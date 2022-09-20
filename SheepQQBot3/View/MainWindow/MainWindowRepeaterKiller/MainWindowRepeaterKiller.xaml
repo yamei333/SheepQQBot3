@@ -1,0 +1,232 @@
+﻿<UserControl x:Class="SheepQQBot3.View.MainWindowRepeaterKiller"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:SheepQQBot3.View"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="450"
+             d:DesignWidth="800"
+             Loaded="MainWindowRepeaterKiller_OnLoaded"
+             mc:Ignorable="d">
+    <UserControl.DataContext>
+        <local:MainWindowRepeaterKillerViewModel />
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.Resources>
+            <Style x:Key="RepeaterKillerDockPanelStyle" TargetType="DockPanel">
+                <Setter Property="Margin" Value="0,4,0,0" />
+            </Style>
+            <Style x:Key="RepeaterKillerTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Margin" Value="2,0,0,0" />
+            </Style>
+            <Style x:Key="RepeaterKillerTextBoxStyle" TargetType="TextBox">
+                <Setter Property="Margin" Value="0,0,4,0" />
+                <Setter Property="Width" Value="40" />
+                <Setter Property="TextAlignment" Value="Right" />
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="180" />
+            <ColumnDefinition Width="344" />
+        </Grid.ColumnDefinitions>
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="Auto" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <GroupBox>
+                <GroupBox.Header>
+                    <TextBlock Text="基本设置" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <DockPanel>
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="复读限制次数" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.RepeatLimit}"
+                                     TextChanged="OnRepeatLimitChanged" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="缓存消息条数" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Grid.Row="1">
+                <GroupBox.Header>
+                    <TextBlock Text="相似度设置" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <DockPanel>
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值(Emoji)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值(图片)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+            <GroupBox Grid.Row="2">
+                <GroupBox.Header>
+                    <TextBlock Text="禁言配置" />
+                </GroupBox.Header>
+                <StackPanel>
+                    <DockPanel>
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="基础禁言时间(秒)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="首个禁言时间(秒)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="加成方案" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <ComboBox Width="90" Margin="0,0,4,0" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="红包狂欢时间(秒)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <CheckBox HorizontalAlignment="Left" Content="禁言状态守护" />
+                    </DockPanel>
+                </StackPanel>
+            </GroupBox>
+        </Grid>
+        <Grid Grid.Column="1">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="120" />
+                <RowDefinition Height="*" />
+            </Grid.RowDefinitions>
+            <GroupBox>
+                <GroupBox.Header>
+                    <TextBlock Text="过滤列表设置" />
+                </GroupBox.Header>
+                <ListView x:Name="RepeatKillerFilterList"
+                          ItemsSource="{Binding SelectedSetConfig.AlarmAideConfigs.Values}"
+                          ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                          SelectedItem="{Binding SelectedAlarmAideConfig}">
+                    <ListView.ContextMenu>
+                        <ContextMenu>
+                            <MenuItem Header="新增" />
+                            <MenuItem Header="修改" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                            <MenuItem Header="删除" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                        </ContextMenu>
+                    </ListView.ContextMenu>
+                    <ListView.View>
+                        <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
+                            <GridViewColumn Width="240" Header="正则表达式">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                            <GridViewColumn Width="60" Header="最大长度">
+                                <GridViewColumn.CellTemplate>
+                                    <DataTemplate>
+                                        <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                                   Text="{Binding Condition}"
+                                                   TextTrimming="CharacterEllipsis"
+                                                   ToolTip="{Binding Condition}" />
+                                    </DataTemplate>
+                                </GridViewColumn.CellTemplate>
+                            </GridViewColumn>
+                        </GridView>
+                    </ListView.View>
+                </ListView>
+            </GroupBox>
+            <GroupBox Grid.Row="1">
+                <GroupBox.Header>
+                    <TextBlock Text="当前禁言列表" />
+                </GroupBox.Header>
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="222" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <ListView x:Name="RepeatKillerBannedList"
+                              ItemsSource="{Binding SelectedSetConfig.AlarmAideConfigs.Values}"
+                              ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                              SelectedItem="{Binding SelectedAlarmAideConfig}">
+                        <ListView.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Header="新增" />
+                                <MenuItem Header="修改" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                                <MenuItem Header="删除" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                            </ContextMenu>
+                        </ListView.ContextMenu>
+                        <ListView.View>
+                            <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
+                                <GridViewColumn Width="110" Header="QQ号">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                                <GridViewColumn Width="80" Header="上次禁言时间">
+                                    <GridViewColumn.CellTemplate>
+                                        <DataTemplate>
+                                            <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                                       Text="{Binding Condition}"
+                                                       TextTrimming="CharacterEllipsis"
+                                                       ToolTip="{Binding Condition}" />
+                                        </DataTemplate>
+                                    </GridViewColumn.CellTemplate>
+                                </GridViewColumn>
+                            </GridView>
+                        </ListView.View>
+                    </ListView>
+                    <StackPanel Grid.Column="1">
+                        <Button Margin="4,0,0,0" Content="测试按钮1" />
+                        <Button Margin="4,4,0,0" Content="测试按钮2" />
+                        <Button Margin="4,4,0,0" Content="测试按钮3" />
+                        <Button Margin="4,4,0,0" Content="测试按钮4" />
+                    </StackPanel>
+                </Grid>
+            </GroupBox>
+        </Grid>
+    </Grid>
+</UserControl>

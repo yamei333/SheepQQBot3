@@ -1,0 +1,67 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <OutputType>WinExe</OutputType>
+    <TargetFramework>net6.0-windows</TargetFramework>
+    <Nullable>disable</Nullable>
+    <UseWPF>true</UseWPF>
+    <UseWindowsForms>False</UseWindowsForms>
+    <StartupObject>SheepQQBot3.App</StartupObject>
+    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+    <PlatformTarget>AnyCPU</PlatformTarget>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <Compile Remove="View\Dialog\AddAlarmAideDialog\**" />
+    <EmbeddedResource Remove="View\Dialog\AddAlarmAideDialog\**" />
+    <None Remove="View\Dialog\AddAlarmAideDialog\**" />
+    <Page Remove="View\Dialog\AddAlarmAideDialog\**" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Remove="BotService\IQQBotService.cs" />
+    <Compile Remove="BotService\QQBotService.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Remove="Resource\check-circle.png" />
+    <None Remove="Resource\check-circle_16.png" />
+    <None Remove="Resource\check.png" />
+    <None Remove="Resource\close-circle.png" />
+    <None Remove="Resource\close-circle_16.png" />
+    <None Remove="Resource\close.png" />
+    <None Remove="Resource\hari0.ico" />
+    <None Remove="Resource\hari0.jpg" />
+    <None Remove="Resource\Hari002.ico" />
+    <None Remove="Resource\Hari002_85591274_p1.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Resource Include="Resource\check-circle.png" />
+    <Resource Include="Resource\check-circle_16.png" />
+    <Resource Include="Resource\check.png" />
+    <Resource Include="Resource\close-circle.png" />
+    <Resource Include="Resource\close-circle_16.png" />
+    <Resource Include="Resource\close.png" />
+    <Resource Include="Resource\hari0.ico" />
+    <Resource Include="Resource\hari0.jpg" />
+    <Resource Include="Resource\Hari002.ico" />
+    <Resource Include="Resource\Hari002_85591274_p1.png" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
+    <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
+    <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj" />
+    <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="BotService\" />
+  </ItemGroup>
+
+</Project>
