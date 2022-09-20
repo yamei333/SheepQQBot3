@@ -1,0 +1,55 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.2.32630.192
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CommonLibrary", "CommonLibrary\CommonLibrary.csproj", "{FF9D3E00-2457-40E9-B0C9-56356906CDFE}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.SDK.Event", "SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj", "{6D1F9BCF-3E81-4B48-BA60-213C312D5618}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.Model", "SheepQQBot3.Model\SheepQQBot3.Model.csproj", "{BD83D5A8-48D5-4D56-9B68-5A137DDFF186}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.SDK.Client", "SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj", "{EF8EBC5D-3BFF-47C0-95C1-95601FB184B0}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.UnitTest", "SheepQQBot3.UnitTest\SheepQQBot3.UnitTest.csproj", "{6322EA74-15E7-489E-8B45-541A6D10D360}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SheepQQBot3", "SheepQQBot3\SheepQQBot3.csproj", "{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{FF9D3E00-2457-40E9-B0C9-56356906CDFE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{FF9D3E00-2457-40E9-B0C9-56356906CDFE}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{FF9D3E00-2457-40E9-B0C9-56356906CDFE}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{FF9D3E00-2457-40E9-B0C9-56356906CDFE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6D1F9BCF-3E81-4B48-BA60-213C312D5618}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6D1F9BCF-3E81-4B48-BA60-213C312D5618}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6D1F9BCF-3E81-4B48-BA60-213C312D5618}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6D1F9BCF-3E81-4B48-BA60-213C312D5618}.Release|Any CPU.Build.0 = Release|Any CPU
+		{BD83D5A8-48D5-4D56-9B68-5A137DDFF186}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{BD83D5A8-48D5-4D56-9B68-5A137DDFF186}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{BD83D5A8-48D5-4D56-9B68-5A137DDFF186}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{BD83D5A8-48D5-4D56-9B68-5A137DDFF186}.Release|Any CPU.Build.0 = Release|Any CPU
+		{EF8EBC5D-3BFF-47C0-95C1-95601FB184B0}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{EF8EBC5D-3BFF-47C0-95C1-95601FB184B0}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{EF8EBC5D-3BFF-47C0-95C1-95601FB184B0}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{EF8EBC5D-3BFF-47C0-95C1-95601FB184B0}.Release|Any CPU.Build.0 = Release|Any CPU
+		{6322EA74-15E7-489E-8B45-541A6D10D360}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{6322EA74-15E7-489E-8B45-541A6D10D360}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{6322EA74-15E7-489E-8B45-541A6D10D360}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{6322EA74-15E7-489E-8B45-541A6D10D360}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {8CC0C8F2-D598-4A8B-9B53-6D98BC8DB270}
+	EndGlobalSection
+EndGlobal

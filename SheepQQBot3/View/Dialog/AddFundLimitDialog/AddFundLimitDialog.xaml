@@ -1,0 +1,84 @@
+﻿<local:AddDialogWindowBase x:Class="SheepQQBot3.View.AddFundLimitDialog"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:local="clr-namespace:SheepQQBot3.View"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           Title="基金阈值观测配置"
+                           Width="180"
+                           Height="124"
+                           x:TypeArguments="local:AddFundLimitDialogViewModel"
+                           mc:Ignorable="d">
+    <Window.DataContext>
+        <local:AddFundLimitDialogViewModel />
+    </Window.DataContext>
+    <Grid Margin="4,4,4,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="20" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="20" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="36" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock">
+                <Setter Property="Padding" Value="3,2,0,0" />
+            </Style>
+        </Grid.Resources>
+        <TextBlock Style="{StaticResource HeaderTextBlockStyle}" Text="编号：" />
+        <TextBox x:Name="TxtFundId"
+                 Grid.Row="0"
+                 Grid.Column="1"
+                 Padding="3,0,0,0"
+                 Style="{StaticResource HintTextStyle}"
+                 Text="{Binding FundId}" />
+        <TextBlock Grid.Row="1"
+                   Grid.Column="0"
+                   Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="类型：" />
+        <ComboBox x:Name="CboType"
+                  Grid.Row="1"
+                  Grid.Column="1"
+                  ItemsSource="{Binding AddFundLimitDialogConfigs}"
+                  SelectedItem="{Binding SelectedAddFundLimitDialogConfig}">
+            <ComboBox.ItemTemplate>
+                <DataTemplate>
+                    <TextBlock VerticalAlignment="Center" Text="{Binding Title}" />
+                </DataTemplate>
+            </ComboBox.ItemTemplate>
+        </ComboBox>
+        <TextBox Grid.Row="2"
+                 Grid.Column="1"
+                 Padding="3,0,0,0"
+                 Style="{StaticResource HintTextStyle}"
+                 Text="{Binding AlertLimit}" />
+        <TextBlock Grid.Row="2"
+                   Grid.Column="0"
+                   Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="阈值：" />
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <Style x:Key="ButtonStyle" TargetType="Button">
+                    <Setter Property="Height" Value="20" />
+                    <Setter Property="Width" Value="60" />
+                </Style>
+            </Grid.Resources>
+            <Button Click="OK_Click"
+                    Content="确定"
+                    Style="{StaticResource ButtonStyle}" />
+            <Button Grid.Column="1"
+                    Click="Cancel_Click"
+                    Content="取消"
+                    Style="{StaticResource ButtonStyle}" />
+        </Grid>
+    </Grid>
+</local:AddDialogWindowBase>

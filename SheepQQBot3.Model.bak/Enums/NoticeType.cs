@@ -1,0 +1,90 @@
+﻿namespace SheepQQBot3.Model.Enums
+{
+    public enum NoticeType
+    {
+        /// <summary>
+        /// 群消息撤回
+        /// </summary>
+        Group_Recall,
+
+        /// <summary>
+        /// 好友消息撤回
+        /// </summary>
+        Friend_Recall,
+
+        /// <summary>
+        /// 通知信息
+        /// </summary>
+        Notify,
+
+        /// <summary>
+        /// 其他客户端在线状态变更
+        /// </summary>
+        Client_Status,
+
+        /// <summary>
+        /// 群上报
+        /// </summary>
+        Group_Upload,
+
+        /// <summary>
+        /// 群成员名片更新
+        /// </summary>
+        Group_Card,
+
+        /// <summary>
+        /// 接收到离线文件
+        /// </summary>
+        Offline_File,
+
+        /// <summary>
+        /// 精华消息
+        /// </summary>
+        Essence,
+
+        /// <summary>
+        /// 频道消息表情贴更新
+        /// </summary>
+        Message_Reactions_Updated,
+
+        /// <summary>
+        /// 子频道信息更新
+        /// </summary>
+        Channel_Updated,
+
+        /// <summary>
+        /// 子频道创建
+        /// </summary>
+        Channel_Created,
+
+        /// <summary>
+        /// 子频道删除
+        /// </summary>
+        Channel_Destroyed,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Group_Increase,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Group_Decrease,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Friend_Add,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Group_Admin,
+
+        /// <summary>
+        ///
+        /// </summary>
+        Group_Ban,
+    }
+}

@@ -1,0 +1,23 @@
+﻿namespace SheepQQBot3.Model.Enums
+{
+    /// <summary>
+    /// 消息类型
+    /// </summary>
+    public enum MessageType
+    {
+        /// <summary>
+        /// 私聊消息
+        /// </summary>
+        Private,
+
+        /// <summary>
+        /// 群消息
+        /// </summary>
+        Group,
+
+        /// <summary>
+        /// 频道消息
+        /// </summary>
+        Guild,
+    }
+}

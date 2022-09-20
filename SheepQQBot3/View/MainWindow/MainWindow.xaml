@@ -1,0 +1,193 @@
+﻿<Window x:Class="SheepQQBot3.View.MainWindow"
+        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:converters="clr-namespace:SheepQQBot3.Converter"
+        xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+        xmlns:local="clr-namespace:SheepQQBot3.View"
+        xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+        xmlns:tb="http://www.hardcodet.net/taskbar"
+        x:Name="AideHariMainWindow"
+        Title="{Binding Title}"
+        Width="980"
+        Height="482"
+        Closed="MainWindow_OnClosed"
+        Closing="MainWindow_OnClosing"
+        Icon="/Resource/Hari002.ico"
+        Initialized="MainWindow_OnInitialized"
+        Loaded="MainWindow_OnLoaded"
+        WindowStartupLocation="CenterScreen"
+        mc:Ignorable="d">
+    <Window.Style>
+        <Style TargetType="Window">
+            <Setter Property="FontFamily" Value="微软雅黑" />
+            <Setter Property="ResizeMode" Value="CanMinimize" />
+            <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
+            <Setter Property="TextOptions.TextRenderingMode" Value="ClearType" />
+        </Style>
+    </Window.Style>
+    <Window.DataContext>
+        <local:MainWindowViewModel />
+    </Window.DataContext>
+    <TabControl>
+        <TabItem x:Name="TabRunLog" Header="运行日志">
+            <local:MainWindowRunlog DataContext="{Binding MainWindowRunlogViewModel}" />
+        </TabItem>
+        <TabItem x:Name="TabConfig" Header="机器人配置">
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="37" />
+                    <ColumnDefinition Width="243" />
+                    <ColumnDefinition Width="*" />
+                </Grid.ColumnDefinitions>
+                <Grid Grid.ColumnSpan="2">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="24" />
+                        <RowDefinition Height="*" />
+                    </Grid.RowDefinitions>
+                    <Label Padding="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Content="配置群列表" />
+                    <Label Grid.Row="0"
+                           Grid.Column="1"
+                           Padding="10,0,0,0"
+                           VerticalAlignment="Center"
+                           Content="已配置功能" />
+                    <ListBox x:Name="GroupList"
+                             Grid.Row="1"
+                             Grid.Column="0"
+                             HorizontalAlignment="Stretch"
+                             VerticalAlignment="Stretch"
+                             ItemsSource="{Binding SetConfigs.Values}"
+                             MouseDoubleClick="GroupList_MouseDoubleClick"
+                             SelectedItem="{Binding SelectedSetConfig}"
+                             SelectionChanged="GroupList_SelectionChanged">
+                        <ListBox.Resources>
+                            <Style x:Key="TextStyle" TargetType="TextBlock">
+                                <Setter Property="FontSize" Value="13" />
+                                <Setter Property="Padding" Value="5,0,0,0" />
+                                <Setter Property="VerticalAlignment" Value="Center" />
+                            </Style>
+                        </ListBox.Resources>
+                        <ListBox.ContextMenu>
+                            <ContextMenu>
+                                <MenuItem Click="GroupConfig_OnAdd" Header="新增" />
+                                <MenuItem Click="GroupConfig_OnEdit"
+                                          Header="修改"
+                                          Style="{StaticResource EditDeleteMenuItemStyle}" />
+                                <MenuItem Click="GroupConfig_OnDelete"
+                                          Header="删除"
+                                          Style="{StaticResource EditDeleteMenuItemStyle}" />
+                                <!--<MenuItem.Style>
+                                        <Style TargetType="MenuItem">
+                                            <Setter Property="Visibility" Value="Visible" />
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding SelectedSetConfig}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Collapsed" />
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </MenuItem.Style>-->
+                            </ContextMenu>
+                        </ListBox.ContextMenu>
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <Image Height="40" Source="{Binding Icon}">
+                                        <Image.Clip>
+                                            <EllipseGeometry Center="20,20"
+                                                             RadiusX="20"
+                                                             RadiusY="20" />
+                                        </Image.Clip>
+                                    </Image>
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="*" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+                                        <TextBlock Style="{StaticResource TextStyle}" Text="{Binding DisplayId}" />
+                                        <TextBlock Grid.Row="1"
+                                                   Style="{StaticResource TextStyle}"
+                                                   Text="{Binding TargetName}" />
+                                    </Grid>
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <ListBox x:Name="UsedFunctionList"
+                             Grid.Row="1"
+                             Grid.Column="1"
+                             ItemsSource="{Binding SelectedSetBotFunctions}">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Horizontal">
+                                    <CheckBox VerticalAlignment="Center"
+                                              Checked="BotFunctionCheckBox_CheckedChange"
+                                              IsChecked="{Binding IsUsed}"
+                                              IsTabStop="False"
+                                              Unchecked="BotFunctionCheckBox_CheckedChange" />
+                                    <TextBlock Padding="5,0,0,0"
+                                               VerticalAlignment="Center"
+                                               Text="{Binding DisplayName}" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+                <TabControl x:Name="TabBotFunctions" Grid.Column="2">
+                    <TabItem Header="闹钟助手">
+                        <local:MainWindowAlarmAide x:Name="MainWindowAlarmAideTab" />
+                    </TabItem>
+                    <TabItem x:Name="TabGroup_RepeaterKiller"
+                             Header="复读机杀手"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding IsVisibleGroupRepeaterKiller, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowRepeaterKiller />
+                    </TabItem>
+                    <!--<TabItem x:Name="TabGroup_GroupAlarm"
+                             Header="群提醒"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding IsVisibleGroupGroupAlarm,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <Grid Visibility="{Binding ElementName=TabGroup_GroupAlarm, Path=Visibility}">
+                            <Label Content="zap2" />
+                        </Grid>
+                    </TabItem>-->
+                    <TabItem x:Name="TabGroup_AlarmAideSubmit"
+                             Header="闹钟助手投稿"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding IsVisibleAlarmAideSubmit, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowAlarmAideSubmit />
+                    </TabItem>
+                    <TabItem x:Name="TabGroup_FundHelper"
+                             Header="基金助手"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding IsVisibleFundHelper, Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowFundHelper />
+                    </TabItem>
+                </TabControl>
+            </Grid>
+        </TabItem>
+        <TabItem x:Name="TabTest" Header="功能测试">
+            <local:MainWindowFunctionTest />
+        </TabItem>
+        <TabItem Header="托盘图标" Visibility="Hidden">
+            <tb:TaskbarIcon x:Name="MyNotifyIcon"
+                            IconSource="/Resource/Hari002.ico"
+                            ToolTipText="{Binding Title}"
+                            TrayMouseDoubleClick="OnNotifyIconDoubleClick"
+                            Visibility="Visible">
+                <tb:TaskbarIcon.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Click="NotifyIncon_OnShowMainWindow" Header="打开主画面" />
+                        <MenuItem Click="NotifyIncon_OnShowGocqWindow" Header="打开gocq画面" />
+                        <MenuItem Click="NotifyIncon_OnExit" Header="退出" />
+                    </ContextMenu>
+                </tb:TaskbarIcon.ContextMenu>
+            </tb:TaskbarIcon>
+        </TabItem>
+    </TabControl>
+</Window>
