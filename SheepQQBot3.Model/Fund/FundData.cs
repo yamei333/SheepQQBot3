@@ -5,11 +5,14 @@ namespace SheepQQBot3.Model.Fund;
 
 public class FundData
 {
-    [JsonPropertyName("code")] public int Code { get; set; }
+    [JsonPropertyName("code")]
+    public int Code { get; set; }
 
-    [JsonPropertyName("message")] public string Message { get; set; }
+    [JsonPropertyName("message")]
+    public string Message { get; set; }
 
-    [JsonPropertyName("data")] public FundSimpleData[] Data { get; set; }
+    [JsonPropertyName("data")]
+    public FundSimpleData[] Data { get; set; }
 }
 
 /// <summary>
@@ -95,25 +98,35 @@ public class FundSimpleData
     [JsonPropertyName("expectWorthDate")]
     public string ExpectWorthDateSource { get; set; }
 
-    [JsonIgnore] public float ExpectGrowth => FloatParse(ExpectGrowthSource);
+    [JsonIgnore]
+    public float ExpectGrowth => FloatParse(ExpectGrowthSource);
 
-    [JsonIgnore] public float DayGrowth => FloatParse(DayGrowthSource);
+    [JsonIgnore]
+    public float DayGrowth => FloatParse(DayGrowthSource);
 
-    [JsonIgnore] public float LastMonthGrowth => FloatParse(LastMonthGrowthSource);
+    [JsonIgnore]
+    public float LastMonthGrowth => FloatParse(LastMonthGrowthSource);
 
-    [JsonIgnore] public float LastWeekGrowth => FloatParse(LastWeekGrowthSource);
+    [JsonIgnore]
+    public float LastWeekGrowth => FloatParse(LastWeekGrowthSource);
 
-    [JsonIgnore] public float LastThreeMonthsGrowth => FloatParse(LastThreeMonthsGrowthSource);
+    [JsonIgnore]
+    public float LastThreeMonthsGrowth => FloatParse(LastThreeMonthsGrowthSource);
 
-    [JsonIgnore] public float LastSixMonthsGrowth => FloatParse(LastSixMonthsGrowthSource);
+    [JsonIgnore]
+    public float LastSixMonthsGrowth => FloatParse(LastSixMonthsGrowthSource);
 
-    [JsonIgnore] public float LastYearGrowth => FloatParse(LastYearGrowthSource);
+    [JsonIgnore]
+    public float LastYearGrowth => FloatParse(LastYearGrowthSource);
 
-    [JsonIgnore] public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
+    [JsonIgnore]
+    public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
 
-    [JsonIgnore] public DateTime NetWorthDate => FormatDate(NetWorthDateSource);
+    [JsonIgnore]
+    public DateTime NetWorthDate => FormatDate(NetWorthDateSource);
 
-    [JsonIgnore] public DateTime ExpectWorthDate => FormatDate(ExpectWorthDateSource);
+    [JsonIgnore]
+    public DateTime ExpectWorthDate => FormatDate(ExpectWorthDateSource);
 
     //[JsonIgnore] public string LastWeekGrowthString => FormatGrowth(LastWeekGrowth);
 

@@ -29,7 +29,8 @@
                      SelectionMode="Extended">
                 <ListBox.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="AlarmAideSubmitMemberList_OnAdd" Header="新增" />
+                        <MenuItem Click="AlarmAideSubmitMemberList_OnAdd"
+                                  Header="新增" />
                         <MenuItem Click="AlarmAideSubmitMemberList_OnDelete"
                                   Header="删除"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />

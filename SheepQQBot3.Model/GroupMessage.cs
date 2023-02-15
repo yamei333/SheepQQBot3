@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Text.Json.Serialization;
 using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model
@@ -8,21 +9,39 @@ namespace SheepQQBot3.Model
     /// </summary>
     public class GroupMessage
     {
+        [JsonPropertyName("datetime")]
         public DateTime DateTime { get; set; }
+
+        [JsonPropertyName("userid")]
         public long UserId { get; set; }
+
+        [JsonPropertyName("anonymous")]
         public string Anonymous { get; set; }
+
+        [JsonPropertyName("font")]
         public int Font { get; set; }
+
+        [JsonPropertyName("groupid")]
         public long GroupId { get; set; }
+
+        [JsonPropertyName("message")]
         public string Message { get; set; }
+
+        [JsonPropertyName("rawmessage")]
         public string RawMessage { get; set; }
+
+        [JsonPropertyName("messageid")]
         public int MessageId { get; set; }
+
+        [JsonPropertyName("messagetype")]
         public MessageType MessageType { get; set; }
+
+        [JsonPropertyName("sender")]
         public Sender Sender { get; set; }
 
         public GroupMessage(ReceiveData receiveData)
         {
-            var startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            DateTime = startTime.AddSeconds(receiveData.Time);
+            DateTime = CommonExtensions.StartTime.AddSeconds(receiveData.Time);
             UserId = receiveData.User_Id;
             Anonymous = receiveData.Anonymous;
             Font = receiveData.Font;
@@ -36,8 +55,7 @@ namespace SheepQQBot3.Model
 
         public GroupMessage(ClientData clientData)
         {
-            var startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-            DateTime = startTime.AddSeconds(clientData.Time);
+            DateTime = CommonExtensions.StartTime.AddSeconds(clientData.Time);
             GroupId = clientData.Group_Id;
             Message = clientData.Message;
             RawMessage = clientData.Raw_Message;

@@ -1,11 +1,12 @@
-﻿using System;
+﻿using MessagePack;
 
 namespace SheepQQBot3.Model.Config
 {
-    [Serializable]
+    [MessagePackObject]
     public class JsonConfig
     {
-        public string JsonConfigString;
+        [Key(nameof(JsonConfigString))]
+        public string JsonConfigString { get; set; }
 
         public JsonConfig(string jsonConfigString)
         {

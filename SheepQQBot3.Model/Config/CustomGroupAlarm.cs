@@ -1,19 +1,31 @@
 ﻿using System;
+using MessagePack;
 
 namespace SheepQQBot3.Model.Config
 {
     /// <summary>
     /// 群自定义提醒
     /// </summary>
-    [Serializable]
+    [MessagePackObject]
     public class CustomGroupAlarm
     {
+        [Key(nameof(Id))]
         public Guid Id { get; set; }
+
+        [Key(nameof(TargetId))]
         public long TargetId { get; set; }
+
+        [Key(nameof(GroupId))]
         public long GroupId { get; set; }
-        public bool isAtTarget { get; set; }
-        public DateTime alarmDate { get; set; }
-        public string alarmMessage { get; set; }
+
+        [Key(nameof(IsAtTarget))]
+        public bool IsAtTarget { get; set; }
+
+        [Key(nameof(AlarmDate))]
+        public DateTime AlarmDate { get; set; }
+
+        [Key(nameof(AlarmMessage))]
+        public string AlarmMessage { get; set; }
 
         public CustomGroupAlarm(
             Guid id,
@@ -26,9 +38,9 @@ namespace SheepQQBot3.Model.Config
             Id = id;
             GroupId = groupId;
             TargetId = targetId;
-            this.alarmDate = alarmDate;
-            this.alarmMessage = alarmMessage;
-            this.isAtTarget = isAtTarget;
+            this.AlarmDate = alarmDate;
+            this.AlarmMessage = alarmMessage;
+            this.IsAtTarget = isAtTarget;
         }
     }
 }

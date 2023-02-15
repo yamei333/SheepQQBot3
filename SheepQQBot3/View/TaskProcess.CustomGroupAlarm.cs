@@ -28,13 +28,13 @@ namespace SheepQQBot3.View
                             var removeIds = new HashSet<Guid>();
                             groupAlarms.Values.ForEach(groupAlarm =>
                             {
-                                var overSeconds = (dateNow - groupAlarm.alarmDate).TotalSeconds;
+                                var overSeconds = (dateNow - groupAlarm.AlarmDate).TotalSeconds;
                                 // MEMO : 超过3分钟内都可以提醒
                                 if (overSeconds >= 0 && overSeconds <= 180)
                                 {
-                                    var alarmMessage = groupAlarm.alarmMessage.ToCqCode(0).Result;
+                                    var alarmMessage = groupAlarm.AlarmMessage.ToCqCode(0).Result;
                                     var sendCustomMessage =
-                                        $"{(groupAlarm.isAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{RN}[内容] " : string.Empty)}" +
+                                        $"{(groupAlarm.IsAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{RN}[内容] " : string.Empty)}" +
                                         $"{alarmMessage}";
                                     Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
                                     // MEMO : 添加为删除消息
@@ -60,7 +60,7 @@ namespace SheepQQBot3.View
                     var removeIds = new HashSet<Guid>();
                     groupAlarms.Values.ForEach(groupAlarm =>
                     {
-                        var overHours = (startDateNow - groupAlarm.alarmDate).TotalHours;
+                        var overHours = (startDateNow - groupAlarm.AlarmDate).TotalHours;
                         // MEMO : 超过48小时, 因未知原因未进行提醒的消息将进行删除
                         if (overHours >= 48)
                             removeIds.Add(groupAlarm.Id);

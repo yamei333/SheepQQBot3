@@ -3,7 +3,8 @@
                     xmlns:converter="clr-namespace:SheepQQBot3.Converter"
                     xmlns:local="clr-namespace:SheepQQBot3.View">
     <converter:SingleLineTextConverter x:Key="SingleLineTextConverter" />
-    <Style x:Key="WindowBaseStyle" TargetType="Window">
+    <Style x:Key="WindowBaseStyle"
+           TargetType="Window">
         <Setter Property="FontFamily" Value="微软雅黑" />
         <Setter Property="ResizeMode" Value="NoResize" />
         <Setter Property="TextOptions.TextFormattingMode" Value="Display" />
@@ -16,10 +17,12 @@
                  Stretch="None"
                  TileMode="None">
         <VisualBrush.Visual>
-            <TextBlock FontStyle="Italic" Text=" 请输入内容" />
+            <TextBlock FontStyle="Italic"
+                       Text=" 请输入内容" />
         </VisualBrush.Visual>
     </VisualBrush>
-    <Style x:Key="HintTextStyle" TargetType="TextBox">
+    <Style x:Key="HintTextStyle"
+           TargetType="TextBox">
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Height" Value="24" />
         <Setter Property="Padding" Value="2,0,0,0" />
@@ -32,7 +35,8 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <Style x:Key="NoResizeHeaderStyle" TargetType="{x:Type GridViewColumnHeader}">
+    <Style x:Key="NoResizeHeaderStyle"
+           TargetType="{x:Type GridViewColumnHeader}">
         <Setter Property="IsEnabled" Value="False" />
         <Style.Triggers>
             <Trigger Property="IsEnabled" Value="False">
@@ -40,10 +44,14 @@
             </Trigger>
         </Style.Triggers>
     </Style>
-    <Style x:Key="EditDeleteMenuItemStyle" TargetType="MenuItem">
+    <Style x:Key="EditDeleteMenuItemStyle"
+           TargetType="MenuItem">
         <Setter Property="Visibility" Value="Visible" />
         <Style.Triggers>
-            <DataTrigger Binding="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" Value="{x:Null}">
+            <DataTrigger Binding="{Binding PlacementTarget.SelectedItem,
+                                           RelativeSource={RelativeSource FindAncestor,
+                                                                          AncestorType=ContextMenu}}"
+                         Value="{x:Null}">
                 <Setter Property="Visibility" Value="Collapsed" />
             </DataTrigger>
         </Style.Triggers>

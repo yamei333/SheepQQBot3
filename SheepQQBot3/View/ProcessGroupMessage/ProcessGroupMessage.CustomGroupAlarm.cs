@@ -131,13 +131,13 @@ namespace SheepQQBot3.View
                                 var isShowId = listArray.Length == 2 && listArray[1].Trim() == "1";
                                 groupAlarms
                                     .Where(each => each.TargetId == targetId)
-                                    .OrderBy(each => each.alarmDate)
+                                    .OrderBy(each => each.AlarmDate)
                                     .ForEach(customGroupAlarm =>
                                     {
-                                        var alarmMessage = customGroupAlarm.alarmMessage.ToNormalText();
+                                        var alarmMessage = customGroupAlarm.AlarmMessage.ToNormalText();
                                         alarmMessage = alarmMessage.ByteSubstring(isShowId ? 56 : 20);
                                         sendMessage.Append($"{RN}[{(isShowId ? customGroupAlarm.Id.ToString() : string.Empty)}]"
-                                            + $"[{customGroupAlarm.alarmDate.ToYYYYMMDDHHMMSS()}] {alarmMessage}");
+                                            + $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}] {alarmMessage}");
                                     });
 
                                 if (string.IsNullOrEmpty(sendMessage.ToString()))
@@ -157,12 +157,12 @@ namespace SheepQQBot3.View
                         void AddCustomAlarm(DateTime addDateTime, string addMessage)
                         {
                             var addDateString = addDateTime.ToYYYYMMDDHHMMSS();
-                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.alarmDate - addDateTime).TotalSeconds == 0);
+                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - addDateTime).TotalSeconds == 0);
                             if (groupAlarm != null)
                             {
                                 // 有记录, 则提示
                                 sendMessage.Append($"{RN}已存在 {addDateString} 的提醒记录!" +
-                                    $"{RN}提醒内容: {groupAlarm.alarmMessage}");
+                                    $"{RN}提醒内容: {groupAlarm.AlarmMessage}");
                             }
                             else
                             {
@@ -177,7 +177,7 @@ namespace SheepQQBot3.View
                         void DeleteUserAlarmCustom(DateTime deleteDateTime)
                         {
                             var deleteDateString = deleteDateTime.ToYYYYMMDDHHMMSS();
-                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.alarmDate - deleteDateTime).TotalSeconds <= 1);
+                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - deleteDateTime).TotalSeconds <= 1);
                             if (groupAlarm != null)
                             {
                                 // 有记录, 则删除并发送反馈

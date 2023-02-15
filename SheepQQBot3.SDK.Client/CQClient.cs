@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Configuration;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using Fleck;
@@ -10,7 +9,7 @@ namespace SheepQQBot3.SDK.Client
 {
     public partial class CQAPI : IDisposable
     {
-        private WebSocketServer _client;
+        private readonly WebSocketServer _client;
         private IWebSocketConnection _connection;
 
         public bool IsConnected => _connection?.IsAvailable ?? false;
@@ -32,8 +31,7 @@ namespace SheepQQBot3.SDK.Client
         {
             _connection?.Close();
             _client.ListenerSocket?.Close();
-            _client?.Dispose();
-            _client = null;
+            GC.SuppressFinalize(this);
         }
 
         public void Start()
@@ -46,11 +44,8 @@ namespace SheepQQBot3.SDK.Client
                 socket.OnMessage = jsonInfo => ProcessClientReceiveData(GetReceiveData(jsonInfo));
             });
 
-            ClientReceiveData? GetReceiveData(string jsonInfo)
-                => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+            ClientReceiveData GetReceiveData(string jsonInfo)
+                => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
         }
 
         private void ProcessClientReceiveData(ClientReceiveData receiveData)
@@ -68,7 +63,7 @@ namespace SheepQQBot3.SDK.Client
                     // MEMO : 发送消息的反馈, 不处理
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException();
+                    throw new ArgumentOutOfRangeException(data.Message_Type);
             }
         }
 
@@ -80,10 +75,7 @@ namespace SheepQQBot3.SDK.Client
             if (_connection?.IsAvailable != true)
                 return false;
 
-            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData), new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            });
+            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData));
             await _connection.Send(jsonText);
             return true;
         }

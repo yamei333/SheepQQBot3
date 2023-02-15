@@ -20,8 +20,8 @@ public class MessageUtilTest
     {
         var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData
         {
-            group_id = "11111",
-            message = new List<Element>
+            Group_Id = "11111",
+            Message = new List<Element>
             {
                 new Element("text", new ElementBaseData("测试消息"))
             }
@@ -33,7 +33,6 @@ public class MessageUtilTest
         //{
         //    Text1 = "text1",
         //});
-        ;
 
         const int jsTimeStamp = 1610090450;
         //var startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));

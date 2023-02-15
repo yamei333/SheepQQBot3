@@ -2,7 +2,6 @@
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text;
 using System.Text.Json;
 using System.Windows;
@@ -17,7 +16,7 @@ namespace SheepQQBot3.Extensions
 {
     public static class ConfigExtensions
     {
-        public static readonly string ConfigPath = "config.bin";
+        public static readonly string ConfigPath = "config.json";
 
         /// <summary>
         /// 读取配置
@@ -36,9 +35,6 @@ namespace SheepQQBot3.Extensions
             try
             {
                 // 读取配置
-                var fs = new FileStream(ConfigPath, FileMode.Open);
-                var bf = new BinaryFormatter();
-                var jsonConfig = bf.Deserialize(fs) as JsonConfig;
                 var configFilePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\SheepQQBot3Config.txt";
                 if (File.Exists(configFilePath) && MessageBox.Show(
                     "检测到 SheepQQBot3Config.txt\n真的要导入该文件作为新配置吗?\n!! 将会覆盖当前配置 !!",
@@ -52,13 +48,10 @@ namespace SheepQQBot3.Extensions
                 }
                 else
                 {
-                    jsonText = jsonConfig.JsonConfigString;
+                    jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
                 }
 
-                var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText);
                 var defaultBotFunctions = SetConfig.DefaultBotFunctions;
                 botConfig.SetConfigs.Values.ForEach(each =>
                 {
@@ -134,11 +127,13 @@ namespace SheepQQBot3.Extensions
             if (!Vm.IsLoadComplete)
                 return;
 
-            var jsonConfig = new JsonConfig(JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs)));
-            var fs = new FileStream(ConfigPath, FileMode.OpenOrCreate);
-            var bf = new BinaryFormatter();
-            bf.Serialize(fs, jsonConfig);
-            fs.Close();
+            var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs));
+            File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+
+            // MEMO : OldVersion
+            //var jsonConfig = new JsonConfig(jsonText);
+            //using var fileStream = new FileStream(ConfigPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
+            //MessagePackSerializer.Serialize(fileStream, jsonConfig);
 
             focusControl?.Focus();
         }
