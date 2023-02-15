@@ -1,25 +1,37 @@
 ﻿using System.Collections.Generic;
-using System.IO;
-using System.Runtime.Serialization.Formatters.Binary;
 using System.Text.RegularExpressions;
 using System.Threading;
+using MessagePack;
 
 namespace System
 {
     public static class CommonExtensions
     {
+        public static readonly DateTime StartTime = new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset);
         private const string KH_LEFT = @"&#91;";
         private const string KH_RIGHT = @"&#93;";
 
-        [Obsolete("Clone方法用过时没办法")]
-        public static T Clone<T>(T realObject)
+        //[Obsolete("为了适配所有对象深拷贝, 使用BinaryFormatter")]
+        //public static T Clone<T>(T realObject)
+        //{
+        //    var objectStream = new MemoryStream();
+        //    //利用 System.Runtime.Serialization序列化与反序列化完成引用对象的复制
+        //    var formatter = new BinaryFormatter();
+        //    formatter.Serialize(objectStream, realObject);
+        //    objectStream.Seek(0, SeekOrigin.Begin);
+        //    return (T)formatter.Deserialize(objectStream);
+        //}
+
+        /// <summary>
+        /// 基于MessagePackObject的深拷贝
+        /// </summary>
+        /// <param name="obj">对象</param>
+        /// <typeparam name="T">对象类型</typeparam>
+        /// <returns>深拷贝后的对象</returns>
+        public static T Clone<T>(T obj)
         {
-            var objectStream = new MemoryStream();
-            //利用 System.Runtime.Serialization序列化与反序列化完成引用对象的复制
-            var formatter = new BinaryFormatter();
-            formatter.Serialize(objectStream, realObject);
-            objectStream.Seek(0, SeekOrigin.Begin);
-            return (T)formatter.Deserialize(objectStream);
+            var raw = MessagePackSerializer.Serialize(obj);
+            return MessagePackSerializer.Deserialize<T>(raw);
         }
 
         public static string ToConditionString(this DateTime input, Dictionary<string, bool> holidayInfo)

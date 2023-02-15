@@ -44,58 +44,34 @@ namespace SheepQQBot3.Model.Config
         private readonly DateTime _logDate;
 
         public string MessageColor
-        {
-            get
+            => MessageType switch
             {
-                switch (MessageType)
-                {
-                    case LogMessageType.MetaData:
-                    case LogMessageType.GroupMessage:
-                    case LogMessageType.GroupRevokeMessage:
-                    case LogMessageType.GroupPoke:
-                    case LogMessageType.System_Info:
-                    case LogMessageType.AlarmAide:
-                    case LogMessageType.FundHelper:
-                        return DefaultColor;
-                    case LogMessageType.System_Error:
-                        return "Red";
-                    case LogMessageType.System_Warning:
-                        return "Blue";
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+                LogMessageType.MetaData => DefaultColor,
+                LogMessageType.GroupMessage => DefaultColor,
+                LogMessageType.GroupRevokeMessage => DefaultColor,
+                LogMessageType.GroupPoke => DefaultColor,
+                LogMessageType.System_Info => DefaultColor,
+                LogMessageType.AlarmAide => DefaultColor,
+                LogMessageType.FundHelper => DefaultColor,
+                LogMessageType.System_Error => "Red",
+                LogMessageType.System_Warning => "Blue",
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         public string MessageTypeStr
-        {
-            get
+            => MessageType switch
             {
-                switch (MessageType)
-                {
-                    case LogMessageType.MetaData:
-                        return "元事件";
-                    case LogMessageType.GroupMessage:
-                        return "群消息";
-                    case LogMessageType.GroupRevokeMessage:
-                        return "群消息撤回";
-                    case LogMessageType.GroupPoke:
-                        return "群戳一戳";
-                    case LogMessageType.AlarmAide:
-                        return "闹钟助手";
-                    case LogMessageType.FundHelper:
-                        return "基金助手";
-                    case LogMessageType.System_Info:
-                        return "Bot消息";
-                    case LogMessageType.System_Error:
-                        return "Bot错误";
-                    case LogMessageType.System_Warning:
-                        return "Bot警告";
-                    default:
-                        throw new ArgumentOutOfRangeException();
-                }
-            }
-        }
+                LogMessageType.MetaData => "元事件",
+                LogMessageType.GroupMessage => "群消息",
+                LogMessageType.GroupRevokeMessage => "群消息撤回",
+                LogMessageType.GroupPoke => "群戳一戳",
+                LogMessageType.AlarmAide => "闹钟助手",
+                LogMessageType.FundHelper => "基金助手",
+                LogMessageType.System_Info => "Bot消息",
+                LogMessageType.System_Error => "Bot错误",
+                LogMessageType.System_Warning => "Bot警告",
+                _ => throw new ArgumentOutOfRangeException()
+            };
 
         protected RunLog(LogMessageType messageType, string content)
         {

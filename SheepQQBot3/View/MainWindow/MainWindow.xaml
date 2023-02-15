@@ -29,10 +29,12 @@
         <local:MainWindowViewModel />
     </Window.DataContext>
     <TabControl>
-        <TabItem x:Name="TabRunLog" Header="运行日志">
+        <TabItem x:Name="TabRunLog"
+                 Header="运行日志">
             <local:MainWindowRunlog DataContext="{Binding MainWindowRunlogViewModel}" />
         </TabItem>
-        <TabItem x:Name="TabConfig" Header="机器人配置">
+        <TabItem x:Name="TabConfig"
+                 Header="机器人配置">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="37" />
@@ -66,7 +68,8 @@
                              SelectedItem="{Binding SelectedSetConfig}"
                              SelectionChanged="GroupList_SelectionChanged">
                         <ListBox.Resources>
-                            <Style x:Key="TextStyle" TargetType="TextBlock">
+                            <Style x:Key="TextStyle"
+                                   TargetType="TextBlock">
                                 <Setter Property="FontSize" Value="13" />
                                 <Setter Property="Padding" Value="5,0,0,0" />
                                 <Setter Property="VerticalAlignment" Value="Center" />
@@ -74,7 +77,8 @@
                         </ListBox.Resources>
                         <ListBox.ContextMenu>
                             <ContextMenu>
-                                <MenuItem Click="GroupConfig_OnAdd" Header="新增" />
+                                <MenuItem Click="GroupConfig_OnAdd"
+                                          Header="新增" />
                                 <MenuItem Click="GroupConfig_OnEdit"
                                           Header="修改"
                                           Style="{StaticResource EditDeleteMenuItemStyle}" />
@@ -96,7 +100,8 @@
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
-                                    <Image Height="40" Source="{Binding Icon}">
+                                    <Image Height="40"
+                                           Source="{Binding Icon}">
                                         <Image.Clip>
                                             <EllipseGeometry Center="20,20"
                                                              RadiusX="20"
@@ -108,7 +113,8 @@
                                             <RowDefinition Height="*" />
                                             <RowDefinition Height="*" />
                                         </Grid.RowDefinitions>
-                                        <TextBlock Style="{StaticResource TextStyle}" Text="{Binding DisplayId}" />
+                                        <TextBlock Style="{StaticResource TextStyle}"
+                                                   Text="{Binding DisplayId}" />
                                         <TextBlock Grid.Row="1"
                                                    Style="{StaticResource TextStyle}"
                                                    Text="{Binding TargetName}" />
@@ -137,14 +143,16 @@
                         </ListBox.ItemTemplate>
                     </ListBox>
                 </Grid>
-                <TabControl x:Name="TabBotFunctions" Grid.Column="2">
+                <TabControl x:Name="TabBotFunctions"
+                            Grid.Column="2">
                     <TabItem Header="闹钟助手">
                         <local:MainWindowAlarmAide x:Name="MainWindowAlarmAideTab" />
                     </TabItem>
                     <TabItem x:Name="TabGroup_RepeaterKiller"
                              Header="复读机杀手"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleGroupRepeaterKiller, Converter={StaticResource BooleanToVisibilityConverter}}">
+                             Visibility="{Binding IsVisibleGroupRepeaterKiller,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowRepeaterKiller />
                     </TabItem>
                     <!--<TabItem x:Name="TabGroup_GroupAlarm"
@@ -159,22 +167,26 @@
                     <TabItem x:Name="TabGroup_AlarmAideSubmit"
                              Header="闹钟助手投稿"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleAlarmAideSubmit, Converter={StaticResource BooleanToVisibilityConverter}}">
+                             Visibility="{Binding IsVisibleAlarmAideSubmit,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowAlarmAideSubmit />
                     </TabItem>
                     <TabItem x:Name="TabGroup_FundHelper"
                              Header="基金助手"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleFundHelper, Converter={StaticResource BooleanToVisibilityConverter}}">
+                             Visibility="{Binding IsVisibleFundHelper,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowFundHelper />
                     </TabItem>
                 </TabControl>
             </Grid>
         </TabItem>
-        <TabItem x:Name="TabTest" Header="功能测试">
+        <TabItem x:Name="TabTest"
+                 Header="功能测试">
             <local:MainWindowFunctionTest />
         </TabItem>
-        <TabItem Header="托盘图标" Visibility="Hidden">
+        <TabItem Header="托盘图标"
+                 Visibility="Hidden">
             <tb:TaskbarIcon x:Name="MyNotifyIcon"
                             IconSource="/Resource/Hari002.ico"
                             ToolTipText="{Binding Title}"
@@ -182,9 +194,12 @@
                             Visibility="Visible">
                 <tb:TaskbarIcon.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="NotifyIncon_OnShowMainWindow" Header="打开主画面" />
-                        <MenuItem Click="NotifyIncon_OnShowGocqWindow" Header="打开gocq画面" />
-                        <MenuItem Click="NotifyIncon_OnExit" Header="退出" />
+                        <MenuItem Click="NotifyIcon_OnShowMainWindow"
+                                  Header="打开主画面" />
+                        <MenuItem Click="NotifyIcon_OnShowGocqWindow"
+                                  Header="打开gocq画面" />
+                        <MenuItem Click="NotifyIcon_OnExit"
+                                  Header="退出" />
                     </ContextMenu>
                 </tb:TaskbarIcon.ContextMenu>
             </tb:TaskbarIcon>

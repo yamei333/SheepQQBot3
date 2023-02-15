@@ -35,7 +35,6 @@ namespace SheepQQBot3.Model
     /// <summary>
     /// 节点信息, 包含所有字段
     /// </summary>
-    [Serializable]
     public class ElementBaseData
     {
         [JsonPropertyName("id")]

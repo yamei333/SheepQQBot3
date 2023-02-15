@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace SheepQQBot3.Model.Enums
 {
     public enum GroupRole
     {

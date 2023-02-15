@@ -2,14 +2,15 @@
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Net;
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
+using MessagePack;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Config
 {
-    [Serializable]
+    [MessagePackObject]
     public class SetConfig
     {
         [JsonIgnore]
@@ -20,17 +21,20 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 配置中的功能
         /// </summary>
+        [Key(nameof(BotFunctions))]
         public List<BotFunction> BotFunctions { get; set; }
 
         /// <summary>
         /// 配置ID
         /// </summary>
+        [Key(nameof(Id))]
         public Guid Id { get; set; }
 
         /// <summary>
         /// 配置显示的图标
         /// </summary>
         [JsonIgnore]
+        [IgnoreMember]
         public BitmapImage Icon =>
             TargetType switch
             {
@@ -43,31 +47,37 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 对象类型
         /// </summary>
+        [Key(nameof(TargetType))]
         public BotConfigTargetType TargetType { get; set; }
 
         /// <summary>
         /// 闹钟助手配置
         /// </summary>
+        [Key(nameof(AlarmAideConfigs))]
         public Dictionary<Guid, AlarmAideConfig> AlarmAideConfigs { get; set; }
 
         /// <summary>
         /// 闹钟助手允许投稿成员ID配置
         /// </summary>
+        [Key(nameof(AlarmAideSubmitMemberIds))]
         public HashSet<long> AlarmAideSubmitMemberIds { get; set; }
 
         /// <summary>
         /// 基金播报配置
         /// </summary>
+        [Key(nameof(FundAlarmConfigs))]
         public Dictionary<Guid, FundAlarmConfig> FundAlarmConfigs { get; set; }
 
         /// <summary>
         /// 基金阈值观测配置
         /// </summary>
+        [Key(nameof(FundLimitObserveConfigs))]
         public Dictionary<Guid, FundLimitObserveConfig> FundLimitObserveConfigs { get; set; }
 
         /// <summary>
         /// 复读机杀手配置
         /// </summary>
+        [Key(nameof(RepeaterKillerConfigs))]
         public Dictionary<Guid, RepeaterKillerConfig> RepeaterKillerConfigs { get; set; }
 
         #region 已执行内容的保存
@@ -75,32 +85,26 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 保存已提醒闹钟列表
         /// </summary>
+        [Key(nameof(AlarmAideAlarmedList))]
         public Dictionary<Guid, DateTime> AlarmAideAlarmedList { get; set; }
 
         /// <summary>
         /// 保存群自定义提醒内容
         /// </summary>
+        [Key(nameof(CustomGroupAlarms))]
         public Dictionary<Guid, CustomGroupAlarm> CustomGroupAlarms { get; set; }
 
-        private Dictionary<Guid, DateTime> _fundAlarmedList;
         /// <summary>
         /// 保存已执行基金播报任务
         /// </summary>
-        public Dictionary<Guid, DateTime> FundAlarmedList
-        {
-            get => _fundAlarmedList ??= new Dictionary<Guid, DateTime>();
-            set => _fundAlarmedList = value;
-        }
+        [Key(nameof(FundAlarmedList))]
+        public Dictionary<Guid, DateTime> FundAlarmedList { get; set; }
 
-        private Dictionary<Guid, DateTime> _fundLimitObservedList;
         /// <summary>
         /// 保存已执行基金观测任务
         /// </summary>
-        public Dictionary<Guid, DateTime> FundLimitObservedList
-        {
-            get => _fundLimitObservedList ??= new Dictionary<Guid, DateTime>();
-            set => _fundLimitObservedList = value;
-        }
+        [Key(nameof(FundLimitObservedList))]
+        public Dictionary<Guid, DateTime> FundLimitObservedList { get; set; }
 
         #endregion 已执行内容的保存
 
@@ -108,6 +112,7 @@ namespace SheepQQBot3.Model.Config
         /// 显示文字
         /// </summary>
         [JsonIgnore]
+        [IgnoreMember]
         public string DisplayId =>
             TargetType switch
             {
@@ -120,11 +125,13 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 对象ID(群号/个人QQ号)
         /// </summary>
+        [Key(nameof(TargetId))]
         public long TargetId { get; set; }
 
         /// <summary>
         /// 名称
         /// </summary>
+        [Key(nameof(TargetName))]
         public string TargetName { get; set; }
 
         public SetConfig(Guid id, BotConfigTargetType targetType, long targetId, string targetName)
@@ -174,16 +181,14 @@ namespace SheepQQBot3.Model.Config
         /// </summary>
         /// <param name="url">URL地址</param>
         /// <returns><see cref="BitmapImage"/></returns>
-        private BitmapImage GetHttpIcon(string url)
+        private static BitmapImage GetHttpIcon(string url)
         {
             var image = new BitmapImage();
             const int bytesToRead = 100;
 
-            var request = WebRequest.Create(new Uri(url, UriKind.Absolute));
-            request.Timeout = -1;
-            request.Credentials = CredentialCache.DefaultNetworkCredentials;
-            var response = request.GetResponse();
-            var responseStream = response.GetResponseStream();
+            var response = HttpExtensions.SendHttpResponse(url);
+            var responseStream = response.Content.ReadAsStream();
+
             var reader = new BinaryReader(responseStream);
             var memoryStream = new MemoryStream();
             var bytebuffer = new byte[bytesToRead];

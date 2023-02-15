@@ -14,7 +14,8 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.Resources>
-            <Style x:Key="AlarmAideTextBlockStyle" TargetType="TextBlock">
+            <Style x:Key="AlarmAideTextBlockStyle"
+                   TargetType="TextBlock">
                 <Setter Property="FontSize" Value="14" />
             </Style>
         </Grid.Resources>
@@ -30,8 +31,10 @@
                   SelectedItem="{Binding SelectedAlarmAideConfig}">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Click="AlarmAideList_OnGetGuid" Header="取得Guid" />
-                    <MenuItem Click="AlarmAideList_OnAdd" Header="新增" />
+                    <MenuItem Click="AlarmAideList_OnGetGuid"
+                              Header="取得Guid" />
+                    <MenuItem Click="AlarmAideList_OnAdd"
+                              Header="新增" />
                     <MenuItem Click="AlarmAideList_OnEdit"
                               Header="修改"
                               Style="{StaticResource EditDeleteMenuItemStyle}" />
@@ -45,14 +48,17 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                    <GridViewColumn Width="137" Header="名称">
+                    <GridViewColumn Width="137"
+                                    Header="名称">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                           Text="{Binding AlarmName}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="442" Header="时间条件">
+                    <GridViewColumn Width="442"
+                                    Header="时间条件">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
@@ -65,7 +71,8 @@
                     <GridViewColumn Width="30"
                                     CellTemplate="{StaticResource CheckImageButtonTemplate}"
                                     Header="√" />
-                    <GridViewColumn Width="30" Header="投">
+                    <GridViewColumn Width="30"
+                                    Header="投">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <ToggleButton Width="30"
@@ -76,12 +83,15 @@
                                               Tag="{Binding}">
                                     <ToggleButton.Template>
                                         <ControlTemplate>
-                                            <Image Height="16" HorizontalAlignment="Center">
+                                            <Image Height="16"
+                                                   HorizontalAlignment="Center">
                                                 <Image.Style>
                                                     <Style TargetType="Image">
                                                         <Setter Property="Source" Value="/Resource/close.png" />
                                                         <Style.Triggers>
-                                                            <DataTrigger Binding="{Binding IsDefault, Mode=OneWay}" Value="true">
+                                                            <DataTrigger Binding="{Binding IsDefault,
+                                                                                           Mode=OneWay}"
+                                                                         Value="true">
                                                                 <Setter Property="Source" Value="/Resource/check.png" />
                                                             </DataTrigger>
                                                         </Style.Triggers>
@@ -112,7 +122,8 @@
                          SelectionMode="Extended">
                     <ListBox.ItemTemplate>
                         <DataTemplate>
-                            <TextBlock Text="{Binding Value, Converter={StaticResource SingleLineTextConverter}}"
+                            <TextBlock Text="{Binding Value,
+                                                      Converter={StaticResource SingleLineTextConverter}}"
                                        TextTrimming="CharacterEllipsis"
                                        TextWrapping="NoWrap"
                                        ToolTip="{Binding Value}" />
@@ -120,14 +131,18 @@
                     </ListBox.ItemTemplate>
                     <ListBox.ContextMenu>
                         <ContextMenu>
-                            <MenuItem Click="AlarmAideTextList_OnAdd" Header="新增" />
-                            <MenuItem Click="AlarmAideTextList_OnCopy" Header="复制" />
-                            <MenuItem Click="AlarmAideTextList_OnEdit" Header="修改">
+                            <MenuItem Click="AlarmAideTextList_OnAdd"
+                                      Header="新增" />
+                            <MenuItem Click="AlarmAideTextList_OnCopy"
+                                      Header="复制" />
+                            <MenuItem Click="AlarmAideTextList_OnEdit"
+                                      Header="修改">
                                 <MenuItem.Style>
                                     <Style TargetType="MenuItem">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSingleSelectedAlarmAideText}" Value="true">
+                                            <DataTrigger Binding="{Binding IsSingleSelectedAlarmAideText}"
+                                                         Value="true">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -137,21 +152,26 @@
                             <MenuItem Click="AlarmAideTextList_OnDelete"
                                       Header="删除"
                                       Style="{StaticResource EditDeleteMenuItemStyle}" />
-                            <MenuItem Click="AlarmAideTextList_OnTest" Header="测试发送">
+                            <MenuItem Click="AlarmAideTextList_OnTest"
+                                      Header="测试发送">
                                 <MenuItem.Style>
                                     <Style TargetType="MenuItem">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsSingleSelectedAlarmAideText}" Value="true">
+                                            <DataTrigger Binding="{Binding IsSingleSelectedAlarmAideText}"
+                                                         Value="true">
                                                 <Setter Property="Visibility" Value="Visible" />
                                             </DataTrigger>
                                         </Style.Triggers>
                                     </Style>
                                 </MenuItem.Style>
                             </MenuItem>
-                            <MenuItem Click="AlarmAideTextList_OnExport" Header="导出" />
-                            <MenuItem Click="AlarmAideTextList_OnImport" Header="导入" />
-                            <MenuItem Click="AlarmAideTextList_OnSort" Header="按内容排序" />
+                            <MenuItem Click="AlarmAideTextList_OnExport"
+                                      Header="导出" />
+                            <MenuItem Click="AlarmAideTextList_OnImport"
+                                      Header="导入" />
+                            <MenuItem Click="AlarmAideTextList_OnSort"
+                                      Header="按内容排序" />
                         </ContextMenu>
                     </ListBox.ContextMenu>
                 </ListBox>

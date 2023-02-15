@@ -10,6 +10,9 @@ using SheepQQBot3.SDK.Event;
 
 namespace SheepQQBot3.View
 {
+    /// <summary>
+    /// ViewModel
+    /// </summary>
     public partial class MainWindowViewModel : INotifyPropertyChanged, IDisposable
     {
         /// <inheritdoc/>

@@ -19,12 +19,15 @@
                               Tag="{Binding}">
                     <ToggleButton.Template>
                         <ControlTemplate>
-                            <Image Height="16" HorizontalAlignment="Center">
+                            <Image Height="16"
+                                   HorizontalAlignment="Center">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Source" Value="/Resource/close.png" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding IsActive, Mode=OneWay}" Value="true">
+                                            <DataTrigger Binding="{Binding IsActive,
+                                                                           Mode=OneWay}"
+                                                         Value="true">
                                                 <Setter Property="Source" Value="/Resource/check.png" />
                                             </DataTrigger>
                                         </Style.Triggers>
@@ -44,12 +47,15 @@
                               Tag="{Binding}">
                     <ToggleButton.Template>
                         <ControlTemplate>
-                            <Image Height="16" HorizontalAlignment="Center">
+                            <Image Height="16"
+                                   HorizontalAlignment="Center">
                                 <Image.Style>
                                     <Style TargetType="Image">
                                         <Setter Property="Source" Value="/Resource/close.png" />
                                         <Style.Triggers>
-                                            <DataTrigger Binding="{Binding Value.IsActive, Mode=OneWay}" Value="true">
+                                            <DataTrigger Binding="{Binding Value.IsActive,
+                                                                           Mode=OneWay}"
+                                                         Value="true">
                                                 <Setter Property="Source" Value="/Resource/check.png" />
                                             </DataTrigger>
                                         </Style.Triggers>

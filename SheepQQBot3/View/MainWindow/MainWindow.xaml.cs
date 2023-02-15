@@ -41,7 +41,6 @@ namespace SheepQQBot3.View
             // MEMO : 界面初始化时读取配置
             ConfigExtensions.LoadConfig();
             MWindow = this;
-            //Vm.MainWindowAlarmAideViewModel = new MainWindowAlarmAideViewModel();
 
             // MEMO : 获得节假日配置
             GetHolidayInfo();
@@ -61,14 +60,11 @@ namespace SheepQQBot3.View
                     File.WriteAllLines(holidayInfoPath, new[] { holidayInfoJson }, Encoding.UTF8);
                 }
 
-                var regholidayInfo = new Regex(@"(?<=""\d{2}-\d{2}"":){.+?}");
+                var regHolidayInfo = new Regex(@"(?<=""\d{2}-\d{2}"":){.+?}");
                 var holidayInfo = new Dictionary<string, bool>();
-                regholidayInfo.Matches(holidayInfoJson).ForEach(each =>
+                regHolidayInfo.Matches(holidayInfoJson).ForEach(each =>
                 {
-                    var holidayInfoData = JsonSerializer.Deserialize<HolidayInfoData>(each.Value, new JsonSerializerOptions
-                    {
-                        PropertyNameCaseInsensitive = true
-                    });
+                    var holidayInfoData = JsonSerializer.Deserialize<HolidayInfoData>(each.Value);
                     if (holidayInfoData != null)
                         holidayInfo.Add(holidayInfoData.Date, holidayInfoData.Holiday);
                 });
@@ -265,16 +261,16 @@ namespace SheepQQBot3.View
             this.Activate();
         }
 
-        private void NotifyIncon_OnExit(object sender, RoutedEventArgs e)
+        private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
         {
             BotExtensions.KillGocqexe();
             Application.Current.Shutdown();
         }
 
-        private void NotifyIncon_OnShowMainWindow(object sender, RoutedEventArgs e)
+        private void NotifyIcon_OnShowMainWindow(object sender, RoutedEventArgs e)
             => OnNotifyIconDoubleClick(sender, e);
 
-        private void NotifyIncon_OnShowGocqWindow(object sender, RoutedEventArgs e)
+        private void NotifyIcon_OnShowGocqWindow(object sender, RoutedEventArgs e)
         {
             GocqEmbedWindow.Visibility = Visibility.Visible;
             GocqEmbedWindow.Activate();

@@ -12,7 +12,8 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.Resources>
-            <Style x:Key="AlarmAideTextBlockStyle" TargetType="TextBlock" />
+            <Style x:Key="AlarmAideTextBlockStyle"
+                   TargetType="TextBlock" />
         </Grid.Resources>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="680" />
@@ -25,15 +26,20 @@
                   SelectedItem="{Binding SelectedRunLog}">
             <ListView.ContextMenu>
                 <ContextMenu>
-                    <MenuItem Click="RunLog_OnRepeat" Header="复读这条消息">
+                    <MenuItem Click="RunLog_OnRepeat"
+                              Header="复读这条消息">
                         <MenuItem.Style>
                             <Style TargetType="MenuItem">
                                 <Setter Property="Visibility" Value="Visible" />
                                 <Style.Triggers>
-                                    <DataTrigger Binding="{Binding PlacementTarget.SelectedItem, RelativeSource={RelativeSource FindAncestor, AncestorType=ContextMenu}}" Value="{x:Null}">
+                                    <DataTrigger Binding="{Binding PlacementTarget.SelectedItem,
+                                                                   RelativeSource={RelativeSource FindAncestor,
+                                                                                                  AncestorType=ContextMenu}}"
+                                                 Value="{x:Null}">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </DataTrigger>
-                                    <DataTrigger Binding="{Binding SelectedRunLog.IsGroupMessage}" Value="false">
+                                    <DataTrigger Binding="{Binding SelectedRunLog.IsGroupMessage}"
+                                                 Value="false">
                                         <Setter Property="Visibility" Value="Collapsed" />
                                     </DataTrigger>
                                 </Style.Triggers>
@@ -44,46 +50,58 @@
             </ListView.ContextMenu>
             <ListView.View>
                 <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                    <GridViewColumn Width="60" Header="时间">
+                    <GridViewColumn Width="60"
+                                    Header="时间">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <Border HorizontalAlignment="Center" VerticalAlignment="Center">
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding DateTimeStr}" />
+                                <Border HorizontalAlignment="Center"
+                                        VerticalAlignment="Center">
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding DateTimeStr}" />
                                 </Border>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="62" Header="类型">
+                    <GridViewColumn Width="62"
+                                    Header="类型">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding MessageTypeStr}" />
+                                <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                           Text="{Binding MessageTypeStr}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="86" Header="来源">
+                    <GridViewColumn Width="86"
+                                    Header="来源">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical">
                                     <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
                                                Text="{Binding GroupId}"
-                                               Visibility="{Binding HasGroupId, Mode=OneWay, Converter={StaticResource BooleanToVisibilityConverter}}" />
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding SenderId}" />
+                                               Visibility="{Binding HasGroupId,
+                                                                    Mode=OneWay,
+                                                                    Converter={StaticResource BooleanToVisibilityConverter}}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding SenderId}" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
-                    <GridViewColumn Width="438" Header="内容">
+                    <GridViewColumn Width="438"
+                                    Header="内容">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Text="{Binding ContentTitle}">
                                     <TextBlock.Style>
-                                        <Style BasedOn="{StaticResource AlarmAideTextBlockStyle}" TargetType="TextBlock">
+                                        <Style BasedOn="{StaticResource AlarmAideTextBlockStyle}"
+                                               TargetType="TextBlock">
                                             <Style.Setters>
                                                 <Setter Property="Height" Value="16" />
                                                 <Setter Property="TextWrapping" Value="NoWrap" />
                                             </Style.Setters>
                                             <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsWarp}" Value="true">
+                                                <DataTrigger Binding="{Binding IsWarp}"
+                                                             Value="true">
                                                     <Setter Property="Height" Value="32" />
                                                     <Setter Property="TextWrapping" Value="Wrap" />
                                                 </DataTrigger>
@@ -98,7 +116,8 @@
             </ListView.View>
         </ListView>
         <Border Grid.Column="1">
-            <ItemsControl Margin="5,2,0,0" ItemsSource="{Binding RunLogMessages}">
+            <ItemsControl Margin="5,2,0,0"
+                          ItemsSource="{Binding RunLogMessages}">
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
                         <Grid>
@@ -114,7 +133,8 @@
                                      GotFocus="RunLogMessageText_OnGotFocus"
                                      IsReadOnly="True"
                                      PreviewMouseDown="RunLogMessageText_OnPreviewMouseDown"
-                                     Text="{Binding ContentSubString, Mode=OneWay}"
+                                     Text="{Binding ContentSubString,
+                                                    Mode=OneWay}"
                                      TextWrapping="Wrap" />
                             <Line Grid.Row="1"
                                   Stretch="Fill"

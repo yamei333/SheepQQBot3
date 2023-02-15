@@ -71,8 +71,8 @@ namespace SheepQQBot3.SDK.Client
 
             await SendDataAsync("send_group_msg", new ParamData
             {
-                group_id = groupId.ToString(),
-                message = messageList
+                Group_Id = groupId.ToString(),
+                Message = messageList
             });
         }
 
@@ -84,8 +84,8 @@ namespace SheepQQBot3.SDK.Client
         public async Task SendPrivateMessage(long userId, string message)
             => await SendDataAsync("send_private_msg", new ParamData
             {
-                user_id = userId.ToString(),
-                message = MessageUtil.ProcessCQMessage(message)
+                User_Id = userId.ToString(),
+                Message = MessageUtil.ProcessCQMessage(message)
             });
 
         /// <summary>
@@ -116,7 +116,7 @@ namespace SheepQQBot3.SDK.Client
         public async void DeleteMessage(int messageId)
             => await SendDataAsync("delete_msg", new ParamData
             {
-                message_id = messageId.ToString()
+                Message_Id = messageId.ToString()
             });
 
         /// <summary>
@@ -126,7 +126,7 @@ namespace SheepQQBot3.SDK.Client
         public async void GetMessage(int messageId)
             => await SendDataAsync("get_msg", new ParamData
             {
-                message_id = messageId.ToString()
+                Message_Id = messageId.ToString()
             });
 
         /// <summary>
@@ -137,8 +137,8 @@ namespace SheepQQBot3.SDK.Client
         public async void SendLike(long userId, int times)
             => await SendDataAsync("send_like", new ParamData
             {
-                user_id = userId.ToString(),
-                times = times.ToString()
+                User_Id = userId.ToString(),
+                Times = times.ToString()
             });
 
         /// <summary>
@@ -150,9 +150,9 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupKick(long groupId, long userId, bool isReject = false)
             => await SendDataAsync("set_group_kick", new ParamData
             {
-                group_id = groupId.ToString(),
-                user_id = userId.ToString(),
-                reject_add_request = isReject.ToString()
+                Group_Id = groupId.ToString(),
+                User_Id = userId.ToString(),
+                Reject_Add_Request = isReject.ToString()
             });
 
         /// <summary>
@@ -164,9 +164,9 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupBan(long groupId, long userId, int duration)
             => await SendDataAsync("set_group_ban", new ParamData
             {
-                group_id = groupId.ToString(),
-                user_id = userId.ToString(),
-                duration = duration.ToString()
+                Group_Id = groupId.ToString(),
+                User_Id = userId.ToString(),
+                Duration = duration.ToString()
             });
 
         /// <summary>
@@ -177,8 +177,8 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupAllBan(long groupId, bool enable)
             => await SendDataAsync("set_group_whole_ban", new ParamData
             {
-                group_id = groupId.ToString(),
-                enable = enable.ToString()
+                Group_Id = groupId.ToString(),
+                Enable = enable.ToString()
             });
 
         /// <summary>
@@ -190,9 +190,9 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupCard(long groupId, int userId, string card)
             => await SendDataAsync("set_group_card", new ParamData
             {
-                group_id = groupId.ToString(),
-                enable = userId.ToString(),
-                card = card
+                Group_Id = groupId.ToString(),
+                Enable = userId.ToString(),
+                Card = card
             });
 
         /// <summary>
@@ -203,8 +203,8 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupName(long groupId, string groupName)
             => await SendDataAsync("set_group_name", new ParamData
             {
-                group_id = groupId.ToString(),
-                group_name = groupName
+                Group_Id = groupId.ToString(),
+                Group_Name = groupName
             });
     }
 }

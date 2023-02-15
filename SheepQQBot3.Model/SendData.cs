@@ -10,6 +10,7 @@ namespace SheepQQBot3.Model
         /// <summary>
         /// 接口方法
         /// </summary>
+        [JsonPropertyName("action")]
         public string action { get; }
 
         [JsonPropertyName("params")]
@@ -24,24 +25,34 @@ namespace SheepQQBot3.Model
 
     public class ParamData
     {
-        public string group_id { get; set; }
+        [JsonPropertyName("group_id")]
+        public string Group_Id { get; set; }
 
-        public string user_id { get; set; }
+        [JsonPropertyName("user_id")]
+        public string User_Id { get; set; }
 
-        public string message_id { get; set; }
+        [JsonPropertyName("message_id")]
+        public string Message_Id { get; set; }
 
-        public string times { get; set; }
+        [JsonPropertyName("times")]
+        public string Times { get; set; }
 
-        public string reject_add_request { get; set; }
+        [JsonPropertyName("reject_add_request")]
+        public string Reject_Add_Request { get; set; }
 
-        public string duration { get; set; }
+        [JsonPropertyName("duration")]
+        public string Duration { get; set; }
 
-        public string enable { get; set; }
+        [JsonPropertyName("enable")]
+        public string Enable { get; set; }
 
-        public string card { get; set; }
+        [JsonPropertyName("card")]
+        public string Card { get; set; }
 
-        public string group_name { get; set; }
+        [JsonPropertyName("group_name")]
+        public string Group_Name { get; set; }
 
-        public List<Element> message { get; set; }
+        [JsonPropertyName("message")]
+        public List<Element> Message { get; set; }
     }
 }

@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Net;
+using System.Net.Http;
 using System.Text;
-using System.Text.Json.Nodes;
 using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Extension
@@ -20,43 +19,48 @@ namespace SheepQQBot3.Model.Extension
         {
             try
             {
-                var request = (HttpWebRequest)WebRequest.Create($"http://push.yamei.moe/{key}");
-                request.Method = "POST";
-                request.ContentType = "application/x-www-form-urlencoded";
+                var httpClient = new HttpClient();
+                var content = new StringContent(string.Empty, Encoding.UTF8, "application/x-www-form-urlencoded");
+                var request = httpClient.PostAsync($"http://push.yamei.moe/{key}", content);
+                //var request = (HttpWebRequest)WebRequest.Create($"http://push.yamei.moe/{key}");
+                //request.Method = "POST";
+                //request.ContentType = "application/x-www-form-urlencoded";
 
                 // MEMO : 设置POST参数
-                var builder = new StringBuilder();
-                builder.Append($"Title={title}");
-                builder.Append($"&body={message}");
-                if (!string.IsNullOrEmpty(icon))
-                    builder.Append($"&icon={icon}");
+                //var builder = new StringBuilder();
+                //builder.Append($"Title={title}");
+                //builder.Append($"&body={message}");
+                //if (!string.IsNullOrEmpty(icon))
+                //    builder.Append($"&icon={icon}");
 
-                if (!string.IsNullOrEmpty(url))
-                    builder.Append($"&Url={url}");
+                //if (!string.IsNullOrEmpty(url))
+                //    builder.Append($"&Url={url}");
 
-                builder.Append($"&isArchive={(isArchive ? "1" : "0")}");
+                //builder.Append($"&isArchive={(isArchive ? "1" : "0")}");
 
-                if (isCopy)
-                    builder.Append($"&copy={message}");
+                //if (isCopy)
+                //    builder.Append($"&copy={message}");
 
-                if (isAutoCopy)
-                    builder.AppendFormat("&autoCopy=1");
+                //if (isAutoCopy)
+                //    builder.AppendFormat("&autoCopy=1");
 
-                var data = Encoding.UTF8.GetBytes(builder.ToString());
-                request.ContentLength = data.Length;
-                using (var reqStream = request.GetRequestStream())
-                {
-                    reqStream.Write(data, 0, data.Length);
-                    reqStream.Close();
-                }
+                //var data = Encoding.UTF8.GetBytes(builder.ToString());
+                //request.ContentLength = data.Length;
+                //using (var reqStream = request.GetRequestStream())
+                //{
+                //    reqStream.Write(data, 0, data.Length);
+                //    reqStream.Close();
+                //}
 
-                var response = ((HttpWebResponse)request.GetResponse());
-                var myreader = new System.IO.StreamReader(response.GetResponseStream(), Encoding.UTF8);
-                var barkResp = JsonNode.Parse(myreader.ReadToEnd());
+                //var response = ((HttpWebResponse)request.GetResponse());
+                //var myreader = new System.IO.StreamReader(response.GetResponseStream(), Encoding.UTF8);
+                //var barkResp = JsonNode.Parse(myreader.ReadToEnd());
 
-                return Convert.ToInt16(barkResp?["code"]) == 200
-                    ? PushBarkResultType.Success
-                    : PushBarkResultType.Failed;
+                //return Convert.ToInt16(barkResp?["code"]) == 200
+                //    ? PushBarkResultType.Success
+                //    : PushBarkResultType.Failed;
+
+                return PushBarkResultType.Success;
             }
             catch (Exception)
             {

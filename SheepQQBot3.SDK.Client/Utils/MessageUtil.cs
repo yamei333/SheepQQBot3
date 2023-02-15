@@ -78,10 +78,7 @@ namespace SheepQQBot3.SDK.Client
             ElementBaseData GetElementBaseData()
             {
                 var subJson = GetSubJson();
-                var jsonData = JsonSerializer.Deserialize<ElementBaseData>(subJson, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var jsonData = JsonSerializer.Deserialize<ElementBaseData>(subJson);
                 return jsonData;
             }
 
@@ -114,10 +111,7 @@ namespace SheepQQBot3.SDK.Client
                     .Select(eachSubData => string.Join(":", eachSubData.Split('=')
                         .Select(eachElement => $"\"{eachElement}\"")
                         .ToArray())));
-                var elementBaseData = JsonSerializer.Deserialize<ElementBaseData>($"{{{subJsonContent}}}", new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                var elementBaseData = JsonSerializer.Deserialize<ElementBaseData>($"{{{subJsonContent}}}");
                 elementBaseData.Data = xmlString[5..];
                 return elementBaseData;
             }

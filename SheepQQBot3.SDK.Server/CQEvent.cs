@@ -9,8 +9,8 @@ namespace SheepQQBot3.SDK.Event
 {
     public partial class CQEvent : IDisposable
     {
-        private WebSocketServer? _server;
-        private IWebSocketConnection? _connection;
+        private WebSocketServer _server;
+        private IWebSocketConnection _connection;
 
         public CQEvent()
         {
@@ -38,10 +38,7 @@ namespace SheepQQBot3.SDK.Event
             });
 
             ReceiveData GetReceiveData(string jsonInfo)
-                => JsonSerializer.Deserialize<ReceiveData>(jsonInfo, new JsonSerializerOptions
-                {
-                    PropertyNameCaseInsensitive = true
-                });
+                => JsonSerializer.Deserialize<ReceiveData>(jsonInfo);
         }
 
         private void ProcessReceiveData(ReceiveData receiveData)

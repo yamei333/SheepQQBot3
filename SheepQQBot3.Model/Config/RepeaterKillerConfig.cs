@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
+using System.Text.Json.Serialization;
+using MessagePack;
 
 namespace SheepQQBot3.Model.Config
 {
@@ -8,18 +10,22 @@ namespace SheepQQBot3.Model.Config
     /// 闹钟助手配置
     /// </summary>
     [Serializable]
+    [MessagePackObject]
     public class RepeaterKillerConfig : INotifyPropertyChanged
     {
-        [field: NonSerialized]
+        [field: IgnoreMember, JsonIgnore]
         public event PropertyChangedEventHandler PropertyChanged;
 
         protected void OnPropertyChanged(string propertyName)
             => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
+        [Key(nameof(_repeatLimit))]
         private int? _repeatLimit;
+
         /// <summary>
         /// 复读限制次数
         /// </summary>
+        [IgnoreMember]
         public int? RepeatLimit
         {
             get => _repeatLimit;
@@ -30,10 +36,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_maxCacheMessageCount))]
         private int? _maxCacheMessageCount;
+
         /// <summary>
         /// 复读限制次数
         /// </summary>
+        [IgnoreMember]
         public int? MaxCacheMessageCount
         {
             get => _maxCacheMessageCount;
@@ -44,10 +53,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_similarityLimit))]
         private double _similarityLimit;
+
         /// <summary>
         /// 相似度限值
         /// </summary>
+        [IgnoreMember]
         public double SimilarityLimit
         {
             get => _similarityLimit;
@@ -58,11 +70,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_similarityLimitEmoji))]
         private double _similarityLimitEmoji;
 
         /// <summary>
         /// 相似度限值(默认表情)
         /// </summary>
+        [IgnoreMember]
         public double SimilarityLimitEmoji
         {
             get => _similarityLimitEmoji;
@@ -73,11 +87,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_similarityLimitImage))]
         private double _similarityLimitImage;
 
         /// <summary>
         /// 相似度限值(带图片)
         /// </summary>
+        [IgnoreMember]
         public double SimilarityLimitImage
         {
             get => _similarityLimitImage;
@@ -88,10 +104,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_filterList))]
         private ConcurrentDictionary<string, int> _filterList;
+
         /// <summary>
         /// 过滤列表
         /// </summary>
+        [IgnoreMember]
         public ConcurrentDictionary<string, int> FilterList
         {
             get => _filterList;
