@@ -23,7 +23,7 @@ namespace SheepQQBot3.Model.Setu
         /// pixiv 图片ID
         /// </summary>
         [JsonPropertyName("pid")]
-        public string Pid { get; set; }
+        public int Pid { get; set; }
 
         [JsonIgnore]
         public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";

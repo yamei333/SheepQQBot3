@@ -9,6 +9,7 @@
     <StartupObject>SheepQQBot3.App</StartupObject>
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <PlatformTarget>AnyCPU</PlatformTarget>
+    <PackageIcon>Kyouko04_104991561_0 128.png</PackageIcon>
   </PropertyGroup>
 
   <ItemGroup>
@@ -34,6 +35,7 @@
     <None Remove="Resource\hari0.jpg" />
     <None Remove="Resource\Hari002.ico" />
     <None Remove="Resource\Hari002_85591274_p1.png" />
+    <None Remove="Resource\hari003.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -47,6 +49,7 @@
     <Resource Include="Resource\hari0.jpg" />
     <Resource Include="Resource\Hari002.ico" />
     <Resource Include="Resource\Hari002_85591274_p1.png" />
+    <Resource Include="Resource\hari003.ico" />
   </ItemGroup>
 
   <ItemGroup>
@@ -62,6 +65,17 @@
 
   <ItemGroup>
     <Folder Include="BotService\" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <None Update="Resource\Kyouko04_104991561_0 128.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+    <None Update="Resource\Kyouko04_104991561_0.png">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
   </ItemGroup>
 
 </Project>

@@ -77,7 +77,7 @@ namespace SheepQQBot3.View
             // MEMO : 命令为#st#
             // MEMO : 或者字数在4字以内, 并包含色图关键字
             if (upperMessage == COMMAND_CUSTOM_GROUP_SETU_LIBRARY
-                || upperMessage.GetByteCount() <= 10 && _setuKeyWords.Any(each => upperMessage.Contains(each)))
+                || upperMessage.GetByteCount() <= 12 && _setuKeyWords.Any(each => upperMessage.Contains(each)))
             {
                 var dateNow = DateTime.Now;
                 var r18bonus = false;
@@ -147,7 +147,9 @@ namespace SheepQQBot3.View
                     };
 
                     var setuInfo = await randomSetu.Random().Invoke();
-                    await Api.SendGroupMessage(groupId, $"[CQ:image,file={setuInfo.ImageUrl}]" +
+                    var fileName = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl, "png");
+                    CommonExtensions.DeleteExpiredCache();
+                    await Api.SendGroupMessage(groupId, $"[CQ:image,file={CommonExtensions.GetCachePath(fileName)}]" +
                                                         $"\n{setuInfo.SourceText}" +
                                                         $"\n{_setuSource.Random()}:{setuInfo.SourceUrl}" +
                                                         $"\n[CQ:at,qq={targetId}] {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGet.Random()}");

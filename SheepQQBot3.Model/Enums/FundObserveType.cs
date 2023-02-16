@@ -1,8 +1,11 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace SheepQQBot3.Model.Enums
 {
     /// <summary>
     /// 基金观察类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum FundObserveType
     {
         /// <summary>

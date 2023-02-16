@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Configuration;
 using System.Text.Json;
+using CommonLibrary;
 using Fleck;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Enums;
@@ -34,7 +35,17 @@ namespace SheepQQBot3.SDK.Event
                 _connection = socket;
                 socket.OnOpen = () => OnOpen?.Invoke(null, null!);
                 socket.OnClose = () => OnClose?.Invoke(null, null!);
-                socket.OnMessage = jsonInfo => ProcessReceiveData(GetReceiveData(jsonInfo));
+                socket.OnMessage = jsonInfo =>
+                {
+                    try
+                    {
+                        ProcessReceiveData(GetReceiveData(jsonInfo));
+                    }
+                    catch (Exception e)
+                    {
+                        LogExtensions.WriteLog(LogType.Error, $"ProcessReceiveData-{e.Message}\r\n{jsonInfo}");
+                    }
+                };
             });
 
             ReceiveData GetReceiveData(string jsonInfo)

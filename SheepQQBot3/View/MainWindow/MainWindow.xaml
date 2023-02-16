@@ -12,7 +12,7 @@
         Height="482"
         Closed="MainWindow_OnClosed"
         Closing="MainWindow_OnClosing"
-        Icon="/Resource/Hari002.ico"
+        Icon="/Resource/hari003.ico"
         Initialized="MainWindow_OnInitialized"
         Loaded="MainWindow_OnLoaded"
         WindowStartupLocation="CenterScreen"
@@ -188,7 +188,7 @@
         <TabItem Header="托盘图标"
                  Visibility="Hidden">
             <tb:TaskbarIcon x:Name="MyNotifyIcon"
-                            IconSource="/Resource/Hari002.ico"
+                            IconSource="/Resource/hari003.ico"
                             ToolTipText="{Binding Title}"
                             TrayMouseDoubleClick="OnNotifyIconDoubleClick"
                             Visibility="Visible">
