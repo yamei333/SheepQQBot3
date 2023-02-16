@@ -10,6 +10,7 @@
     <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
     <PlatformTarget>AnyCPU</PlatformTarget>
     <PackageIcon>Kyouko04_104991561_0 128.png</PackageIcon>
+    <ApplicationIcon>Resource\hari003.ico</ApplicationIcon>
   </PropertyGroup>
 
   <ItemGroup>

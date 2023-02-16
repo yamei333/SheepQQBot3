@@ -10,8 +10,20 @@ namespace SheepQQBot3.Model.Extension
 {
     public static class SetuExtensions
     {
+        /// <summary>
+        /// Pximg地址, 无法直接使用
+        /// </summary>
         private const string Pximg = "i.pximg.net";
-        private const string PixivRe = "i.pixiv.re";
+
+        /// <summary>
+        /// Pixiv反代源地址
+        /// </summary>
+        private const string PixivReSource = "i.pixiv.re";
+
+        /// <summary>
+        /// Pixiv反代目标地址
+        /// </summary>
+        private const string PixivReTarget = "i.pixiv.cat";
 
         public static async Task<SetuInfo> GetSetu_Lolicon()
             => await GetSetu_Lolicon_Core();
@@ -35,7 +47,10 @@ namespace SheepQQBot3.Model.Extension
                 setuData = new SetuData_Lolicon();
             }
 
-            return new SetuInfo(setuData.SetuInfo, setuData.Urls.Original[1..], setuData.Urls.Small);
+            return new SetuInfo(
+                setuData.SetuInfo,
+                setuData.Urls.Original.Replace(PixivReSource, PixivReTarget),
+                setuData.Urls.Small.Replace(PixivReSource, PixivReTarget));
         }
 
         private static readonly Regex RegGetImageId_Rainchan = new Regex(@"(?<=id=)\d+");
@@ -58,7 +73,10 @@ namespace SheepQQBot3.Model.Extension
                 setuData = new SetuData_Rainchan();
             }
 
-            return new SetuInfo(setuData.SetuInfo, @$"ttps://pximg.rainchan.win/img?img_id={imageId}", $@"https://pximg.rainchan.win/img?img_id={imageId}&web=true");
+            return new SetuInfo(
+                setuData.SetuInfo,
+                @$"https://pximg.rainchan.win/img?img_id={imageId}",
+                @$"https://pximg.rainchan.win/img?img_id={imageId}&web=true");
         }
 
         public static async Task<SetuInfo> GetSetu_Yuban()
@@ -77,7 +95,10 @@ namespace SheepQQBot3.Model.Extension
                 setuData = new SetuData_Yuban();
             }
 
-            return new SetuInfo(setuData.SetuInfo, setuData.Urls.Original.Replace(Pximg, PixivRe)[1..], setuData.Urls.Medium.Replace(Pximg, PixivRe));
+            return new SetuInfo(
+                setuData.SetuInfo,
+                setuData.Urls.Original.Replace(Pximg, PixivReTarget),
+                setuData.Urls.Medium.Replace(Pximg, PixivReTarget));
         }
     }
 }
