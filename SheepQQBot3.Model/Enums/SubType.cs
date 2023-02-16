@@ -1,8 +1,11 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace SheepQQBot3.Model.Enums
 {
     /// <summary>
     /// 子类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum SubType
     {
         /// <summary>

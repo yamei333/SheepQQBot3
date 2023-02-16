@@ -6,6 +6,7 @@ namespace SheepQQBot3.Model
 {
     public class ReceiveData
     {
+        [JsonPropertyName("meta_event_type")]
         public string Meta_Event_Type { get; set; }
 
         [JsonPropertyName("sub_type")]
@@ -14,6 +15,7 @@ namespace SheepQQBot3.Model
         [JsonIgnore]
         public SubType Sub_Type => (SubType)Enum.Parse(typeof(SubType), Sub_Type_Value, true);
 
+        [JsonPropertyName("time")]
         public int Time { get; set; }
 
         [JsonPropertyName("post_type")]

@@ -1,4 +1,6 @@
-﻿using System.Net.Http;
+﻿using System;
+using System.IO;
+using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -43,6 +45,20 @@ namespace SheepQQBot3.Model.Extension
         {
             var httpClient = new HttpClient();
             return await httpClient.GetAsync(url).ConfigureAwait(false);
+        }
+
+        /// <summary>
+        /// http下载
+        /// </summary>
+        public static async Task<string> HttpDownloadAsync(string url, string fileExtend)
+        {
+            var fileName = Guid.NewGuid().ToString();
+            var response = await HttpGetAsync(url);
+            const string cachePathName = "Cache";
+            CommonExtensions.CreatePath(cachePathName);
+            var fs = new FileStream($"{cachePathName}/{fileName}.{fileExtend}", FileMode.CreateNew);
+            await response.Content.CopyToAsync(fs);
+            return $"{fileName}.{fileExtend}";
         }
     }
 }

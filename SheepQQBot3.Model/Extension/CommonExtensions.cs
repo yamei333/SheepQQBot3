@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.IO;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MessagePack;
+using Yamei.Common;
 
 namespace System
 {
@@ -147,5 +149,34 @@ namespace System
         //        return isMatch;
         //    }
         //}
+
+        public static string GetCachePath(string fileName)
+        {
+            var appPath = Environment.CurrentDirectory;
+            return $"file:///{appPath.Replace(@"\", "/")}/Cache/{fileName}";
+        }
+
+        public static void CreatePath(string pathName)
+        {
+            if (!Directory.Exists(pathName))
+                Directory.CreateDirectory(pathName);
+        }
+
+        /// <summary>
+        /// 删除过期缓存文件
+        /// </summary>
+        /// <param name="expiredDays">过期日期</param>
+        public static void DeleteExpiredCache(int expiredDays = 7)
+        {
+            const string folderPath = "Cache";
+            var dateNow = DateTime.Now;
+            Directory.GetFiles(folderPath)
+                .ForEach(file =>
+                {
+                    var fileInfo = new FileInfo(file);
+                    if ((dateNow - fileInfo.CreationTime).TotalDays >= expiredDays)
+                        fileInfo.Delete();
+                });
+        }
     }
 }

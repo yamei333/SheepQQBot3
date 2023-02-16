@@ -59,7 +59,7 @@ namespace SheepQQBot3.View
         public MainWindowViewModel()
         {
             PublicVar.InitPublicVar(this);
-            Title = "助手哈莉 - Ver 0.4.3.0";
+            Title = "助手哈莉 - Ver 0.5.0.0";
             IsLoadComplete = false;
 
             InitViewModel();

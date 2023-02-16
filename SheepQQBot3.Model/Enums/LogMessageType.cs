@@ -1,5 +1,8 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Text.Json.Serialization;
+
+namespace SheepQQBot3.Model.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum LogMessageType
     {
         /// <summary>

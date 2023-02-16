@@ -1,6 +1,7 @@
 ﻿using System.Text.Encodings.Web;
 using System.Text.Json;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.Setu;
 using static SheepQQBot3.SDK.Client.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
@@ -29,6 +30,11 @@ public class MessageUtilTest
         {
             Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         });
+
+        var zap =
+            "{\"error\":\"\",\"data\":[{\"pid\":92425813,\"p\":0,\"uid\":569672,\"title\":\"オリキャラ\",\"author\":\"ミルクセーキ\",\"r18\":false,\"width\":968,\"height\":1366,\"tags\":[\"R-18\",\"オリジナル\",\"原创\",\"下着\",\"内衣\",\"高品質パンツ\",\"高品质内裤\",\"おへそ\",\"肚脐\",\"ぱんつ\",\"胖次\",\"揉みしだきたい乳\",\"诱人把玩的乳房\"],\"ext\":\"jpg\",\"aiType\":0,\"uploadDate\":1630465202000,\"urls\":{\"small\":\"https://i.pixiv.re/c/540x540_70/img-master/img/2021/09/01/12/00/02/92425813_p0_master1200.jpg\",\"original\":\"https://i.pixiv.re/img-original/img/2021/09/01/12/00/02/92425813_p0.jpg\"}";
+        var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(zap);
+        ;
         //var jsonData = JsonSerializer.Serialize(new TestClass
         //{
         //    Text1 = "text1",
