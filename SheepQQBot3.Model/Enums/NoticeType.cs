@@ -31,7 +31,7 @@ namespace SheepQQBot3.Model.Enums
         Group_Upload,
 
         /// <summary>
-        /// 群成员名片更新
+        /// 群名片变更
         /// </summary>
         Group_Card,
 
@@ -66,7 +66,7 @@ namespace SheepQQBot3.Model.Enums
         Channel_Destroyed,
 
         /// <summary>
-        ///
+        /// 群员增加事件
         /// </summary>
         Group_Increase,
 
