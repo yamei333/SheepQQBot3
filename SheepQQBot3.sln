@@ -13,7 +13,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.SDK.Client", "S
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.UnitTest", "SheepQQBot3.UnitTest\SheepQQBot3.UnitTest.csproj", "{6322EA74-15E7-489E-8B45-541A6D10D360}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "SheepQQBot3", "SheepQQBot3\SheepQQBot3.csproj", "{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3", "SheepQQBot3\SheepQQBot3.csproj", "{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution

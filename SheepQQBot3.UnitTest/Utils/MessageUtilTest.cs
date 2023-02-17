@@ -1,8 +1,4 @@
-﻿using System.Text.Encodings.Web;
-using System.Text.Json;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Setu;
-using static SheepQQBot3.SDK.Client.MessageUtil;
+﻿using static SheepQQBot3.SDK.Client.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
 
@@ -19,32 +15,21 @@ public class MessageUtilTest
     [TestMethod]
     public void NormalTest()
     {
-        var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData
-        {
-            Group_Id = "11111",
-            Message = new List<Element>
-            {
-                new Element("text", new ElementBaseData("测试消息"))
-            }
-        }), new JsonSerializerOptions
-        {
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-        });
-
-        var zap =
-            "{\"error\":\"\",\"data\":[{\"pid\":92425813,\"p\":0,\"uid\":569672,\"title\":\"オリキャラ\",\"author\":\"ミルクセーキ\",\"r18\":false,\"width\":968,\"height\":1366,\"tags\":[\"R-18\",\"オリジナル\",\"原创\",\"下着\",\"内衣\",\"高品質パンツ\",\"高品质内裤\",\"おへそ\",\"肚脐\",\"ぱんつ\",\"胖次\",\"揉みしだきたい乳\",\"诱人把玩的乳房\"],\"ext\":\"jpg\",\"aiType\":0,\"uploadDate\":1630465202000,\"urls\":{\"small\":\"https://i.pixiv.re/c/540x540_70/img-master/img/2021/09/01/12/00/02/92425813_p0_master1200.jpg\",\"original\":\"https://i.pixiv.re/img-original/img/2021/09/01/12/00/02/92425813_p0.jpg\"}";
-        var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(zap);
-        ;
-        //var jsonData = JsonSerializer.Serialize(new TestClass
+        //var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData
         //{
-        //    Text1 = "text1",
+        //    Group_Id = "11111",
+        //    Message = new List<Element>
+        //    {
+        //        new Element("text", new ElementBaseData("测试消息"))
+        //    }
+        //}), new JsonSerializerOptions
+        //{
+        //    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
         //});
 
-        const int jsTimeStamp = 1610090450;
-        //var startTime = TimeZone.CurrentTimeZone.ToLocalTime(new DateTime(1970, 1, 1));
-        var startTime = new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset);
-        var dt = startTime.AddSeconds(jsTimeStamp);
-        ;
+        //var zap =
+        //    "{\"post_type\":\"notice\",\"notice_type\":\"notify\",\"time\":1676531224,\"self_id\":1366869256,\"sub_type\":\"honor\",\"group_id\":122187517,\"user_id\":252961222,\"honor_type\":\"talkative\"}";
+        //var setuResponse = JsonSerializer.Deserialize<ReceiveData>(zap);
 
         //var receiveJson = @"{""anonymous"":null,""font"":0,""group_id"":675106101,
         //    ""message"":""test for tlpmdm"",""message_id"":-1144564185,
@@ -55,6 +40,7 @@ public class MessageUtilTest
         //        },
         //    ""sub_type"":""normal"",""time"":1610090450,""user_id"":252961222}";
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
+
         ;
     }
 
@@ -151,7 +137,7 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementPoke()
     {
-        var element = ProcessCQAreaMessage("[CQ:poke,Type=126,id=2003]");
+        var element = ProcessCQAreaMessage("[CQ:poke,type=126,id=2003]");
         Assert.AreEqual("poke", element.Type);
         Assert.AreEqual("126", element.Data.Type);
         Assert.AreEqual("2003", element.Data.Id);
@@ -160,7 +146,7 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementAnonymous()
     {
-        var element = ProcessCQAreaMessage("[CQ:anonymous,Ignore=0]");
+        var element = ProcessCQAreaMessage("[CQ:anonymous,ignore=0]");
         Assert.AreEqual("anonymous", element.Type);
         Assert.AreEqual("0", element.Data.Ignore);
     }
@@ -168,7 +154,7 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementShare()
     {
-        var element = ProcessCQAreaMessage("[CQ:share,Url=http://baidu.com,Title=百度]");
+        var element = ProcessCQAreaMessage("[CQ:share,url=http://baidu.com,title=百度]");
         Assert.AreEqual("share", element.Type);
         Assert.AreEqual("http://baidu.com", element.Data.Url);
         Assert.AreEqual("百度", element.Data.Title);
@@ -177,12 +163,12 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementContact()
     {
-        var element = ProcessCQAreaMessage("[CQ:contact,Type=qq,id=10001000]");
+        var element = ProcessCQAreaMessage("[CQ:contact,type=qq,id=10001000]");
         Assert.AreEqual("contact", element.Type);
         Assert.AreEqual("qq", element.Data.Type);
         Assert.AreEqual("10001000", element.Data.Id);
 
-        element = ProcessCQAreaMessage("[CQ:contact,Type=group,id=100100]");
+        element = ProcessCQAreaMessage("[CQ:contact,type=group,id=100100]");
         Assert.AreEqual("contact", element.Type);
         Assert.AreEqual("group", element.Data.Type);
         Assert.AreEqual("100100", element.Data.Id);
@@ -191,7 +177,7 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementLocation()
     {
-        var element = ProcessCQAreaMessage("[CQ:location,Lat=39.8969426,Lon=116.3109099,Title=牌面,Content=马厩]");
+        var element = ProcessCQAreaMessage("[CQ:location,lat=39.8969426,lon=116.3109099,title=牌面,content=马厩]");
         Assert.AreEqual("location", element.Type);
         Assert.AreEqual("39.8969426", element.Data.Lat);
         Assert.AreEqual("116.3109099", element.Data.Lon);
@@ -202,12 +188,12 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementMusic()
     {
-        var element = ProcessCQAreaMessage("[CQ:music,Type=163,id=28949129]");
+        var element = ProcessCQAreaMessage("[CQ:music,type=163,id=28949129]");
         Assert.AreEqual("music", element.Type);
         Assert.AreEqual("163", element.Data.Type);
         Assert.AreEqual("28949129", element.Data.Id);
 
-        element = ProcessCQAreaMessage("[CQ:music,Type=custom,Url=http://baidu.com,Audio=http://baidu.com/1.mp3,Title=音乐标题]");
+        element = ProcessCQAreaMessage("[CQ:music,type=custom,Url=http://baidu.com,Audio=http://baidu.com/1.mp3,Title=音乐标题]");
         Assert.AreEqual("music", element.Type);
         Assert.AreEqual("custom", element.Data.Type);
         Assert.AreEqual("http://baidu.com", element.Data.Url);
@@ -226,28 +212,28 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementYM_Play()
     {
-        ProcessCQAreaMessage("[CQ:ym_play,File=D:/Code/C#/WPF/SheepSoft/SheepQQBot3/SheepQQBot3.UnitTest/bin/Debug/Se/miao.wav]");
+        ProcessCQAreaMessage("[CQ:ym_play,file=D:/Code/C#/WPF/SheepSoft/SheepQQBot3/SheepQQBot3.UnitTest/bin/Debug/Se/miao.wav]");
         // 测试听到声音
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementYM_Play3()
     {
-        ProcessCQAreaMessage("[CQ:ym_play3,File=D:/Code/C#/WPF/SheepSoft/SheepQQBot3/SheepQQBot3.UnitTest/bin/Debug/Se/miao.wav]");
+        ProcessCQAreaMessage("[CQ:ym_play3,file=D:/Code/C#/WPF/SheepSoft/SheepQQBot3/SheepQQBot3.UnitTest/bin/Debug/Se/miao.wav]");
         // 测试听到声音
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementYM_Play3_Short()
     {
-        ProcessCQAreaMessage("[CQ:ym_play3,File=Se/miao.wav]");
+        ProcessCQAreaMessage("[CQ:ym_play3,file=Se/miao.wav]");
         // 测试听到声音
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementJson()
     {
-        var element = ProcessCQAreaMessage("[CQ:xml,Data=<?xml version=\"1.0\" + " +
+        var element = ProcessCQAreaMessage("[CQ:xml,data=<?xml version=\"1.0\" + " +
                                            "encoding=\"utf-8\"?><msg templateID=\"12345\" action=\"web\" brief=\"RPG\" " +
                                            "serviceID=\"1\" Url=\"http://pcro.jp/\"><item layout=\"2\"><picture cover=\"\"/>" +
                                            "<Title>ぷちっとくろにくる</Title><summary>カワイイ</summary></item><source/></msg>,resid=1]");
@@ -257,7 +243,7 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementYM_ifnotidle()
     {
-        var element = ProcessCQAreaMessage("[CQ:ym_ifnotidle,Data=5000]");
+        var element = ProcessCQAreaMessage("[CQ:ym_ifnotidle,data=5000]");
         Assert.AreEqual("ym_ifnotidle", element.Type);
         Assert.AreEqual("5000", element.Data.Data);
     }

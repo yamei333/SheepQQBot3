@@ -86,18 +86,18 @@ namespace SheepQQBot3.View
                     var randNum = Rand.Next(0, 100000);
                     switch (randNum)
                     {
-                        case var n when n >= 30000 && n < 100000:
+                        case < 100000 and >= 30000:
                             canSendDate = dateNow.AddSeconds(sendDelay).AddSeconds(Rand.Next(-180, 300));
                             break;
-                        case var n when n >= 15000 && n < 30000:
+                        case < 30000 and >= 15000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被增加了");
                             canSendDate = dateNow.AddSeconds(Rand.Next(5, 15));
                             return true;
-                        case var n when n >= 300 && n < 15000:
+                        case < 15000 and >= 300:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被增加了");
                             canSendDate = dateNow.AddSeconds(Rand.Next(10, 30));
                             return true;
-                        case var n when n >= 0 && n < 300:
+                        case < 300 and >= 0:
                             canSendDate = dateNow.AddSeconds(sendDelay).AddSeconds(Rand.Next(-180, 300));
                             r18bonus = true;
                             break;
@@ -108,31 +108,31 @@ namespace SheepQQBot3.View
                     var randNum = Rand.Next(0, 100000);
                     switch (randNum)
                     {
-                        case var n when n >= 40000 && n < 100000:
+                        case < 100000 and >= 40000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被增加了");
                             canSendDate = canSendDate.AddSeconds(Rand.Next(10, 120));
                             return true;
-                        case var n when n >= 14000 && n < 40000:
+                        case < 40000 and >= 14000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被加倍了!");
                             canSendDate = canSendDate.AddSeconds(Rand.Next(10 * 2, 120 * 2));
                             return true;
-                        case var n when n >= 4900 && n < 14000:
+                        case < 14000 and >= 8900:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被超级加倍了!!");
                             canSendDate = canSendDate.AddSeconds(Rand.Next(10 * 4, 120 * 4));
                             return true;
-                        case var n when n >= 4900 && n < 14000:
+                        case < 8900 and >= 4000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被黄金加倍了!!!");
                             canSendDate = canSendDate.AddSeconds(Rand.Next(10 * 8, 120 * 8));
                             return true;
-                        case var n when n >= 2000 && n < 4900:
+                        case < 4900 and >= 2000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}的CD被白金加倍了!!!!");
                             canSendDate = canSendDate.AddSeconds(Rand.Next(10 * 16, 120 * 16));
                             return true;
-                        case var n when n >= 1000 && n < 2000:
+                        case < 2000 and >= 1000:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, 但运气好, {_setuKeyWords.Random()}的CD被缩短了!");
                             canSendDate = canSendDate.AddSeconds(-Rand.Next(180, 600));
                             return true;
-                        case var n when n >= 0 && n < 1000:
+                        case < 1000 and >= 0:
                             await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {_setuNo.Random()}{_setuSendLe.Random()}, 但运气好, {_setuKeyWords.Random()}的CD被超级缩短了!");
                             canSendDate = canSendDate.AddSeconds(-Rand.Next(300, 900));
                             return true;
