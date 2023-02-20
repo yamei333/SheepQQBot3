@@ -3,6 +3,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.Extension;
 using YameiLibrary;
 
 namespace SheepQQBot3.SDK.Client
@@ -12,10 +13,10 @@ namespace SheepQQBot3.SDK.Client
     /// </summary>
     public static class MessageUtil
     {
-        private static readonly Regex _regGetCQArea = new Regex(@"\[CQ:[a-z]+.*?\]", RegexOptions.Singleline);
-        private static readonly Regex _regGetCQCode = new Regex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline);
-        private static readonly Regex _regRemoveUrl = new Regex(@",Url=.+?(?=[,\]])");
-        private static readonly Regex _regRemoveSubType = new Regex(@",subType=.+?(?=[,\]])");
+        private static readonly Regex _regGetCQArea = RegexGenerator.GetCQArea();
+        private static readonly Regex _regGetCQCode = RegexGenerator.GetCQCode();
+        private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
+        private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
         public static List<Element> ProcessCQMessage(string message)
         {

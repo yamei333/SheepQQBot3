@@ -2,34 +2,45 @@
 using System.Windows;
 using System.Windows.Input;
 using SheepQQBot3.Enums;
+using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.View
 {
     /// <summary>
-    /// AddAlarmAideSubmitMemberDialog.xaml 的交互逻辑
+    /// AddNumberDialog.xaml 的交互逻辑
     /// </summary>
-    public partial class AddAlarmAideSubmitMemberDialog
-        : AddDialogWindowBase<AddAlarmAideSubmitMemberDialogViewModel>
+    public partial class AddNumberDialog
+        : AddDialogWindowBase<AddNumberDialogViewModel>
     {
-        private static readonly Regex _regex = new Regex("[^0-9]+");
+        private static readonly Regex _regex = RegexGenerator.Number();
+
         private static bool IsTextAllowed(string text) => !_regex.IsMatch(text);
 
-        public int AlarmAideMemberId { get; set; }
+        /// <summary>
+        /// 增加的数字内容
+        /// </summary>
+        public int AddNumber { get; set; }
 
-        public AddAlarmAideSubmitMemberDialog(Window owner, object menuItem, DialogMode mode)
+        /// <summary>
+        /// 界面的标题
+        /// </summary>
+        public string Title { private get; set; }
+
+        public AddNumberDialog(Window owner, object menuItem, DialogMode mode)
             : base(owner, menuItem, mode)
             => InitializeComponent();
 
         /// <inheritdoc />
         protected override void OnLoaded(object sender, RoutedEventArgs e)
         {
-            Vm.AlarmAideMemberId = AlarmAideMemberId;
+            Vm.AddNumber = AddNumber;
+            Vm.Title = Title;
             TxtContent.SelectAll();
         }
 
         private void OK_Click(object sender, RoutedEventArgs e)
         {
-            AlarmAideMemberId = Vm.AlarmAideMemberId;
+            AddNumber = Vm.AddNumber;
             DialogResult = true;
         }
 

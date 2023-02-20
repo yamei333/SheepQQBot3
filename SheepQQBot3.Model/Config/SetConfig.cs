@@ -13,6 +13,9 @@ namespace SheepQQBot3.Model.Config
     [MessagePackObject]
     public class SetConfig
     {
+        /// <summary>
+        /// 默认BotFunction
+        /// </summary>
         [JsonIgnore]
         public static readonly List<BotFunction> DefaultBotFunctions = Enum.GetNames(typeof(BotFunctionType))
             .Select(each => new BotFunction((BotFunctionType)Enum.Parse(typeof(BotFunctionType), each), false))
@@ -61,6 +64,12 @@ namespace SheepQQBot3.Model.Config
         /// </summary>
         [Key(nameof(AlarmAideSubmitMemberIds))]
         public HashSet<long> AlarmAideSubmitMemberIds { get; set; }
+
+        /// <summary>
+        /// 黑名单ID配置
+        /// </summary>
+        [Key(nameof(BlackListIds))]
+        public HashSet<long> BlackListIds { get; set; }
 
         /// <summary>
         /// 基金播报配置
@@ -150,6 +159,7 @@ namespace SheepQQBot3.Model.Config
             FundLimitObservedList = new Dictionary<Guid, DateTime>();
             CustomGroupAlarms = new Dictionary<Guid, CustomGroupAlarm>();
             RepeaterKillerConfigs = new Dictionary<Guid, RepeaterKillerConfig>();
+            InitBotFunctionIsEnabled();
 #if (!debug)
 #else
             //AlarmAideConfigs = new List<AlarmAideConfig>()
@@ -174,6 +184,15 @@ namespace SheepQQBot3.Model.Config
             //    }
             //};
 #endif
+        }
+
+        /// <summary>
+        /// 初始化BotFuntion可用状态
+        /// </summary>
+        internal void InitBotFunctionIsEnabled()
+        {
+            var allowFunctions = TargetType.GetAllowFunctions();
+            BotFunctions.ForEach(each => each.IsEnabled = allowFunctions.Contains(each.BotFunctionType));
         }
 
         /// <summary>

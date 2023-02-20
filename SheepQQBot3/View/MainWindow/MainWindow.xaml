@@ -126,13 +126,15 @@
                     <ListBox x:Name="UsedFunctionList"
                              Grid.Row="1"
                              Grid.Column="1"
-                             ItemsSource="{Binding SelectedSetBotFunctions}">
+                             ItemsSource="{Binding SelectedSetBotFunctions.Values}">
                         <ListBox.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Horizontal">
                                     <CheckBox VerticalAlignment="Center"
                                               Checked="BotFunctionCheckBox_CheckedChange"
                                               IsChecked="{Binding IsUsed}"
+                                              IsEnabled="{Binding IsEnabled,
+                                                                  Mode=OneWay}"
                                               IsTabStop="False"
                                               Unchecked="BotFunctionCheckBox_CheckedChange" />
                                     <TextBlock Padding="5,0,0,0"
@@ -144,14 +146,17 @@
                     </ListBox>
                 </Grid>
                 <TabControl x:Name="TabBotFunctions"
-                            Grid.Column="2">
-                    <TabItem Header="闹钟助手">
-                        <local:MainWindowAlarmAide x:Name="MainWindowAlarmAideTab" />
+                            Grid.Column="2"
+                            Visibility="{Binding IsTabVisible,
+                                                 Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TabItem Header="闹钟助手"
+                             Visibility="{Binding Path=SelectedSetBotFunctions[0].IsUsed,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowAlarmAide />
                     </TabItem>
-                    <TabItem x:Name="TabGroup_RepeaterKiller"
-                             Header="复读机杀手"
+                    <TabItem Header="复读机杀手"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleGroupRepeaterKiller,
+                             Visibility="{Binding Path=SelectedSetBotFunctions[2000].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowRepeaterKiller />
                     </TabItem>
@@ -164,17 +169,21 @@
                             <Label Content="zap2" />
                         </Grid>
                     </TabItem>-->
-                    <TabItem x:Name="TabGroup_AlarmAideSubmit"
-                             Header="闹钟助手投稿"
+                    <TabItem Header="闹钟助手投稿"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleAlarmAideSubmit,
+                             Visibility="{Binding Path=SelectedSetBotFunctions[1].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowAlarmAideSubmit />
                     </TabItem>
-                    <TabItem x:Name="TabGroup_FundHelper"
-                             Header="基金助手"
+                    <TabItem Header="黑名单"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding IsVisibleFundHelper,
+                             Visibility="{Binding Path=SelectedSetBotFunctions[2].IsUsed,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowBlackList />
+                    </TabItem>
+                    <TabItem Header="基金助手"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding Path=SelectedSetBotFunctions[2003].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowFundHelper />
                     </TabItem>

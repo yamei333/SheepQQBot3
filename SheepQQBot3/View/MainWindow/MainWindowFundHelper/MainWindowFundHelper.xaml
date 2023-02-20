@@ -13,7 +13,8 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.Resources>
-            <Style x:Key="AlarmAideTextBlockStyle" TargetType="TextBlock">
+            <Style x:Key="AlarmAideTextBlockStyle"
+                   TargetType="TextBlock">
                 <Setter Property="FontSize" Value="14" />
             </Style>
         </Grid.Resources>
@@ -37,26 +38,31 @@
                       SelectedItem="{Binding SelectedFundAlarmConfig}">
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="FundAlarmConfigList_OnAdd" Header="新增" />
+                        <MenuItem Click="FundAlarmConfigList_OnAdd"
+                                  Header="新增" />
                         <MenuItem Click="FundAlarmConfigList_OnEdit"
                                   Header="修改"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
                         <MenuItem Click="FundAlarmConfigList_OnDelete"
                                   Header="删除"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
-                        <MenuItem Click="FundAlarmConfigList_OnTest" Header="测试发送" />
+                        <MenuItem Click="FundAlarmConfigList_OnTest"
+                                  Header="测试发送" />
                     </ContextMenu>
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                        <GridViewColumn Width="70" Header="名称">
+                        <GridViewColumn Width="70"
+                                        Header="名称">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding AlarmName}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="194" Header="时间条件">
+                        <GridViewColumn Width="194"
+                                        Header="时间条件">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
@@ -73,7 +79,8 @@
                 </ListView.View>
             </ListView>
         </GroupBox>
-        <GroupBox Grid.Row="0" Grid.Column="1">
+        <GroupBox Grid.Row="0"
+                  Grid.Column="1">
             <GroupBox.Header>
                 <TextBlock Text="基金阈值观测时间设置" />
             </GroupBox.Header>
@@ -84,26 +91,31 @@
                       SelectedItem="{Binding SelectedFundLimitObserveConfig}">
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="FundLimitObserveConfigList_OnAdd" Header="新增" />
+                        <MenuItem Click="FundLimitObserveConfigList_OnAdd"
+                                  Header="新增" />
                         <MenuItem Click="FundLimitObserveConfigList_OnEdit"
                                   Header="修改"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
                         <MenuItem Click="FundLimitObserveConfigList_OnDelete"
                                   Header="删除"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
-                        <MenuItem Click="FundLimitObserveConfigList_OnTest" Header="测试发送" />
+                        <MenuItem Click="FundLimitObserveConfigList_OnTest"
+                                  Header="测试发送" />
                     </ContextMenu>
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                        <GridViewColumn Width="70" Header="名称">
+                        <GridViewColumn Width="70"
+                                        Header="名称">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding LimitObserveName}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding LimitObserveName}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="194" Header="时间条件">
+                        <GridViewColumn Width="194"
+                                        Header="时间条件">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
@@ -120,7 +132,8 @@
                 </ListView.View>
             </ListView>
         </GroupBox>
-        <GroupBox Grid.Row="1" Grid.Column="0">
+        <GroupBox Grid.Row="1"
+                  Grid.Column="0">
             <GroupBox.Header>
                 <TextBlock Text="基金播报设置" />
             </GroupBox.Header>
@@ -131,7 +144,8 @@
                       SelectedItem="{Binding SelectedAlarmFundConfig}">
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="AlarmFundConfigList_OnAdd" Header="新增" />
+                        <MenuItem Click="AlarmFundConfigList_OnAdd"
+                                  Header="新增" />
                         <MenuItem Click="AlarmFundConfigList_OnEdit"
                                   Header="修改"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
@@ -142,17 +156,21 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                        <GridViewColumn Width="88" Header="基金编号">
+                        <GridViewColumn Width="88"
+                                        Header="基金编号">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding Value.FundId}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding Value.FundId}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="158" Header="备注">
+                        <GridViewColumn Width="158"
+                                        Header="备注">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding Value.FundRemark}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding Value.FundRemark}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
@@ -163,7 +181,8 @@
                 </ListView.View>
             </ListView>
         </GroupBox>
-        <GroupBox Grid.Row="1" Grid.Column="1">
+        <GroupBox Grid.Row="1"
+                  Grid.Column="1">
             <GroupBox.Header>
                 <TextBlock Text="基金阈值观测设置" />
             </GroupBox.Header>
@@ -174,7 +193,8 @@
                       SelectedItem="{Binding SelectedLimitObserveFundConfig}">
                 <ListView.ContextMenu>
                     <ContextMenu>
-                        <MenuItem Click="LimitObserveFundConfigList_OnAdd" Header="新增" />
+                        <MenuItem Click="LimitObserveFundConfigList_OnAdd"
+                                  Header="新增" />
                         <MenuItem Click="LimitObserveFundConfigList_OnEdit"
                                   Header="修改"
                                   Style="{StaticResource EditDeleteMenuItemStyle}" />
@@ -185,24 +205,30 @@
                 </ListView.ContextMenu>
                 <ListView.View>
                     <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                        <GridViewColumn Width="88" Header="基金编号">
+                        <GridViewColumn Width="88"
+                                        Header="基金编号">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding Value.FundId}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding Value.FundId}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="88" Header="阈值类型">
+                        <GridViewColumn Width="88"
+                                        Header="阈值类型">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding Value.FundObserveTypeString}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding Value.FundObserveTypeString}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="68" Header="阈值">
+                        <GridViewColumn Width="68"
+                                        Header="阈值">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
-                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding Value.AlertLimitString}" />
+                                    <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                               Text="{Binding Value.AlertLimitString}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>

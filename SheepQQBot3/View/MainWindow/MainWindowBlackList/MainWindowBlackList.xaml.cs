@@ -3,50 +3,50 @@ using System.Windows;
 using System.Windows.Controls;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
+using Yamei.Common;
 
 namespace SheepQQBot3.View
 {
     /// <summary>
-    /// MainWindowAlarmAideSubmit.xaml 的交互逻辑
+    /// MainWindowBlackList.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindowAlarmAideSubmit : UserControl
+    public partial class MainWindowBlackList : UserControl
     {
-        private static MainWindowAlarmAideSubmitViewModel _vm => PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
+        private static MainWindowBlackListViewModel _vm => PublicVar.Vm.MainWindowBlackListViewModel;
 
-        public MainWindowAlarmAideSubmit()
+        public MainWindowBlackList()
         {
             InitializeComponent();
         }
 
-        private void MainWindowAlarmAideSubmit_OnLoaded(object sender, RoutedEventArgs e)
+        private void MainWindowBlackList_OnLoaded(object sender, RoutedEventArgs e)
         {
-            DataContext = PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
+            DataContext = PublicVar.Vm.MainWindowBlackListViewModel;
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         }
 
         /// <summary>
-        /// 闹钟助手投稿配置内容列表-新增
+        /// 黑名单-新增
         /// </summary>
-        private void AlarmAideSubmitMemberList_OnAdd(object sender, RoutedEventArgs e)
+        private void BlackList_OnAdd(object sender, RoutedEventArgs e)
         {
             var alarmAideSubmitMemberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add);
             if (alarmAideSubmitMemberDialog.ShowDialog() != true)
                 return;
 
             var alarmAideMemberId = alarmAideSubmitMemberDialog.AddNumber;
-            var alarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds;
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = alarmAideSubmitMemberIds == null
-                ? new HashSet<long> { alarmAideMemberId }
-                : new HashSet<long>(alarmAideSubmitMemberIds) { alarmAideMemberId };
+            _vm.SelectedSetConfig.BlackListIds = _vm.SelectedSetConfig.BlackListIds
+                .CopyAdd(alarmAideMemberId);
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
+
             _vm.SelectedMemberId = alarmAideMemberId;
             ConfigExtensions.SaveConfig();
         }
 
         /// <summary>
-        /// 闹钟助手投稿配置内容列表-删除
+        /// 黑名单-删除
         /// </summary>
-        private void AlarmAideSubmitMemberList_OnDelete(object sender, RoutedEventArgs e)
+        private void BlackList_OnDelete(object sender, RoutedEventArgs e)
         {
             if (!MainWindowUtil.ShowDeleteDialog())
                 return;
