@@ -25,7 +25,9 @@ namespace SheepQQBot3.Extensions
         {
             if (!File.Exists(ConfigPath))
             {
-                Vm.SetConfigs = new BotConfig().SetConfigs;
+                var botConfig = new BotConfig();
+                botConfig.InitBotFunctionIsEnabled();
+                Vm.SetConfigs = botConfig.SetConfigs;
                 Vm.IsLoadComplete = true;
                 return;
             }
@@ -64,6 +66,7 @@ namespace SheepQQBot3.Extensions
                             .ForEach(eachBotFunction => botFunctions.Add(eachBotFunction));
                     }
                 });
+                botConfig.InitBotFunctionIsEnabled();
 
                 PrepareData(botConfig);
 

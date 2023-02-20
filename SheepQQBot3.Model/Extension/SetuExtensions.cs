@@ -53,7 +53,7 @@ namespace SheepQQBot3.Model.Extension
                 setuData.Urls.Small.Replace(PixivReSource, PixivReTarget));
         }
 
-        private static readonly Regex RegGetImageId_Rainchan = new Regex(@"(?<=id=)\d+");
+        private static readonly Regex _regGetImageId_Rainchan = RegexGenerator.GetImageId_RainChan();
 
         public static async Task<SetuInfo> GetSetu_Rainchan()
         {
@@ -63,7 +63,7 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var httpResponse = await HttpExtensions.HttpGetAsync(@"https://pximg.rainchan.win/img");
-                imageId = RegGetImageId_Rainchan.Match(httpResponse.RequestMessage.RequestUri.OriginalString).Value;
+                imageId = _regGetImageId_Rainchan.Match(httpResponse.RequestMessage.RequestUri.OriginalString).Value;
                 setuJsonText = await HttpExtensions.HttpGetStringAsync(@$"https://pximg.rainchan.win/imginfo?img_id={imageId}");
                 setuData = JsonSerializer.Deserialize<SetuData_Rainchan>(setuJsonText);
             }

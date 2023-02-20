@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Extension;
 using Yamei.Common;
 using static SheepQQBot3.View.PublicVar;
 
@@ -17,8 +18,8 @@ namespace SheepQQBot3.View
         /// </summary>
         private const string COMMAND_ALARMAIDE_SUBMIT_LIBRARY = "#TG#";
 
-        private static readonly Regex _regRemoveUrl = new Regex(@",url=.+?(?=[,\]])");
-        private static readonly Regex _regRemoveSubType = new Regex(@",subType=.+?(?=[,\]])");
+        private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
+        private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
         /// <summary>
         /// 闹钟助手投稿

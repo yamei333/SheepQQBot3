@@ -24,6 +24,12 @@ namespace SheepQQBot3.Model.Config
         public bool IsUsed { get; set; }
 
         /// <summary>
+        /// 是否允许使用
+        /// </summary>
+        [IgnoreMember]
+        public bool IsEnabled { get; set; }
+
+        /// <summary>
         /// 初始化
         /// </summary>
         public BotFunction(BotFunctionType botFunctionType, bool isUsed)

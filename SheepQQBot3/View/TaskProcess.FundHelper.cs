@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -13,21 +12,6 @@ namespace SheepQQBot3.View
 {
     public static partial class TaskProcess
     {
-        /// <summary>
-        /// 基金播报时间1 (早间)
-        /// </summary>
-        private static readonly Regex _regFundAlarm1Time = new Regex(@"\d{4}-\d{2}-\d{2}-\d{1} 10:00:\d{2}");
-
-        /// <summary>
-        /// 基金播报时间2 (收盘)
-        /// </summary>
-        private static readonly Regex _regFundAlarm2Time = new Regex(@"\d{4}-\d{2}-\d{2}-\d{1} 14:45:\d{2}");
-
-        /// <summary>
-        /// 基金阈值观察时间
-        /// </summary>
-        private static readonly Regex _regFundLimitTime = new Regex(@"\d{4}-\d{2}-\d{2}-\d{1} 14:30:\d{2}");
-
         /// <summary>
         /// 基金助手 (播报/阈值监控)
         /// </summary>

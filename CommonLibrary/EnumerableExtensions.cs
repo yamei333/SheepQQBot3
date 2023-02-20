@@ -384,31 +384,23 @@ namespace Yamei.Common
         /// <summary>
         /// ForEach方法<see cref="MatchCollection"/>的扩展。
         /// </summary>
-        /// <typeparam name="T">各要素の型</typeparam>
-        /// <param name="enumerable">対象の配列</param>
-        /// <param name="toAction">要素に対して実行するアクション</param>
         [DebuggerStepThrough]
         public static void ForEach(this MatchCollection enumerable, Action<Match> toAction)
         {
-            foreach (Match each in enumerable)
-                toAction(each);
+            foreach (var each in enumerable)
+                toAction((Match)each);
         }
 
         /// <summary>
         /// インデックス付イテレートメソッドです。各要素に対して<paramref name="toAction"/>を実行します。
         /// インデックスを利用したい場合に利用してください。
         /// </summary>
-        /// <typeparam name="T">各要素の型</typeparam>
-        /// <param name="enumerable">対象の<see cref="IEnumerable{T}"/></param>
-        /// <param name="toAction">要素に対して実行するアクション。<c>int</c>パラメーターはアクセスインデックス</param>
         [DebuggerStepThrough]
         public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T, int> toAction)
         {
-            int i = 0;
-            foreach (T each in enumerable)
-            {
+            var i = 0;
+            foreach (var each in enumerable)
                 toAction(each, i++);
-            }
         }
 
         /// <summary>
@@ -1159,6 +1151,23 @@ namespace Yamei.Common
             enumerable ??= new ConcurrentDictionary<TKey, TValue>();
             enumerable.TryAdd(addItemKey, addItemValue);
             return new ConcurrentDictionary<TKey, TValue>(enumerable);
+        }
+
+        /// <summary>
+        /// <see cref="HashSet{T}"/>复制后增加新项目
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="hashSet">对象<see cref="HashSet{T}"/></param>
+        /// <param name="addItem">增加的项目</param>
+        [DebuggerStepThrough]
+        public static HashSet<T> CopyAdd<T>(
+            this HashSet<T> hashSet,
+            T addItem)
+            where T : unmanaged
+        {
+            return hashSet == null
+                ? new HashSet<T> { addItem }
+                : new HashSet<T>(hashSet) { addItem };
         }
 
         /// <summary>

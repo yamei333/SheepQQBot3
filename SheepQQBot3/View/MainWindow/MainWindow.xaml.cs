@@ -5,7 +5,6 @@ using System.IO;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -25,14 +24,14 @@ namespace SheepQQBot3.View
     /// </summary>
     public partial class MainWindow : Window
     {
-        private readonly BotFunction[] DefaultBotFunctions;
+        //private readonly BotFunction[] DefaultBotFunctions;
 
         public MainWindow()
         {
             BotExtensions.KillGocqexe();
-            DefaultBotFunctions = Enum.GetNames(typeof(BotFunctionType))
-                .Select(each => new BotFunction((BotFunctionType)Enum.Parse(typeof(BotFunctionType), each), false))
-                .ToArray();
+            //DefaultBotFunctions = Enum.GetNames(typeof(BotFunctionType))
+            //    .Select(each => new BotFunction((BotFunctionType)Enum.Parse(typeof(BotFunctionType), each), false))
+            //    .ToArray();
             InitializeComponent();
         }
 
@@ -60,7 +59,7 @@ namespace SheepQQBot3.View
                     File.WriteAllLines(holidayInfoPath, new[] { holidayInfoJson }, Encoding.UTF8);
                 }
 
-                var regHolidayInfo = new Regex(@"(?<=""\d{2}-\d{2}"":){.+?}");
+                var regHolidayInfo = RegexGenerator.HolidayInfo();
                 var holidayInfo = new Dictionary<string, bool>();
                 regHolidayInfo.Matches(holidayInfoJson).ForEach(each =>
                 {
@@ -93,11 +92,12 @@ namespace SheepQQBot3.View
             vm.SelectedSetBotFunctions = selectionSetConfig.BotFunctions.Select(each => each.Value).ToArray();*/
             if (Vm.SelectedSetConfig == null)
             {
-                Vm.SelectedSetBotFunctions = new List<BotFunction>();
+                Vm.SelectedSetBotFunctions = new Dictionary<BotFunctionType, BotFunction>();
             }
             else
             {
-                Vm.SelectedSetBotFunctions = Vm.SelectedSetConfig.BotFunctions;
+                Vm.SelectedSetBotFunctions = Vm.SelectedSetConfig.BotFunctions
+                    .ToDictionary(each => each.BotFunctionType, each => each);
             }
 
             /*
@@ -108,9 +108,8 @@ namespace SheepQQBot3.View
 
         private void BotFunctionCheckBox_CheckedChange(object sender, RoutedEventArgs e)
         {
-            Vm.IsVisibleTabPages = Vm.SelectedSetBotFunctions
-                .ToDictionary(each => each.BotFunctionType, each => each.IsUsed);
             ConfigExtensions.SaveConfig();
+            Vm.OnPropertyChanged(nameof(Vm.IsTabVisible));
 
             /*
             var selectionSetConfig = vm.SelectionSetConfig;

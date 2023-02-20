@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Collections.Generic;
+
+namespace SheepQQBot3.Model.Enums
 {
     /// <summary>
     /// 配置目标类型
@@ -23,17 +25,34 @@
 
     public static class TargetTypeExtensions
     {
-        public static BotFunctionType[] GetAllowFunctions(this BotConfigTargetType botConfigTargetType)
+        /// <summary>
+        /// 获得各种类型允许使用功能
+        /// </summary>
+        /// <param name="botConfigTargetType"><see cref="BotConfigTargetType"/></param>
+        /// <returns>允许使用功能</returns>
+        public static HashSet<BotFunctionType> GetAllowFunctions(this BotConfigTargetType botConfigTargetType)
         {
             return botConfigTargetType switch
             {
-                BotConfigTargetType.Common => new[] { BotFunctionType.Common_AlarmAide },
-                BotConfigTargetType.Group => new[]
+                BotConfigTargetType.Common => new HashSet<BotFunctionType>
                 {
-                    BotFunctionType.Group_CustomGroupAlarm, BotFunctionType.Group_RepeaterKiller,
-                    BotFunctionType.Common_AlarmAideSubmit
+                    BotFunctionType.Common_AlarmAide
                 },
-                BotConfigTargetType.Private => new[] { BotFunctionType.Private_AdminConfig },
+                BotConfigTargetType.Group => new HashSet<BotFunctionType>
+                {
+                    BotFunctionType.Common_AlarmAide,
+                    BotFunctionType.Common_AlarmAideSubmit,
+                    BotFunctionType.Common_BlackList,
+                    BotFunctionType.Group_CustomGroupAlarm,
+                    BotFunctionType.Group_RepeatRevokeMessage,
+                    BotFunctionType.Group_FundHelper,
+                    BotFunctionType.Group_RandomSetu,
+                    BotFunctionType.Group_RepeaterKiller,
+                },
+                BotConfigTargetType.Private => new HashSet<BotFunctionType>
+                {
+                    BotFunctionType.Private_AdminConfig
+                },
                 _ => null
             };
         }

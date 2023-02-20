@@ -18,8 +18,7 @@ namespace SheepQQBot3.View
         /// <inheritdoc/>
         public event PropertyChangedEventHandler PropertyChanged;
 
-        private List<BotFunction> _selectedSetBotFunctions;
-        private Dictionary<BotFunctionType, bool> _isVisibleTabPages;
+        private Dictionary<BotFunctionType, BotFunction> _selectedSetBotFunctions;
 
         /// <summary>
         /// 是否读取完成
@@ -83,6 +82,7 @@ namespace SheepQQBot3.View
             MainWindowAlarmAideSubmitViewModel = new MainWindowAlarmAideSubmitViewModel();
             MainWindowFundHelperViewModel = new MainWindowFundHelperViewModel();
             MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
+            MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
         }
 
         public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -90,6 +90,7 @@ namespace SheepQQBot3.View
         public MainWindowAlarmAideSubmitViewModel MainWindowAlarmAideSubmitViewModel { get; set; }
         public MainWindowFundHelperViewModel MainWindowFundHelperViewModel { get; set; }
         public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
+        public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
 
         public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 
@@ -142,49 +143,32 @@ namespace SheepQQBot3.View
             }
         }
 
-        public bool IsVisibleAlarmAideSubmit => GetTabVisible(BotFunctionType.Common_AlarmAideSubmit);
-
-        public bool IsVisibleFundHelper => GetTabVisible(BotFunctionType.Group_FundHelper);
-
-        public bool IsVisibleGroupGroupAlarm => GetTabVisible(BotFunctionType.Group_CustomGroupAlarm);
-
-        public bool IsVisibleGroupRepeaterKiller => GetTabVisible(BotFunctionType.Group_RepeaterKiller);
-
-        public Dictionary<BotFunctionType, bool> IsVisibleTabPages
-        {
-            get => _isVisibleTabPages;
-            set
-            {
-                _isVisibleTabPages = value;
-                OnPropertyChanged(nameof(IsVisibleGroupRepeaterKiller));
-                OnPropertyChanged(nameof(IsVisibleGroupGroupAlarm));
-                OnPropertyChanged(nameof(IsVisibleAlarmAideSubmit));
-                OnPropertyChanged(nameof(IsVisibleFundHelper));
-            }
-        }
-
         /// <summary>
         /// 选中群的功能配置
         /// </summary>
-        public List<BotFunction> SelectedSetBotFunctions
+        public Dictionary<BotFunctionType, BotFunction> SelectedSetBotFunctions
         {
             get => _selectedSetBotFunctions;
             set
             {
                 _selectedSetBotFunctions = value;
-                IsVisibleTabPages = _selectedSetBotFunctions
-                    .ToDictionary(each => each.BotFunctionType, each => each.IsUsed);
                 OnPropertyChanged(nameof(SelectedSetBotFunctions));
+                OnPropertyChanged(nameof(IsTabVisible));
             }
         }
 
-        private bool GetTabVisible(BotFunctionType botFunctionType)
+        /// <summary>
+        /// 是否有任意Tab页在显示中
+        /// </summary>
+        public bool IsTabVisible
         {
-            var isVisibleTabPages = IsVisibleTabPages;
-            if (isVisibleTabPages?.Any() == true)
-                return isVisibleTabPages[botFunctionType] == true;
-
-            return false;
+            get
+            {
+                var tabFunctions = BotFunctionTypeExtensions.GetTabFunctions();
+                return SelectedSetBotFunctions?.Values
+                    .Where(each => tabFunctions.Contains(each.BotFunctionType))
+                    .Any(each => each.IsUsed) == true;
+            }
         }
     }
 }

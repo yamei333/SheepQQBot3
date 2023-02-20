@@ -1,9 +1,12 @@
-﻿namespace SheepQQBot3.Model.Enums
+﻿using System.Collections.Generic;
+
+namespace SheepQQBot3.Model.Enums
 {
     public enum BotFunctionType
     {
         Common_AlarmAide = 0,
         Common_AlarmAideSubmit = 1,
+        Common_BlackList = 2,
         Private_AdminConfig = 1000,
         Group_RepeaterKiller = 2000,
         Group_CustomGroupAlarm = 2001,
@@ -20,6 +23,7 @@
             {
                 BotFunctionType.Common_AlarmAide => "闹钟助手",
                 BotFunctionType.Common_AlarmAideSubmit => "闹钟助手投稿",
+                BotFunctionType.Common_BlackList => "黑名单",
                 BotFunctionType.Private_AdminConfig => "私聊配置",
                 BotFunctionType.Group_RepeaterKiller => "复读机杀手",
                 BotFunctionType.Group_CustomGroupAlarm => "群提醒",
@@ -29,5 +33,15 @@
                 _ => throw new System.NotImplementedException()
             };
         }
+
+        public static HashSet<BotFunctionType> GetTabFunctions()
+            => new()
+            {
+                BotFunctionType.Common_AlarmAide,
+                BotFunctionType.Common_AlarmAideSubmit,
+                BotFunctionType.Common_BlackList,
+                BotFunctionType.Group_RepeaterKiller,
+                BotFunctionType.Group_FundHelper,
+            };
     }
 }
