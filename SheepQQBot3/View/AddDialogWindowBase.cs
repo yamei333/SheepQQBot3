@@ -13,7 +13,7 @@ public class AddDialogWindowBase<T> : Window
     protected DialogMode Mode { get; set; }
     protected T Vm;
 
-    public AddDialogWindowBase(Window owner, object menuItem, DialogMode mode)
+    public AddDialogWindowBase(Window owner, object menuItem, DialogMode mode, string title = "")
     {
         // MEMO : 设置Window的Style
         var resourceDictionary = new ResourceDictionary
@@ -34,7 +34,7 @@ public class AddDialogWindowBase<T> : Window
         // MEMO : Load时设置标题
         Loaded += (sender, args) =>
         {
-            Title = $"{GetMenuHeader(menuItem)}{Title}";
+            Title = $"{GetMenuHeader(menuItem)}{title}";
             OnLoaded(sender, args);
             MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
         };

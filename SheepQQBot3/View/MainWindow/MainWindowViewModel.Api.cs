@@ -82,11 +82,19 @@ namespace SheepQQBot3.View
                 GetSelectedConfigs(BotFunctionType.Group_CustomGroupAlarm, groupId)
                     .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
                 GetSelectedConfigs(BotFunctionType.Common_AlarmAideSubmit, groupId)
-                    .ForEach(each => StartTask(() => ProcessGroupMessage.AlarmAideSubmit(each.AlarmAideConfigs, each.AlarmAideSubmitMemberIds, groupMessage)));
+                    .ForEach(each =>
+                    {
+                        StartTask(AlarmAideSubmit);
+                        async void AlarmAideSubmit() => await ProcessGroupMessage.AlarmAideSubmit(each.AlarmAideConfigs, each.AlarmAideSubmitMemberIds, groupMessage);
+                    });
                 GetSelectedConfigs(BotFunctionType.Group_FundHelper, groupId)
                     .ForEach(each => StartTask(() => ProcessGroupMessage.FundHelper(groupMessage)));
                 GetSelectedConfigs(BotFunctionType.Group_RandomSetu, groupId)
-                    .ForEach(each => StartTask(async () => await ProcessGroupMessage.RandomSetu(groupMessage)));
+                    .ForEach(each =>
+                    {
+                        StartTask(RandomSetu);
+                        async void RandomSetu() => await ProcessGroupMessage.RandomSetu(groupMessage).ConfigureAwait(false);
+                    });
                 GetSelectedConfigs(BotFunctionType.Group_RepeaterKiller, groupId)
                     .ForEach(each => StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage)));
 

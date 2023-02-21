@@ -4,7 +4,6 @@
                            xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
                            xmlns:local="clr-namespace:SheepQQBot3.View"
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-                           Title="{Binding Title}"
                            Width="300"
                            Height="108"
                            x:TypeArguments="local:AddNumberDialogViewModel"
@@ -40,10 +39,11 @@
                  VerticalContentAlignment="Center"
                  AcceptsReturn="True"
                  KeyDown="OnCtrlEnter"
-                 MaxLength="12"
+                 MaxLength="10"
                  PreviewTextInput="TxtContent_OnPreviewTextInput"
                  Style="{StaticResource HintTextStyle}"
-                 Text="{Binding AlarmAideMemberId}"
+                 Text="{Binding AddNumber,
+                                UpdateSourceTrigger=PropertyChanged}"
                  TextWrapping="NoWrap" />
         <Grid Grid.Row="1"
               Grid.Column="0"

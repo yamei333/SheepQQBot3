@@ -19,22 +19,16 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 增加的数字内容
         /// </summary>
-        public int AddNumber { get; set; }
+        public int? AddNumber { get; set; }
 
-        /// <summary>
-        /// 界面的标题
-        /// </summary>
-        public string Title { private get; set; }
-
-        public AddNumberDialog(Window owner, object menuItem, DialogMode mode)
-            : base(owner, menuItem, mode)
+        public AddNumberDialog(Window owner, object menuItem, DialogMode mode, string title)
+            : base(owner, menuItem, mode, title)
             => InitializeComponent();
 
         /// <inheritdoc />
         protected override void OnLoaded(object sender, RoutedEventArgs e)
         {
             Vm.AddNumber = AddNumber;
-            Vm.Title = Title;
             TxtContent.SelectAll();
         }
 

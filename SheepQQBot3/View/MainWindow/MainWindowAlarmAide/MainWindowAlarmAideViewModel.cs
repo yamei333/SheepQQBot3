@@ -1,31 +1,10 @@
-﻿using System;
-using System.Collections.Generic;
-using System.ComponentModel;
+﻿using System.Collections.Generic;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Client;
 
 namespace SheepQQBot3.View
 {
-    public partial class MainWindowAlarmAideViewModel : INotifyPropertyChanged
+    public partial class MainWindowAlarmAideViewModel : MainWindowViewModelBase
     {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private AlarmAideConfig _selectedAlarmAideConfig;
-
-        private static MainWindowViewModel _mainVm => PublicVar.Vm;
-
-        /// <summary>
-        /// 值变化时调用, 用于通知界面
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public Dictionary<Guid, SetConfig> SetConfigs => _mainVm.SetConfigs;
-        public SetConfig SelectedSetConfig => _mainVm.SelectedSetConfig;
-        public CQAPI Api => _mainVm.CqApi;
-
         /// <summary>
         /// 初始化
         /// </summary>
@@ -33,6 +12,7 @@ namespace SheepQQBot3.View
         {
         }
 
+        private AlarmAideConfig _selectedAlarmAideConfig;
         public AlarmAideConfig SelectedAlarmAideConfig
         {
             get => _selectedAlarmAideConfig;

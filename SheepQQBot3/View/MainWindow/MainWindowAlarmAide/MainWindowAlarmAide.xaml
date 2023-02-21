@@ -28,7 +28,8 @@
                   ItemsSource="{Binding SelectedSetConfig.AlarmAideConfigs.Values}"
                   MouseDoubleClick="AlarmAideList_MouseDoubleClick"
                   ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                  SelectedItem="{Binding SelectedAlarmAideConfig}">
+                  SelectedItem="{Binding SelectedAlarmAideConfig}"
+                  SelectionMode="Single">
             <ListView.ContextMenu>
                 <ContextMenu>
                     <MenuItem Click="AlarmAideList_OnGetGuid"

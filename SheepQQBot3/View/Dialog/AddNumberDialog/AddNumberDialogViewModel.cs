@@ -1,35 +1,26 @@
-﻿using System.ComponentModel;
-
-namespace SheepQQBot3.View
+﻿namespace SheepQQBot3.View
 {
-    public class AddAlarmAideSubmitMemberDialogViewModel : INotifyPropertyChanged
+    public class AddNumberDialogViewModel : NotifyPropertyChangedBase
     {
-        public int _alarmAideMemberId;
-
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public AddAlarmAideSubmitMemberDialogViewModel()
+        public AddNumberDialogViewModel()
         {
-            AlarmAideMemberId = 0;
+            AddNumber = null;
         }
 
+        private int? _addNumber;
         /// <summary>
-        /// 闹钟助手投稿成员ID
+        /// 新增的数字
         /// </summary>
-        public int AlarmAideMemberId
+        public int? AddNumber
         {
-            get => _alarmAideMemberId;
+            get => _addNumber;
             set
             {
-                if (_alarmAideMemberId == value)
+                if (_addNumber == value)
                     return;
 
-                _alarmAideMemberId = value;
-                OnPropertyChanged(nameof(AlarmAideMemberId));
+                _addNumber = value;
+                OnPropertyChanged(nameof(AddNumber));
             }
         }
     }

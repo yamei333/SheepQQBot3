@@ -1,28 +1,10 @@
 ﻿using System.Collections.Generic;
-using System.ComponentModel;
 using SheepQQBot3.Model.Config;
 
 namespace SheepQQBot3.View
 {
-    public partial class MainWindowFundHelperViewModel : INotifyPropertyChanged
+    public partial class MainWindowFundHelperViewModel : MainWindowViewModelBase
     {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private static MainWindowViewModel _mainVm => PublicVar.Vm;
-
-        private FundAlarmConfig _selectedFundAlarmConfig;
-        private FundLimitObserveConfig _selectedFundLimitObserveConfig;
-
-        /// <summary>
-        /// 值变化时调用, 用于通知界面
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public SetConfig SelectedSetConfig => _mainVm.SelectedSetConfig;
-
         /// <summary>
         /// 初始化
         /// </summary>
@@ -30,9 +12,11 @@ namespace SheepQQBot3.View
         {
         }
 
+        private FundAlarmConfig _selectedFundAlarmConfig;
         /// <summary>
         /// 选中的基金播报项
         /// </summary>
+
         public FundAlarmConfig SelectedFundAlarmConfig
         {
             get => _selectedFundAlarmConfig;
@@ -46,6 +30,7 @@ namespace SheepQQBot3.View
             }
         }
 
+        private FundLimitObserveConfig _selectedFundLimitObserveConfig;
         /// <summary>
         /// 选中的基金阈值观测项
         /// </summary>

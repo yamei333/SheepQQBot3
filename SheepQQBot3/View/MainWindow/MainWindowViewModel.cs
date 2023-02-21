@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using System.Linq;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
@@ -13,13 +12,8 @@ namespace SheepQQBot3.View
     /// <summary>
     /// ViewModel
     /// </summary>
-    public partial class MainWindowViewModel : INotifyPropertyChanged, IDisposable
+    public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposable
     {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private Dictionary<BotFunctionType, BotFunction> _selectedSetBotFunctions;
-
         /// <summary>
         /// 是否读取完成
         /// </summary>
@@ -46,19 +40,12 @@ namespace SheepQQBot3.View
         }
 
         /// <summary>
-        /// 值变化时调用, 用于通知界面
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        /// <summary>
         /// 初始化
         /// </summary>
         public MainWindowViewModel()
         {
             PublicVar.InitPublicVar(this);
-            Title = "助手哈莉 - Ver 0.5.0.0";
+            Title = "助手哈莉 - Ver 0.5.2.0";
             IsLoadComplete = false;
 
             InitViewModel();
@@ -110,6 +97,7 @@ namespace SheepQQBot3.View
                 MainWindowAlarmAideSubmitViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
                 MainWindowFundHelperViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
                 MainWindowRepeaterKillerViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
+                MainWindowBlackListViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             }
         }
 
@@ -143,6 +131,7 @@ namespace SheepQQBot3.View
             }
         }
 
+        private Dictionary<BotFunctionType, BotFunction> _selectedSetBotFunctions;
         /// <summary>
         /// 选中群的功能配置
         /// </summary>

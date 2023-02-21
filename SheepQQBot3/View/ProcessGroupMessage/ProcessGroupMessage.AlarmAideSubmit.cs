@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -29,7 +30,7 @@ namespace SheepQQBot3.View
         /// <param name="alarmAideSubmitMembers">可投稿成员列表</param>
         /// <param name="groupMessage"><see cref="GroupMessage"/></param>
         /// <returns></returns>
-        public static bool AlarmAideSubmit(
+        public static async Task<bool> AlarmAideSubmit(
             Dictionary<Guid, AlarmAideConfig> alarmAideConfigs,
             HashSet<long> alarmAideSubmitMembers,
             GroupMessage groupMessage)
@@ -50,7 +51,7 @@ namespace SheepQQBot3.View
             var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
             if (alarmAideConfig == null)
             {
-                Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 未设置默认投稿项, 联系管理设置!");
+                await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 未设置默认投稿项, 联系管理设置!");
                 return false;
             }
 
@@ -69,7 +70,7 @@ namespace SheepQQBot3.View
                 if (alarmTexts.Values.Any(each => each == alarmMessage))
                 {
                     // MEMO : 已存在则不添加, 发送反馈
-                    Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 投稿失败, 相同的内容已存在!");
+                    await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 投稿失败, 相同的内容已存在!");
                     return false;
                 }
                 else
@@ -77,14 +78,14 @@ namespace SheepQQBot3.View
                     // MEMO : 添加闹钟助手内容
                     alarmTexts.TryAdd(alarmTexts.GetSequence(), alarmMessage);
                     // MEMO : 发送反馈
-                    Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 投稿成功!!\n{alarmMessage}");
+                    await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 投稿成功!!\n{alarmMessage}");
                     ConfigExtensions.SaveConfig();
                     return true;
                 }
             }
             catch (Exception)
             {
-                Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 发生错误! 投稿内容有误!!");
+                await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 发生错误! 投稿内容有误!!");
                 return false;
             }
         }
