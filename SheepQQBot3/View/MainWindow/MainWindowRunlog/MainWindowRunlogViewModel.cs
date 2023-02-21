@@ -1,31 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Client;
 using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
 namespace SheepQQBot3.View
 {
-    public partial class MainWindowRunlogViewModel : INotifyPropertyChanged
+    public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
     {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        private List<RunLog> _runLogs;
-        private RunLog _selectedRunLog;
-        private static MainWindowViewModel _mainVm => PublicVar.Vm;
-
-        /// <summary>
-        /// 值变化时调用, 用于通知界面
-        /// </summary>
-        /// <param name="propertyName">属性名</param>
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public Dictionary<Guid, SetConfig> SetConfigs => _mainVm.SetConfigs;
-        public CQAPI Api => _mainVm.CqApi;
-
         /// <summary>
         /// 初始化
         /// </summary>
@@ -35,6 +16,7 @@ namespace SheepQQBot3.View
             RunLogs = new List<RunLog>();
         }
 
+        private List<RunLog> _runLogs;
         public List<RunLog> RunLogs
         {
             get => _runLogs;
@@ -50,6 +32,7 @@ namespace SheepQQBot3.View
 
         public IEnumerable<RunLogMessage> RunLogMessages { get; set; }
 
+        private RunLog _selectedRunLog;
         public RunLog SelectedRunLog
         {
             get => _selectedRunLog;
@@ -72,8 +55,8 @@ namespace SheepQQBot3.View
         {
             var result = new List<RunLogMessage>
             {
-                new RunLogMessage($"时间: {runLog.DateTimeStrFFF}"),
-                new RunLogMessage(runLog.MessageColor, $"类型: {runLog.MessageTypeStr}")
+                new($"时间: {runLog.DateTimeStrFFF}"),
+                new(runLog.MessageColor, $"类型: {runLog.MessageTypeStr}")
             };
             switch (runLog.MessageType)
             {

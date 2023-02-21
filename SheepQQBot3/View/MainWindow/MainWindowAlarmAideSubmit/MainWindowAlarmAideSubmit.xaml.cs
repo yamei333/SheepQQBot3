@@ -1,15 +1,15 @@
-﻿using System.Collections.Generic;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
+using Yamei.Common;
 
 namespace SheepQQBot3.View
 {
     /// <summary>
     /// MainWindowAlarmAideSubmit.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindowAlarmAideSubmit : UserControl
+    public partial class MainWindowAlarmAideSubmit
     {
         private static MainWindowAlarmAideSubmitViewModel _vm => PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
 
@@ -29,15 +29,13 @@ namespace SheepQQBot3.View
         /// </summary>
         private void AlarmAideSubmitMemberList_OnAdd(object sender, RoutedEventArgs e)
         {
-            var alarmAideSubmitMemberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add);
-            if (alarmAideSubmitMemberDialog.ShowDialog() != true)
+            var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "闹钟助手投稿ID");
+            if (addNumberDialog.ShowDialog() != true)
                 return;
 
-            var alarmAideMemberId = alarmAideSubmitMemberDialog.AddNumber;
-            var alarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds;
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = alarmAideSubmitMemberIds == null
-                ? new HashSet<long> { alarmAideMemberId }
-                : new HashSet<long>(alarmAideSubmitMemberIds) { alarmAideMemberId };
+            var alarmAideMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
+            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
+                .CopyAdd(alarmAideMemberId);
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
             _vm.SelectedMemberId = alarmAideMemberId;
             ConfigExtensions.SaveConfig();
@@ -54,9 +52,8 @@ namespace SheepQQBot3.View
             if (!_vm.SelectedMemberId.HasValue)
                 return;
 
-            var alarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds;
-            alarmAideSubmitMemberIds.Remove(_vm.SelectedMemberId.Value);
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = new HashSet<long>(alarmAideSubmitMemberIds);
+            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
+                .CopyRemove(_vm.SelectedMemberId.Value);
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
             _vm.SelectedMemberId = null;
             ConfigExtensions.SaveConfig();

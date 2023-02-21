@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -27,17 +28,17 @@ namespace SheepQQBot3.View
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Common_AlarmAide))
                         .ForEach(setConfig =>
                         {
-                            setConfig.AlarmAideConfigs.ToValueList().ForEach(alarmAidesConfig =>
+                            setConfig.AlarmAideConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
+                            async void DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
                             {
-                                if (alarmAidesConfig.IsActive
-                                    && alarmAidesConfig.Condition.IsMatch(dateNowStr))
-                                {
-                                    // 删除过期发送内容
-                                    DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
-                                    // 发送闹钟助手消息
-                                    SendAlarm(setConfig, alarmAidesConfig, dateNow);
-                                }
-                            });
+                                if (!alarmAidesConfig.IsActive || !alarmAidesConfig.Condition.IsMatch(dateNowStr))
+                                    return;
+
+                                // 删除过期发送内容
+                                DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
+                                // 发送闹钟助手消息
+                                await SendAlarm(setConfig, alarmAidesConfig, dateNow);
+                            }
                         });
                 }
 
@@ -48,30 +49,32 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 发送闹钟助手消息
         /// </summary>
-        private static void SendAlarm(SetConfig setConfig, AlarmAideConfig alarmAideConfig, DateTime now)
+        private static async Task SendAlarm(SetConfig setConfig, AlarmAideConfig alarmAideConfig, DateTime now)
         {
             var alarmInfoKey = alarmAideConfig.Id;
             if (setConfig.AlarmAideAlarmedList.ContainsKey(alarmInfoKey))
                 return;
 
             var alarmTexts = alarmAideConfig.AlarmTexts;
-            if (alarmTexts.Count > 0)
+            if (!alarmTexts.IsEmpty)
             {
                 var alarmText = alarmTexts.Values.Random();
                 var targetId = setConfig.TargetId;
                 switch (setConfig.TargetType)
                 {
                     case BotConfigTargetType.Group:
-                        Api.SendGroupMessage(targetId, alarmText, Vm.SetConfigs);
+                        await Api.SendGroupMessage(targetId, alarmText, Vm.SetConfigs);
                         AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Group, targetId, alarmText));
                         break;
                     case BotConfigTargetType.Private:
-                        Api.SendPrivateMessage(targetId, alarmText);
+                        await Api.SendPrivateMessage(targetId, alarmText);
                         AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Private, targetId, alarmText));
                         break;
                     case BotConfigTargetType.Common:
                     default:
-                        throw new ArgumentOutOfRangeException();
+                        throw new ArgumentOutOfRangeException(
+                            $"{nameof(SendAlarm)}.{nameof(setConfig.TargetType)}",
+                            setConfig.TargetType.ToString());
                 }
 
                 // MEMO : 追加到已发送列表

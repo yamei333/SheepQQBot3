@@ -1171,6 +1171,45 @@ namespace Yamei.Common
         }
 
         /// <summary>
+        /// <see cref="HashSet{T}"/>复制后删除项目
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="hashSet">对象<see cref="HashSet{T}"/></param>
+        /// <param name="deleteItem">删除的项目</param>
+        /// <param name="deleteSuccessed">是否删除成功</param>
+        [DebuggerStepThrough]
+        public static HashSet<T> CopyRemove<T>(
+            this HashSet<T> hashSet,
+            T deleteItem,
+            out bool deleteSuccessed)
+            where T : unmanaged
+        {
+            if (hashSet == null)
+            {
+                deleteSuccessed = false;
+                return new HashSet<T>();
+            }
+
+            deleteSuccessed = hashSet.Remove(deleteItem);
+            return new HashSet<T>(hashSet);
+        }
+
+        /// <summary>
+        /// <see cref="HashSet{T}"/>复制后删除项目
+        /// </summary>
+        /// <typeparam name="T">类型</typeparam>
+        /// <param name="hashSet">对象<see cref="HashSet{T}"/></param>
+        /// <param name="deleteItem">删除的项目</param>
+        [DebuggerStepThrough]
+        public static HashSet<T> CopyRemove<T>(
+            this HashSet<T> hashSet,
+            T deleteItem)
+            where T : unmanaged
+        {
+            return CopyRemove(hashSet, deleteItem, out _);
+        }
+
+        /// <summary>
         /// Dictionary复制项目后编辑项目
         /// </summary>
         /// <typeparam name="TKey">Key类型</typeparam>

@@ -22,10 +22,10 @@
             <GroupBox.Header>
                 <TextBlock Text="黑名单列表" />
             </GroupBox.Header>
-            <ListBox ItemsSource="{Binding SelectedSetConfig.AlarmAideSubmitMemberIds}"
+            <ListBox ItemsSource="{Binding SelectedSetConfig.BlackListIds}"
                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
                      SelectedItem="{Binding SelectedMemberId}"
-                     SelectionMode="Extended">
+                     SelectionMode="Single">
                 <ListBox.ContextMenu>
                     <ContextMenu>
                         <MenuItem Click="BlackList_OnAdd"

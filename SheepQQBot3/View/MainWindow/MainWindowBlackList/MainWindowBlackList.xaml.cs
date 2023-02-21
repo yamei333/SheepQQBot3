@@ -1,6 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Windows;
-using System.Windows.Controls;
+﻿using System.Windows;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using Yamei.Common;
@@ -10,7 +8,7 @@ namespace SheepQQBot3.View
     /// <summary>
     /// MainWindowBlackList.xaml 的交互逻辑
     /// </summary>
-    public partial class MainWindowBlackList : UserControl
+    public partial class MainWindowBlackList
     {
         private static MainWindowBlackListViewModel _vm => PublicVar.Vm.MainWindowBlackListViewModel;
 
@@ -30,16 +28,16 @@ namespace SheepQQBot3.View
         /// </summary>
         private void BlackList_OnAdd(object sender, RoutedEventArgs e)
         {
-            var alarmAideSubmitMemberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add);
-            if (alarmAideSubmitMemberDialog.ShowDialog() != true)
+            var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "黑名单ID");
+            if (addNumberDialog.ShowDialog() != true)
                 return;
 
-            var alarmAideMemberId = alarmAideSubmitMemberDialog.AddNumber;
+            var blackListMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
             _vm.SelectedSetConfig.BlackListIds = _vm.SelectedSetConfig.BlackListIds
-                .CopyAdd(alarmAideMemberId);
+                .CopyAdd(blackListMemberId);
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
 
-            _vm.SelectedMemberId = alarmAideMemberId;
+            _vm.SelectedMemberId = blackListMemberId;
             ConfigExtensions.SaveConfig();
         }
 
@@ -54,9 +52,8 @@ namespace SheepQQBot3.View
             if (!_vm.SelectedMemberId.HasValue)
                 return;
 
-            var alarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds;
-            alarmAideSubmitMemberIds.Remove(_vm.SelectedMemberId.Value);
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = new HashSet<long>(alarmAideSubmitMemberIds);
+            _vm.SelectedSetConfig.BlackListIds = _vm.SelectedSetConfig.BlackListIds
+                .CopyRemove(_vm.SelectedMemberId.Value);
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
             _vm.SelectedMemberId = null;
             ConfigExtensions.SaveConfig();
