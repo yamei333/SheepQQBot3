@@ -6,6 +6,9 @@ using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Config
 {
+    /// <summary>
+    /// 运行日志
+    /// </summary>
     public class RunLog
     {
         private const string DefaultColor = "Black";
@@ -40,6 +43,7 @@ namespace SheepQQBot3.Model.Config
         public string TargetId { get; set; }
         public string MessageId { get; set; }
         public string Content { get; set; }
+        public bool IsBlackList { get; set; }
 
         private readonly DateTime _logDate;
 
@@ -58,6 +62,9 @@ namespace SheepQQBot3.Model.Config
                 _ => throw new ArgumentOutOfRangeException()
             };
 
+        /// <summary>
+        /// <see cref="MessageType"/>说明
+        /// </summary>
         public string MessageTypeStr
             => MessageType switch
             {
@@ -73,43 +80,56 @@ namespace SheepQQBot3.Model.Config
                 _ => throw new ArgumentOutOfRangeException()
             };
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         protected RunLog(LogMessageType messageType, string content)
         {
             _logDate = DateTime.Now;
             MessageType = messageType;
             SenderId = SystemSenderId;
             Content = content;
+            IsBlackList = false;
         }
 
+        /// <summary>
+        /// 初始化
+        /// </summary>
         protected RunLog(LogMessageType messageType, long senderId, string content)
+            : this(messageType, content)
         {
-            _logDate = DateTime.Now;
-            MessageType = messageType;
             SenderId = senderId.ToString();
-            Content = content;
         }
     }
 
+    /// <inheritdoc />
     public class RunLog_SystemInfo : RunLog
     {
+        /// <inheritdoc />
         public RunLog_SystemInfo(string content) : base(LogMessageType.System_Info, content)
         { }
     }
 
+    /// <inheritdoc />
     public class RunLog_SystemWarning : RunLog
     {
+        /// <inheritdoc />
         public RunLog_SystemWarning(string content) : base(LogMessageType.System_Warning, content)
         { }
     }
 
+    /// <inheritdoc />
     public class RunLog_SystemError : RunLog
     {
+        /// <inheritdoc />
         public RunLog_SystemError(string content) : base(LogMessageType.System_Error, content)
         { }
     }
 
+    /// <inheritdoc />
     public class RunLog_GroupMessage : RunLog
     {
+        /// <inheritdoc />
         public RunLog_GroupMessage(GroupMessage groupMessage)
             : base(LogMessageType.GroupMessage, groupMessage.Sender!.User_Id, groupMessage.Message!)
         {
@@ -117,8 +137,21 @@ namespace SheepQQBot3.Model.Config
         }
     }
 
+    /// <inheritdoc />
+    public class RunLog_GroupMessageBlackList : RunLog_GroupMessage
+    {
+        /// <inheritdoc />
+        public RunLog_GroupMessageBlackList(GroupMessage groupMessage)
+            : base(groupMessage)
+        {
+            IsBlackList = true;
+        }
+    }
+
+    /// <inheritdoc />
     public class RunLog_GroupRevokeMessage : RunLog
     {
+        /// <inheritdoc />
         public RunLog_GroupRevokeMessage(GroupRevokeMessage groupRevokeMessage)
             : base(LogMessageType.GroupRevokeMessage, groupRevokeMessage.UserId, "撤回消息")
         {
@@ -128,8 +161,10 @@ namespace SheepQQBot3.Model.Config
         }
     }
 
+    /// <inheritdoc />
     public class RunLog_GroupPoke : RunLog
     {
+        /// <inheritdoc />
         public RunLog_GroupPoke(GroupPoke groupPoke)
             : base(LogMessageType.GroupPoke, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
         {

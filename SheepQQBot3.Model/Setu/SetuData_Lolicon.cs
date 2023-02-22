@@ -34,6 +34,9 @@ namespace SheepQQBot3.Model.Setu
         [JsonPropertyName("original")]
         public string Original { get; set; }
 
+        [JsonPropertyName("thumb")]
+        public string Thumb { get; set; }
+
         [JsonPropertyName("small")]
         public string Small { get; set; }
 

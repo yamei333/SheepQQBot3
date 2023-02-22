@@ -1,5 +1,6 @@
 ﻿using System;
 using System.IO;
+using System.Net;
 using System.Net.Http;
 using System.Text;
 using System.Threading.Tasks;
@@ -50,15 +51,25 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// http下载
         /// </summary>
-        public static async Task<string> HttpDownloadAsync(string url, string fileExtend)
+        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(string url)
         {
-            var fileName = Guid.NewGuid().ToString();
+            var tempFileName = Guid.NewGuid().ToString();
             var response = await HttpGetAsync(url);
+            if (response.StatusCode != HttpStatusCode.OK)
+                return (false, string.Empty);
+
+            var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+            {
+                "image/jpeg" => "jpg",
+                "zap" => "zap",
+                _ => "png"
+            };
+
             const string cachePathName = "Cache";
             CommonExtensions.CreatePath(cachePathName);
-            var fs = new FileStream($"{cachePathName}/{fileName}.{fileExtend}", FileMode.CreateNew);
+            var fs = new FileStream($"{cachePathName}/{tempFileName}.{fileExtend}", FileMode.CreateNew);
             await response.Content.CopyToAsync(fs);
-            return $"{fileName}.{fileExtend}";
+            return (true, $"{tempFileName}.{fileExtend}");
         }
     }
 }

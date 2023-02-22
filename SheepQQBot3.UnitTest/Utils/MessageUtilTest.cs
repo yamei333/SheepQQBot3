@@ -41,6 +41,10 @@ public class MessageUtilTest
         //    ""sub_type"":""normal"",""time"":1610090450,""user_id"":252961222}";
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
 
+        var fileName = HttpExtensions
+            .HttpDownloadAsync("https://i.pixiv.re/c/540x540_70/img-master/img/2022/03/11/21/02/20/96838020_p0_master1200.jpg")
+            .Result;
+
         ;
     }
 
