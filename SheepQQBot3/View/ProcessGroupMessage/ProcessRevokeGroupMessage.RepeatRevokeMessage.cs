@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.Model;
+﻿using System.Threading.Tasks;
+using SheepQQBot3.Model;
 using Yamei.Common;
 using static SheepQQBot3.View.PublicVar;
 
@@ -11,10 +12,9 @@ namespace SheepQQBot3.View
         /// </summary>
         /// <param name="groupMessage"><see cref="GroupMessage"/></param>
         /// <returns></returns>
-        public static bool RepeatRevokeMessage(GroupMessage groupMessage)
+        public static async Task<bool> RepeatRevokeMessage(GroupMessage groupMessage)
         {
-            Api.SendGroupMessage(groupMessage.GroupId, GetRevokeMessage());
-
+            await Api.SendGroupMessage(groupMessage.GroupId, GetRevokeMessage());
             return true;
 
             string GetRevokeMessage()
@@ -27,10 +27,17 @@ namespace SheepQQBot3.View
                 return new[]
                 {
                     $"{messageHead} 撤回了消息\n{message}\n你以为我不知道吗",
-                    $"{messageHead} 撤回了消息\n{message}\nwzstlpmdm",
+                    $"{messageHead} 撤回了消息\n{message}\nwzstlpmd🐱",
+                    $"{messageHead} 撤回了消息\n{message}\nynl!",
+                    $"{messageHead} 撤回了消息\n{message}\nbrdn!",
+                    $"{messageHead} 撤回了消息\n{message}\nnhzs!",
                     $"{messageHead} 撤回了消息\n{message}\n没什么好藏的, 发出来给大伙乐乐",
                     $"{messageHead} 撤回了消息\n{message}\n哈莉, 撤回禁止!",
-                    $"{messageHead} 撤回了消息\n{message}\n你撤回你猫呢",
+                    $"{messageHead} 撤回了消息\n{message}\n你撤回你🐱呢",
+                    $"{messageHead} 撤回了消息\n{message}\n复读撤回也是一种卜鸽",
+                    $"{messageHead} 撤回了消息\n{message}\n我的我的, 哈哈",
+                    $"{messageHead} 撤回了消息\n{message}\n失礼了, 哈哈",
+                    $"{messageHead} 撤回了消息\n{message}\n;ao?",
                 }.Random();
             }
         }

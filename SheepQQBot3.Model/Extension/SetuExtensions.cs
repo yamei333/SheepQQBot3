@@ -37,7 +37,8 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions.HttpGetStringAsync(@$"https://api.lolicon.app/setu/v2?proxy=i.pixiv.re&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}");
+                setuJsonText = await HttpExtensions.HttpGetStringAsync(
+                    @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=thumb&size=original{(r18 ? "&r18=1" : string.Empty)}");
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
@@ -49,8 +50,8 @@ namespace SheepQQBot3.Model.Extension
 
             return new SetuInfo(
                 setuData.SetuInfo,
-                setuData.Urls.Original.Replace(PixivReSource, PixivReTarget),
-                setuData.Urls.Small.Replace(PixivReSource, PixivReTarget));
+                setuData.Urls.Original,
+                setuData.Urls.Thumb);
         }
 
         private static readonly Regex _regGetImageId_Rainchan = RegexGenerator.GetImageId_RainChan();
@@ -98,7 +99,7 @@ namespace SheepQQBot3.Model.Extension
             return new SetuInfo(
                 setuData.SetuInfo,
                 setuData.Urls.Original.Replace(Pximg, PixivReTarget),
-                setuData.Urls.Medium.Replace(Pximg, PixivReTarget));
+                setuData.Urls.Medium.Replace(Pximg, PixivReTarget).Replace("540x540_70", "250x250_80_a2"));
         }
     }
 }

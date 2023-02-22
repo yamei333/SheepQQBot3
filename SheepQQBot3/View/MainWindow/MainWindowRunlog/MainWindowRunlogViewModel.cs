@@ -76,12 +76,12 @@ namespace SheepQQBot3.View
                     break;
                 case LogMessageType.GroupMessage:
                     result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));
-                    result.Add(new RunLogMessage($"　　-QQ号: {runLog.SenderId}"));
+                    result.Add(new RunLogMessage($"　　-QQ号: {runLog.SenderId}{(runLog.IsBlackList ? "(黑名单)" : string.Empty)}"));
                     break;
                 case LogMessageType.GroupRevokeMessage:
                     result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));
                     result.Add(new RunLogMessage($"　　-操作者: {runLog.OperatorId}"));
-                    result.Add(new RunLogMessage($"　　-QQ号: {runLog.SenderId}"));
+                    result.Add(new RunLogMessage($"　　-QQ号: {runLog.SenderId}{(runLog.IsBlackList ? "(黑名单)" : string.Empty)}"));
                     break;
                 case LogMessageType.GroupPoke:
                     result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));

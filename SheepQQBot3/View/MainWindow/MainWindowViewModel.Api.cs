@@ -6,7 +6,6 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Event;
-using Yamei.Common;
 
 namespace SheepQQBot3.View
 {
@@ -14,7 +13,7 @@ namespace SheepQQBot3.View
     {
         private const int MaxLogCount = 200;
 
-        private static Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new Dictionary<int, Action<GroupMessage>>();
+        private static readonly Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new();
 
         private void InitApi()
         {
@@ -32,11 +31,11 @@ namespace SheepQQBot3.View
             cqApi.OnGetGroupMessage += (o, groupMessage) =>
             {
                 var messageId = groupMessage.MessageId;
-                if (GetMessageCallBacks.TryGetValue(messageId, out var processAction))
-                {
-                    processAction(groupMessage);
-                    GetMessageCallBacks.Remove(messageId);
-                }
+                if (!GetMessageCallBacks.TryGetValue(messageId, out var processAction))
+                    return;
+
+                processAction(groupMessage);
+                GetMessageCallBacks.Remove(messageId);
             };
             cqApi.Start();
         }
@@ -64,11 +63,23 @@ namespace SheepQQBot3.View
 
                 var groupId = groupRevokeMessage.GroupId;
                 var messageId = groupRevokeMessage.MessageId;
-                if (GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId).Any()
-                    && groupRevokeMessage.OperatorId == groupRevokeMessage.UserId)
+                var targetId = groupRevokeMessage.UserId;
+                if (groupRevokeMessage.OperatorId == targetId)
                 {
-                    GetMessageCallBacks.Add(messageId, groupMessage => ProcessRevokeGroupMessage.RepeatRevokeMessage(groupMessage));
-                    CqApi.GetMessage(groupRevokeMessage.MessageId);
+                    GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, config =>
+                    {
+                        if (targetId == PublicVar.ADMIN_ID)
+                        {
+                            // MEMO : ADMIN不复读撤回消息
+                            return;
+                        }
+
+                        GetMessageCallBacks.Add(messageId, RepeatRevokeMessage);
+                        CqApi.GetMessage(groupRevokeMessage.MessageId);
+
+                        async void RepeatRevokeMessage(GroupMessage groupMessage)
+                            => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupMessage);
+                    });
                 }
             };
             cqEvent.OnGroupMessage += (o, groupMessage) =>
@@ -77,26 +88,51 @@ namespace SheepQQBot3.View
                 if (SetConfigs.Values.All(each => each.TargetId != groupId))
                     return;
 
-                AddRunLog(new RunLog_GroupMessage(groupMessage));
+                var isBlackList = false;
+                if (!GetSelectedConfig(
+                    groupId,
+                    BotFunctionType.Common_BlackList,
+                    config =>
+                    {
+                        isBlackList = config.BlackListIds.Contains(groupMessage.UserId);
+                        AddRunLog(isBlackList
+                            ? new RunLog_GroupMessageBlackList(groupMessage)
+                            : new RunLog_GroupMessage(groupMessage));
+                    }))
+                {
+                    AddRunLog(new RunLog_GroupMessage(groupMessage));
+                }
 
-                GetSelectedConfigs(BotFunctionType.Group_CustomGroupAlarm, groupId)
-                    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
-                GetSelectedConfigs(BotFunctionType.Common_AlarmAideSubmit, groupId)
-                    .ForEach(each =>
-                    {
-                        StartTask(AlarmAideSubmit);
-                        async void AlarmAideSubmit() => await ProcessGroupMessage.AlarmAideSubmit(each.AlarmAideConfigs, each.AlarmAideSubmitMemberIds, groupMessage);
-                    });
-                GetSelectedConfigs(BotFunctionType.Group_FundHelper, groupId)
-                    .ForEach(each => StartTask(() => ProcessGroupMessage.FundHelper(groupMessage)));
-                GetSelectedConfigs(BotFunctionType.Group_RandomSetu, groupId)
-                    .ForEach(each =>
-                    {
-                        StartTask(RandomSetu);
-                        async void RandomSetu() => await ProcessGroupMessage.RandomSetu(groupMessage).ConfigureAwait(false);
-                    });
-                GetSelectedConfigs(BotFunctionType.Group_RepeaterKiller, groupId)
-                    .ForEach(each => StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage)));
+                // MEMO : 黑名单用户不作处理
+                if (isBlackList)
+                    return;
+
+                GetSelectedConfig(groupId, BotFunctionType.Group_CustomGroupAlarm, config =>
+                {
+                    StartTask(() => ProcessGroupMessage.CustomGroupAlarm(config.CustomGroupAlarms, groupMessage));
+                });
+
+                GetSelectedConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
+                {
+                    StartTask(AlarmAideSubmit);
+                    async void AlarmAideSubmit() => await ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
+                });
+
+                GetSelectedConfig(groupId, BotFunctionType.Group_FundHelper, config =>
+                {
+                    StartTask(() => ProcessGroupMessage.FundHelper(groupMessage));
+                });
+
+                GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
+                {
+                    StartTask(RandomSetu);
+                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(groupMessage).ConfigureAwait(false);
+                });
+
+                GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
+                {
+                    StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage));
+                });
 
                 //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
                 //    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
@@ -110,12 +146,23 @@ namespace SheepQQBot3.View
             };
             cqEvent.Start();
 
-            IEnumerable<SetConfig> GetSelectedConfigs(BotFunctionType botFunctionType, long groupId)
-                => SetConfigs.Values.Where(each =>
+            bool GetSelectedConfig(
+                long groupId,
+                BotFunctionType botFunctionType,
+                Action<SetConfig> runAction = null)
+            {
+                var setConfig = SetConfigs.Values.FirstOrDefault(each =>
                 {
-                    var botFunction = each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType);
+                    var botFunction =
+                        each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType);
                     return botFunction?.IsUsed == true && each.TargetId == groupId;
                 });
+                if (setConfig == null)
+                    return false;
+
+                runAction?.Invoke(setConfig);
+                return true;
+            }
         }
 
         /// <summary>
