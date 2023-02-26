@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
@@ -53,7 +54,10 @@ namespace SheepQQBot3.Extensions
                     jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
                 }
 
-                var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText);
+                var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText, new JsonSerializerOptions
+                {
+                    IncludeFields = true
+                });
                 var defaultBotFunctions = SetConfig.DefaultBotFunctions;
                 botConfig.SetConfigs.Values.ForEach(each =>
                 {
@@ -78,7 +82,7 @@ namespace SheepQQBot3.Extensions
                 if (isImportConfigFileExists)
                     FileSystem.DeleteFile(configFilePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
             }
-            catch (Exception)
+            catch (Exception e)
             {
                 if (!isImportConfigFileExists)
                 {
@@ -130,7 +134,11 @@ namespace SheepQQBot3.Extensions
             if (!Vm.IsLoadComplete)
                 return;
 
-            var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs));
+            var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs), new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                WriteIndented = true
+            });
             File.WriteAllText("config.json", jsonText, Encoding.UTF8);
 
             // MEMO : OldVersion

@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.View
+﻿using SheepQQBot3.Model;
+
+namespace SheepQQBot3.View
 {
     public class AddNumberDialogViewModel : NotifyPropertyChangedBase
     {

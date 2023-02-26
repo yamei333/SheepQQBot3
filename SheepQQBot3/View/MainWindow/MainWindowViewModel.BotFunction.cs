@@ -18,6 +18,7 @@ namespace SheepQQBot3.View
             StartTask(TaskProcess.AlarmAides);
             StartTask(TaskProcess.CustomGroupAlarm);
             StartTask(TaskProcess.FundHelper);
+            StartTask(TaskProcess.LiveAlarm);
         }
 
         /// <summary>

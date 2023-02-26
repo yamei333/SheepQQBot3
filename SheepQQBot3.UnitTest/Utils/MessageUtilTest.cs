@@ -1,4 +1,5 @@
-﻿using static SheepQQBot3.SDK.Client.MessageUtil;
+﻿using Yamei.Common;
+using static SheepQQBot3.SDK.Client.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
 
@@ -15,6 +16,8 @@ public class MessageUtilTest
     [TestMethod]
     public void NormalTest()
     {
+        #region Test
+
         //var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData
         //{
         //    Group_Id = "11111",
@@ -41,10 +44,31 @@ public class MessageUtilTest
         //    ""sub_type"":""normal"",""time"":1610090450,""user_id"":252961222}";
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
 
-        var fileName = HttpExtensions
-            .HttpDownloadAsync("https://i.pixiv.re/c/540x540_70/img-master/img/2022/03/11/21/02/20/96838020_p0_master1200.jpg")
-            .Result;
+        var dt = 1677327578.ToDateTime();
+        ;
 
+        //var fileName = HttpExtensions
+        //    .HttpDownloadAsync("https://i.pixiv.re/c/540x540_70/img-master/img/2022/03/11/21/02/20/96838020_p0_master1200.jpg")
+        //    .Result;
+
+        var jsonText = HttpExtensions.HttpGetAsync(
+            $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=123").Result;
+
+        ;
+
+        #endregion Test
+
+        //var api = new OpenAI_API.OpenAIAPI("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");
+        //IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest request);
+
+        //// for example
+        //foreach (var token in api.Completions.StreamCompletionEnumerableAsync(new CompletionRequest(
+        //    "测试测试",
+        //    OpenAI_API.Models.Model.DavinciText, 200, 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1)))
+        //{
+        //    Console.Write(token);
+        //}
+        // should print something starting with "Three"
         ;
     }
 

@@ -150,6 +150,7 @@
                             Visibility="{Binding IsTabVisible,
                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
                     <TabItem Header="闹钟助手"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
                              Visibility="{Binding Path=SelectedSetBotFunctions[0].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowAlarmAide />
@@ -186,6 +187,12 @@
                              Visibility="{Binding Path=SelectedSetBotFunctions[2003].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowFundHelper />
+                    </TabItem>
+                    <TabItem Header="直播提醒"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding Path=SelectedSetBotFunctions[2005].IsUsed,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowLiveAlarm />
                     </TabItem>
                 </TabControl>
             </Grid>

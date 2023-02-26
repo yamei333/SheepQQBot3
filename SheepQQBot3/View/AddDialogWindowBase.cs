@@ -34,7 +34,7 @@ public class AddDialogWindowBase<T> : Window
         // MEMO : Load时设置标题
         Loaded += (sender, args) =>
         {
-            Title = $"{GetMenuHeader(menuItem)}{title}";
+            Title = $"{GetMenuHeader(menuItem)}{(string.IsNullOrEmpty(title) ? Title : title)}";
             OnLoaded(sender, args);
             MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
         };

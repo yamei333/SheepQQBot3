@@ -1,24 +1,10 @@
 ﻿using SheepQQBot3.Model;
+using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
 {
     public static partial class ProcessGroupMessage
     {
-        /// <summary>
-        /// 空格
-        /// </summary>
-        private const string SPACE = " ";
-
-        /// <summary>
-        /// 空格(全角)
-        /// </summary>
-        private const string SPACE_FULL = "　";
-
-        /// <summary>
-        /// 回车
-        /// </summary>
-        private const string ENTER = "\r\n";
-
         /// <summary>
         /// 复读机杀手
         /// </summary>

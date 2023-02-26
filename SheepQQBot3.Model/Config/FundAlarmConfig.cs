@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Text.Json.Serialization;
 using MessagePack;
 
 namespace SheepQQBot3.Model.Config
@@ -10,17 +8,8 @@ namespace SheepQQBot3.Model.Config
     /// 基金播报配置
     /// </summary>
     [MessagePackObject]
-    public class FundAlarmConfig : INotifyPropertyChanged
+    public class FundAlarmConfig : NotifyPropertyChangedConfigBase
     {
-        [field: IgnoreMember, JsonIgnore]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        [Key(nameof(ConfigId))]
-        public Guid ConfigId { get; set; }
-
         /// <summary>
         /// 播报名称
         /// </summary>
@@ -71,12 +60,12 @@ namespace SheepQQBot3.Model.Config
         /// 默认构造函数
         /// </summary>
         public FundAlarmConfig(
-            Guid configId,
+            Guid id,
             string alarmName,
             string condition,
             bool isActive = false)
         {
-            ConfigId = configId;
+            Id = id;
             AlarmName = alarmName;
             Condition = condition;
             _isActive = isActive;

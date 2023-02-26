@@ -33,5 +33,8 @@ namespace SheepQQBot3.Model.Extension
 
         [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]
         public static partial Regex HolidayInfo();
+
+        [GeneratedRegex(@"\$.+\$")]
+        public static partial Regex ConditionJsonText();
     }
 }

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Client;
 

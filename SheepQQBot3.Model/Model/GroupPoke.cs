@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -19,7 +20,7 @@ namespace SheepQQBot3.Model
 
         public GroupPoke(ReceiveData receiveData)
         {
-            DateTime = CommonExtensions.StartTime.AddSeconds(receiveData.Time);
+            DateTime = receiveData.Time.ToDateTime();
             SenderId = receiveData.Sender_Id;
             TargetId = receiveData.Target_Id;
             GroupId = receiveData.Group_Id;

@@ -1,0 +1,76 @@
+﻿<UserControl x:Class="SheepQQBot3.View.MainWindowLiveAlarm"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:SheepQQBot3.View"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             d:DesignHeight="300"
+             d:DesignWidth="270"
+             Loaded="MainWindowLiveAlarm_OnLoaded"
+             mc:Ignorable="d">
+    <UserControl.DataContext>
+        <local:MainWindowLiveAlarmViewModel />
+    </UserControl.DataContext>
+    <Grid>
+        <Grid.Resources>
+            <Style x:Key="ListViewTextBlockStyle"
+                   TargetType="TextBlock">
+                <Setter Property="FontSize" Value="14" />
+            </Style>
+        </Grid.Resources>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="270" />
+        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="300" />
+        </Grid.RowDefinitions>
+        <GroupBox>
+            <GroupBox.Header>
+                <TextBlock Text="直播提醒列表" />
+            </GroupBox.Header>
+            <ListView x:Name="LiveAlarmConfigList"
+                      ItemsSource="{Binding SelectedSetConfig.LiveAlarmConfigs.Values}"
+                      MouseDoubleClick="ListView_MouseDoubleClick"
+                      ScrollViewer.HorizontalScrollBarVisibility="Disabled"
+                      SelectedItem="{Binding SelectedLiveAlarmConfig}">
+                <ListView.ContextMenu>
+                    <ContextMenu>
+                        <MenuItem Click="ListView_OnAdd"
+                                  Header="新增" />
+                        <MenuItem Click="ListView_OnEdit"
+                                  Header="修改"
+                                  Style="{StaticResource EditDeleteMenuItemStyle}" />
+                        <MenuItem Click="ListView_OnDelete"
+                                  Header="删除"
+                                  Style="{StaticResource EditDeleteMenuItemStyle}" />
+                    </ContextMenu>
+                </ListView.ContextMenu>
+                <ListView.View>
+                    <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
+                        <GridViewColumn Width="80"
+                                        Header="类型">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Style="{StaticResource ListViewTextBlockStyle}"
+                                               Text="{Binding LiveTypeString}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="120"
+                                        Header="房间编号">
+                            <GridViewColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Style="{StaticResource ListViewTextBlockStyle}"
+                                               Text="{Binding LiveRoomId}" />
+                                </DataTemplate>
+                            </GridViewColumn.CellTemplate>
+                        </GridViewColumn>
+                        <GridViewColumn Width="30"
+                                        CellTemplate="{StaticResource CheckImageButtonTemplate}"
+                                        Header="√" />
+                    </GridView>
+                </ListView.View>
+            </ListView>
+        </GroupBox>
+    </Grid>
+</UserControl>

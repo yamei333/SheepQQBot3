@@ -165,15 +165,33 @@ namespace SheepQQBot3.View
                     var setuInfo = await randomSetu.Random().Invoke();
                     var fileName = string.Empty;
                     var getSuccessed = false;
+                    const int maxRetryTimes = 5;
+                    var retryTimes = 0;
                     while (!getSuccessed)
                     {
                         (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl);
                         if (getSuccessed)
                             continue;
 
-                        await Api.SendGroupMessage(groupId,
-                            $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在重新{_setuGetting.Random()}...");
+                        retryTimes++;
+                        if (retryTimes <= maxRetryTimes)
+                        {
+                            await Api.SendGroupMessage(groupId,
+                                $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
+                            setuInfo = await randomSetu.Random().Invoke();
+                        }
+                        else
+                        {
+                            getSuccessed = true;
+                        }
+
                         CommonUtil.Sleep(500);
+                    }
+
+                    if (retryTimes > maxRetryTimes)
+                    {
+                        await Api.SendGroupMessage(groupId, "超过重试次数上限,放弃下载!");
+                        return false;
                     }
 
                     var isFileExists = false;

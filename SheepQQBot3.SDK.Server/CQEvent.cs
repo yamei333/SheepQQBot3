@@ -108,6 +108,8 @@ namespace SheepQQBot3.SDK.Event
                 // TODO : 群成员增加
                 case NoticeType.Group_Card:
                 // TODO : 群名片变更
+                case NoticeType.Group_Upload:
+                // TODO : 上传群文件
                 default:
                     throw new ArgumentOutOfRangeException(nameof(receiveData.Notice_Type), receiveData.Notice_Type, "值不在正确范围内");
             }

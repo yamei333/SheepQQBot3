@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
@@ -45,7 +46,7 @@ namespace SheepQQBot3.View
         public MainWindowViewModel()
         {
             PublicVar.InitPublicVar(this);
-            Title = "助手哈莉 - Ver 0.5.3.0";
+            Title = "助手哈莉 - Ver 0.6.1.3";
             IsLoadComplete = false;
 
             InitViewModel();
@@ -70,6 +71,7 @@ namespace SheepQQBot3.View
             MainWindowFundHelperViewModel = new MainWindowFundHelperViewModel();
             MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
             MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
+            MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
         }
 
         public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -78,6 +80,7 @@ namespace SheepQQBot3.View
         public MainWindowFundHelperViewModel MainWindowFundHelperViewModel { get; set; }
         public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
         public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
+        public MainWindowLiveAlarmViewModel MainWindowLiveAlarmViewModel { get; set; }
 
         public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 

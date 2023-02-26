@@ -1,10 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Enums
 {
     /// <summary>
     /// 配置目标类型
     /// </summary>
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum BotConfigTargetType
     {
         /// <summary>
@@ -48,6 +50,7 @@ namespace SheepQQBot3.Model.Enums
                     BotFunctionType.Group_FundHelper,
                     BotFunctionType.Group_RandomSetu,
                     BotFunctionType.Group_RepeaterKiller,
+                    BotFunctionType.Group_LiveAlarm,
                 },
                 BotConfigTargetType.Private => new HashSet<BotFunctionType>
                 {

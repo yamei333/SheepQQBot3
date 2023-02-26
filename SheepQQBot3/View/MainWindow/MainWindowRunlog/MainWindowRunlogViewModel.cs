@@ -58,7 +58,7 @@ namespace SheepQQBot3.View
                 new($"时间: {runLog.DateTimeStrFFF}"),
                 new(runLog.MessageColor, $"类型: {runLog.MessageTypeStr}")
             };
-            switch (runLog.MessageType)
+            switch (runLog.LogMessageType)
             {
                 case LogMessageType.System_Info:
                 case LogMessageType.System_Error:
@@ -73,6 +73,10 @@ namespace SheepQQBot3.View
                     result.Add(string.IsNullOrEmpty(runLog.GroupId)
                         ? new RunLogMessage($"QQ号: {runLog.SenderId}")
                         : new RunLogMessage($"群号: {runLog.GroupId}"));
+                    break;
+                case LogMessageType.LiveAlarm:
+                    result.Add(new RunLogMessage($"群号: {runLog.SenderId}"));
+                    result.Add(new RunLogMessage($"直播间号: {runLog.GroupId}"));
                     break;
                 case LogMessageType.GroupMessage:
                     result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));

@@ -26,7 +26,7 @@ namespace SheepQQBot3.Model.Enums
         Client_Status,
 
         /// <summary>
-        /// 群上报
+        /// 上传群文件
         /// </summary>
         Group_Upload,
 

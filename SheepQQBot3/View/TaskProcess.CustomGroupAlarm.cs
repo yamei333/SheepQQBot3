@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;
 using static SheepQQBot3.View.PublicVar;
@@ -10,6 +11,9 @@ namespace SheepQQBot3.View
 {
     public static partial class TaskProcess
     {
+        /// <summary>
+        /// 自定义群消息
+        /// </summary>
         public static void CustomGroupAlarm()
         {
             // MEMO : 清理过期提醒
@@ -26,23 +30,23 @@ namespace SheepQQBot3.View
                         .ForEach(groupAlarms =>
                         {
                             var removeIds = new HashSet<Guid>();
-                            groupAlarms.Values.ForEach(groupAlarm =>
+                            groupAlarms.Values.ForEach(AlertMessage);
+                            // MEMO : 移除需要删除的消息
+                            removeIds.ForEach(removeId => groupAlarms.Remove(removeId));
+
+                            async void AlertMessage(CustomGroupAlarm groupAlarm)
                             {
                                 var overSeconds = (dateNow - groupAlarm.AlarmDate).TotalSeconds;
                                 // MEMO : 超过3分钟内都可以提醒
-                                if (overSeconds >= 0 && overSeconds <= 180)
+                                if (overSeconds is >= 0 and <= 180)
                                 {
                                     var alarmMessage = groupAlarm.AlarmMessage.ToCqCode(0).Result;
-                                    var sendCustomMessage =
-                                        $"{(groupAlarm.IsAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{RN}[内容] " : string.Empty)}" +
-                                        $"{alarmMessage}";
-                                    Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
+                                    var sendCustomMessage = $"{(groupAlarm.IsAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}";
+                                    await Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
                                     // MEMO : 添加为删除消息
                                     removeIds.Add(groupAlarm.Id);
                                 }
-                            });
-                            // MEMO : 移除需要删除的消息
-                            removeIds.ForEach(removeId => groupAlarms.Remove(removeId));
+                            }
                         });
                 }
 

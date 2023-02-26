@@ -52,7 +52,7 @@ namespace SheepQQBot3.View
                 switch (startChar1)
                 {
                     case 'C':
-                        var errorMsg = $"{RN}输入格式有误, 请输入 #ym#ch 查询帮助!";
+                        var errorMsg = $"{PublicVar.ENTER}输入格式有误, 请输入 #ym#ch 查询帮助!";
                         var messageArraySpace = changedMessageSpace.Split(COMMA);
                         //var messageArray = changedMessage.Split(COMMA);
                         //switch (messageArraySpace.Length)
@@ -73,15 +73,15 @@ namespace SheepQQBot3.View
                             case 'H':
                                 isNoReply = false;
                                 sendMessage.Append($" 群提醒功能介绍:" +
-                                    $"{RN}#ym#ca收菜,60 -> 60分钟后发送提醒消息, 内容为'收菜'" +
-                                    $"{RN}#ym#ca收菜,2019-7-13 19:00 -> 在指定时间(只精确到分)发送提醒消息, 内容为'收菜'" +
-                                    $"{RN}#ym#ca收菜,19:00 -> 同上, 省略日期时为当天提醒" +
-                                    $"{RN}#ym#cd2019-7-13 19:00 -> 删除2019-7-13 19:00的提醒, 如用分钟增加的提醒可以用cl命令查询具体时间" +
-                                    $"{RN}#ym#cl -> 列出当前还未提醒的项目" +
-                                    $"{RN}特殊参数: (在消息内包含)" +
-                                    $"{RN}[at-22222] at某人" +
-                                    $"{RN}[-na] 提醒时不at自己" +
-                                    $"{RN}[-nr] 添加提醒时不发送反馈");
+                                    $"{ENTER}#ym#ca收菜,60 -> 60分钟后发送提醒消息, 内容为'收菜'" +
+                                    $"{ENTER}#ym#ca收菜,2019-7-13 19:00 -> 在指定时间(只精确到分)发送提醒消息, 内容为'收菜'" +
+                                    $"{ENTER}#ym#ca收菜,19:00 -> 同上, 省略日期时为当天提醒" +
+                                    $"{ENTER}#ym#cd2019-7-13 19:00 -> 删除2019-7-13 19:00的提醒, 如用分钟增加的提醒可以用cl命令查询具体时间" +
+                                    $"{ENTER}#ym#cl -> 列出当前还未提醒的项目" +
+                                    $"{ENTER}特殊参数: (在消息内包含)" +
+                                    $"{ENTER}[at-22222] at某人" +
+                                    $"{ENTER}[-na] 提醒时不at自己" +
+                                    $"{ENTER}[-nr] 添加提醒时不发送反馈");
                                 break;
                             case 'A':
                                 var isTimeFormat = messageArraySpace[1].Contains(":");
@@ -136,17 +136,17 @@ namespace SheepQQBot3.View
                                     {
                                         var alarmMessage = customGroupAlarm.AlarmMessage.ToNormalText();
                                         alarmMessage = alarmMessage.ByteSubstring(isShowId ? 56 : 20);
-                                        sendMessage.Append($"{RN}[{(isShowId ? customGroupAlarm.Id.ToString() : string.Empty)}]"
+                                        sendMessage.Append($"{ENTER}[{(isShowId ? customGroupAlarm.Id.ToString() : string.Empty)}]"
                                             + $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}] {alarmMessage}");
                                     });
 
                                 if (string.IsNullOrEmpty(sendMessage.ToString()))
-                                    sendMessage.Append($"{RN}无任何提醒记录!");
+                                    sendMessage.Append($"{ENTER}无任何提醒记录!");
 
                                 break;
                             case 'T':
                                 isNoReply = false;
-                                sendMessage.Append($"{RN}{messageArraySpace[0].Substring(2).ToCqCode(targetId).Result}");
+                                sendMessage.Append($"{ENTER}{messageArraySpace[0][2..].ToCqCode(targetId).Result}");
                                 break;
                             default:
                                 sendMessage.Append(errorMsg);
@@ -161,15 +161,15 @@ namespace SheepQQBot3.View
                             if (groupAlarm != null)
                             {
                                 // 有记录, 则提示
-                                sendMessage.Append($"{RN}已存在 {addDateString} 的提醒记录!" +
-                                    $"{RN}提醒内容: {groupAlarm.AlarmMessage}");
+                                sendMessage.Append($"{ENTER}已存在 {addDateString} 的提醒记录!" +
+                                    $"{ENTER}提醒内容: {groupAlarm.AlarmMessage}");
                             }
                             else
                             {
                                 // 无记录, 则添加并发送反馈
                                 var newId = Guid.NewGuid();
                                 customGroupAlarms.Add(newId, new CustomGroupAlarm(newId, groupId, targetId, addDateTime, addMessage, !isNoAt));
-                                sendMessage.Append($"{RN}已添加时间为 {addDateString} 的提醒记录!");
+                                sendMessage.Append($"{ENTER}已添加时间为 {addDateString} 的提醒记录!");
                                 ConfigExtensions.SaveConfig();
                             }
                         }
@@ -183,18 +183,18 @@ namespace SheepQQBot3.View
                                 // 有记录, 则删除并发送反馈
                                 var deleteId = groupAlarm.Id;
                                 customGroupAlarms.Remove(deleteId);
-                                sendMessage.Append($"{RN}已删除 {deleteDateString}({deleteId}) 的提醒记录!");
+                                sendMessage.Append($"{ENTER}已删除 {deleteDateString}({deleteId}) 的提醒记录!");
                             }
                             else
                             {
                                 // 无记录, 则提醒错误
-                                sendMessage.Append($"{RN}不存在 {deleteDateString} 的提醒记录!");
+                                sendMessage.Append($"{ENTER}不存在 {deleteDateString} 的提醒记录!");
                             }
                         }
                     default:
                         // 不支持提示
                         isNoReply = false;
-                        sendMessage.Append($"{RN}不支持的命令内容!");
+                        sendMessage.Append($"{ENTER}不支持的命令内容!");
                         break;
                 }
 
