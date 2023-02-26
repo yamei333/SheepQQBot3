@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 using SheepQQBot3.Model.Enums;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -41,7 +42,7 @@ namespace SheepQQBot3.Model
 
         public GroupMessage(ReceiveData receiveData)
         {
-            DateTime = CommonExtensions.StartTime.AddSeconds(receiveData.Time);
+            DateTime = receiveData.Time.ToDateTime();
             UserId = receiveData.User_Id;
             Anonymous = receiveData.Anonymous;
             Font = receiveData.Font;
@@ -55,12 +56,12 @@ namespace SheepQQBot3.Model
 
         public GroupMessage(ClientData clientData)
         {
-            DateTime = CommonExtensions.StartTime.AddSeconds(clientData.Time);
+            DateTime = clientData.Time.ToDateTime();
             GroupId = clientData.Group_Id;
             Message = clientData.Message;
             RawMessage = clientData.Raw_Message;
             MessageId = clientData.Message_Id;
-            //MessageType = clientData.Message_Type;
+            //LogMessageType = clientData.Message_Type;
             Sender = clientData.Sender;
         }
     }

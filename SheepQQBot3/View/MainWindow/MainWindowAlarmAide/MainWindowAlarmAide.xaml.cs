@@ -46,7 +46,7 @@ namespace SheepQQBot3.View
         /// <param name="e"></param>
         private void AlarmAideList_OnGetGuid(object sender, RoutedEventArgs e)
         {
-            ClipboardExtensions.SetText(_vm.SelectedAlarmAideConfig.Id.ToString());
+            ClipboardExtensions.SetText(_vm.SelectedAlarmAideConfig?.Id.ToString());
             MessageBox.Show("已将Id复制到剪贴板");
         }
 

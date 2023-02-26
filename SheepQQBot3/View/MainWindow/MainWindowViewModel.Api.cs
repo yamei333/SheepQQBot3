@@ -142,7 +142,7 @@ namespace SheepQQBot3.View
                 //    return;
 
                 //if (groupMessage.UserId == 252961222)
-                //    _cqApi.SendMessage(MessageType.Group, groupMessage.GroupId, "你刚发了条消息");
+                //    _cqApi.SendMessage(LogMessageType.Group, groupMessage.GroupId, "你刚发了条消息");
             };
             cqEvent.Start();
 

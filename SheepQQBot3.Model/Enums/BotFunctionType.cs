@@ -1,7 +1,9 @@
 ﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Enums
 {
+    [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum BotFunctionType
     {
         Common_AlarmAide = 0,
@@ -13,6 +15,7 @@ namespace SheepQQBot3.Model.Enums
         Group_RepeatRevokeMessage = 2002,
         Group_FundHelper = 2003,
         Group_RandomSetu = 2004,
+        Group_LiveAlarm = 2005,
     }
 
     public static class BotFunctionTypeExtensions
@@ -30,6 +33,7 @@ namespace SheepQQBot3.Model.Enums
                 BotFunctionType.Group_RepeatRevokeMessage => "复读撤回消息",
                 BotFunctionType.Group_FundHelper => "基金助手",
                 BotFunctionType.Group_RandomSetu => "随机色图",
+                BotFunctionType.Group_LiveAlarm => "直播提醒",
                 _ => throw new System.NotImplementedException()
             };
         }
@@ -42,6 +46,7 @@ namespace SheepQQBot3.Model.Enums
                 BotFunctionType.Common_BlackList,
                 BotFunctionType.Group_RepeaterKiller,
                 BotFunctionType.Group_FundHelper,
+                BotFunctionType.Group_LiveAlarm,
             };
     }
 }

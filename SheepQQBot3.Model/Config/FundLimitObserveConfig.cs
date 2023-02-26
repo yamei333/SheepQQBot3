@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
 using System.Text.Json.Serialization;
 using MessagePack;
 using SheepQQBot3.Model.Enums;
@@ -11,17 +10,8 @@ namespace SheepQQBot3.Model.Config
     /// 基金阈值观测配置
     /// </summary>
     [MessagePackObject]
-    public class FundLimitObserveConfig : INotifyPropertyChanged
+    public class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
     {
-        [field: IgnoreMember, JsonIgnore]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        [Key(nameof(ConfigId))]
-        public Guid ConfigId { get; set; }
-
         /// <summary>
         /// 阈值观测名称
         /// </summary>
@@ -72,12 +62,12 @@ namespace SheepQQBot3.Model.Config
         /// 默认构造函数
         /// </summary>
         public FundLimitObserveConfig(
-            Guid configId,
+            Guid id,
             string limitObserveName,
             string condition,
             bool isActive = false)
         {
-            ConfigId = configId;
+            Id = id;
             LimitObserveName = limitObserveName;
             Condition = condition;
             _isActive = isActive;
@@ -88,6 +78,7 @@ namespace SheepQQBot3.Model.Config
     /// <summary>
     /// 阈值观测基金配置
     /// </summary>
+    [MessagePackObject]
     public class LimitObserveFundConfig
     {
         /// <summary>
@@ -100,7 +91,7 @@ namespace SheepQQBot3.Model.Config
         /// 观察类型
         /// </summary>
         [Key(nameof(FundObserveType))]
-        public FundObserveType FundObserveType;
+        public FundObserveType FundObserveType { get; set; }
 
         /// <summary>
         /// 播报阈值
@@ -118,9 +109,11 @@ namespace SheepQQBot3.Model.Config
         /// 播报阈值
         /// </summary>
         [IgnoreMember]
+        [JsonIgnore]
         public string AlertLimitString => $"{AlertLimit:0.00}";
 
         [IgnoreMember]
+        [JsonIgnore]
         public string FundObserveTypeString =>
             FundObserveType switch
             {

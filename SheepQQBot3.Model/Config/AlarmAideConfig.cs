@@ -1,7 +1,5 @@
 ﻿using System;
 using System.Collections.Concurrent;
-using System.ComponentModel;
-using System.Text.Json.Serialization;
 using MessagePack;
 
 namespace SheepQQBot3.Model.Config
@@ -10,18 +8,8 @@ namespace SheepQQBot3.Model.Config
     /// 闹钟助手配置
     /// </summary>
     [MessagePackObject]
-    public class AlarmAideConfig : INotifyPropertyChanged
+    public class AlarmAideConfig : NotifyPropertyChangedBase
     {
-        private bool _isActive;
-        private bool _isDefault;
-
-        
-        [field: IgnoreMember, JsonIgnore]
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        protected void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
         [Key(nameof(Id))]
         public Guid Id { get; set; }
 
@@ -52,10 +40,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_isDefault))]
+        private bool _isDefault;
+
         /// <summary>
         /// 是否默认投稿项
         /// </summary>
-        [Key(nameof(IsDefault))]
+        [IgnoreMember]
         public bool IsDefault
         {
             get => _isDefault;
@@ -66,10 +57,13 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
+        [Key(nameof(_isActive))]
+        private bool _isActive;
+
         /// <summary>
         /// 是否启用
         /// </summary>
-        [Key(nameof(IsActive))]
+        [IgnoreMember]
         public bool IsActive
         {
             get => _isActive;

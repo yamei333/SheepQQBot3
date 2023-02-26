@@ -32,8 +32,7 @@ namespace SheepQQBot3.View
             var targetId = groupMessage.Sender.User_Id;
             try
             {
-                var changedMessageSpace = message
-                    .Substring(COMMAND_FUNDHELPER_LIBRARY.Length);
+                var changedMessageSpace = message[COMMAND_FUNDHELPER_LIBRARY.Length..];
 
                 var changedMessage = changedMessageSpace
                     .Replace(SPACE, string.Empty);
@@ -45,14 +44,13 @@ namespace SheepQQBot3.View
                 {
                     case 'H':
                         sendMessage.Append($" 基金助手功能介绍:" +
-                                           $"{RN}#jj#c000001 -> 查询000001的持仓");
+                                           $"{ENTER}#jj#c000001 -> 查询000001的持仓");
                         break;
                     case 'C':
-
-                        var fundId = changedMessage.Substring(1);
+                        var fundId = changedMessage[1..];
                         if (string.IsNullOrEmpty(fundId))
                         {
-                            sendMessage.Append($"{RN}查询失败, 参数有误");
+                            sendMessage.Append($"{ENTER}查询失败, 参数有误");
                             break;
                         }
 
@@ -60,24 +58,24 @@ namespace SheepQQBot3.View
                         if (fundPositionData.Code == 200)
                         {
                             var fundStockData = fundPositionData.Data;
-                            sendMessage.Append($"{RN}{fundStockData.Title}");
-                            sendMessage.Append($"{RN}================");
+                            sendMessage.Append($"{ENTER}{fundStockData.Title}");
+                            sendMessage.Append($"{ENTER}================");
                             fundStockData.StockList.ForEach(each =>
                             {
                                 var stock = float.Parse(each[2].Replace("%", string.Empty));
                                 if (stock > 5)
-                                    sendMessage.Append($"{RN}{each[1]}({each[0]}) {each[2]}");
+                                    sendMessage.Append($"{ENTER}{each[1]}({each[0]}) {each[2]}");
                             });
                         }
                         else
                         {
-                            sendMessage.Append($"{RN}查询失败, 参数有误");
+                            sendMessage.Append($"{ENTER}查询失败, 参数有误");
                         }
                         break;
                     default:
                         // 不支持提示
                         isNoReply = false;
-                        sendMessage.Append($"{RN}不支持的命令内容!");
+                        sendMessage.Append($"{ENTER}不支持的命令内容!");
                         break;
                 }
 

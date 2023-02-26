@@ -5,10 +5,19 @@ using SheepQQBot3.SDK.Client;
 
 namespace SheepQQBot3.View
 {
+    /// <summary>
+    /// 存放公共变量
+    /// </summary>
     public static class PublicVar
     {
+        /// <summary>
+        /// 随机数产生器
+        /// </summary>
         public static Random Rand = new Random();
 
+        /// <summary>
+        /// 是否Debug模式
+        /// </summary>
         public static bool IsDebug = false;
 
         /// <summary>
@@ -42,18 +51,25 @@ namespace SheepQQBot3.View
         public const string SPACE_FULL = "　";
 
         /// <summary>
-        /// 回车符
+        /// 回车换行
         /// </summary>
         public const string ENTER = "\r\n";
 
         /// <summary>
-        /// 换行
+        /// <see cref="MainWindow"/>
         /// </summary>
-        public const string RN = ENTER;
-
         public static MainWindow MWindow { get; set; }
+
+        /// <summary>
+        /// <see cref="MainWindowViewModel"/>
+        /// </summary>
         public static MainWindowViewModel Vm { get; set; }
+
+        /// <summary>
+        /// <see cref="CQAPI"/>
+        /// </summary>
         public static CQAPI Api => Vm.CqApi;
+
         public static Process Gocq;
         public static GocqWindow GocqEmbedWindow;
 
@@ -65,7 +81,7 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 初始化全局变量
         /// </summary>
-        /// <param name="vm"></param>
+        /// <param name="vm"><see cref="MainWindowViewModel"/></param>
         public static void InitPublicVar(MainWindowViewModel vm)
         {
             Vm = vm;

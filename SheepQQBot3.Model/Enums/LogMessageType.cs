@@ -36,6 +36,11 @@ namespace SheepQQBot3.Model.Enums
         FundHelper,
 
         /// <summary>
+        /// 直播提醒消息
+        /// </summary>
+        LiveAlarm,
+
+        /// <summary>
         /// 群消息
         /// </summary>
         GroupMessage,

@@ -15,6 +15,10 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3.UnitTest", "She
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "SheepQQBot3", "SheepQQBot3\SheepQQBot3.csproj", "{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}"
 EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xunkong.Hoyolab", "Xunkong.Hoyolab\Xunkong.Hoyolab.csproj", "{0B482260-978A-47A2-BC9D-B6B3DA079254}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Xunkong.Core", "Xunkong.Core\Xunkong.Core.csproj", "{D58C5882-322A-48B8-AC5A-B43C25392B6B}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -45,6 +49,14 @@ Global
 		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{B6F304D2-6F1B-46CF-B7EB-53A6480DCDCD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{0B482260-978A-47A2-BC9D-B6B3DA079254}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{0B482260-978A-47A2-BC9D-B6B3DA079254}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{0B482260-978A-47A2-BC9D-B6B3DA079254}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{0B482260-978A-47A2-BC9D-B6B3DA079254}.Release|Any CPU.Build.0 = Release|Any CPU
+		{D58C5882-322A-48B8-AC5A-B43C25392B6B}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{D58C5882-322A-48B8-AC5A-B43C25392B6B}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{D58C5882-322A-48B8-AC5A-B43C25392B6B}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{D58C5882-322A-48B8-AC5A-B43C25392B6B}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

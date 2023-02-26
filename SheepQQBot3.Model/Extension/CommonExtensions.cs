@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.IO;
+using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
 using MessagePack;
@@ -9,7 +11,11 @@ namespace System
 {
     public static class CommonExtensions
     {
-        public static readonly DateTime StartTime = new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset);
+        public static readonly JsonSerializerOptions JsonOption = new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull
+        };
+
         private const string KH_LEFT = @"&#91;";
         private const string KH_RIGHT = @"&#93;";
 

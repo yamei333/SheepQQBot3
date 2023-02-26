@@ -65,7 +65,7 @@ namespace SheepQQBot3.View
                 return;
 
             var selectedSetConfig = _vm.SelectedSetConfig;
-            var configId = selectedFundAlarmConfig.ConfigId;
+            var configId = selectedFundAlarmConfig.Id;
             selectedSetConfig.FundAlarmConfigs = selectedSetConfig.FundAlarmConfigs
                 .CopyEdit(configId, fundAlarmConfig =>
                 {
@@ -136,7 +136,7 @@ namespace SheepQQBot3.View
                 return;
 
             var selectedSetConfig = _vm.SelectedSetConfig;
-            var configId = selectedFundLimitObserveConfig.ConfigId;
+            var configId = selectedFundLimitObserveConfig.Id;
             selectedSetConfig.FundLimitObserveConfigs = selectedSetConfig.FundLimitObserveConfigs
                 .CopyEdit(configId, fundLimitObserveConfig =>
                 {

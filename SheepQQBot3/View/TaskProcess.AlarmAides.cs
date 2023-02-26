@@ -1,9 +1,12 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.View.PublicVar;
@@ -31,9 +34,39 @@ namespace SheepQQBot3.View
                             setConfig.AlarmAideConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
                             async void DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
                             {
-                                if (!alarmAidesConfig.IsActive || !alarmAidesConfig.Condition.IsMatch(dateNowStr))
+                                if (!alarmAidesConfig.IsActive)
                                     return;
 
+                                var condition = alarmAidesConfig.Condition;
+                                var jsonCondition = RegexGenerator.ConditionJsonText();
+                                var match = jsonCondition.Match(condition);
+                                if (match.Success)
+                                {
+                                    var matchValue = match.Value;
+                                    condition = condition.Replace(matchValue, string.Empty);
+                                    var extendCondition = JsonSerializer.Deserialize<AlarmAideExtendCondition>(
+                                        matchValue.Replace("$", string.Empty));
+                                    if (extendCondition.DayOfMonthOffset.HasValue)
+                                    {
+                                        var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();
+                                        var (dayOfMonth, lastDayOfMonth) = YameiExtensions.GetDayOfMonthAndLastDayOfMonth(DateTime.Now);
+                                        if (dayOfMonthOffsetValue > 0)
+                                        {
+                                            if (dayOfMonthOffsetValue != dayOfMonth)
+                                                return;
+                                        }
+                                        else
+                                        {
+                                            if (dayOfMonthOffsetValue != -lastDayOfMonth)
+                                                return;
+                                        }
+                                    }
+                                }
+
+                                if (!condition.IsMatch(dateNowStr))
+                                    return;
+
+                                setConfig.AlarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
                                 // 删除过期发送内容
                                 DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
                                 // 发送闹钟助手消息

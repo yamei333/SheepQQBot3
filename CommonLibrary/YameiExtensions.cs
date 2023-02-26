@@ -1,10 +1,27 @@
 ﻿using NAudio.Wave;
-using Yamei.Common;
 
-namespace YameiLibrary
+namespace Yamei.Common
 {
-    public static class CommonExtensions
+    public static class YameiExtensions
     {
+        public static readonly DateTime StartTime = new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset);
+
+        public static DateTime ToDateTime(this long timeStamp)
+            => StartTime.AddSeconds(timeStamp);
+
+        public static DateTime ToDateTime(this int timeStamp)
+            => StartTime.AddSeconds(timeStamp);
+
+        /// <summary>
+        /// 获取给定日期是本月的第几天和倒数第几天
+        /// </summary>
+        public static (int DayOfMonth, int LastDayOfMonth) GetDayOfMonthAndLastDayOfMonth(DateTime date)
+        {
+            var dayOfMonth = date.Day;
+            var lastDayOfMonth = DateTime.DaysInMonth(date.Year, date.Month) - dayOfMonth + 1;
+            return (dayOfMonth, lastDayOfMonth);
+        }
+
         /// <summary>
         /// 播放声音
         /// </summary>

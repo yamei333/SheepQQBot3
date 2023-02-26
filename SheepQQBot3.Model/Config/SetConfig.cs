@@ -89,6 +89,12 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(RepeaterKillerConfigs))]
         public Dictionary<Guid, RepeaterKillerConfig> RepeaterKillerConfigs { get; set; }
 
+        /// <summary>
+        /// 直播提醒配置
+        /// </summary>
+        [Key(nameof(LiveAlarmConfigs))]
+        public Dictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
+
         #region 已执行内容的保存
 
         /// <summary>
@@ -114,6 +120,12 @@ namespace SheepQQBot3.Model.Config
         /// </summary>
         [Key(nameof(FundLimitObservedList))]
         public Dictionary<Guid, DateTime> FundLimitObservedList { get; set; }
+
+        /// <summary>
+        /// 保存已执行直播提醒任务 (不缓存)
+        /// </summary>
+        [IgnoreMember]
+        public Dictionary<Guid, DateTime> LiveAlarmedList { get; set; }
 
         #endregion 已执行内容的保存
 
@@ -157,8 +169,10 @@ namespace SheepQQBot3.Model.Config
             FundLimitObserveConfigs = new Dictionary<Guid, FundLimitObserveConfig>();
             FundAlarmedList = new Dictionary<Guid, DateTime>();
             FundLimitObservedList = new Dictionary<Guid, DateTime>();
+            LiveAlarmedList = new Dictionary<Guid, DateTime>();
             CustomGroupAlarms = new Dictionary<Guid, CustomGroupAlarm>();
             RepeaterKillerConfigs = new Dictionary<Guid, RepeaterKillerConfig>();
+            LiveAlarmConfigs = new Dictionary<Guid, LiveAlarmConfig>();
             InitBotFunctionIsEnabled();
 #if (!debug)
 #else

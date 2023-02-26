@@ -27,7 +27,7 @@ namespace SheepQQBot3.Model.Config
         public bool IsWarp => Encoding.Default.GetBytes(Content).Length > 42;
 
         [JsonIgnore]
-        public bool IsGroupMessage => MessageType == LogMessageType.GroupMessage;
+        public bool IsGroupMessage => LogMessageType == LogMessageType.GroupMessage;
 
         /// <summary>
         /// 是否有GroudId
@@ -35,20 +35,30 @@ namespace SheepQQBot3.Model.Config
         [JsonIgnore]
         public bool HasGroupId => !string.IsNullOrEmpty(GroupId);
 
-        public LogMessageType MessageType { get; set; }
+        public LogMessageType LogMessageType { get; set; }
+        public string MessageType { get; set; }
 
         public string OperatorId { get; set; }
         public string SenderId { get; set; }
         public string GroupId { get; set; }
         public string TargetId { get; set; }
+
+        /// <summary>
+        /// 其他ID
+        /// </summary>
+        public string OtherId { get; set; }
+
         public string MessageId { get; set; }
         public string Content { get; set; }
         public bool IsBlackList { get; set; }
 
         private readonly DateTime _logDate;
 
+        /// <summary>
+        /// 消息颜色
+        /// </summary>
         public string MessageColor
-            => MessageType switch
+            => LogMessageType switch
             {
                 LogMessageType.MetaData => DefaultColor,
                 LogMessageType.GroupMessage => DefaultColor,
@@ -57,16 +67,17 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.System_Info => DefaultColor,
                 LogMessageType.AlarmAide => DefaultColor,
                 LogMessageType.FundHelper => DefaultColor,
+                LogMessageType.LiveAlarm => DefaultColor,
                 LogMessageType.System_Error => "Red",
                 LogMessageType.System_Warning => "Blue",
                 _ => throw new ArgumentOutOfRangeException()
             };
 
         /// <summary>
-        /// <see cref="MessageType"/>说明
+        /// <see cref="LogMessageType"/>说明
         /// </summary>
         public string MessageTypeStr
-            => MessageType switch
+            => LogMessageType switch
             {
                 LogMessageType.MetaData => "元事件",
                 LogMessageType.GroupMessage => "群消息",
@@ -74,6 +85,7 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.GroupPoke => "群戳一戳",
                 LogMessageType.AlarmAide => "闹钟助手",
                 LogMessageType.FundHelper => "基金助手",
+                LogMessageType.LiveAlarm => "直播提醒",
                 LogMessageType.System_Info => "Bot消息",
                 LogMessageType.System_Error => "Bot错误",
                 LogMessageType.System_Warning => "Bot警告",
@@ -83,10 +95,10 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 初始化
         /// </summary>
-        protected RunLog(LogMessageType messageType, string content)
+        protected RunLog(LogMessageType logMessageType, string content)
         {
             _logDate = DateTime.Now;
-            MessageType = messageType;
+            LogMessageType = logMessageType;
             SenderId = SystemSenderId;
             Content = content;
             IsBlackList = false;
@@ -95,8 +107,8 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 初始化
         /// </summary>
-        protected RunLog(LogMessageType messageType, long senderId, string content)
-            : this(messageType, content)
+        protected RunLog(LogMessageType logMessageType, long senderId, string content)
+            : this(logMessageType, content)
         {
             SenderId = senderId.ToString();
         }
@@ -206,6 +218,30 @@ namespace SheepQQBot3.Model.Config
                     break;
                 case BotConfigTargetType.Private:
                     GroupId = "私聊消息";
+                    break;
+                case BotConfigTargetType.Common:
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 直播提醒日志类型
+    /// </summary>
+    public class RunLog_LiveAlarm : RunLog
+    {
+        public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
+            : base(LogMessageType.LiveAlarm, targetId, content)
+        {
+            OtherId = otherId;
+            switch (targetType)
+            {
+                case BotConfigTargetType.Group:
+                    MessageType = "群消息";
+                    break;
+                case BotConfigTargetType.Private:
+                    MessageType = "私聊消息";
                     break;
                 case BotConfigTargetType.Common:
                 default:

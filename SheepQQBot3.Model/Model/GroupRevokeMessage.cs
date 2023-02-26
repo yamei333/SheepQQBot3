@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -25,7 +26,7 @@ namespace SheepQQBot3.Model
 
         public GroupRevokeMessage(ReceiveData receiveData)
         {
-            DateTime = CommonExtensions.StartTime.AddSeconds(receiveData.Time);
+            DateTime = receiveData.Time.ToDateTime();
             OperatorId = receiveData.Operator_Id;
             UserId = receiveData.User_Id;
             GroupId = receiveData.Group_Id;

@@ -35,6 +35,7 @@ namespace SheepQQBot3.View
                                 if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))
                                     return;
 
+                                setConfig.FundAlarmedList ??= new Dictionary<Guid, DateTime>();
                                 // 删除过期发送内容
                                 DeleteExpiredData(setConfig.FundAlarmedList, dateNow);
                                 // 发送基金播报消息
@@ -46,6 +47,7 @@ namespace SheepQQBot3.View
                             {
                                 if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr)) return;
 
+                                setConfig.FundLimitObservedList ??= new Dictionary<Guid, DateTime>();
                                 // 删除过期发送内容
                                 DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
                                 // 发送基金阈值观测消息
@@ -82,7 +84,7 @@ namespace SheepQQBot3.View
             DateTime now,
             bool forceSend = false)
         {
-            var configId = fundAlarmConfig.ConfigId;
+            var configId = fundAlarmConfig.Id;
             if (!forceSend && setConfig.FundAlarmedList.ContainsKey(configId))
                 return;
 
@@ -95,6 +97,9 @@ namespace SheepQQBot3.View
                 return;
 
             var fundInfo = FundExtensions.GetFundData(fundIds);
+            if (fundInfo == null)
+                return;
+
             var sendMessage = FundExtensions.GetFundAlarmString(fundInfo, alarmFundConfigs);
             if (string.IsNullOrEmpty(sendMessage))
                 return;
@@ -131,7 +136,7 @@ namespace SheepQQBot3.View
             DateTime now,
             bool forceSend = false)
         {
-            var configId = fundLimitObserveConfig.ConfigId;
+            var configId = fundLimitObserveConfig.Id;
             if (!forceSend && setConfig.FundLimitObservedList.ContainsKey(configId))
                 return;
 
@@ -147,6 +152,9 @@ namespace SheepQQBot3.View
                 return;
 
             var fundInfo = FundExtensions.GetFundData(fundIds);
+            if (fundInfo == null)
+                return;
+
             var sendMessage = FundExtensions.GetFundLimitString(fundInfo, activeFundLimitObserveConfigs);
             if (string.IsNullOrEmpty(sendMessage))
                 return;

@@ -17,15 +17,18 @@
                  Stretch="None"
                  TileMode="None">
         <VisualBrush.Visual>
-            <TextBlock FontStyle="Italic"
+            <TextBlock Margin="2,0,0,0"
+                       FontStyle="Italic"
                        Text=" 请输入内容" />
         </VisualBrush.Visual>
     </VisualBrush>
     <Style x:Key="HintTextStyle"
            TargetType="TextBox">
+        <Setter Property="BorderBrush" Value="Black" />
+        <Setter Property="BorderThickness" Value="1" />
         <Setter Property="VerticalAlignment" Value="Center" />
         <Setter Property="Height" Value="24" />
-        <Setter Property="Padding" Value="2,0,0,0" />
+        <Setter Property="Padding" Value="2" />
         <Style.Triggers>
             <Trigger Property="Text" Value="{x:Null}">
                 <Setter Property="Background" Value="{StaticResource HintText}" />
