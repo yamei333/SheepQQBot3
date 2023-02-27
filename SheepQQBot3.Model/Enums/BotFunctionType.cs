@@ -16,6 +16,7 @@ namespace SheepQQBot3.Model.Enums
         Group_FundHelper = 2003,
         Group_RandomSetu = 2004,
         Group_LiveAlarm = 2005,
+        Group_GenshinHelper = 2200,
     }
 
     public static class BotFunctionTypeExtensions
@@ -34,6 +35,7 @@ namespace SheepQQBot3.Model.Enums
                 BotFunctionType.Group_FundHelper => "基金助手",
                 BotFunctionType.Group_RandomSetu => "随机色图",
                 BotFunctionType.Group_LiveAlarm => "直播提醒",
+                BotFunctionType.Group_GenshinHelper => "原神助手",
                 _ => throw new System.NotImplementedException()
             };
         }
@@ -47,6 +49,7 @@ namespace SheepQQBot3.Model.Enums
                 BotFunctionType.Group_RepeaterKiller,
                 BotFunctionType.Group_FundHelper,
                 BotFunctionType.Group_LiveAlarm,
+                BotFunctionType.Group_GenshinHelper,
             };
     }
 }

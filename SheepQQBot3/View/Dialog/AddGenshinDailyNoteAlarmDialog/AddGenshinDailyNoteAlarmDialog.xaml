@@ -1,0 +1,85 @@
+﻿<local:AddDialogWindowBase x:Class="SheepQQBot3.View.AddGenshinDailyNoteAlarmDialog"
+                           xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+                           xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                           xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+                           xmlns:local="clr-namespace:SheepQQBot3.View"
+                           xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+                           Title="原神树脂提醒配置"
+                           Width="216"
+                           Height="124"
+                           x:TypeArguments="local:AddGenshinDailyNoteAlarmDialogViewModel"
+                           mc:Ignorable="d">
+    <Window.DataContext>
+        <local:AddGenshinDailyNoteAlarmDialogViewModel />
+    </Window.DataContext>
+    <Grid Margin="4,4,4,0">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="30" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="72" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+        <Grid.Resources>
+            <Style x:Key="HeaderTextBlockStyle"
+                   TargetType="TextBlock">
+                <Setter Property="Margin" Value="3,2,0,0" />
+            </Style>
+        </Grid.Resources>
+        <TextBlock Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="名称：" />
+        <TextBox x:Name="TxtConfigName"
+                 Grid.Column="1"
+                 Margin="0,2,0,0"
+                 Style="{StaticResource HintTextStyle}"
+                 Text="{Binding ConfigName,
+                                UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Grid.Row="1"
+                   Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="Cookies：" />
+        <TextBox x:Name="TxtCookies"
+                 Grid.Row="1"
+                 Grid.Column="1"
+                 Margin="0,2,0,0"
+                 Style="{StaticResource HintTextStyle}"
+                 Text="{Binding Cookies,
+                                UpdateSourceTrigger=PropertyChanged}" />
+        <Grid Grid.Row="3"
+              Grid.Column="0"
+              Grid.ColumnSpan="2">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="*" />
+            </Grid.ColumnDefinitions>
+            <Grid.Resources>
+                <Style x:Key="ButtonStyle"
+                       TargetType="Button">
+                    <Setter Property="Height" Value="20" />
+                    <Setter Property="Width" Value="60" />
+                </Style>
+            </Grid.Resources>
+            <Button Click="OK_Click"
+                    Content="确定">
+                <Button.Style>
+                    <Style BasedOn="{StaticResource ButtonStyle}"
+                           TargetType="Button">
+                        <Setter Property="IsEnabled" Value="True" />
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ElementName=TxtLiveRoomId,
+                                                           Path=Text}"
+                                         Value="">
+                                <Setter Property="IsEnabled" Value="False" />
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+            <Button Grid.Column="1"
+                    Click="Cancel_Click"
+                    Content="取消"
+                    Style="{StaticResource ButtonStyle}" />
+        </Grid>
+    </Grid>
+</local:AddDialogWindowBase>

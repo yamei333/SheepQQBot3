@@ -46,7 +46,7 @@ namespace SheepQQBot3.View
         public MainWindowViewModel()
         {
             PublicVar.InitPublicVar(this);
-            Title = "助手哈莉 - Ver 0.6.1.3";
+            Title = "助手哈莉 - Ver 0.6.2.0";
             IsLoadComplete = false;
 
             InitViewModel();
@@ -72,6 +72,7 @@ namespace SheepQQBot3.View
             MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
             MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
             MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
+            MainWindowGenshinHelperViewModel = new MainWindowGenshinHelperViewModel();
         }
 
         public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -81,6 +82,7 @@ namespace SheepQQBot3.View
         public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
         public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
         public MainWindowLiveAlarmViewModel MainWindowLiveAlarmViewModel { get; set; }
+        public MainWindowGenshinHelperViewModel MainWindowGenshinHelperViewModel { get; set; }
 
         public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 

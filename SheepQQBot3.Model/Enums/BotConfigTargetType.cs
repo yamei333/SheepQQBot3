@@ -51,6 +51,7 @@ namespace SheepQQBot3.Model.Enums
                     BotFunctionType.Group_RandomSetu,
                     BotFunctionType.Group_RepeaterKiller,
                     BotFunctionType.Group_LiveAlarm,
+                    BotFunctionType.Group_GenshinHelper,
                 },
                 BotConfigTargetType.Private => new HashSet<BotFunctionType>
                 {
