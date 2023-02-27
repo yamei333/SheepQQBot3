@@ -10,9 +10,19 @@ namespace SheepQQBot3.View;
 public class AddDialogWindowBase<T> : Window
     where T : class, INotifyPropertyChanged, new()
 {
+    /// <summary>
+    /// <see cref="DialogMode"/>
+    /// </summary>
     protected DialogMode Mode { get; set; }
-    protected T Vm;
 
+    /// <summary>
+    /// 对应的ViewModel
+    /// </summary>
+    public T Vm { get; set; }
+
+    /// <summary>
+    /// 默认构造函数
+    /// </summary>
     public AddDialogWindowBase(Window owner, object menuItem, DialogMode mode, string title = "")
     {
         // MEMO : 设置Window的Style

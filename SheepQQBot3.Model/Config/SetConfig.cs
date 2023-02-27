@@ -95,6 +95,12 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(LiveAlarmConfigs))]
         public Dictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
 
+        /// <summary>
+        /// 原神助手配置
+        /// </summary>
+        [Key(nameof(GenshinHelperConfig))]
+        public GenshinHelperConfig GenshinHelperConfig { get; set; }
+
         #region 已执行内容的保存
 
         /// <summary>

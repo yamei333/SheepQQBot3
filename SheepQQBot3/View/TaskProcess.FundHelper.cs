@@ -7,6 +7,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
+using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
@@ -18,7 +19,7 @@ namespace SheepQQBot3.View
         /// </summary>
         public static void FundHelper()
         {
-            //AddRunLog(new RunLog_SystemInfo("基金助手 已开启"));
+            AddRunLog(new RunLog_SystemInfo("基金助手 模块已运行"));
             while (true)
             {
                 if (Api?.IsConnected == true)

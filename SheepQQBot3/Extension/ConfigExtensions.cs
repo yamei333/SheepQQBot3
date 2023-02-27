@@ -40,7 +40,7 @@ namespace SheepQQBot3.Extensions
                 // 读取配置
                 var configFilePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\SheepQQBot3Config.txt";
                 if (File.Exists(configFilePath) && MessageBox.Show(
-                    "检测到 SheepQQBot3Config.txt\n真的要导入该文件作为新配置吗?\n!! 将会覆盖当前配置 !!",
+                    $"检测到 SheepQQBot3Config.txt{ENTER}真的要导入该文件作为新配置吗?{ENTER}!! 将会覆盖当前配置 !!",
                     "警告",
                     MessageBoxButton.YesNo,
                     MessageBoxImage.Warning,
@@ -87,7 +87,7 @@ namespace SheepQQBot3.Extensions
                 if (!isImportConfigFileExists)
                 {
                     WriteJsonConfig(jsonText);
-                    MessageBox.Show("读取配置时发生错误! 已导出文件至 SheepQQBot3ConfigBak.txt\n确认修改完成后创建 SheepQQBot3Config.txt 可按此文件配置重新加载");
+                    MessageBox.Show($"读取配置时发生错误! 已导出文件至 SheepQQBot3ConfigBak.txt{ENTER}确认修改完成后创建 SheepQQBot3Config.txt 可按此文件配置重新加载");
                 }
 
                 Application.Current.Shutdown();

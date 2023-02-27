@@ -21,7 +21,7 @@ public static partial class TaskProcess
     /// </summary>
     public static void LiveAlarm()
     {
-        AddRunLog(new RunLog_SystemInfo("[直播提醒]模块已运行"));
+        AddRunLog(new RunLog_SystemInfo("直播提醒 模块已运行"));
         while (true)
         {
             if (Api?.IsConnected == true)

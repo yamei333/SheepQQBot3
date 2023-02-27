@@ -35,36 +35,17 @@ namespace SheepQQBot3.Model.Config
                 _ => string.Empty
             };
 
-        [Key(nameof(_isActive))]
-        private bool _isActive;
-
-        /// <summary>
-        /// 是否启用
-        /// </summary>
-        [IgnoreMember]
-        public bool IsActive
-        {
-            get => _isActive;
-            set
-            {
-                _isActive = value;
-                OnPropertyChanged(nameof(IsActive));
-            }
-        }
-
         /// <summary>
         /// 默认构造函数
         /// </summary>
         public LiveAlarmConfig(
             Guid id,
             LiveType liveType,
-            long liveRoomId,
-            bool isActive = false)
+            long liveRoomId)
         {
             Id = id;
             LiveType = liveType;
             LiveRoomId = liveRoomId;
-            _isActive = isActive;
         }
     }
 }
