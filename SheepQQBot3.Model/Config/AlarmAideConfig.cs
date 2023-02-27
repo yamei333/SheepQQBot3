@@ -5,14 +5,11 @@ using MessagePack;
 namespace SheepQQBot3.Model.Config
 {
     /// <summary>
-    /// 闹钟助手配置
+    /// 直播提醒配置
     /// </summary>
     [MessagePackObject]
-    public class AlarmAideConfig : NotifyPropertyChangedBase
+    public class AlarmAideConfig : NotifyPropertyChangedConfigBase
     {
-        [Key(nameof(Id))]
-        public Guid Id { get; set; }
-
         /// <summary>
         /// 闹钟名称
         /// </summary>
@@ -25,7 +22,9 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(Condition))]
         public string Condition { get; set; }
 
+        [Key(nameof(_alarmTexts))]
         private ConcurrentDictionary<int, string> _alarmTexts;
+
         /// <summary>
         /// 闹钟消息
         /// </summary>
@@ -60,30 +59,17 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(_isActive))]
         private bool _isActive;
 
-        /// <summary>
-        /// 是否启用
-        /// </summary>
-        [IgnoreMember]
-        public bool IsActive
-        {
-            get => _isActive;
-            set
-            {
-                _isActive = value;
-                OnPropertyChanged(nameof(IsActive));
-            }
-        }
-
+        /// <inheritdoc />
         public AlarmAideConfig(string alarmName, string condition)
         {
             Id = Guid.NewGuid();
             AlarmName = alarmName;
             Condition = condition;
-            IsActive = false;
             IsDefault = false;
             AlarmTexts = new ConcurrentDictionary<int, string>();
         }
 
+        /// <inheritdoc />
         public AlarmAideConfig()
         {
         }

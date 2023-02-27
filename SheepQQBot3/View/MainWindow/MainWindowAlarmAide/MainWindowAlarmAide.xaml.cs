@@ -12,6 +12,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;
+using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
 {
@@ -312,7 +313,7 @@ namespace SheepQQBot3.View
                 _vm.SelectedAlarmAideConfig.AlarmTexts = new ConcurrentDictionary<int, string>(alarmTexts);
 
                 sr.Close();
-                MessageBox.Show($"共导入 {importCount} 条记录!{(importFailedCount > 0 ? $"\n其中 {importFailedCount} 条为重复项目, 忽略导入" : string.Empty)}");
+                MessageBox.Show($"共导入 {importCount} 条记录!{(importFailedCount > 0 ? $"{ENTER}其中 {importFailedCount} 条为重复项目, 忽略导入" : string.Empty)}");
             }
             catch (Exception)
             {

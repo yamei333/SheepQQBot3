@@ -11,25 +11,25 @@ namespace CommonLibrary
 
         private class YameiLog
         {
-            private string logPath;
-            private string ext;
+            private readonly string _logPath;
+            private readonly string _ext;
 
             public YameiLog()
             {
-                logPath = DateTime.Now.ToString("yyyyMMddHHmmss");
-                ext = ".log";
+                _logPath = DateTime.Now.ToString("yyyyMMddHHmmss");
+                _ext = ".log";
             }
 
             public YameiLog(string fileName)
             {
-                logPath = fileName;
-                ext = ".log";
+                _logPath = fileName;
+                _ext = ".log";
             }
 
             public YameiLog(string fileName, string fileExt)
             {
-                logPath = fileName;
-                ext = fileExt;
+                _logPath = fileName;
+                _ext = fileExt;
             }
 
             public void WriteLog(LogType logType, string logText)
@@ -37,10 +37,9 @@ namespace CommonLibrary
                 if (!Directory.Exists("Log"))
                     Directory.CreateDirectory("Log");
 
-                var fs = new FileStream($@"Log\{logPath}{ext}", FileMode.Append, FileAccess.Write);
+                var fs = new FileStream($@"Log\{_logPath}{_ext}", FileMode.Append, FileAccess.Write);
                 var sw = new StreamWriter(fs, Encoding.UTF8);
                 var dt = DateTime.Now;
-
                 var typeStr = logType switch
                 {
                     LogType.Debug => "☆",
@@ -50,7 +49,7 @@ namespace CommonLibrary
                     LogType.Error => "×",
                     _ => "@"
                 };
-                sw.WriteLine($"{dt.ToShortDateString()} {dt.ToLongTimeString()}-{typeStr}=>{logText}");
+                sw.Write($"\r\n{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
                 sw.Close();
                 fs.Close();
             }

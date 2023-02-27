@@ -37,8 +37,9 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions.HttpGetStringAsync(
-                    @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=thumb&size=original{(r18 ? "&r18=1" : string.Empty)}");
+                setuJsonText = await HttpExtensions
+                    .HttpGetStringAsync(@$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}")
+                    .ConfigureAwait(false);
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
@@ -51,7 +52,7 @@ namespace SheepQQBot3.Model.Extension
             return new SetuInfo(
                 setuData.SetuInfo,
                 setuData.Urls.Original,
-                setuData.Urls.Thumb);
+                setuData.Urls.Small);
         }
 
         private static readonly Regex _regGetImageId_Rainchan = RegexGenerator.GetImageId_RainChan();
@@ -63,9 +64,13 @@ namespace SheepQQBot3.Model.Extension
             var imageId = string.Empty;
             try
             {
-                var httpResponse = await HttpExtensions.HttpGetAsync(@"https://pximg.rainchan.win/img");
+                var httpResponse = await HttpExtensions
+                    .HttpGetAsync(@"https://pximg.rainchan.win/img")
+                    .ConfigureAwait(false);
                 imageId = _regGetImageId_Rainchan.Match(httpResponse.RequestMessage.RequestUri.OriginalString).Value;
-                setuJsonText = await HttpExtensions.HttpGetStringAsync(@$"https://pximg.rainchan.win/imginfo?img_id={imageId}");
+                setuJsonText = await HttpExtensions
+                    .HttpGetStringAsync(@$"https://pximg.rainchan.win/imginfo?img_id={imageId}")
+                    .ConfigureAwait(false);
                 setuData = JsonSerializer.Deserialize<SetuData_Rainchan>(setuJsonText);
             }
             catch (Exception e)
@@ -86,7 +91,9 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions.HttpGetStringAsync(@"https://setu.yuban10703.xyz/setu");
+                setuJsonText = await HttpExtensions
+                    .HttpGetStringAsync(@"https://setu.yuban10703.xyz/setu")
+                    .ConfigureAwait(false);
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Yuban>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
@@ -99,7 +106,8 @@ namespace SheepQQBot3.Model.Extension
             return new SetuInfo(
                 setuData.SetuInfo,
                 setuData.Urls.Original.Replace(Pximg, PixivReTarget),
-                setuData.Urls.Medium.Replace(Pximg, PixivReTarget).Replace("540x540_70", "250x250_80_a2"));
+                setuData.Urls.Medium.Replace(Pximg, PixivReTarget));
+            //setuData.Urls.Medium.Replace(Pximg, PixivReTarget).Replace("540x540_70", "250x250_80_a2"));
         }
     }
 }

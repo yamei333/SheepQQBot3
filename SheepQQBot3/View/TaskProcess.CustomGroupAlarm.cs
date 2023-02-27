@@ -5,6 +5,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;
+using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
@@ -16,6 +17,7 @@ namespace SheepQQBot3.View
         /// </summary>
         public static void CustomGroupAlarm()
         {
+            AddRunLog(new RunLog_SystemInfo("自定义群提醒 模块已运行"));
             // MEMO : 清理过期提醒
             ClearHistoryData();
 

@@ -20,7 +20,7 @@ namespace SheepQQBot3.View
         /// </summary>
         public static void AlarmAides()
         {
-            //AddRunLog(new RunLog_SystemInfo("闹钟助手 已开启"));
+            AddRunLog(new RunLog_SystemInfo("闹钟助手 模块已运行"));
             while (true)
             {
                 if (Api?.IsConnected == true)

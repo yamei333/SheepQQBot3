@@ -39,36 +39,17 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
-        [Key(nameof(_isActive))]
-        private bool _isActive;
-
-        /// <summary>
-        /// 是否启用
-        /// </summary>
-        [IgnoreMember]
-        public bool IsActive
-        {
-            get => _isActive;
-            set
-            {
-                _isActive = value;
-                OnPropertyChanged(nameof(IsActive));
-            }
-        }
-
         /// <summary>
         /// 默认构造函数
         /// </summary>
         public FundAlarmConfig(
             Guid id,
             string alarmName,
-            string condition,
-            bool isActive = false)
+            string condition)
         {
             Id = id;
             AlarmName = alarmName;
             Condition = condition;
-            _isActive = isActive;
             _alarmFundConfigs = new ConcurrentDictionary<int, AlarmFundConfig>();
         }
     }
