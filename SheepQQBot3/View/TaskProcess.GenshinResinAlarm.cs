@@ -50,7 +50,7 @@ public static partial class TaskProcess
                     });
             }
 
-            CommonExtensions.Sleep(60000);
+            CommonExtensions.Sleep(240000);
         }
     }
 
@@ -92,30 +92,33 @@ public static partial class TaskProcess
 
         #region 树脂
 
-        switch (currentResin)
+        if (genshinResinAlarm.Resin)
         {
-            case 155:
-            case 140:
-            case 120:
-                AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], {_resinMessage.Random()}",
-                    GenshinDailyNoteAlarmType.Resin);
-                break;
-            default:
-                if (currentResin >= 85 && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
-                {
-                    AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], " +
-                                  $"体力会在明天10点前爆炸, 你怎么睡得着!",
+            switch (currentResin)
+            {
+                case 155:
+                case 140:
+                case 120:
+                    AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], {_resinMessage.Random()}",
                         GenshinDailyNoteAlarmType.Resin);
-                }
+                    break;
+                default:
+                    if (currentResin >= 85 && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
+                    {
+                        AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], " +
+                                       $"体力会在明天10点前爆炸, 你怎么睡得着!",
+                            GenshinDailyNoteAlarmType.Resin);
+                    }
 
-                break;
+                    break;
+            }
         }
 
         #endregion 树脂
 
         #region 每日任务
 
-        if (!dailyNote.IsExtraTaskRewardReceived && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
+        if (genshinResinAlarm.DailyMission && !dailyNote.IsExtraTaskRewardReceived && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
             AddSendMessage($"今天每日任务还没做, 要血亏了!", GenshinDailyNoteAlarmType.DailyMission);
 
         #endregion 每日任务
@@ -123,7 +126,7 @@ public static partial class TaskProcess
         #region 洞天宝钱
 
         var potCoin = dailyNote.CurrentHomeCoin;
-        if (RegexGenerator.GenshinPotCoin().IsMatch(dateNowStr) && potCoin >= 2000)
+        if (genshinResinAlarm.PotCoin && RegexGenerator.GenshinPotCoin().IsMatch(dateNowStr) && potCoin >= 2000)
             AddSendMessage($"当前洞天宝钱为[{potCoin}/{dailyNote.MaxHomeCoin}], 快满了!",
                 GenshinDailyNoteAlarmType.PotCoin);
 
@@ -131,7 +134,7 @@ public static partial class TaskProcess
 
         #region 参量质变仪
 
-        if (dailyNote.Transformer.Obtained && RegexGenerator.GenshinTransformer().IsMatch(dateNowStr))
+        if (genshinResinAlarm.Transformer && dailyNote.Transformer.Obtained && RegexGenerator.GenshinTransformer().IsMatch(dateNowStr))
             AddSendMessage($"参量质变仪可用了!", GenshinDailyNoteAlarmType.Transformer);
 
         #endregion 参量质变仪
