@@ -161,7 +161,7 @@ namespace SheepQQBot3.View
                     };
 
                     await Api.SendGroupMessage(groupId,
-                        $"[CQ:at,qq={targetId}] {_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
+                        $"{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
                     var setuInfo = await randomSetu.Random().Invoke();
                     var fileName = string.Empty;
                     var getSuccessed = false;

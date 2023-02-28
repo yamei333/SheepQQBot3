@@ -41,6 +41,11 @@ namespace SheepQQBot3.Model.Enums
         LiveAlarm,
 
         /// <summary>
+        /// 原神每日提醒消息
+        /// </summary>
+        GenshinDailyNoteAlarm,
+
+        /// <summary>
         /// 群消息
         /// </summary>
         GroupMessage,

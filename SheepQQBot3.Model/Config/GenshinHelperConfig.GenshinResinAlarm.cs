@@ -16,6 +16,12 @@ namespace SheepQQBot3.Model.Config
         public string ConfigName { get; set; }
 
         /// <summary>
+        /// 提醒对象QQ号
+        /// </summary>
+        [Key(nameof(TargetId))]
+        public long TargetId { get; set; }
+
+        /// <summary>
         /// Cookies
         /// </summary>
         [Key(nameof(Cookies))]
@@ -93,11 +99,13 @@ namespace SheepQQBot3.Model.Config
         public GenshinResinAlarm(
             Guid id,
             string configName,
-            string cookies)
+            string cookies,
+            long targetId)
         {
             Id = id;
             ConfigName = configName;
             Cookies = cookies;
+            TargetId = targetId;
             Resin = true;
             DailyMission = true;
             PotCoin = true;

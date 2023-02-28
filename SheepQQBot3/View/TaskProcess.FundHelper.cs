@@ -64,16 +64,17 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 删除过期发送内容
         /// </summary>
-        private static void DeleteExpiredData(
-            IDictionary<Guid, DateTime> dateTimelist,
+        private static void DeleteExpiredData<T>(
+            IDictionary<T, DateTime> dateTimelist,
             DateTime now,
             int totalSecond = 120)
+            where T : unmanaged
         {
-            var dateTimes = dateTimelist
+            var deleteKeys = dateTimelist
                 .Where(each => (now - each.Value).TotalSeconds > totalSecond)
                 .Select(each => each.Key)
                 .ToArray();
-            dateTimes.ForEach(each => dateTimelist.Remove(each));
+            deleteKeys.ForEach(each => dateTimelist.Remove(each));
         }
 
         /// <summary>

@@ -17,11 +17,12 @@ namespace SheepQQBot3.View
         /// <inheritdoc />
         public AddGenshinDailyNoteAlarmDialog(
             Window owner, object menuItem, DialogMode mode,
-            string configName, string cookies)
+            string configName, string cookies, long targetId)
             : this(owner, menuItem, mode)
         {
             Vm.ConfigName = configName;
             Vm.Cookies = cookies;
+            Vm.TargetId = targetId;
         }
 
         /// <inheritdoc />

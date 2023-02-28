@@ -37,9 +37,8 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions
-                    .HttpGetStringAsync(@$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}")
-                    .ConfigureAwait(false);
+                setuJsonText = await HttpExtensions.HttpGetStringAsync(
+                    @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}");
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
@@ -68,9 +67,8 @@ namespace SheepQQBot3.Model.Extension
                     .HttpGetAsync(@"https://pximg.rainchan.win/img")
                     .ConfigureAwait(false);
                 imageId = _regGetImageId_Rainchan.Match(httpResponse.RequestMessage.RequestUri.OriginalString).Value;
-                setuJsonText = await HttpExtensions
-                    .HttpGetStringAsync(@$"https://pximg.rainchan.win/imginfo?img_id={imageId}")
-                    .ConfigureAwait(false);
+                setuJsonText = await HttpExtensions.HttpGetStringAsync(
+                    @$"https://pximg.rainchan.win/imginfo?img_id={imageId}");
                 setuData = JsonSerializer.Deserialize<SetuData_Rainchan>(setuJsonText);
             }
             catch (Exception e)
@@ -91,9 +89,8 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions
-                    .HttpGetStringAsync(@"https://setu.yuban10703.xyz/setu")
-                    .ConfigureAwait(false);
+                setuJsonText = await HttpExtensions.HttpGetStringAsync(
+                    @"https://setu.yuban10703.xyz/setu");
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Yuban>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }

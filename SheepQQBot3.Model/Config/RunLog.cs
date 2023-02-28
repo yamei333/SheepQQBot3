@@ -68,6 +68,7 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.AlarmAide => DefaultColor,
                 LogMessageType.FundHelper => DefaultColor,
                 LogMessageType.LiveAlarm => DefaultColor,
+                LogMessageType.GenshinDailyNoteAlarm => DefaultColor,
                 LogMessageType.System_Error => "Red",
                 LogMessageType.System_Warning => "Blue",
                 _ => throw new ArgumentOutOfRangeException()
@@ -86,6 +87,7 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.AlarmAide => "闹钟助手",
                 LogMessageType.FundHelper => "基金助手",
                 LogMessageType.LiveAlarm => "直播提醒",
+                LogMessageType.GenshinDailyNoteAlarm => "原神每日提醒",
                 LogMessageType.System_Info => "Bot消息",
                 LogMessageType.System_Error => "Bot错误",
                 LogMessageType.System_Warning => "Bot警告",
@@ -186,8 +188,12 @@ namespace SheepQQBot3.Model.Config
         }
     }
 
+    /// <summary>
+    /// 闹钟助手日志类型
+    /// </summary>
     public class RunLog_AlarmAide : RunLog
     {
+        /// <inheritdoc />
         public RunLog_AlarmAide(BotConfigTargetType targetType, long targetId, string content)
             : base(LogMessageType.AlarmAide, targetId, content)
         {
@@ -206,8 +212,12 @@ namespace SheepQQBot3.Model.Config
         }
     }
 
+    /// <summary>
+    /// 基金助手日志类型
+    /// </summary>
     public class RunLog_FundHelper : RunLog
     {
+        /// <inheritdoc />
         public RunLog_FundHelper(BotConfigTargetType targetType, long targetId, string content)
             : base(LogMessageType.FundHelper, targetId, content)
         {
@@ -231,10 +241,35 @@ namespace SheepQQBot3.Model.Config
     /// </summary>
     public class RunLog_LiveAlarm : RunLog
     {
+        /// <inheritdoc />
         public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
             : base(LogMessageType.LiveAlarm, targetId, content)
         {
             OtherId = otherId;
+            switch (targetType)
+            {
+                case BotConfigTargetType.Group:
+                    MessageType = "群消息";
+                    break;
+                case BotConfigTargetType.Private:
+                    MessageType = "私聊消息";
+                    break;
+                case BotConfigTargetType.Common:
+                default:
+                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
+            }
+        }
+    }
+
+    /// <summary>
+    /// 直播提醒日志类型
+    /// </summary>
+    public class RunLog_GenshinDailyNoteAlarm : RunLog
+    {
+        /// <inheritdoc />
+        public RunLog_GenshinDailyNoteAlarm(BotConfigTargetType targetType, long senderId, string content)
+            : base(LogMessageType.GenshinDailyNoteAlarm, senderId, content)
+        {
             switch (targetType)
             {
                 case BotConfigTargetType.Group:
