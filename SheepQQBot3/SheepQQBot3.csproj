@@ -62,6 +62,7 @@
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj" />
+    <ProjectReference Include="..\Xunkong.Hoyolab\Xunkong.Hoyolab.csproj" />
   </ItemGroup>
 
   <ItemGroup>

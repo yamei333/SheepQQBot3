@@ -37,5 +37,19 @@ namespace SheepQQBot3.View
                 OnPropertyChanged(nameof(Cookies));
             }
         }
+
+        private long? _targetId;
+        /// <summary>
+        /// 目标ID
+        /// </summary>
+        public long? TargetId
+        {
+            get => _targetId;
+            set
+            {
+                _targetId = value;
+                OnPropertyChanged(nameof(TargetId));
+            }
+        }
     }
 }

@@ -27,7 +27,7 @@ namespace SheepQQBot3.Model.Extension
         }
 
         /// <summary>
-        /// HttpGet返回string
+        /// HttpGet返回string, 不需要使用<see cref="Task.ConfigureAwait"/>
         /// </summary>
         public static async Task<string> HttpGetStringAsync(string url)
         {

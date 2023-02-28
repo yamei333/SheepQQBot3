@@ -36,5 +36,17 @@ namespace SheepQQBot3.Model.Extension
 
         [GeneratedRegex(@"\$.+\$")]
         public static partial Regex ConditionJsonText();
+
+        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(57|58|59):\d{2}")]
+        public static partial Regex GenshinResin();
+
+        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(50|51|52):\d{2}")]
+        public static partial Regex GenshinDailyMission();
+
+        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (09|13|18|23|01):00:\d{2}")]
+        public static partial Regex GenshinPotCoin();
+
+        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):00:\d{2}")]
+        public static partial Regex GenshinTransformer();
     }
 }

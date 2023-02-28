@@ -133,6 +133,12 @@ namespace SheepQQBot3.Model.Config
         [IgnoreMember]
         public Dictionary<Guid, DateTime> LiveAlarmedList { get; set; }
 
+        /// <summary>
+        /// 保存已执行原神每日提醒任务 (不缓存)
+        /// </summary>
+        [IgnoreMember]
+        public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList { get; set; }
+
         #endregion 已执行内容的保存
 
         /// <summary>

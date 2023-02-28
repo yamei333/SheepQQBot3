@@ -78,6 +78,9 @@ namespace SheepQQBot3.View
                     result.Add(new RunLogMessage($"群号: {runLog.SenderId}"));
                     result.Add(new RunLogMessage($"直播间号: {runLog.GroupId}"));
                     break;
+                case LogMessageType.GenshinDailyNoteAlarm:
+                    result.Add(new RunLogMessage($"群号: {runLog.SenderId}"));
+                    break;
                 case LogMessageType.GroupMessage:
                     result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));
                     result.Add(new RunLogMessage($"　　-QQ号: {runLog.SenderId}{(runLog.IsBlackList ? "(黑名单)" : string.Empty)}"));

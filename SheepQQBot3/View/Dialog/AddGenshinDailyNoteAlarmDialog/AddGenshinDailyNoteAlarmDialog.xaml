@@ -6,7 +6,7 @@
                            xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
                            Title="原神树脂提醒配置"
                            Width="216"
-                           Height="124"
+                           Height="154"
                            x:TypeArguments="local:AddGenshinDailyNoteAlarmDialogViewModel"
                            mc:Ignorable="d">
     <Window.DataContext>
@@ -14,6 +14,7 @@
     </Window.DataContext>
     <Grid Margin="4,4,4,0">
         <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
             <RowDefinition Height="30" />
@@ -45,6 +46,15 @@
                  Margin="0,2,0,0"
                  Style="{StaticResource HintTextStyle}"
                  Text="{Binding Cookies,
+                                UpdateSourceTrigger=PropertyChanged}" />
+        <TextBlock Grid.Row="2"
+                   Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="QQ号：" />
+        <TextBox Grid.Row="2"
+                 Grid.Column="1"
+                 Margin="0,2,0,0"
+                 Style="{StaticResource HintTextStyle}"
+                 Text="{Binding TargetId,
                                 UpdateSourceTrigger=PropertyChanged}" />
         <Grid Grid.Row="3"
               Grid.Column="0"

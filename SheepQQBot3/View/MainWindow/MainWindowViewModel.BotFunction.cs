@@ -19,6 +19,7 @@ namespace SheepQQBot3.View
             StartTask(TaskProcess.CustomGroupAlarm);
             StartTask(TaskProcess.FundHelper);
             StartTask(TaskProcess.LiveAlarm);
+            StartTask(TaskProcess.GenshinResinAlarm);
         }
 
         /// <summary>

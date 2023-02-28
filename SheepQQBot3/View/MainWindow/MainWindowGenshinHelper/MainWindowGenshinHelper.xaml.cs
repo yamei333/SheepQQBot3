@@ -42,7 +42,8 @@ namespace SheepQQBot3.View
             var newGenshinResinAlarm = new GenshinResinAlarm(
                 configId,
                 vm.ConfigName,
-                vm.Cookies);
+                vm.Cookies,
+                vm.TargetId.GetValueOrDefault());
             var selectedSetConfig = _vm.SelectedSetConfig;
             selectedSetConfig.GenshinHelperConfig ??= new GenshinHelperConfig();
             selectedSetConfig.GenshinHelperConfig.GenshinResinAlarms = selectedSetConfig.GenshinHelperConfig.GenshinResinAlarms
@@ -61,7 +62,8 @@ namespace SheepQQBot3.View
             var addGenshinDailyNoteAlarmDialog = new AddGenshinDailyNoteAlarmDialog(
                 PublicVar.MWindow, sender, DialogMode.Edit,
                 selectedGenshinResinAlarm.ConfigName,
-                selectedGenshinResinAlarm.Cookies);
+                selectedGenshinResinAlarm.Cookies,
+                selectedGenshinResinAlarm.TargetId);
 
             if (addGenshinDailyNoteAlarmDialog.ShowDialog() != true)
                 return;
@@ -73,6 +75,7 @@ namespace SheepQQBot3.View
                 {
                     genshinResinAlarm.ConfigName = addGenshinDailyNoteAlarmDialog.Vm.ConfigName;
                     genshinResinAlarm.Cookies = addGenshinDailyNoteAlarmDialog.Vm.Cookies;
+                    genshinResinAlarm.TargetId = addGenshinDailyNoteAlarmDialog.Vm.TargetId.GetValueOrDefault();
                 });
             _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
             ConfigExtensions.SaveConfig(GenshinResinAlarmList);
