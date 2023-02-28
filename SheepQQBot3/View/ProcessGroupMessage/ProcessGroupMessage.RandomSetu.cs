@@ -156,7 +156,7 @@ namespace SheepQQBot3.View
                 try
                 {
                     Func<Task<SetuInfo>>[] randomSetu = {
-                        SetuExtensions.GetSetu_Lolicon,
+                        //SetuExtensions.GetSetu_Lolicon,
                         SetuExtensions.GetSetu_Yuban
                     };
 

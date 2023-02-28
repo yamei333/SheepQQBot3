@@ -94,7 +94,7 @@ public static partial class TaskProcess
 
         switch (currentResin)
         {
-            case 160:
+            case 155:
             case 140:
             case 120:
                 AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], {_resinMessage.Random()}",
