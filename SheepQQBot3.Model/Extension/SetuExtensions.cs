@@ -37,8 +37,8 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                setuJsonText = await HttpExtensions.HttpGetStringAsync(
-                    @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}");
+                var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}";
+                setuJsonText = await HttpExtensions.HttpGetStringAsync(url);
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
