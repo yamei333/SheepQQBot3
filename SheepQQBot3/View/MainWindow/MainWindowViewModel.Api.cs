@@ -134,6 +134,15 @@ namespace SheepQQBot3.View
                     StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage));
                 });
 
+                GetSelectedConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
+                {
+                    StartTask(GenshinHelper);
+                    async void GenshinHelper() => await ProcessGroupMessage.GenshinHelper(
+                        config.GenshinHelperConfig.GenshinResinAlarms.Values
+                            .ToDictionary(each => each.TargetId, each => each),
+                        groupMessage);
+                });
+
                 //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
                 //    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
 
