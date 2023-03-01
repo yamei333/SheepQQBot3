@@ -2,7 +2,7 @@
 
 namespace CommonLibrary
 {
-    public static class LogExtensions
+    public static class YameiLogExtensions
     {
         private static YameiLog yameiLog = new YameiLog();
 

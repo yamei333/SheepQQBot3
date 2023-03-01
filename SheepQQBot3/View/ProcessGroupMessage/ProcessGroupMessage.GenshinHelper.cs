@@ -7,7 +7,6 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using Xunkong.Hoyolab;
 using static SheepQQBot3.View.PublicVar;
-using LogExtensions = CommonLibrary.LogExtensions;
 
 namespace SheepQQBot3.View
 {
@@ -63,7 +62,7 @@ namespace SheepQQBot3.View
                 }
                 catch (Exception e)
                 {
-                    LogExtensions.WriteLog(LogType.Error, $"GetDailyNoteAsync 失败:{e.Message}");
+                    YameiLogExtensions.WriteLog(LogType.Error, $"GetDailyNoteAsync 失败:{e.Message}");
                     await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 数据获取失败, 可能是cookie已失效!");
                     return false;
                 }

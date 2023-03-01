@@ -1,4 +1,5 @@
-﻿using System.Net.Http.Json;
+﻿using System.Net;
+using System.Net.Http.Json;
 using System.Text.Json.Nodes;
 using Xunkong.Hoyolab.Account;
 using Xunkong.Hoyolab.Activity;
@@ -43,7 +44,7 @@ public class HoyolabClient
     /// <param name="httpClient"></param>
     public HoyolabClient(HttpClient httpClient = null)
     {
-        _httpClient = httpClient ?? new(new HttpClientHandler { AutomaticDecompression = System.Net.DecompressionMethods.All });
+        _httpClient = httpClient ?? new HttpClient(new HttpClientHandler { AutomaticDecompression = DecompressionMethods.All });
     }
 
     private async Task<T> CommonSendAsync<T>(HttpRequestMessage request, CancellationToken? cancellationToken = null) where T : class
@@ -52,12 +53,12 @@ public class HoyolabClient
         request.Headers.Add(UserAgent, UAContent);
         var response = await _httpClient.SendAsync(request, cancellationToken ?? CancellationToken.None);
         response.EnsureSuccessStatusCode();
-#if DEBUG
-        var content = await response.Content.ReadAsStringAsync();
-        var responseData = JsonSerializer.Deserialize<HoyolabBaseWrapper<T>>(content);
-#else
+        //#if DEBUG
+        //        var content = await response.Content.ReadAsStringAsync();
+        //        var responseData = JsonSerializer.Deserialize<HoyolabBaseWrapper<T>>(content);
+        //#else
         var responseData = await response.Content.ReadFromJsonAsync<HoyolabBaseWrapper<T>>();
-#endif
+        //#endif
         if (responseData is null)
         {
             throw new HoyolabException(-1, "Can not parse the response body.");

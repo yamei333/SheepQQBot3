@@ -3,12 +3,14 @@ using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using Xunkong.Hoyolab;
+using Xunkong.Hoyolab.Account;
 using Xunkong.Hoyolab.DailyNote;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
@@ -33,21 +35,27 @@ public static partial class TaskProcess
             if (Api?.IsConnected == true)
             {
                 var dateNow = DateTime.Now;
-                Vm.SetConfigs?.Values
-                    .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
-                    .ForEach(setConfig =>
-                    {
-                        setConfig.GenshinHelperConfig.GenshinResinAlarms?.ToValueList().ForEach(DeleteExpiredDataAction);
-                        async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
+                if (dateNow.Hour is not (>= 2 and <= 7))
+                {
+                    Vm.SetConfigs?.Values
+                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
+                        .ForEach(setConfig =>
                         {
-                            if (!genshinResinAlarm.IsActive)
-                                return;
+                            setConfig.GenshinHelperConfig.GenshinResinAlarms?.ToValueList()
+                                .ForEach(DeleteExpiredDataAction);
 
-                            setConfig.GenshinResinAlarmedList ??= new Dictionary<(Guid, GenshinDailyNoteAlarmType), DateTime>();
-                            DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
-                            await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
-                        }
-                    });
+                            async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
+                            {
+                                if (!genshinResinAlarm.IsActive)
+                                    return;
+
+                                setConfig.GenshinResinAlarmedList ??=
+                                    new Dictionary<(Guid, GenshinDailyNoteAlarmType), DateTime>();
+                                DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
+                                await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
+                            }
+                        });
+                }
             }
 
             CommonExtensions.Sleep(240000);
@@ -71,15 +79,36 @@ public static partial class TaskProcess
         var cookie = genshinResinAlarm.Cookies;
         var client = new HoyolabClient();
         DailyNoteInfo dailyNote;
+        GenshinRoleInfo role;
         try
         {
             var roles = await client.GetGenshinRoleInfosAsync(cookie);
-            var role = roles[0];
+            role = roles[0];
+        }
+        catch (HoyolabException e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}");
+            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}"));
+            return;
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
+            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}"));
+            return;
+        }
+
+        try
+        {
             dailyNote = await client.GetDailyNoteAsync(role);
         }
         catch (Exception e)
         {
-            AddRunLog(new RunLog_SystemError($"GetDailyNoteAsync 失败:{e.Message}"));
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
+            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}"));
             return;
         }
 

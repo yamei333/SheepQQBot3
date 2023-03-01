@@ -12,6 +12,9 @@ namespace Yamei.Common
         public static DateTime ToDateTime(this int timeStamp)
             => StartTime.AddSeconds(timeStamp);
 
+        public static int ToTimeStamp(this DateTime dateTime)
+            => (int)(dateTime - StartTime).TotalSeconds;
+
         /// <summary>
         /// 获取给定日期是本月的第几天和倒数第几天
         /// </summary>
