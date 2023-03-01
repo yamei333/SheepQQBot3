@@ -43,7 +43,7 @@ namespace SheepQQBot3.SDK.Event
                     }
                     catch (Exception e)
                     {
-                        LogExtensions.WriteLog(LogType.Error, $"ProcessReceiveData-{e.Message}\r\n{jsonInfo}");
+                        YameiLogExtensions.WriteLog(LogType.Error, $"ProcessReceiveData-{e.Message}\r\n{jsonInfo}");
                     }
                 };
             });

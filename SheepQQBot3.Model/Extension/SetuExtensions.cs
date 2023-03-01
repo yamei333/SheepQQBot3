@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonLibrary;
 using SheepQQBot3.Model.Setu;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model.Extension
 {
@@ -37,14 +38,15 @@ namespace SheepQQBot3.Model.Extension
             var setuJsonText = string.Empty;
             try
             {
-                var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}";
+                var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
+                    $"&dateAfter={DateTime.Now.AddYears(-1).ToTimeStamp()}size=small&size=original{(r18 ? " & r18 = 1" : string.Empty)}";
                 setuJsonText = await HttpExtensions.HttpGetStringAsync(url);
                 var setuResponse = JsonSerializer.Deserialize<SetuResponse_Lolicon>(setuJsonText);
                 setuData = setuResponse.Data.First();
             }
             catch (Exception e)
             {
-                LogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{e.Message}\r\n{setuJsonText}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{e.Message}\r\n{setuJsonText}");
                 setuData = new SetuData_Lolicon();
             }
 
@@ -73,7 +75,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                LogExtensions.WriteLog(LogType.Error, $"GetSetu_Rainchan-{e.Message}\r\n{setuJsonText}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Rainchan-{e.Message}\r\n{setuJsonText}");
                 setuData = new SetuData_Rainchan();
             }
 
@@ -96,7 +98,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                LogExtensions.WriteLog(LogType.Error, $"GetSetu_Yuban-{e.Message}\r\n{setuJsonText}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Yuban-{e.Message}\r\n{setuJsonText}");
                 setuData = new SetuData_Yuban();
             }
 
