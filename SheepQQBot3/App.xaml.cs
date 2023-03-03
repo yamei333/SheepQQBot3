@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Linq;
 using System.Windows;
+using System.Windows.Threading;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.View;
 
@@ -17,6 +19,12 @@ namespace SheepQQBot3
         {
             var args = Environment.GetCommandLineArgs();
             PublicVar.IsDebug = args.Contains("-debug");
+        }
+
+        private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.Message}");
+            e.Handled = true;
         }
     }
 }
