@@ -40,6 +40,7 @@ namespace SheepQQBot3.View
                 return false;
 
             upperMessage = upperMessage.Replace(COMMAND_GENSHIN_HELPER, string.Empty);
+            var dateNow = DateTime.Now;
             if (string.IsNullOrEmpty(upperMessage))
             {
                 var cookie = genshinResinAlarms[targetId].Cookies;
@@ -49,6 +50,7 @@ namespace SheepQQBot3.View
                     var roles = await client.GetGenshinRoleInfosAsync(cookie);
                     var role = roles[0];
                     var dailyNote = await client.GetDailyNoteAsync(role);
+                    var transformer = dailyNote.Transformer;
                     await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {dailyNote.Nickname}({dailyNote.Uid})" +
                                                         $"{ENTER}树脂: {dailyNote.CurrentResin}/{dailyNote.MaxResin} ({dailyNote.ResinFullTime:yyyy/M/d HH:mm})" +
                                                         $"{ENTER}每日: {(dailyNote.IsExtraTaskRewardReceived ? "已领取" :
@@ -56,9 +58,13 @@ namespace SheepQQBot3.View
                                                                 ? "完成任务但未领取"
                                                                 : $"任务未完成 {dailyNote.FinishedTaskNumber}/{dailyNote.TotalTaskNumber}")}" +
                                                         $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})" +
-                                                        $"{ENTER}质变: {(dailyNote.Transformer.Obtained
-                                                            ? "可用"
-                                                            : $"冷却中({dailyNote.Transformer.RecoveryTime:yyyy/M/d HH:mm})")}");
+                                                        $"{ENTER}质变: {(transformer.Obtained
+                                                            ? transformer.RecoveryTime.Reached
+                                                                ? "已可用"
+                                                                : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
+                                                                    .AddMinutes(transformer.RecoveryTime.Minute)
+                                                                    .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
+                                                            : "未获得")}");
                 }
                 catch (Exception e)
                 {

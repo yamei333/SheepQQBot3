@@ -73,7 +73,7 @@ public static partial class TaskProcess
     {
         var configId = genshinResinAlarm.Id;
         if (!forceSend && setConfig.GenshinResinAlarmedList.Keys
-            .Any(each => each.Item1 == configId))
+            .Any(each => each.Id == configId))
             return;
 
         var cookie = genshinResinAlarm.Cookies;
@@ -163,7 +163,10 @@ public static partial class TaskProcess
 
         #region 参量质变仪
 
-        if (genshinResinAlarm.Transformer && dailyNote.Transformer.Obtained && RegexGenerator.GenshinTransformer().IsMatch(dateNowStr))
+        if (genshinResinAlarm.Transformer
+            && dailyNote.Transformer.Obtained
+            && dailyNote.Transformer.RecoveryTime.Reached
+            && RegexGenerator.GenshinTransformer().IsMatch(dateNowStr))
             AddSendMessage($"参量质变仪可用了!", GenshinDailyNoteAlarmType.Transformer);
 
         #endregion 参量质变仪
