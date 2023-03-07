@@ -59,5 +59,10 @@ namespace SheepQQBot3.Model.Enums
         /// 群戳一戳
         /// </summary>
         GroupPoke,
+
+        /// <summary>
+        /// 风控消息(发送消息被屏蔽)
+        /// </summary>
+        BlockedByServer,
     }
 }

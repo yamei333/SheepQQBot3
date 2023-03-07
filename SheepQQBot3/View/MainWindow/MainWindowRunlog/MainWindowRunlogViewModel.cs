@@ -95,6 +95,9 @@ namespace SheepQQBot3.View
                     result.Add(new RunLogMessage($"　　-操作者: {runLog.SenderId}"));
                     result.Add(new RunLogMessage($"　　-目标: {runLog.TargetId}"));
                     break;
+                case LogMessageType.BlockedByServer:
+                    result.Add(new RunLogMessage("来源: gocq"));
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException();
             }

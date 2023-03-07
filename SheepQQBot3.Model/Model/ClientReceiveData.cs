@@ -12,5 +12,11 @@ namespace SheepQQBot3.Model
 
         [JsonPropertyName("status")]
         public string Status { get; set; }
+
+        [JsonPropertyName("msg")]
+        public string Message { get; set; }
+
+        [JsonPropertyName("wording")]
+        public string Wording { get; set; }
     }
 }

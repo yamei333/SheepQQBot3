@@ -71,6 +71,7 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.GenshinDailyNoteAlarm => DefaultColor,
                 LogMessageType.System_Error => "Red",
                 LogMessageType.System_Warning => "Blue",
+                LogMessageType.BlockedByServer => "Blue",
                 _ => throw new ArgumentOutOfRangeException()
             };
 
@@ -91,6 +92,7 @@ namespace SheepQQBot3.Model.Config
                 LogMessageType.System_Info => "Bot消息",
                 LogMessageType.System_Error => "Bot错误",
                 LogMessageType.System_Warning => "Bot警告",
+                LogMessageType.BlockedByServer => "账号风控",
                 _ => throw new ArgumentOutOfRangeException()
             };
 
@@ -262,7 +264,7 @@ namespace SheepQQBot3.Model.Config
     }
 
     /// <summary>
-    /// 直播提醒日志类型
+    /// 原神每日提醒日志类型
     /// </summary>
     public class RunLog_GenshinDailyNoteAlarm : RunLog
     {
@@ -282,6 +284,18 @@ namespace SheepQQBot3.Model.Config
                 default:
                     throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
             }
+        }
+    }
+
+    /// <summary>
+    /// 风控消息(发送被屏蔽)
+    /// </summary>
+    public class RunLog_BlockedByServer : RunLog
+    {
+        /// <inheritdoc />
+        public RunLog_BlockedByServer(string message)
+            : base(LogMessageType.BlockedByServer, 0, message)
+        {
         }
     }
 }

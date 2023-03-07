@@ -13,6 +13,9 @@ namespace SheepQQBot3.SDK.Event
         private WebSocketServer _server;
         private IWebSocketConnection _connection;
 
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
         public CQEvent()
         {
             var url = ConfigurationManager.AppSettings["event"];
@@ -28,6 +31,9 @@ namespace SheepQQBot3.SDK.Event
             _server = null;
         }
 
+        /// <summary>
+        /// 开始获取事件
+        /// </summary>
         public void Start()
         {
             _server?.Start(socket =>

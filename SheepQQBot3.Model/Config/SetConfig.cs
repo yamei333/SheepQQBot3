@@ -139,6 +139,12 @@ namespace SheepQQBot3.Model.Config
         [IgnoreMember]
         public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList { get; set; }
 
+        /// <summary>
+        /// 保存已发送的色图记录
+        /// </summary>
+        [IgnoreMember]
+        public Dictionary<long, DateTime> SetuSendHistorys { get; set; }
+
         #endregion 已执行内容的保存
 
         /// <summary>

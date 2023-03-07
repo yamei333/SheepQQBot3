@@ -19,6 +19,9 @@ public static class BotExtensions
     public static bool IsUsed(this List<BotFunction> botFunctions, BotFunctionType botFunctionType)
         => botFunctions.FirstOrDefault(each => each.BotFunctionType == botFunctionType)?.IsUsed ?? false;
 
+    /// <summary>
+    /// 关闭gocq进程
+    /// </summary>
     public static void KillGocqexe()
     {
         var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["gocqexe"]?.Replace(".exe", string.Empty));
