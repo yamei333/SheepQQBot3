@@ -151,7 +151,7 @@ namespace SheepQQBot3.View
                 GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
                 {
                     StartTask(RandomSetu);
-                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(config.SetuSendHistorys, groupMessage).ConfigureAwait(false);
+                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(config, groupMessage).ConfigureAwait(false);
                 });
 
                 GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
