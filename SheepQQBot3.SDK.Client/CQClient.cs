@@ -25,6 +25,11 @@ namespace SheepQQBot3.SDK.Client
         public event EventHandler<GroupMessage> OnGetGroupMessage;
 
         /// <summary>
+        /// 收到发送消息失败事件
+        /// </summary>
+        public event EventHandler<ClientReceiveData> OnSendMessageError;
+
+        /// <summary>
         /// 连接时事件
         /// </summary>
         public event EventHandler OnOpen;
@@ -83,8 +88,20 @@ namespace SheepQQBot3.SDK.Client
 
         private void ProcessClientReceiveData(ClientReceiveData receiveData)
         {
-            if (receiveData.RetCode != 0)
+            var retCode = receiveData.RetCode;
+            if (retCode != 0)
+            {
+                switch (receiveData.Message)
+                {
+                    case "SEND_MSG_API_ERROR":
+                        OnSendMessageError?.Invoke(null, receiveData);
+                        break;
+                    default:
+                        YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {receiveData.Message}-{receiveData.Wording}");
+                        break;
+                }
                 return;
+            }
 
             var data = receiveData.Data;
             switch (data.Message_Type)
@@ -94,12 +111,17 @@ namespace SheepQQBot3.SDK.Client
                     break;
                 case null:
                     // MEMO : 发送消息的反馈, 不处理
+                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [Message_Type:null]{receiveData.Message}-{receiveData.Wording}");
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(data.Message_Type);
+                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {data.Message_Type}-{receiveData.Message}-{receiveData.Wording}");
+                    break;
             }
         }
 
+        /// <summary>
+        /// 处理群消息
+        /// </summary>
         private void ProcessGetMessage(ClientData clientData)
             => OnGetGroupMessage?.Invoke(null, new GroupMessage(clientData));
 

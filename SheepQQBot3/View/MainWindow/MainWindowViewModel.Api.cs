@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommonLibrary;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -14,6 +16,8 @@ namespace SheepQQBot3.View
         private const int MaxLogCount = 200;
 
         private static readonly Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new();
+
+        private DateTime _lastBlockedTime = DateTime.MinValue;
 
         private void InitApi()
         {
@@ -37,6 +41,27 @@ namespace SheepQQBot3.View
                 processAction(groupMessage);
                 GetMessageCallBacks.Remove(messageId);
             };
+            cqApi.OnSendMessageError += (o, clientReceiveData) =>
+            {
+                var dateNow = DateTime.Now;
+                if (clientReceiveData.Wording == "send group message failed: blocked by server")
+                {
+                    if ((dateNow - _lastBlockedTime).TotalMicroseconds > 2000)
+                    {
+                        LogExtensions.AddRunLog(new RunLog_BlockedByServer("账号已被风控!"));
+                        _lastBlockedTime = dateNow;
+                    }
+                    else
+                    {
+                        // MEMO : 不处理重复发送的风控消息
+                    }
+                }
+                else
+                {
+                    YameiLogExtensions.WriteLog(LogType.Quest, $"发送消息失败, 未知错误 {clientReceiveData}");
+                }
+            };
+
             cqApi.Start();
         }
 
@@ -126,7 +151,7 @@ namespace SheepQQBot3.View
                 GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
                 {
                     StartTask(RandomSetu);
-                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(groupMessage).ConfigureAwait(false);
+                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(config.SetuSendHistorys, groupMessage).ConfigureAwait(false);
                 });
 
                 GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
