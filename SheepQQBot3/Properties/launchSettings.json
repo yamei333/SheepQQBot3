@@ -1,0 +1,8 @@
+{
+  "profiles": {
+    "SheepQQBot3": {
+      "commandName": "Project",
+      "commandLineArgs": "-debug"
+    }
+  }
+}
