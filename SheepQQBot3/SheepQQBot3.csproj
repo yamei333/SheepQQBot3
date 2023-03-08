@@ -13,6 +13,8 @@
     <ApplicationIcon>Resource\hari003.ico</ApplicationIcon>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+
   <ItemGroup>
     <Compile Remove="View\Dialog\AddAlarmAideDialog\**" />
     <EmbeddedResource Remove="View\Dialog\AddAlarmAideDialog\**" />

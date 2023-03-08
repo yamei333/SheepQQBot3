@@ -55,7 +55,7 @@ namespace SheepQQBot3.View
 
         private static readonly string[] _setuCDWasAdded =
         {
-            "被$ADD_LEVEL$了!", "被$ADD_LEVEL$延长了!", "被$ADD_LEVEL$, 大加特加了!",
+            "被$ADD_LEVEL$了!", "被$ADD_LEVEL$, 时间延长了!", "被$ADD_LEVEL$, 大加特加了!",
         };
 
         private static readonly string[] _setuCDWasReduced =
@@ -66,7 +66,7 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 随机色图
         /// </summary>
-        /// <param name="setuSendHistorys">色图历史记录</param>
+        /// <param name="config">配置</param>
         /// <param name="groupMessage"><see cref="GroupMessage"/></param>
         public static async Task<bool> RandomSetu(SetConfig config, GroupMessage groupMessage)
         {
@@ -101,9 +101,10 @@ namespace SheepQQBot3.View
                 var addLevel = SetuAddLevel.Normal;
                 var canSendSetu = false;
                 config.SetuSendHistorys ??= new Dictionary<long, DateTime>();
-                if (targetId == PublicVar.ADMIN_ID)
+                if (!PublicVar.IsDebug && targetId == PublicVar.ADMIN_ID)
                 {
                     // MEMO : ADMIN无限制要色图
+                    canSendSetu = true;
                 }
                 else
                 {
@@ -114,11 +115,13 @@ namespace SheepQQBot3.View
                         randActions = new List<RandomWeight<SendSetuConfig>>
                         {
                             new(1000, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true)),
-                            new(200, new SendSetuConfig(Rand.Next(5, 15), SetuAddLevel.Normal)),
-                            new(200, new SendSetuConfig(Rand.Next(10, 30), SetuAddLevel.Normal)),
+                            new(200, new SendSetuConfig(Rand.Next(3, 15), SetuAddLevel.Normal)),
+                            new(200, new SendSetuConfig(Rand.Next(5, 30), SetuAddLevel.Normal)),
+                            new(100, new SendSetuConfig(Rand.Next(8, 45), SetuAddLevel.Double)),
+                            new(50, new SendSetuConfig(Rand.Next(10, 60), SetuAddLevel.SuperDouble)),
                             new(50, new SendSetuConfig(0, SetuAddLevel.Free, true)),
                             new(10, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true, true)),
-                            new(2, new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
+                            new(3, new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
                         };
                     }
                     else
@@ -134,7 +137,7 @@ namespace SheepQQBot3.View
                             new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, SetuAddLevel.Luck)),
                             new(750, new SendSetuConfig(Rand.Next(5, 60) * -4, SetuAddLevel.LuckSuper)),
                             new(300, new SendSetuConfig(Rand.Next(5, 60) * -16, SetuAddLevel.LuckGolden)),
-                            new(200, new SendSetuConfig(0, SetuAddLevel.Free)),
+                            //new(200, new SendSetuConfig(0, SetuAddLevel.Free)),
                         };
                     }
 
@@ -148,13 +151,23 @@ namespace SheepQQBot3.View
                     }
                 }
 
-                config.SetuSendHistorys[groupId] = config.SetuSendHistorys.ContainsKey(groupId)
-                    ? config.SetuSendHistorys[groupId].AddSeconds(addSecond)
-                    : dateNow.AddSeconds(addSecond);
+                if (PublicVar.IsDebug)
+                {
+                    await Api.SendGroupMessage(groupId, "[DEBUG]" +
+                                                        $"{ENTER}是否可发: {canSendSetu}" +
+                                                        $"{ENTER}增加时间: {addSecond}s" +
+                                                        $"{ENTER}色图CD: {(config.SetuSendHistorys.ContainsKey(groupId)
+                                                            ? config.SetuSendHistorys[groupId].ToString("HH:mm:ss")
+                                                            : "无记录")}");
+                }
+
                 if (!canSendSetu)
                 {
-                    var isShowValue = Rand.Next(0, 100) <= 40;
-                    var isShowDate = Rand.Next(0, 100) <= 5;
+                    config.SetuSendHistorys[groupId] = config.SetuSendHistorys.ContainsKey(groupId)
+                        ? config.SetuSendHistorys[groupId].AddSeconds(addSecond)
+                        : dateNow.AddSeconds(addSecond);
+
+                    var isShowDate = Rand.Next(0, 100) <= 3;
                     var sendMessage = string.Empty;
                     if (addSecond > 0)
                     {
@@ -162,24 +175,24 @@ namespace SheepQQBot3.View
                         sendMessage = $"[CQ:at,qq={targetId}] "
                                       + $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}"
                                       + $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                      + (isShowValue ? $" (+{addSecond}s)" : string.Empty)
+                                      //+ $" (+{addSecond}s)"
                                       + (isShowDate ? $" [CD {config.SetuSendHistorys[groupId]:HH:mm:ss}]" : string.Empty);
                     }
-                    else if (addSecond == 0)
-                    {
-                        // MEMO : 白嫖
-                        sendMessage = $"[CQ:at,qq={targetId}] "
-                                      + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
-                                      + (isShowDate ? $" [CD {config.SetuSendHistorys[groupId]:HH:mm:ss}]" : string.Empty);
-                        await Api.SendGroupMessage(groupId, sendMessage);
-                        goto SendSetu;
-                    }
+                    //else if (addSecond == 0)
+                    //{
+                    //    // MEMO : 白嫖
+                    //    sendMessage = $"[CQ:at,qq={targetId}] "
+                    //                  + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
+                    //                  + (isShowDate ? $" [CD {config.SetuSendHistorys[groupId]:HH:mm:ss}]" : string.Empty);
+                    //    await Api.SendGroupMessage(groupId, sendMessage);
+                    //    goto SendSetu;
+                    //}
                     else
                     {
                         // MEMO : 幸运(CD减少)
                         sendMessage = $"[CQ:at,qq={targetId}] "
                                       + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                      + (isShowValue ? $" ({addSecond}s)" : string.Empty)
+                                      + $" ({addSecond}s)"
                                       + (isShowDate ? $" [CD {config.SetuSendHistorys[groupId]:HH:mm:ss}]" : string.Empty);
                     }
 
@@ -188,7 +201,8 @@ namespace SheepQQBot3.View
                 }
                 else
                 {
-                    var isShowDate = Rand.Next(0, 100) <= 5;
+                    config.SetuSendHistorys[groupId] = dateNow.AddSeconds(addSecond);
+                    var isShowDate = Rand.Next(0, 100) <= 3;
                     if (targetId != PublicVar.ADMIN_ID && addSecond == 0)
                     {
                         // MEMO : 白嫖
@@ -202,6 +216,12 @@ namespace SheepQQBot3.View
 
 //SendSetuNotReadyMessage($"的CD被增加了({addSecond}秒)");
 SendSetu:
+                if (PublicVar.IsDebug)
+                {
+                    await Api.SendGroupMessage(groupId, "[DEBUG]正常流程发图");
+                    return true;
+                }
+
                 try
                 {
                     Func<Task<SetuInfo>>[] randomSetu = {

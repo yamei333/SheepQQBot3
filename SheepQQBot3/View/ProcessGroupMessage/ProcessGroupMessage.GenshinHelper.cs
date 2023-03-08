@@ -51,20 +51,46 @@ namespace SheepQQBot3.View
                     var role = roles[0];
                     var dailyNote = await client.GetDailyNoteAsync(role);
                     var transformer = dailyNote.Transformer;
-                    await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] {dailyNote.Nickname}({dailyNote.Uid})" +
-                                                        $"{ENTER}树脂: {dailyNote.CurrentResin}/{dailyNote.MaxResin} ({dailyNote.ResinFullTime:yyyy/M/d HH:mm})" +
-                                                        $"{ENTER}每日: {(dailyNote.IsExtraTaskRewardReceived ? "已领取" :
-                                                            dailyNote.FinishedTaskNumber == dailyNote.TotalTaskNumber
-                                                                ? "完成任务但未领取"
-                                                                : $"任务未完成 {dailyNote.FinishedTaskNumber}/{dailyNote.TotalTaskNumber}")}" +
-                                                        $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})" +
-                                                        $"{ENTER}质变: {(transformer.Obtained
-                                                            ? transformer.RecoveryTime.Reached
-                                                                ? "已可用"
-                                                                : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
-                                                                    .AddMinutes(transformer.RecoveryTime.Minute)
-                                                                    .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
-                                                            : "未获得")}");
+                    // MEMO 一句话概括
+                    var oneHint = !dailyNote.IsExtraTaskRewardReceived
+                        ? $"{ENTER}你每日都没做完, 你怎么睡得着!"
+                        : dailyNote.CurrentResin >= 60
+                            ? $"{ENTER}你体力都没用完, 要亏辣鸡圣遗物!"
+                            : dailyNote.ResinFullTime.Hour <= 15
+                                ? $"{ENTER}你体力会在{dailyNote.ResinFullTime:HH:mm:ss}回满, 我觉得不是很保险"
+                                : $"{ENTER}辣鸡任务都搞定了, 今天又是完美的一天";
+                    var nickName = $"{dailyNote.Nickname}({dailyNote.Uid})";
+                    var resin = dailyNote.CurrentResin < 40
+                        ? string.Empty
+                        : $"{ENTER}树脂: {dailyNote.CurrentResin}/{dailyNote.MaxResin} ({dailyNote.ResinFullTime:yyyy/M/d HH:mm})";
+                    var dailyQuest = dailyNote.IsExtraTaskRewardReceived
+                        ? string.Empty
+                        : $"{ENTER}每日: {(dailyNote.FinishedTaskNumber == dailyNote.TotalTaskNumber
+                            ? "完成任务但未领取"
+                            : $"任务还差{dailyNote.TotalTaskNumber - dailyNote.FinishedTaskNumber}个未完成!")}";
+                    var potCoin = dailyNote.CurrentHomeCoin < 1600
+                        ? string.Empty
+                        : $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})";
+                    var transformerStr = !transformer.Obtained
+                        ? string.Empty
+                        : $"{ENTER}质变: {(transformer.RecoveryTime.Reached
+                            ? "已可用"
+                            : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
+                                .AddMinutes(transformer.RecoveryTime.Minute)
+                                .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})")}";
+                    //$"{ENTER}质变: {(transformer.Obtained
+                    //    ? transformer.RecoveryTime.Reached
+                    //        ? "已可用"
+                    //        : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
+                    //            .AddMinutes(transformer.RecoveryTime.Minute)
+                    //            .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
+                    var sendMessage = nickName +
+                                      resin +
+                                      dailyQuest +
+                                      potCoin +
+                                      transformerStr +
+                                      oneHint;
+                    await Api.SendGroupMessage(groupId, sendMessage);
                 }
                 catch (Exception e)
                 {
