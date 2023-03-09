@@ -110,8 +110,14 @@ namespace SheepQQBot3.SDK.Client
                     ProcessGetMessage(data);
                     break;
                 case null:
-                    // MEMO : 发送消息的反馈, 不处理
-                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [Message_Type:null]{receiveData.Message}-{receiveData.Wording}");
+                    if (receiveData.Data != null && receiveData.Data?.Message_Id != 0)
+                    {
+                        // MEMO : 发送消息的反馈, 不处理
+                    }
+                    else
+                    {
+                        YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [Message_Type:null]{receiveData.Message}-{receiveData.Wording}");
+                    }
                     break;
                 default:
                     YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {data.Message_Type}-{receiveData.Message}-{receiveData.Wording}");

@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -58,7 +59,9 @@ namespace SheepQQBot3.View
                 }
                 else
                 {
-                    YameiLogExtensions.WriteLog(LogType.Quest, $"发送消息失败, 未知错误 {clientReceiveData}");
+                    YameiLogExtensions.WriteLog(
+                        LogType.Quest,
+                        $"发送消息失败, 未知错误 {JsonSerializer.Serialize(clientReceiveData)}");
                 }
             };
 

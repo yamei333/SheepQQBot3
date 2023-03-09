@@ -38,7 +38,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetStringAsync)}-{e.Message}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetStringAsync)}-{e.Message}-{url}");
                 return null;
             }
         }
@@ -78,7 +78,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
                 return null;
             }
         }

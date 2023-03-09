@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reflection;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -46,7 +47,9 @@ namespace SheepQQBot3.View
         public MainWindowViewModel()
         {
             PublicVar.InitPublicVar(this);
-            Title = "助手哈莉 - Ver 0.6.5.2";
+            // 获取当前程序集的版本号
+            var version = Assembly.GetExecutingAssembly().GetName().Version;
+            Title = $"助手哈莉 - Ver {version}";
             IsLoadComplete = false;
 
             InitViewModel();
