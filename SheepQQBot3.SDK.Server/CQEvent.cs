@@ -105,17 +105,21 @@ namespace SheepQQBot3.SDK.Event
                             OnGroupPoke?.Invoke(null, new GroupPoke(receiveData));
                             break;
                         case SubType.Honor:
-                        // TODO : 群成员荣誉变更
+                            // TODO : 群成员荣誉变更
+                            break;
                         default:
                             throw new ArgumentOutOfRangeException(nameof(receiveData.Sub_Type), receiveData.Sub_Type, "值不在正确范围内");
                     }
                     break;
                 case NoticeType.Group_Increase:
-                // TODO : 群成员增加
+                    // TODO : 群成员增加
+                    break;
                 case NoticeType.Group_Card:
-                // TODO : 群名片变更
+                    // TODO : 群名片变更
+                    break;
                 case NoticeType.Group_Upload:
-                // TODO : 上传群文件
+                    // TODO : 上传群文件
+                    break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(receiveData.Notice_Type), receiveData.Notice_Type, "值不在正确范围内");
             }
