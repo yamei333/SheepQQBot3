@@ -238,6 +238,14 @@ SendSetu:
                     var retryTimes = 0;
                     while (!getSuccessed)
                     {
+                        if (string.IsNullOrEmpty(setuInfo.ImageUrl))
+                        {
+                            retryTimes++;
+                            setuInfo = await randomSetu.Random().Invoke();
+                            CommonUtil.Sleep(500);
+                            continue;
+                        }
+
                         (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl);
                         if (getSuccessed)
                             continue;
