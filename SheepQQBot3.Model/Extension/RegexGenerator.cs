@@ -48,5 +48,8 @@ namespace SheepQQBot3.Model.Extension
 
         [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):(00|01|02|03|04):\d{2}")]
         public static partial Regex GenshinTransformer();
+
+        [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
+        public static partial Regex CmdStart();
     }
 }

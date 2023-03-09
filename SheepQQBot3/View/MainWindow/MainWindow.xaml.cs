@@ -74,8 +74,10 @@ namespace SheepQQBot3.View
 
         private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
         {
-            GocqEmbedWindow = new GocqWindow();
-            GocqEmbedWindow.Show();
+            this.Left -= int.MaxValue;
+            this.Visibility = Visibility.Collapsed;
+            PublicVar.GocqWindow = new GocqWindow();
+            PublicVar.GocqWindow.Show();
             Vm.AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化完成"));
         }
 
@@ -256,8 +258,20 @@ namespace SheepQQBot3.View
 
         private void OnNotifyIconDoubleClick(object sender, RoutedEventArgs e)
         {
+            if (this.Width <= 100)
+            {
+                this.WindowStyle = WindowStyle.SingleBorderWindow;
+                Width = 980;
+                Height = 482;
+                // 获取 DPI 缩放比例
+                var matrix = PresentationSource.FromVisual(this)!.CompositionTarget!.TransformToDevice;
+                var dpiFactor = 1 / matrix.M11;
+                // 计算居中位置,设置窗口位置
+                this.Left = (SystemParameters.PrimaryScreenWidth - this.Width * dpiFactor) / 2;
+                this.Top = (SystemParameters.PrimaryScreenHeight - this.Height * dpiFactor) / 2;
+            }
             this.Visibility = Visibility.Visible;
-            this.Activate();
+            this.Show();
         }
 
         private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
@@ -271,9 +285,8 @@ namespace SheepQQBot3.View
 
         private void NotifyIcon_OnShowGocqWindow(object sender, RoutedEventArgs e)
         {
-            GocqEmbedWindow.Visibility = Visibility.Visible;
-            GocqEmbedWindow.Activate();
-            GocqEmbedWindow.GocqEmbedWindow.Focus();
+            PublicVar.GocqWindow.Visibility = Visibility.Visible;
+            PublicVar.GocqWindow.Activate();
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)

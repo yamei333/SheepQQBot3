@@ -71,7 +71,7 @@ namespace SheepQQBot3.View
         public static CQAPI Api => Vm.CqApi;
 
         public static Process Gocq;
-        public static GocqWindow GocqEmbedWindow;
+        public static GocqWindow GocqWindow;
 
         /// <summary>
         /// 节假日信息
