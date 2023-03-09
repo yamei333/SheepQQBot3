@@ -8,14 +8,16 @@
         xmlns:tb="http://www.hardcodet.net/taskbar"
         x:Name="AideHariMainWindow"
         Title="{Binding Title}"
-        Width="980"
-        Height="482"
+        Width="0"
+        Height="0"
         Closed="MainWindow_OnClosed"
         Closing="MainWindow_OnClosing"
         Icon="/Resource/hari003.ico"
         Initialized="MainWindow_OnInitialized"
         Loaded="MainWindow_OnLoaded"
+        Visibility="Collapsed"
         WindowStartupLocation="CenterScreen"
+        WindowStyle="None"
         mc:Ignorable="d">
     <Window.Style>
         <Style TargetType="Window">
