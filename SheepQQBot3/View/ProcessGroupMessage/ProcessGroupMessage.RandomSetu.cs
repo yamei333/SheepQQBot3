@@ -216,11 +216,11 @@ namespace SheepQQBot3.View
 
 //SendSetuNotReadyMessage($"的CD被增加了({addSecond}秒)");
 SendSetu:
-                if (PublicVar.IsDebug)
-                {
-                    await Api.SendGroupMessage(groupId, "[DEBUG]正常流程发图");
-                    return true;
-                }
+//if (PublicVar.IsDebug)
+//{
+//    await Api.SendGroupMessage(groupId, "[DEBUG]正常流程发图");
+//    return true;
+//}
 
                 try
                 {
@@ -232,6 +232,14 @@ SendSetu:
                     await Api.SendGroupMessage(groupId,
                         $"{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
                     var setuInfo = await randomSetu.Random().Invoke();
+                    if (PublicVar.IsDebug)
+                    {
+                        await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
+                            $"{ENTER}SetuType: {setuInfo.SetuType}" +
+                            $"{ENTER}SmallUrl: {setuInfo.ImageUrl}" +
+                            $"{ENTER}SourceUrl: {setuInfo.SourceUrl}");
+                    }
+
                     var fileName = string.Empty;
                     var getSuccessed = false;
                     const int maxRetryTimes = 5;
@@ -256,6 +264,13 @@ SendSetu:
                             //await Api.SendGroupMessage(groupId,
                             //    $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
                             setuInfo = await randomSetu.Random().Invoke();
+                            if (PublicVar.IsDebug)
+                            {
+                                await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
+                                                                    $"{ENTER}SetuType: {setuInfo.SetuType}" +
+                                                                    $"{ENTER}SmallUrl: {setuInfo.ImageUrl}" +
+                                                                    $"{ENTER}SourceUrl: {setuInfo.SourceUrl}");
+                            }
                         }
                         else
                         {

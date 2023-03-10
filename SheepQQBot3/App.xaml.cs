@@ -23,6 +23,9 @@ namespace SheepQQBot3
 
         private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
         {
+            if (PublicVar.IsDebug)
+                throw e.Exception;
+
             YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.Message}");
             e.Handled = true;
         }

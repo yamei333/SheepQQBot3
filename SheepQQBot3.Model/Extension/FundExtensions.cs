@@ -22,7 +22,7 @@ namespace SheepQQBot3.Model.Extension
             if (fundIds.Length == 0)
                 return null;
 
-            var fundJsonText = HttpExtensions.HttpGetString($"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIds)}");
+            var fundJsonText = HttpExtensions.GetString($"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIds)}");
             if (string.IsNullOrEmpty(fundJsonText))
                 return null;
 
@@ -42,7 +42,7 @@ namespace SheepQQBot3.Model.Extension
             if (string.IsNullOrEmpty(fundId))
                 return null;
 
-            var fundJsonText = HttpExtensions.HttpGetString($"https://api.doctorxiong.club/v1/fund/position?code={fundId}");
+            var fundJsonText = HttpExtensions.GetString($"https://api.doctorxiong.club/v1/fund/position?code={fundId}");
             if (string.IsNullOrEmpty(fundJsonText))
                 return null;
 
