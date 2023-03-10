@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
@@ -65,12 +64,8 @@ public static partial class TaskProcess
 
         //var liveType = liveAlarmConfig.LiveType;
         var liveRoomId = liveAlarmConfig.LiveRoomId;
-        var jsonText = await HttpExtensions.HttpGetStringAsync(
+        var liveRoomResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
             $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
-        if (string.IsNullOrEmpty(jsonText))
-            return;
-
-        var liveRoomResponse = JsonSerializer.Deserialize<LiveRoomResponse>(jsonText);
         var liveRoomResponseData = liveRoomResponse.Data;
         if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)
             return;

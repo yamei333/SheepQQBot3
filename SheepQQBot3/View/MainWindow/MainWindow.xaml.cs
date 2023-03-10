@@ -55,7 +55,7 @@ namespace SheepQQBot3.View
                 }
                 else
                 {
-                    holidayInfoJson = HttpExtensions.HttpGetString($"https://timor.tech/api/holiday/year/{nowYear}/");
+                    holidayInfoJson = HttpExtensions.GetString($"https://timor.tech/api/holiday/year/{nowYear}/");
                     File.WriteAllLines(holidayInfoPath, new[] { holidayInfoJson }, Encoding.UTF8);
                 }
 
@@ -76,7 +76,11 @@ namespace SheepQQBot3.View
         {
             this.Left -= int.MaxValue;
             this.Visibility = Visibility.Collapsed;
-            PublicVar.GocqWindow = new GocqWindow();
+            PublicVar.GocqWindow = new GocqWindow
+            {
+                Visibility = Visibility.Collapsed,
+                WindowStyle = WindowStyle.None
+            };
             PublicVar.GocqWindow.Show();
             Vm.AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化完成"));
         }

@@ -2,6 +2,7 @@
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLibrary;
@@ -13,7 +14,7 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// HttpGet返回string
         /// </summary>
-        public static string HttpGetString(string url)
+        public static string GetString(string url)
         {
             try
             {
@@ -21,7 +22,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetString)}-{e.Message}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetString)}-{e.Message}");
                 return null;
             }
         }
@@ -29,7 +30,7 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// HttpGet返回string, 不需要使用<see cref="Task.ConfigureAwait"/>
         /// </summary>
-        public static async Task<string> HttpGetStringAsync(string url)
+        public static async Task<string> GetStringAsync(string url)
         {
             try
             {
@@ -38,7 +39,25 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetStringAsync)}-{e.Message}-{url}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetStringAsync)}-{e.Message}-{url}");
+                return null;
+            }
+        }
+
+        /// <summary>
+        /// HttpGet返回json对应类类<see cref="T"/>, 不需要使用<see cref="Task.ConfigureAwait"/>
+        /// </summary>
+        public static async Task<T> GetFromJsonAsync<T>(string url)
+            where T : class
+        {
+            try
+            {
+                var httpClient = new HttpClient();
+                return await httpClient.GetFromJsonAsync<T>(url).ConfigureAwait(false);
+            }
+            catch (Exception e)
+            {
+                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
                 return null;
             }
         }

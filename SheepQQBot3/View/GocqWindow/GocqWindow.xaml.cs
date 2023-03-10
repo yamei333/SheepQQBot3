@@ -93,7 +93,7 @@ namespace SheepQQBot3.View
                             var blocks = RichTextBox.Document.Blocks;
                             if (blocks.Count > 2000)
                                 blocks.Remove(blocks.FirstBlock);
-
+                            
                             if (LogAutoScroll.IsChecked == true)
                                 RichTextBox.ScrollToEnd();
                         });
