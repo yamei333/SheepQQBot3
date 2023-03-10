@@ -37,7 +37,7 @@ namespace SheepQQBot3.View
         {
             // MEMO : 非管理员/投稿者
             var targetId = groupMessage.Sender.User_Id;
-            if (targetId != ADMIN_ID && !alarmAideSubmitMembers.Contains(targetId))
+            if (targetId != AdminId && !alarmAideSubmitMembers.Contains(targetId))
                 return false;
 
             var groupId = groupMessage.GroupId;

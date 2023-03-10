@@ -23,7 +23,7 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// Pixiv反代目标地址
         /// </summary>
-        private const string PixivReTarget = "i.pixiv.cat";
+        private const string PixivReTarget = "i.pixiv.re";
 
         public static async Task<SetuInfo> GetSetu_Lolicon()
             => await GetSetu_Lolicon_Core();
