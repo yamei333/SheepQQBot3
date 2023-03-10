@@ -96,7 +96,7 @@ namespace SheepQQBot3.View
                 {
                     GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, config =>
                     {
-                        if (targetId == PublicVar.ADMIN_ID)
+                        if (targetId == PublicVar.AdminId)
                         {
                             // MEMO : ADMIN不复读撤回消息
                             return;

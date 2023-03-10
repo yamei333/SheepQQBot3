@@ -23,6 +23,11 @@ namespace SheepQQBot3.View
         private const string COMMAND_CUSTOM_GROUP_SETU_LIBRARY = "#ST#";
 
         /// <summary>
+        /// 色图CD命令
+        /// </summary>
+        private const string COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY = "#STCD#";
+
+        /// <summary>
         /// 色图的基础CD, 不能发得太频繁
         /// </summary>
         private const int sendBaseDelay = 300;
@@ -74,6 +79,16 @@ namespace SheepQQBot3.View
             var targetId = groupMessage.Sender.User_Id;
             var message = groupMessage.Message;
             var upperMessage = message.ToUpper();
+            if (targetId == PublicVar.AdminId && upperMessage == COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY)
+            {
+                // MEMO : 显CD
+                var sendMessage = $"当前色图CD为 [{(config.SetuSendHistorys?.ContainsKey(groupId) == true
+                    ? config.SetuSendHistorys[groupId].ToString("HH:mm:ss")
+                    : "无记录")}]";
+                await Api.SendGroupMessage(groupId, sendMessage);
+                return true;
+            }
+
             if (_setuKeyWords == null)
             {
                 _setuKeyWords = new List<string>();
@@ -101,7 +116,7 @@ namespace SheepQQBot3.View
                 var addLevel = SetuAddLevel.Normal;
                 var canSendSetu = false;
                 config.SetuSendHistorys ??= new Dictionary<long, DateTime>();
-                if (!PublicVar.IsDebug && targetId == PublicVar.ADMIN_ID)
+                if (!PublicVar.IsDebug && targetId == PublicVar.AdminId)
                 {
                     // MEMO : ADMIN无限制要色图
                     canSendSetu = true;
@@ -203,7 +218,7 @@ namespace SheepQQBot3.View
                 {
                     config.SetuSendHistorys[groupId] = dateNow.AddSeconds(addSecond);
                     var isShowDate = Rand.Next(0, 100) <= 3;
-                    if (targetId != PublicVar.ADMIN_ID && addSecond == 0)
+                    if (targetId != PublicVar.AdminId && addSecond == 0)
                     {
                         // MEMO : 白嫖
                         var sendMessage = $"[CQ:at,qq={targetId}] "
@@ -216,12 +231,6 @@ namespace SheepQQBot3.View
 
 //SendSetuNotReadyMessage($"的CD被增加了({addSecond}秒)");
 SendSetu:
-//if (PublicVar.IsDebug)
-//{
-//    await Api.SendGroupMessage(groupId, "[DEBUG]正常流程发图");
-//    return true;
-//}
-
                 try
                 {
                     Func<Task<SetuInfo>>[] randomSetu = {

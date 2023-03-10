@@ -130,18 +130,21 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 保存已执行直播提醒任务 (不缓存)
         /// </summary>
+        [JsonIgnore]
         [IgnoreMember]
         public Dictionary<Guid, DateTime> LiveAlarmedList { get; set; }
 
         /// <summary>
         /// 保存已执行原神每日提醒任务 (不缓存)
         /// </summary>
+        [JsonIgnore]
         [IgnoreMember]
         public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList { get; set; }
 
         /// <summary>
         /// 保存已发送的色图记录
         /// </summary>
+        [JsonIgnore]
         [IgnoreMember]
         public Dictionary<long, DateTime> SetuSendHistorys { get; set; }
 

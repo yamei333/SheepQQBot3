@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Diagnostics;
 using SheepQQBot3.SDK.Client;
 
@@ -23,7 +24,7 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 管理员ID
         /// </summary>
-        public const long ADMIN_ID = 252961222;
+        public static readonly long AdminId = long.Parse(ConfigurationManager.AppSettings["adminId"]!);
 
         /// <summary>
         /// 半角逗号
