@@ -298,6 +298,7 @@ SendSetu:
                         $"[CQ:image,file={CommonExtensions.GetCachePath(fileName)}]"
                         + $"{ENTER}{setuInfo.SourceText}"
                         + $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"
+                        + $"{ENTER}API提供:{setuInfo.SetuType}"
                         + $"{ENTER}[CQ:at,qq={targetId}] {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
 
                     if (r18Bonus)
@@ -307,6 +308,7 @@ SendSetu:
                             $"[这是一张额外的金色传说色图, 不可预览]"
                             + $"{ENTER}{setuInfoR18.SourceText}"
                             + $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"
+                            + $"{ENTER}API提供:{setuInfo.SetuType}"
                             + $"{ENTER}[CQ:at,qq={targetId}] {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
                     }
                 }
