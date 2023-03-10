@@ -41,7 +41,7 @@ public static partial class TaskProcess
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                         .ForEach(setConfig =>
                         {
-                            setConfig.GenshinHelperConfig.GenshinResinAlarms?.ToValueList()
+                            setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
                                 .ForEach(DeleteExpiredDataAction);
 
                             async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
