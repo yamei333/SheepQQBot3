@@ -106,6 +106,8 @@ namespace SheepQQBot3.View
                 MainWindowFundHelperViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
                 MainWindowRepeaterKillerViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
                 MainWindowBlackListViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
+                MainWindowLiveAlarmViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
+                MainWindowGenshinHelperViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             }
         }
 

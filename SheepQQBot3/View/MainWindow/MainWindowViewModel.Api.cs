@@ -166,9 +166,9 @@ namespace SheepQQBot3.View
                 {
                     StartTask(GenshinHelper);
                     async void GenshinHelper() => await ProcessGroupMessage.GenshinHelper(
-                        config.GenshinHelperConfig.GenshinResinAlarms.Values
+                        config.GenshinHelperConfig?.GenshinResinAlarms.Values
                             .ToDictionary(each => each.TargetId, each => each),
-                        groupMessage);
+                    groupMessage);
                 });
 
                 //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
