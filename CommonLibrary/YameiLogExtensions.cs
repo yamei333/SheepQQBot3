@@ -13,6 +13,7 @@ namespace CommonLibrary
         {
             private readonly string _logPath;
             private readonly string _ext;
+            private static object _syncLock = new object();
 
             public YameiLog()
             {
@@ -34,24 +35,27 @@ namespace CommonLibrary
 
             public void WriteLog(LogType logType, string logText)
             {
-                if (!Directory.Exists("Log"))
-                    Directory.CreateDirectory("Log");
-
-                var fs = new FileStream($@"Log\{_logPath}{_ext}", FileMode.Append, FileAccess.Write);
-                var sw = new StreamWriter(fs, Encoding.UTF8);
-                var dt = DateTime.Now;
-                var typeStr = logType switch
+                lock (_syncLock)
                 {
-                    LogType.Debug => "☆",
-                    LogType.Quest => "？",
-                    LogType.Info => "○",
-                    LogType.Warning => "！",
-                    LogType.Error => "×",
-                    _ => "@"
-                };
-                sw.Write($"\r\n{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
-                sw.Close();
-                fs.Close();
+                    if (!Directory.Exists("Log"))
+                        Directory.CreateDirectory("Log");
+
+                    var fs = new FileStream($@"Log\{_logPath}{_ext}", FileMode.Append, FileAccess.Write);
+                    var sw = new StreamWriter(fs, Encoding.UTF8);
+                    var dt = DateTime.Now;
+                    var typeStr = logType switch
+                    {
+                        LogType.Debug => "☆",
+                        LogType.Quest => "？",
+                        LogType.Info => "○",
+                        LogType.Warning => "！",
+                        LogType.Error => "×",
+                        _ => "@"
+                    };
+                    sw.Write($"\r\n{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
+                    sw.Close();
+                    fs.Close();
+                }
             }
         }
     }

@@ -56,7 +56,7 @@ namespace SheepQQBot3.View
             var result = new List<RunLogMessage>
             {
                 new($"时间: {runLog.DateTimeStrFFF}"),
-                new(runLog.MessageColor, $"类型: {runLog.MessageTypeStr}")
+                new($"类型: {runLog.MessageTypeStr}")
             };
             switch (runLog.LogMessageType)
             {
