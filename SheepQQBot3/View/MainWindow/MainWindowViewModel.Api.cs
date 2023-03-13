@@ -14,7 +14,7 @@ namespace SheepQQBot3.View
 {
     partial class MainWindowViewModel
     {
-        private const int MaxLogCount = 200;
+        private const int MaxLogCount = 2000;
 
         private static readonly Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new();
 
@@ -28,6 +28,10 @@ namespace SheepQQBot3.View
             cqApi.OnOpen += (o, args) =>
             {
                 AddRunLog(new RunLog_SystemInfo("API 连接成功"));
+                if (PublicVar.IsDebug)
+                {
+                    cqApi.SendGroupMessage(15873217, "测试Bot启动完成!");
+                }
             };
             cqApi.OnClose += (o, data) =>
             {

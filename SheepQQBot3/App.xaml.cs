@@ -26,7 +26,7 @@ namespace SheepQQBot3
             if (PublicVar.IsDebug)
                 throw e.Exception;
 
-            YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.Message}");
+            YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.StackTrace}-{e.Exception?.Message}");
             e.Handled = true;
         }
     }
