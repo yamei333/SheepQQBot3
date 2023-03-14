@@ -25,6 +25,11 @@ public static partial class TaskProcess
     };
 
     /// <summary>
+    /// 风控账户
+    /// </summary>
+    private const string RISK_ACCOUNT = "1034";
+
+    /// <summary>
     /// 原神每日提醒
     /// </summary>
     public static void GenshinResinAlarm()
@@ -79,7 +84,7 @@ public static partial class TaskProcess
         var cookie = genshinResinAlarm.Cookies;
         var client = new HoyolabClient();
         DailyNoteInfo dailyNote;
-        GenshinRoleInfo role;
+        GenshinRoleInfo role = default;
         try
         {
             var roles = await client.GetGenshinRoleInfosAsync(cookie);
@@ -106,9 +111,16 @@ public static partial class TaskProcess
         }
         catch (Exception e)
         {
+            var errorMessage = e.Message;
+            if (errorMessage == RISK_ACCOUNT)
+            {
+                AddRunLog(new RunLog_SystemWarning($"米游社风控账户({genshinResinAlarm.ConfigName})"));
+                return;
+            }
+
             YameiLogExtensions.WriteLog(LogType.Error,
                 $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
-            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}"));
+            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.HResult}({e.Message})"));
             return;
         }
 

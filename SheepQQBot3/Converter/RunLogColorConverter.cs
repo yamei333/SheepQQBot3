@@ -28,7 +28,7 @@ public class RunLogColorConverter : IValueConverter
             case LogMessageType.FundHelper:
             case LogMessageType.LiveAlarm:
             case LogMessageType.GenshinDailyNoteAlarm:
-                return Brushes.Blue;
+                return Brushes.DarkGreen;
             case LogMessageType.GroupMessage:
             case LogMessageType.GroupRevokeMessage:
             case LogMessageType.GroupPoke:
