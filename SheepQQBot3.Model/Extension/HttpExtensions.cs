@@ -53,6 +53,7 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var httpClient = new HttpClient();
+                httpClient.Timeout = TimeSpan.FromSeconds(15);
                 return await httpClient.GetFromJsonAsync<T>(url).ConfigureAwait(false);
             }
             catch (Exception e)
