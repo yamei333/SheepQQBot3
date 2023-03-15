@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -23,56 +24,63 @@ namespace SheepQQBot3.View
             AddRunLog(new RunLog_SystemInfo("闹钟助手 模块已运行"));
             while (true)
             {
-                if (Api?.IsConnected == true)
+                try
                 {
-                    var dateNow = DateTime.Now;
-                    var dateNowStr = dateNow.ToConditionString(HolidayInfo);
-                    Vm.SetConfigs?.Values
-                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Common_AlarmAide))
-                        .ForEach(setConfig =>
-                        {
-                            setConfig.AlarmAideConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
-                            async void DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
+                    if (Api?.IsConnected == true)
+                    {
+                        var dateNow = DateTime.Now;
+                        var dateNowStr = dateNow.ToConditionString(HolidayInfo);
+                        Vm.SetConfigs?.Values
+                            .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Common_AlarmAide))
+                            .ForEach(setConfig =>
                             {
-                                if (!alarmAidesConfig.IsActive)
-                                    return;
-
-                                var condition = alarmAidesConfig.Condition;
-                                var jsonCondition = RegexGenerator.ConditionJsonText();
-                                var match = jsonCondition.Match(condition);
-                                if (match.Success)
+                                setConfig.AlarmAideConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
+                                async void DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
                                 {
-                                    var matchValue = match.Value;
-                                    condition = condition.Replace(matchValue, string.Empty);
-                                    var extendCondition = JsonSerializer.Deserialize<AlarmAideExtendCondition>(
-                                        matchValue.Replace("$", string.Empty));
-                                    if (extendCondition.DayOfMonthOffset.HasValue)
+                                    if (!alarmAidesConfig.IsActive)
+                                        return;
+
+                                    var condition = alarmAidesConfig.Condition;
+                                    var jsonCondition = RegexGenerator.ConditionJsonText();
+                                    var match = jsonCondition.Match(condition);
+                                    if (match.Success)
                                     {
-                                        var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();
-                                        var (dayOfMonth, lastDayOfMonth) = YameiExtensions.GetDayOfMonthAndLastDayOfMonth(DateTime.Now);
-                                        if (dayOfMonthOffsetValue > 0)
+                                        var matchValue = match.Value;
+                                        condition = condition.Replace(matchValue, string.Empty);
+                                        var extendCondition = JsonSerializer.Deserialize<AlarmAideExtendCondition>(
+                                            matchValue.Replace("$", string.Empty));
+                                        if (extendCondition.DayOfMonthOffset.HasValue)
                                         {
-                                            if (dayOfMonthOffsetValue != dayOfMonth)
-                                                return;
-                                        }
-                                        else
-                                        {
-                                            if (dayOfMonthOffsetValue != -lastDayOfMonth)
-                                                return;
+                                            var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();
+                                            var (dayOfMonth, lastDayOfMonth) = YameiExtensions.GetDayOfMonthAndLastDayOfMonth(DateTime.Now);
+                                            if (dayOfMonthOffsetValue > 0)
+                                            {
+                                                if (dayOfMonthOffsetValue != dayOfMonth)
+                                                    return;
+                                            }
+                                            else
+                                            {
+                                                if (dayOfMonthOffsetValue != -lastDayOfMonth)
+                                                    return;
+                                            }
                                         }
                                     }
+
+                                    if (!condition.IsMatch(dateNowStr))
+                                        return;
+
+                                    setConfig.AlarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
+                                    // 删除过期发送内容
+                                    DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
+                                    // 发送闹钟助手消息
+                                    await SendAlarm(setConfig, alarmAidesConfig, dateNow);
                                 }
-
-                                if (!condition.IsMatch(dateNowStr))
-                                    return;
-
-                                setConfig.AlarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
-                                // 发送闹钟助手消息
-                                await SendAlarm(setConfig, alarmAidesConfig, dateNow);
-                            }
-                        });
+                            });
+                    }
+                }
+                catch (Exception e)
+                {
+                    YameiLogExtensions.WriteLog(e);
                 }
 
                 CommonExtensions.Sleep(1000);

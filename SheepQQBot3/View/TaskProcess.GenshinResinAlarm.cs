@@ -37,30 +37,37 @@ public static partial class TaskProcess
         AddRunLog(new RunLog_SystemInfo("原神每日提醒 模块已运行"));
         while (true)
         {
-            if (Api?.IsConnected == true)
+            try
             {
-                var dateNow = DateTime.Now;
-                if (dateNow.Hour is not (>= 2 and <= 7))
+                if (Api?.IsConnected == true)
                 {
-                    Vm.SetConfigs?.Values
-                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
-                        .ForEach(setConfig =>
-                        {
-                            setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
-                                .ForEach(DeleteExpiredDataAction);
-
-                            async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
+                    var dateNow = DateTime.Now;
+                    if (dateNow.Hour is not (>= 2 and <= 7))
+                    {
+                        Vm.SetConfigs?.Values
+                            .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
+                            .ForEach(setConfig =>
                             {
-                                if (!genshinResinAlarm.IsActive)
-                                    return;
+                                setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
+                                    .ForEach(DeleteExpiredDataAction);
 
-                                setConfig.GenshinResinAlarmedList ??=
-                                    new Dictionary<(Guid, GenshinDailyNoteAlarmType), DateTime>();
-                                DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
-                                await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
-                            }
-                        });
+                                async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
+                                {
+                                    if (!genshinResinAlarm.IsActive)
+                                        return;
+
+                                    setConfig.GenshinResinAlarmedList ??=
+                                        new Dictionary<(Guid, GenshinDailyNoteAlarmType), DateTime>();
+                                    DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
+                                    await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
+                                }
+                            });
+                    }
                 }
+            }
+            catch (Exception e)
+            {
+                YameiLogExtensions.WriteLog(e);
             }
 
             CommonExtensions.Sleep(240000);
@@ -137,6 +144,7 @@ public static partial class TaskProcess
         {
             switch (currentResin)
             {
+                case 160:
                 case 155:
                 case 140:
                 case 120:

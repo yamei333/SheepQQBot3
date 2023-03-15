@@ -71,13 +71,17 @@ namespace SheepQQBot3.View
                     var potCoin = dailyNote.CurrentHomeCoin < 1600
                         ? string.Empty
                         : $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})";
+                    var transformerRecoveryTime = dateNow
+                        .AddDays(transformer.RecoveryTime.Day)
+                        .AddMinutes(transformer.RecoveryTime.Minute)
+                        .AddSeconds(transformer.RecoveryTime.Second);
                     var transformerStr = !transformer.Obtained
                         ? string.Empty
                         : $"{ENTER}质变: {(transformer.RecoveryTime.Reached
                             ? "已可用"
-                            : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
-                                .AddMinutes(transformer.RecoveryTime.Minute)
-                                .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})")}";
+                            : (transformerRecoveryTime - dateNow).TotalMinutes <= 30
+                                ? $"冷却中({transformerRecoveryTime:yyyy/M/d HH:mm})"
+                                : string.Empty)}";
                     //$"{ENTER}质变: {(transformer.Obtained
                     //    ? transformer.RecoveryTime.Reached
                     //        ? "已可用"
@@ -94,7 +98,7 @@ namespace SheepQQBot3.View
                 }
                 catch (Exception e)
                 {
-                    YameiLogExtensions.WriteLog(LogType.Error, $"GetDailyNoteAsync 失败:{e.Message}");
+                    YameiLogExtensions.WriteLog(e);
                     await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 数据获取失败, 可能是cookie已失效!");
                     return false;
                 }

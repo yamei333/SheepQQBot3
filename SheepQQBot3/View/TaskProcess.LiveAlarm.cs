@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -23,26 +24,33 @@ public static partial class TaskProcess
         AddRunLog(new RunLog_SystemInfo("直播提醒 模块已运行"));
         while (true)
         {
-            if (Api?.IsConnected == true)
+            try
             {
-                var dateNow = DateTime.Now;
-                Vm.SetConfigs?.Values
-                    .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_LiveAlarm))
-                    .ForEach(setConfig =>
-                    {
-                        setConfig.LiveAlarmConfigs?.ToValueList().ForEach(DeleteExpiredDataAction);
-                        async void DeleteExpiredDataAction(LiveAlarmConfig liveAlarmConfig)
+                if (Api?.IsConnected == true)
+                {
+                    var dateNow = DateTime.Now;
+                    Vm.SetConfigs?.Values
+                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_LiveAlarm))
+                        .ForEach(setConfig =>
                         {
-                            if (!liveAlarmConfig.IsActive)
-                                return;
+                            setConfig.LiveAlarmConfigs?.ToValueList().ForEach(DeleteExpiredDataAction);
+                            async void DeleteExpiredDataAction(LiveAlarmConfig liveAlarmConfig)
+                            {
+                                if (!liveAlarmConfig.IsActive)
+                                    return;
 
-                            setConfig.LiveAlarmedList ??= new Dictionary<Guid, DateTime>();
-                            // 删除过期记录
-                            DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
-                            // 发送基金播报消息
-                            await SendLiveAlarmMessage(setConfig, liveAlarmConfig, dateNow);
-                        }
-                    });
+                                setConfig.LiveAlarmedList ??= new Dictionary<Guid, DateTime>();
+                                // 删除过期记录
+                                DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
+                                // 发送基金播报消息
+                                await SendLiveAlarmMessage(setConfig, liveAlarmConfig, dateNow);
+                            }
+                        });
+                }
+            }
+            catch (Exception e)
+            {
+                YameiLogExtensions.WriteLog(e);
             }
 
             CommonExtensions.Sleep(30000);
@@ -66,9 +74,13 @@ public static partial class TaskProcess
         var liveRoomId = liveAlarmConfig.LiveRoomId;
         var liveRoomResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
             $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
+        if (liveRoomResponse == null)
+            return;
+
         var liveRoomResponseData = liveRoomResponse.Data;
         if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)
             return;
+
         var startTime = liveRoomResponse.Data.RoomInfo.LiveStartTime.ToDateTime();
         if ((DateTime.Now - startTime).TotalSeconds > 90)
             return;
