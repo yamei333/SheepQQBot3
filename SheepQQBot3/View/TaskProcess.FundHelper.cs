@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -22,39 +23,46 @@ namespace SheepQQBot3.View
             AddRunLog(new RunLog_SystemInfo("基金助手 模块已运行"));
             while (true)
             {
-                if (Api?.IsConnected == true)
+                try
                 {
-                    var dateNow = DateTime.Now;
-                    var dateNowStr = dateNow.ToConditionString(HolidayInfo);
-                    Vm.SetConfigs?.Values
-                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_FundHelper))
-                        .ForEach(setConfig =>
-                        {
-                            setConfig.FundAlarmConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
-                            async void DeleteExpiredDataAction(FundAlarmConfig fundAlarmConfig)
+                    if (Api?.IsConnected == true)
+                    {
+                        var dateNow = DateTime.Now;
+                        var dateNowStr = dateNow.ToConditionString(HolidayInfo);
+                        Vm.SetConfigs?.Values
+                            .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_FundHelper))
+                            .ForEach(setConfig =>
                             {
-                                if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))
-                                    return;
+                                setConfig.FundAlarmConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
+                                async void DeleteExpiredDataAction(FundAlarmConfig fundAlarmConfig)
+                                {
+                                    if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))
+                                        return;
 
-                                setConfig.FundAlarmedList ??= new Dictionary<Guid, DateTime>();
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.FundAlarmedList, dateNow);
-                                // 发送基金播报消息
-                                await SendFundAlarmMessage(setConfig, fundAlarmConfig, dateNow);
-                            }
+                                    setConfig.FundAlarmedList ??= new Dictionary<Guid, DateTime>();
+                                    // 删除过期发送内容
+                                    DeleteExpiredData(setConfig.FundAlarmedList, dateNow);
+                                    // 发送基金播报消息
+                                    await SendFundAlarmMessage(setConfig, fundAlarmConfig, dateNow);
+                                }
 
-                            setConfig.FundLimitObserveConfigs.ToValueList().ForEach(DeleteExpiredDataAction2);
-                            async void DeleteExpiredDataAction2(FundLimitObserveConfig fundLimitObserveConfig)
-                            {
-                                if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr)) return;
+                                setConfig.FundLimitObserveConfigs.ToValueList().ForEach(DeleteExpiredDataAction2);
+                                async void DeleteExpiredDataAction2(FundLimitObserveConfig fundLimitObserveConfig)
+                                {
+                                    if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr)) return;
 
-                                setConfig.FundLimitObservedList ??= new Dictionary<Guid, DateTime>();
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
-                                // 发送基金阈值观测消息
-                                await SendFundLimitMessage(setConfig, fundLimitObserveConfig, dateNow);
-                            }
-                        });
+                                    setConfig.FundLimitObservedList ??= new Dictionary<Guid, DateTime>();
+                                    // 删除过期发送内容
+                                    DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
+                                    // 发送基金阈值观测消息
+                                    await SendFundLimitMessage(setConfig, fundLimitObserveConfig, dateNow);
+                                }
+                            });
+                    }
+                }
+                catch (Exception e)
+                {
+                    YameiLogExtensions.WriteLog(e);
                 }
 
                 CommonExtensions.Sleep(5000);

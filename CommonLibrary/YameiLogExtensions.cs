@@ -9,6 +9,12 @@ namespace CommonLibrary
         public static void WriteLog(LogType logType, string logText)
             => yameiLog.WriteLog(logType, logText);
 
+        /// <summary>
+        /// 写入错误日志
+        /// </summary>
+        public static void WriteLog(Exception e)
+            => yameiLog.WriteLog(LogType.Error, $"{e.StackTrace}-{e.Source}({e.HResult})-{e.Message}");
+
         private class YameiLog
         {
             private readonly string _logPath;

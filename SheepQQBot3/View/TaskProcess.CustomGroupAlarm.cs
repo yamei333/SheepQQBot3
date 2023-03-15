@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -23,33 +24,40 @@ namespace SheepQQBot3.View
 
             while (true)
             {
-                if (Api?.IsConnected == true)
+                try
                 {
-                    var dateNow = DateTime.Now;
-                    Vm.SetConfigs?.Values
-                        .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_CustomGroupAlarm))
-                        .Select(each => each.CustomGroupAlarms)
-                        .ForEach(groupAlarms =>
-                        {
-                            var removeIds = new HashSet<Guid>();
-                            groupAlarms.Values.ForEach(AlertMessage);
-                            // MEMO : 移除需要删除的消息
-                            removeIds.ForEach(removeId => groupAlarms.Remove(removeId));
-
-                            async void AlertMessage(CustomGroupAlarm groupAlarm)
+                    if (Api?.IsConnected == true)
+                    {
+                        var dateNow = DateTime.Now;
+                        Vm.SetConfigs?.Values
+                            .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_CustomGroupAlarm))
+                            .Select(each => each.CustomGroupAlarms)
+                            .ForEach(groupAlarms =>
                             {
-                                var overSeconds = (dateNow - groupAlarm.AlarmDate).TotalSeconds;
-                                // MEMO : 超过3分钟内都可以提醒
-                                if (overSeconds is >= 0 and <= 180)
+                                var removeIds = new HashSet<Guid>();
+                                groupAlarms.Values.ForEach(AlertMessage);
+                                // MEMO : 移除需要删除的消息
+                                removeIds.ForEach(removeId => groupAlarms.Remove(removeId));
+
+                                async void AlertMessage(CustomGroupAlarm groupAlarm)
                                 {
-                                    var alarmMessage = groupAlarm.AlarmMessage.ToCqCode(0).Result;
-                                    var sendCustomMessage = $"{(groupAlarm.IsAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}";
-                                    await Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
-                                    // MEMO : 添加为删除消息
-                                    removeIds.Add(groupAlarm.Id);
+                                    var overSeconds = (dateNow - groupAlarm.AlarmDate).TotalSeconds;
+                                    // MEMO : 超过3分钟内都可以提醒
+                                    if (overSeconds is >= 0 and <= 180)
+                                    {
+                                        var alarmMessage = groupAlarm.AlarmMessage.ToCqCode(0).Result;
+                                        var sendCustomMessage = $"{(groupAlarm.IsAtTarget ? $"[CQ:at,qq={groupAlarm.TargetId}] 小助手提醒!{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}";
+                                        await Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
+                                        // MEMO : 添加为删除消息
+                                        removeIds.Add(groupAlarm.Id);
+                                    }
                                 }
-                            }
-                        });
+                            });
+                    }
+                }
+                catch (Exception e)
+                {
+                    YameiLogExtensions.WriteLog(e);
                 }
 
                 CommonExtensions.Sleep(1000);

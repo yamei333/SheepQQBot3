@@ -22,7 +22,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetString)}-{e.Message}");
+                YameiLogExtensions.WriteLog(e);
                 return null;
             }
         }
@@ -84,7 +84,7 @@ namespace SheepQQBot3.Model.Extension
             }
             catch (Exception e)
             {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(SendHttpResponse)}-{e.Message}");
+                YameiLogExtensions.WriteLog(e);
                 return null;
             }
         }
