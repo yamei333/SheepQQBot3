@@ -1,11 +1,12 @@
 ﻿using System;
-using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools.Media;
+using SixLabors.ImageSharp;
 
 namespace SheepQQBot3.Model.Extension
 {
@@ -113,18 +114,23 @@ namespace SheepQQBot3.Model.Extension
             if (response?.StatusCode != HttpStatusCode.OK)
                 return (false, string.Empty);
 
-            var fileExtend = response.Content.Headers.ContentType?.MediaType switch
-            {
-                "image/jpeg" => "jpg",
-                "zap" => "zap",
-                _ => "png"
-            };
+            //var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+            //{
+            //    "image/jpeg" => "jpg",
+            //    "zap" => "zap",
+            //    _ => "png"
+            //};
 
             const string cachePathName = "Cache";
             CommonExtensions.CreatePath(cachePathName);
-            var fs = new FileStream($"{cachePathName}/{tempFileName}.{fileExtend}", FileMode.CreateNew);
-            await response.Content.CopyToAsync(fs);
-            return (true, $"{tempFileName}.{fileExtend}");
+            //Masuit.Tools.Media.ImageUtilities.ResizeImage()
+            var stream = await response.Content.ReadAsStreamAsync();
+            var image = await Image.LoadAsync(stream);
+            await image.ResizeImage(image.Width, image.Height - 1)
+                .SaveAsPngAsync($"{cachePathName}/{tempFileName}.png");
+            //var fs = new FileStream($"{cachePathName}/{tempFileName}.{fileExtend}", FileMode.CreateNew);
+            //await response.Content.CopyToAsync(fs);
+            return (true, $"{tempFileName}.png");
         }
     }
 }

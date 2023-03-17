@@ -3,10 +3,10 @@
 namespace SheepQQBot3.Model.Enums
 {
     /// <summary>
-    /// 消息类型
+    /// 目标类型
     /// </summary>
     [JsonConverter(typeof(JsonStringEnumConverter))]
-    public enum MessageType
+    public enum MessageTargetType
     {
         /// <summary>
         /// 私聊消息

@@ -219,9 +219,13 @@
                 <tb:TaskbarIcon.ContextMenu>
                     <ContextMenu>
                         <MenuItem Click="NotifyIcon_OnShowMainWindow"
-                                  Header="打开主画面" />
+                                  Header="打开主界面" />
                         <MenuItem Click="NotifyIcon_OnShowGocqWindow"
-                                  Header="打开gocq画面" />
+                                  Header="打开gocq界面" />
+                        <MenuItem Click="NotifyIcon_OnShowBarkWindow"
+                                  Header="打开BarkServer界面"
+                                  Visibility="{Binding IsBarkUsed,
+                                                       Converter={StaticResource BooleanToVisibilityConverter}}" />
                         <MenuItem Click="NotifyIcon_OnExit"
                                   Header="退出" />
                     </ContextMenu>

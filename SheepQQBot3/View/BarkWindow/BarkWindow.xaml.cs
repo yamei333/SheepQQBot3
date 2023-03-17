@@ -17,16 +17,16 @@ using static SheepQQBot3.View.PublicVar;
 namespace SheepQQBot3.View
 {
     /// <summary>
-    /// GocqWindow.xaml 的交互逻辑
+    /// BarkWindow.xaml 的交互逻辑
     /// </summary>
-    public partial class GocqWindow
+    public partial class BarkWindow
     {
         private static readonly Regex _regCmdStart = RegexGenerator.CmdStart();
 
         /// <summary>
-        /// Gocq窗口
+        /// Bark窗口
         /// </summary>
-        public GocqWindow()
+        public BarkWindow()
         {
             InitializeComponent();
             Loaded += (s, e) =>
@@ -39,59 +39,67 @@ namespace SheepQQBot3.View
 
         private async void LaunchChildProcess()
         {
-            var hasGocqHttp = true;
-            var gocqexe = ConfigurationManager.AppSettings["gocqexe"];
-            var gocqName = gocqexe?.Replace(".exe", string.Empty);
-            while (hasGocqHttp)
+            var hasBarkHttp = true;
+            var barkexe = ConfigurationManager.AppSettings["barkexe"];
+            var barkName = barkexe?.Replace(".exe", string.Empty);
+            while (hasBarkHttp)
             {
-                var gocqProcesses = Process.GetProcessesByName(gocqName);
-                hasGocqHttp = gocqProcesses.Length > 0;
-                if (hasGocqHttp)
-                    gocqProcesses.ForEach(each => each.Kill());
+                var barkProcesses = Process.GetProcessesByName(barkName);
+                hasBarkHttp = barkProcesses.Length > 0;
+                if (hasBarkHttp)
+                    barkProcesses.ForEach(each => each.Kill());
             }
 
-            if (Gocq is { HasExited: false })
-                Gocq.Kill();
+            if (Bark is { HasExited: false })
+                Bark.Kill();
 
-            var gocqPath = ConfigurationManager.AppSettings["gocq"];
-            Gocq = new Process
+            var barkPath = ConfigurationManager.AppSettings["bark"];
+            Bark = new Process
             {
                 StartInfo =
                 {
-                    WorkingDirectory = gocqPath!,
+                    WorkingDirectory = barkPath!,
                     FileName = "cmd.exe",
                     UseShellExecute = false,
-                    Arguments = "/C go-cqhttp_windows_amd64.exe -faststart",
+                    Arguments = "/C bark-server_windows_amd64 -addr 0.0.0.0:30008 -data ./bark-data",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
-                    CreateNoWindow = true,
+                    CreateNoWindow = true
                 }
             };
 
-            Gocq.Start();
-            Vm.AddRunLog(new RunLog_SystemInfo("gocq-http 已启动"));
+            Bark.Start();
+            Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 已启动"));
             await Task.Run(() =>
             {
-                while (!Gocq.StandardOutput.EndOfStream)
+                while (!Bark.StandardOutput.EndOfStream)
                 {
-                    var line = Gocq.StandardOutput.ReadLine();
+                    var line = Bark.StandardOutput.ReadLine();
                     if (string.IsNullOrEmpty(line))
                         continue;
 
                     var result = _regCmdStart.Replace(line!, string.Empty);
                     Brush color;
-                    if (result.IndexOf("[WARNING]", StringComparison.Ordinal) >= 0)
-                        color = Brushes.DarkGoldenrod;
-                    else if (result.IndexOf("[ERROR]", StringComparison.Ordinal) >= 0)
-                        color = Brushes.DarkRed;
-                    else
+                    var fontName = "微软雅黑";
+                    if (result.IndexOf("  INFO  ", StringComparison.Ordinal) >= 0)
+                    {
                         color = Brushes.DarkGreen;
+                    }
+                    else if (result.IndexOf("  ERROR  ", StringComparison.Ordinal) >= 0)
+                    {
+                        color = Brushes.DarkRed;
+                    }
+                    else
+                    {
+                        color = Brushes.DarkGoldenrod;
+                        fontName = "Consolas";
+                    }
 
                     try
                     {
                         Dispatcher.Invoke(() =>
                         {
-                            AppendRichText(result, color);
+                            AppendRichText(result, color, fontName);
                             var blocks = RichTextBox.Document.Blocks;
                             if (blocks.Count > 2000)
                                 blocks.Remove(blocks.FirstBlock);
@@ -107,11 +115,12 @@ namespace SheepQQBot3.View
                 }
             });
 
-            void AppendRichText(string addMessage, Brush brush)
+            void AppendRichText(string addMessage, Brush brush, string fontFamily)
             {
                 // 创建一个新的 Paragraph 对象
                 var p = new Paragraph
                 {
+                    FontFamily = new FontFamily(fontFamily),
                     LineHeight = 1
                 };
                 p.Inlines.Add(new Run(addMessage)
@@ -122,12 +131,7 @@ namespace SheepQQBot3.View
             }
         }
 
-        //private void OnRestartGocq(object sender, RoutedEventArgs e)
-        //{
-        //    LaunchChildProcess();
-        //}
-
-        private void GocqWindow_OnClosing(object sender, CancelEventArgs e)
+        private void BarkWindow_OnClosing(object sender, CancelEventArgs e)
         {
             this.Visibility = Visibility.Collapsed;
             e.Cancel = true;

@@ -26,9 +26,13 @@ namespace SheepQQBot3.View
     {
         //private readonly BotFunction[] DefaultBotFunctions;
 
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
         public MainWindow()
         {
             BotExtensions.KillGocqexe();
+            BotExtensions.KillBarkexe();
             //DefaultBotFunctions = Enum.GetNames(typeof(BotFunctionType))
             //    .Select(each => new BotFunction((BotFunctionType)Enum.Parse(typeof(BotFunctionType), each), false))
             //    .ToArray();
@@ -76,12 +80,20 @@ namespace SheepQQBot3.View
         {
             this.Left -= int.MaxValue;
             this.Visibility = Visibility.Collapsed;
+            // MEMO : Gocq
             PublicVar.GocqWindow = new GocqWindow
             {
                 Visibility = Visibility.Collapsed,
                 WindowStyle = WindowStyle.None
             };
             PublicVar.GocqWindow.Show();
+            // MEMO : Bark
+            PublicVar.BarkWindow = new BarkWindow
+            {
+                Visibility = Visibility.Collapsed,
+                WindowStyle = WindowStyle.None
+            };
+            PublicVar.BarkWindow.Show();
             Vm.AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化完成"));
         }
 
@@ -126,13 +138,13 @@ namespace SheepQQBot3.View
 
             /*
             var selectedSetConfig = vm.SelectedSetConfig;
-            if (vm.SetBotFunctions.TryGetValue((selectedSetConfig.TargetType, selectedSetConfig.TargetId), out var botFunctions))
+            if (vm.SetBotFunctions.TryGetValue((selectedSetConfig.MessageTargetType, selectedSetConfig.TargetId), out var botFunctions))
             {
                 botFunctions = vm.SelectedSetBotFunctions;
             }
             else
             {
-                vm.SetBotFunctions.Add((selectedSetConfig.TargetType, selectedSetConfig.TargetId), DefaultBotFunctions);
+                vm.SetBotFunctions.Add((selectedSetConfig.MessageTargetType, selectedSetConfig.TargetId), DefaultBotFunctions);
             }*/
         }
 
@@ -281,6 +293,7 @@ namespace SheepQQBot3.View
         private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
         {
             BotExtensions.KillGocqexe();
+            BotExtensions.KillBarkexe();
             Application.Current.Shutdown();
         }
 
@@ -291,6 +304,12 @@ namespace SheepQQBot3.View
         {
             PublicVar.GocqWindow.Visibility = Visibility.Visible;
             PublicVar.GocqWindow.Activate();
+        }
+
+        private void NotifyIcon_OnShowBarkWindow(object sender, RoutedEventArgs e)
+        {
+            PublicVar.BarkWindow.Visibility = Visibility.Visible;
+            PublicVar.BarkWindow.Activate();
         }
 
         private void MainWindow_OnClosing(object sender, CancelEventArgs e)

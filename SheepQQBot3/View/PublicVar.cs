@@ -73,6 +73,8 @@ namespace SheepQQBot3.View
 
         public static Process Gocq;
         public static GocqWindow GocqWindow;
+        public static Process Bark;
+        public static BarkWindow BarkWindow;
 
         /// <summary>
         /// 节假日信息

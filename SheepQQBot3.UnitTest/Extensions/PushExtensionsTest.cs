@@ -6,7 +6,7 @@
         [TestMethod]
         public void PushBarkTest()
         {
-            PushExtensions.PushBarkMessage(message: "真是投了牌面的马", title: "PM跑马场");
+            var type = PushExtensions.PushBarkMessageAsync("真是投了牌面的马", "PM跑马场").Result;
         }
     }
 }

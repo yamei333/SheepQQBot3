@@ -60,8 +60,11 @@ namespace SheepQQBot3.Model
         [JsonPropertyName("message_id")]
         public int Message_Id { get; set; }
 
+        /// <summary>
+        /// 消息目标类型
+        /// </summary>
         [JsonPropertyName("message_type")]
-        public MessageType Message_Type { get; set; }
+        public MessageTargetType MessageTargetType { get; set; }
 
         [JsonPropertyName("raw_message")]
         public string Raw_Message { get; set; }

@@ -16,6 +16,7 @@ namespace SheepQQBot3.Model.Enums
         Group_FundHelper = 2003,
         Group_RandomSetu = 2004,
         Group_LiveAlarm = 2005,
+        Group_SearchImageSource = 2006,
         Group_GenshinHelper = 2200,
     }
 
@@ -35,11 +36,16 @@ namespace SheepQQBot3.Model.Enums
                 BotFunctionType.Group_FundHelper => "基金助手",
                 BotFunctionType.Group_RandomSetu => "随机色图",
                 BotFunctionType.Group_LiveAlarm => "直播提醒",
+                BotFunctionType.Group_SearchImageSource => "图源搜索",
                 BotFunctionType.Group_GenshinHelper => "原神助手",
                 _ => throw new System.NotImplementedException()
             };
         }
 
+        /// <summary>
+        /// 所有显示TAB的功能
+        /// </summary>
+        /// <returns></returns>
         public static HashSet<BotFunctionType> GetTabFunctions()
             => new()
             {

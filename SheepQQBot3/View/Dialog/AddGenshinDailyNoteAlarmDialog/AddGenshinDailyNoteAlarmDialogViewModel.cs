@@ -8,6 +8,7 @@ namespace SheepQQBot3.View
         {
             ConfigName = string.Empty;
             Cookies = string.Empty;
+            BarkKey = string.Empty;
         }
 
         private string _configName;
@@ -35,6 +36,20 @@ namespace SheepQQBot3.View
             {
                 _cookies = value;
                 OnPropertyChanged(nameof(Cookies));
+            }
+        }
+
+        private string _barkKey;
+        /// <summary>
+        /// BarkKey
+        /// </summary>
+        public string BarkKey
+        {
+            get => _barkKey;
+            set
+            {
+                _barkKey = value;
+                OnPropertyChanged(nameof(BarkKey));
             }
         }
 

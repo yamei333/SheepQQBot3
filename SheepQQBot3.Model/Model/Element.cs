@@ -13,7 +13,7 @@ namespace SheepQQBot3.Model
         /// 类型
         /// </summary>
         [JsonPropertyName("type")]
-        public string Type { get; } = string.Empty;
+        public ElementType Type { get; } = ElementType.text;
 
         /// <summary>
         /// 节点信息
@@ -21,9 +21,12 @@ namespace SheepQQBot3.Model
         [JsonPropertyName("data")]
         public ElementBaseData Data { get; set; }
 
-        public Element(string type, ElementBaseData baseData)
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        public Element(ElementType type, ElementBaseData baseData)
         {
-            this.Type = type;
+            Type = type;
             Data = baseData;
         }
 

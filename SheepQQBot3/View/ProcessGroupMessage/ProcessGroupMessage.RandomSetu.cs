@@ -180,16 +180,16 @@ namespace SheepQQBot3.View
                     if (addSecond > 0)
                     {
                         // MEMO : CD增加
-                        sendMessage = $"[CQ:at,qq={targetId}] "
-                                      + $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}"
-                                      + $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                      //+ $" (+{addSecond}s)"
-                                      + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
+                        sendMessage = $"{CQCode.At(targetId)} " +
+                            $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}" +
+                            $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
+                            //+ $" (+{addSecond}s)"
+                            (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
                     }
                     //else if (addSecond == 0)
                     //{
                     //    // MEMO : 白嫖
-                    //    sendMessage = $"[CQ:at,qq={targetId}] "
+                    //    sendMessage = $"{CQCode.at(targetId)} "
                     //                  + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
                     //                  + (isShowDate ? $" [CD {config.SetuSendHistorys[groupId]:HH:mm:ss}]" : string.Empty);
                     //    await Api.SendGroupMessage(groupId, sendMessage);
@@ -198,7 +198,7 @@ namespace SheepQQBot3.View
                     else
                     {
                         // MEMO : 幸运(CD减少)
-                        sendMessage = $"[CQ:at,qq={targetId}] "
+                        sendMessage = $"{CQCode.At(targetId)} "
                                       + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                                       + $" ({addSecond}s)"
                                       + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
@@ -214,7 +214,7 @@ namespace SheepQQBot3.View
                     if (targetId != PublicVar.AdminId && addSecond == 0)
                     {
                         // MEMO : 白嫖
-                        var sendMessage = $"[CQ:at,qq={targetId}] "
+                        var sendMessage = $"{CQCode.At(targetId)} "
                             + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
                             + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
                         await Api.SendGroupMessage(groupId, sendMessage);
@@ -297,21 +297,21 @@ SendSetu:
 
                     CommonExtensions.DeleteExpiredCache();
                     await Api.SendGroupMessage(groupId,
-                        $"[CQ:image,file={CommonExtensions.GetCachePath(fileName)}]"
-                        + $"{ENTER}{setuInfo.SourceText}"
-                        + $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"
-                        + $"{ENTER}API提供:{setuInfo.SetuType}"
-                        + $"{ENTER}[CQ:at,qq={targetId}] {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
+                        CQCode.Image(CommonExtensions.GetCachePath(fileName)) +
+                        $"{ENTER}{setuInfo.SourceText}" +
+                        $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}" +
+                        $"{ENTER}API提供:{setuInfo.SetuType}" +
+                        $"{ENTER}{CQCode.At(targetId)} {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
 
                     if (r18Bonus)
                     {
                         var setuInfoR18 = SetuExtensions.GetSetu_Lolicon_R18().Result;
                         await Api.SendGroupMessage(groupId,
-                            $"[这是一张额外的金色传说色图, 不可预览]"
-                            + $"{ENTER}{setuInfoR18.SourceText}"
-                            + $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"
-                            + $"{ENTER}API提供:{setuInfo.SetuType}"
-                            + $"{ENTER}[CQ:at,qq={targetId}] {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
+                            $"[这是一张额外的金色传说色图, 不可预览]" +
+                            $"{ENTER}{setuInfoR18.SourceText}" +
+                            $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}" +
+                            $"{ENTER}API提供:{setuInfo.SetuType}" +
+                            $"{ENTER}{CQCode.At(targetId)} {_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
                     }
                 }
                 catch (Exception)

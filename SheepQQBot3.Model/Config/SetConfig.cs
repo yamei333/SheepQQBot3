@@ -42,8 +42,8 @@ namespace SheepQQBot3.Model.Config
             TargetType switch
             {
                 BotConfigTargetType.Common => null,
-                BotConfigTargetType.Group => GetHttpIcon($"http://p.qlogo.cn/gh/{TargetId}/{TargetId}/40/"),
-                BotConfigTargetType.Private => GetHttpIcon($"http://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=40"),
+                BotConfigTargetType.Group => GetHttpIcon($"https://p.qlogo.cn/gh/{TargetId}/{TargetId}/100/"),
+                BotConfigTargetType.Private => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=100"),
                 _ => throw new NotImplementedException()
             };
 

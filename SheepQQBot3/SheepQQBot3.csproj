@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.6.6.8</Version>
+    <Version>0.6.8.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
@@ -58,6 +58,7 @@
 
   <ItemGroup>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
+    <PackageReference Include="Masuit.Tools.Net" Version="2.5.9.3" />
   </ItemGroup>
 
   <ItemGroup>
@@ -70,6 +71,7 @@
 
   <ItemGroup>
     <Folder Include="BotService\" />
+    <Folder Include="View\BarkWindow\" />
   </ItemGroup>
 
   <ItemGroup>

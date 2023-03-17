@@ -1,16 +1,35 @@
 ﻿using System;
+using System.Configuration;
 using System.Net.Http;
 using System.Text;
+using System.Text.Encodings.Web;
+using System.Text.Json;
+using System.Threading.Tasks;
 using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Extension
 {
+    /// <summary>
+    /// 推送拓展
+    /// </summary>
     public static class PushExtensions
     {
-        public static PushBarkResultType PushBarkMessage(
-            string key = "AVFEU5an7t4DZqfCCDr7Dn",
-            string message = "test",
-            string title = "",
+        /// <summary>
+        /// 使用Bark给手机推送
+        /// </summary>
+        /// <param name="key">推送的Key, 参考Bark链接</param>
+        /// <param name="message">内容</param>
+        /// <param name="title">标题</param>
+        /// <param name="icon">图标</param>
+        /// <param name="url">链接</param>
+        /// <param name="isArchive">是否存档</param>
+        /// <param name="isCopy">是否允许复制</param>
+        /// <param name="isAutoCopy">是否自动复制</param>
+        /// <returns>推送结果</returns>
+        public static async Task<PushBarkResultType> PushBarkMessageAsync(
+            string key,
+            string message,
+            string title,
             string icon = "",
             string url = "",
             bool isArchive = true,
@@ -20,53 +39,52 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var httpClient = new HttpClient();
-                var content = new StringContent(string.Empty, Encoding.UTF8, "application/x-www-form-urlencoded");
-                var request = httpClient.PostAsync($"http://push.yamei.moe/{key}", content);
-                //var request = (HttpWebRequest)WebRequest.Create($"http://push.yamei.moe/{key}");
-                //request.Method = "POST";
-                //request.ContentType = "application/x-www-form-urlencoded";
-
-                // MEMO : 设置POST参数
-                //var builder = new StringBuilder();
-                //builder.Append($"Title={title}");
-                //builder.Append($"&body={message}");
-                //if (!string.IsNullOrEmpty(icon))
-                //    builder.Append($"&icon={icon}");
-
-                //if (!string.IsNullOrEmpty(url))
-                //    builder.Append($"&Url={url}");
-
-                //builder.Append($"&isArchive={(isArchive ? "1" : "0")}");
-
-                //if (isCopy)
-                //    builder.Append($"&copy={message}");
-
-                //if (isAutoCopy)
-                //    builder.AppendFormat("&autoCopy=1");
-
-                //var data = Encoding.UTF8.GetBytes(builder.ToString());
-                //request.ContentLength = data.Length;
-                //using (var reqStream = request.GetRequestStream())
-                //{
-                //    reqStream.Write(data, 0, data.Length);
-                //    reqStream.Close();
-                //}
-
-                //var response = ((HttpWebResponse)request.GetResponse());
-                //var myreader = new System.IO.StreamReader(response.GetResponseStream(), Encoding.UTF8);
-                //var barkResp = JsonNode.Parse(myreader.ReadToEnd());
-
-                //return Convert.ToInt16(barkResp?["code"]) == 200
-                //    ? PushBarkResultType.Success
-                //    : PushBarkResultType.Failed;
-
-                return PushBarkResultType.Success;
+                var pushBarkData = new PushBarkData
+                {
+                    Body = message,
+                    Title = string.IsNullOrEmpty(title) ? null : title,
+                    Icon = string.IsNullOrEmpty(icon)
+                        ? $"https://q.qlogo.cn/headimg_dl?dst_uin={ConfigurationManager.AppSettings["selfId"]}&spec=100"
+                        : icon,
+                    LinkUrl = string.IsNullOrEmpty(url) ? null : url,
+                    IsArchive = isArchive ? 1 : 0,
+                    IsCopy = isCopy ? 1 : 0,
+                    IsAutoCopy = isAutoCopy ? 1 : 0
+                };
+                var stringContent = new StringContent(
+                    JsonSerializer.Serialize(pushBarkData, new JsonSerializerOptions
+                    {
+                        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                    }),
+                    Encoding.UTF8, "application/json");
+                var request = await httpClient
+                    .PostAsync($"http://yamimi.moe:30008/{key}", stringContent)
+                    //.PostAsJsonAsync($"http://yamimi.moe:30008/{key}", pushBarkData, CancellationToken.None)
+                    .ConfigureAwait(false);
+                return request.IsSuccessStatusCode
+                    ? PushBarkResultType.Success
+                    : PushBarkResultType.Failed;
             }
             catch (Exception)
             {
                 // MEMO : 发起推送失败
                 return PushBarkResultType.PushError;
             }
+        }
+
+        /// <summary>
+        /// 使用Bark给手机推送(默认key)
+        /// </summary>
+        /// <param name="message">内容</param>
+        /// <param name="title">标题</param>
+        /// <returns>推送结果</returns>
+        public static async Task<PushBarkResultType> PushBarkMessageAsync(
+            string message,
+            string title)
+        {
+            return await PushBarkMessageAsync(
+                ConfigurationManager.AppSettings["barkkey"],
+                message, title);
         }
     }
 }

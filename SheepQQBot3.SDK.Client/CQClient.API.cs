@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
 using Yamei.Common;
 using static System.Threading.Tasks.Task;
 
@@ -21,40 +22,17 @@ namespace SheepQQBot3.SDK.Client
         public async Task SendGroupMessage(long groupId, string message, Dictionary<Guid, SetConfig> setConfigs = null)
         {
             var messageList = MessageUtil.ProcessCQMessage(message);
-            var redirectData = messageList.FirstOrDefault(each => each.Type == "ym_redirect");
-            if (redirectData != null)
+
+            ProcessYmMessage(ElementType.ym_redirect, ProcessYmRedirect);
+            ProcessYmMessage(ElementType.ym_ifnotidle, ymElement =>
             {
-                if (Guid.TryParse(redirectData.Data.Data, out var redirectId))
-                {
-                    var alarmAideConfigs = setConfigs
-                        .SelectMany(each => each.Value.AlarmAideConfigs.Values)
-                        .ToDictionary(each => each.Id, each => each);
-                    if (!alarmAideConfigs.TryGetValue(redirectId, out var alarmAideConfig))
-                        return;
-
-                    var alarmTexts = alarmAideConfig.AlarmTexts;
-                    if (alarmTexts.Count > 0)
-                        await SendGroupMessage(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
-
-                    return;
-                }
-                else
-                {
-                    // MEMO : 数据不准确, 发送错误信息
-                    messageList = MessageUtil.ProcessCQMessage("ym_redirect 数据不正确");
-                }
-            }
-
-            var idleData = messageList.FirstOrDefault(each => each.Type == "ym_ifnotidle");
-            if (idleData != null)
-            {
-                if (int.TryParse(idleData.Data.Data, out var overTime))
+                if (int.TryParse(ymElement.Data.Data, out var overTime))
                 {
                     if (CommonUtil.GetIsNotIdle(overTime))
                     {
                         // MEMO : 忙时, 触发
                         //messageList.Add(new Element("text", new ElementBaseData($"闲时:{CommonUtil.GetIdleTime()}")));
-                        messageList.Remove(idleData);
+                        messageList.Remove(ymElement);
                     }
                     else
                     {
@@ -67,13 +45,53 @@ namespace SheepQQBot3.SDK.Client
                     // MEMO : 数据不准确, 发送错误信息
                     messageList = MessageUtil.ProcessCQMessage("ym_ifnotidle 数据不正确");
                 }
-            }
+            });
+            ProcessYmMessage(ElementType.ym_bark, ProcessYmBark);
 
             await SendDataAsync("send_group_msg", new ParamData
             {
                 Group_Id = groupId.ToString(),
                 Message = messageList
             });
+
+            void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
+            {
+                var ymElementData = messageList.FirstOrDefault(each => each.Type == ymElementType);
+                if (ymElementData != null)
+                {
+                    action(ymElementData);
+                }
+            }
+
+            async void ProcessYmRedirect(Element ymElement)
+            {
+                if (Guid.TryParse(ymElement.Data.Data, out var redirectId))
+                {
+                    var alarmAideConfigs = setConfigs.SelectMany(each => each.Value.AlarmAideConfigs.Values)
+                        .ToDictionary(each => each.Id, each => each);
+                    if (!alarmAideConfigs.TryGetValue(redirectId, out var alarmAideConfig)) return;
+
+                    var alarmTexts = alarmAideConfig.AlarmTexts;
+                    if (alarmTexts.Count > 0) await SendGroupMessage(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
+
+                    return;
+                }
+                else
+                {
+                    // MEMO : 数据不准确, 发送错误信息
+                    messageList = MessageUtil.ProcessCQMessage("ym_redirect 数据不正确");
+                }
+            }
+
+            async void ProcessYmBark(Element ymElement)
+            {
+                messageList.Remove(ymElement);
+                var elementData = ymElement.Data;
+                if (!string.IsNullOrEmpty(elementData.Data))
+                {
+                    await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content);
+                }
+            }
         }
 
         /// <summary>
@@ -91,21 +109,21 @@ namespace SheepQQBot3.SDK.Client
         /// <summary>
         /// 发送消息
         /// </summary>
-        /// <param name="messageType"><see cref="MessageType"/></param>
+        /// <param name="type"><see cref="ElementType"/></param>
         /// <param name="targetId">群号</param>
         /// <param name="message">消息内容</param>
-        public async void SendMessage(MessageType messageType, long targetId, string message)
+        public async void SendMessage(MessageTargetType type, long targetId, string message)
         {
-            switch (messageType)
+            switch (type)
             {
-                case MessageType.Private:
+                case MessageTargetType.Private:
                     await Run(() => SendPrivateMessage(targetId, message));
                     break;
-                case MessageType.Group:
+                case MessageTargetType.Group:
                     await Run(() => SendGroupMessage(targetId, message));
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(messageType), messageType, null);
+                    throw new ArgumentOutOfRangeException(nameof(type), type, null);
             }
         }
 

@@ -29,9 +29,7 @@ namespace SheepQQBot3.View
             {
                 AddRunLog(new RunLog_SystemInfo("API 连接成功"));
                 if (PublicVar.IsDebug)
-                {
                     cqApi.SendGroupMessage(15873217, "测试Bot启动完成!");
-                }
             };
             cqApi.OnClose += (o, data) =>
             {
@@ -152,7 +150,8 @@ namespace SheepQQBot3.View
 
                 GetSelectedConfig(groupId, BotFunctionType.Group_FundHelper, config =>
                 {
-                    StartTask(() => ProcessGroupMessage.FundHelper(groupMessage));
+                    StartTask(FundHelper);
+                    async void FundHelper() => await ProcessGroupMessage.FundHelper(groupMessage);
                 });
 
                 GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
@@ -173,6 +172,12 @@ namespace SheepQQBot3.View
                         config.GenshinHelperConfig?.GenshinResinAlarms.Values
                             .ToDictionary(each => each.TargetId, each => each),
                     groupMessage);
+                });
+
+                GetSelectedConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
+                {
+                    StartTask(SearchImageSource);
+                    async void SearchImageSource() => await ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
                 });
 
                 //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)

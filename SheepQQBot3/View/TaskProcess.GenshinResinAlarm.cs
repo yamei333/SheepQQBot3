@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
@@ -20,6 +21,8 @@ namespace SheepQQBot3.View;
 
 public static partial class TaskProcess
 {
+    private static readonly Regex regRemoveCQAt = RegexGenerator.CQCodeRemoveCQAt();
+
     private static readonly string[] _resinMessage = {
         "DJLJ!", "体力爆炸了!", "树脂在燃烧!", "反正也是辣鸡圣遗物", "KJ! JS!"
     };
@@ -199,7 +202,7 @@ public static partial class TaskProcess
                 sendMessage += ENTER;
 
             if (!sendMessage!.Contains("CQ:at"))
-                sendMessage += $"[CQ:at,qq={alarmTargetId}]";
+                sendMessage += CQCode.At(alarmTargetId);
 
             sendMessage += msg;
             if (!forceSend)
@@ -210,6 +213,16 @@ public static partial class TaskProcess
         {
             if (string.IsNullOrEmpty(sendMessage))
                 return;
+
+            var barkKey = genshinResinAlarm.BarkKey;
+            if (!string.IsNullOrEmpty(barkKey))
+            {
+                var barkMessage = regRemoveCQAt.Replace(sendMessage, string.Empty);
+                await PushExtensions.PushBarkMessageAsync(
+                    barkKey,
+                    barkMessage,
+                    "哈莉提醒");
+            }
 
             switch (targetType)
             {

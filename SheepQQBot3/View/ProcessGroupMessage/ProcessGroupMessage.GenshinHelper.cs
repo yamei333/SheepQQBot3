@@ -1,11 +1,13 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 using CommonLibrary;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using Xunkong.Hoyolab;
+using Yamei.Common;
 using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
@@ -49,17 +51,35 @@ namespace SheepQQBot3.View
                 {
                     var roles = await client.GetGenshinRoleInfosAsync(cookie);
                     var role = roles[0];
+                    var sendMessage = string.Empty;
+                    var (dayOfMonth, lastDayOfMonth) = dateNow.GetDayOfMonthAndLastDayOfMonth();
+                    var abyssTotalStar = 0;
+                    var abyssFloor = string.Empty;
+                    if (dayOfMonth is 13 or 14 or 15
+                        || lastDayOfMonth is 1 or 2 or 3)
+                    {
+                        var spiralAbyssInfo = await client.GetSpiralAbyssInfoAsync(role, 1, CancellationToken.None);
+                        if (spiralAbyssInfo != null)
+                        {
+                            abyssTotalStar = spiralAbyssInfo.TotalStar;
+                            abyssFloor = spiralAbyssInfo.MaxFloor;
+                        }
+                    }
+
                     var dailyNote = await client.GetDailyNoteAsync(role);
                     var transformer = dailyNote.Transformer;
-                    // MEMO 一句话概括
+                    // MEMO : 一句话概括
                     var oneHint = !dailyNote.IsExtraTaskRewardReceived
-                        ? $"{ENTER}你每日都没做完, 你怎么睡得着!"
+                        ? $"你每日都没做完, 你怎么睡得着!"
                         : dailyNote.CurrentResin >= 60
-                            ? $"{ENTER}你体力都没用完, 要亏辣鸡圣遗物!"
+                            ? $"你体力都没用完, 要亏辣鸡圣遗物!"
                             : dailyNote.ResinFullTime.Hour <= 15
-                                ? $"{ENTER}你体力会在{dailyNote.ResinFullTime:HH:mm:ss}回满, 我觉得不是很保险"
-                                : $"{ENTER}辣鸡任务都搞定了, 今天又是完美的一天";
-                    var nickName = $"{dailyNote.Nickname}({dailyNote.Uid})";
+                                ? $"你体力会在{dailyNote.ResinFullTime:HH:mm:ss}回满, 我觉得不是很保险"
+                                : abyssTotalStar < 36
+                                    ? abyssTotalStar > 0
+                                        ? $"都TM{dayOfMonth}号了, 你深渊才打到{abyssFloor}! 真菜啊!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
+                                        : $"都TM{dayOfMonth}号了, 你深渊还没打! 还要不要石头了!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
+                                    : $"辣鸡任务都搞定了, 今天又是完美的一天";
                     var resin = dailyNote.CurrentResin < 40
                         ? string.Empty
                         : $"{ENTER}树脂: {dailyNote.CurrentResin}/{dailyNote.MaxResin} ({dailyNote.ResinFullTime:yyyy/M/d HH:mm})";
@@ -71,35 +91,25 @@ namespace SheepQQBot3.View
                     var potCoin = dailyNote.CurrentHomeCoin < 1600
                         ? string.Empty
                         : $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})";
-                    var transformerRecoveryTime = dateNow
-                        .AddDays(transformer.RecoveryTime.Day)
-                        .AddMinutes(transformer.RecoveryTime.Minute)
-                        .AddSeconds(transformer.RecoveryTime.Second);
                     var transformerStr = !transformer.Obtained
                         ? string.Empty
-                        : $"{ENTER}质变: {(transformer.RecoveryTime.Reached
-                            ? "已可用"
-                            : (transformerRecoveryTime - dateNow).TotalMinutes <= 30
-                                ? $"冷却中({transformerRecoveryTime:yyyy/M/d HH:mm})"
-                                : string.Empty)}";
+                        : transformer.RecoveryTime.Reached
+                            ? $"{ENTER}质变: 已可用"
+                            : string.Empty;
                     //$"{ENTER}质变: {(transformer.Obtained
                     //    ? transformer.RecoveryTime.Reached
                     //        ? "已可用"
                     //        : $"冷却中({dateNow.AddDays(transformer.RecoveryTime.Day)
                     //            .AddMinutes(transformer.RecoveryTime.Minute)
                     //            .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
-                    var sendMessage = nickName +
-                                      resin +
-                                      dailyQuest +
-                                      potCoin +
-                                      transformerStr +
-                                      oneHint;
+                    sendMessage = sendMessage + oneHint +
+                        resin + dailyQuest + potCoin + transformerStr;
                     await Api.SendGroupMessage(groupId, sendMessage);
                 }
                 catch (Exception e)
                 {
                     YameiLogExtensions.WriteLog(e);
-                    await Api.SendGroupMessage(groupId, $"[CQ:at,qq={targetId}] 数据获取失败, 可能是cookie已失效!");
+                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 数据获取失败, 可能是cookie已失效!");
                     return false;
                 }
             }

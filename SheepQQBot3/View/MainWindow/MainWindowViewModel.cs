@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.Linq;
 using System.Reflection;
 using SheepQQBot3.Extensions;
@@ -51,6 +52,7 @@ namespace SheepQQBot3.View
             var version = Assembly.GetExecutingAssembly().GetName().Version;
             Title = $"助手哈莉 - Ver {version}";
             IsLoadComplete = false;
+            IsBarkUsed = !string.IsNullOrEmpty(ConfigurationManager.AppSettings["bark"]);
 
             InitViewModel();
             AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
@@ -155,6 +157,11 @@ namespace SheepQQBot3.View
                 OnPropertyChanged(nameof(IsTabVisible));
             }
         }
+
+        /// <summary>
+        /// BarkServer是否启用
+        /// </summary>
+        public bool IsBarkUsed { get; }
 
         /// <summary>
         /// 是否有任意Tab页在显示中
