@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Configuration;
+using System.Linq;
 using System.Threading.Tasks;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
@@ -20,6 +21,10 @@ namespace SheepQQBot3.View
         /// <returns></returns>
         public static async Task<bool> SearchImageSource(GroupMessage groupMessage)
         {
+            var sauceNaoKey = ConfigurationManager.AppSettings["saucenaokey"];
+            if (string.IsNullOrEmpty(sauceNaoKey))
+                return false;
+
             var groupId = groupMessage.GroupId;
             var message = groupMessage.Message;
             // MEMO : 命令格式检查
@@ -34,9 +39,9 @@ namespace SheepQQBot3.View
 
             await Api.SendGroupMessage(groupId, "图片搜索中...");
             var sauceNaoRequest = await HttpExtensions.GetFromJsonAsync<SauceNaoRequest>(
-                "https://saucenao.com/search.php?api_key=SAUCENAO_KEY" +
+                $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
                 $"&db=999&output_type=2&numres=1&url={url}");
-            if (sauceNaoRequest.Results.Count > 0)
+            if (sauceNaoRequest.Results?.Count > 0)
             {
                 var result = sauceNaoRequest.Results.First();
                 var header = result.Header;
