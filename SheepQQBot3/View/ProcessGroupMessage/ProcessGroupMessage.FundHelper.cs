@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text;
+using System.Threading.Tasks;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.View.PublicVar;
@@ -19,7 +20,7 @@ namespace SheepQQBot3.View
         /// </summary>
         /// <param name="groupMessage"><see cref="GroupMessage"/></param>
         /// <returns></returns>
-        public static bool FundHelper(GroupMessage groupMessage)
+        public static async Task<bool> FundHelper(GroupMessage groupMessage)
         {
             var message = groupMessage.Message;
             // MEMO : 命令格式检查
@@ -38,8 +39,6 @@ namespace SheepQQBot3.View
                     .Replace(SPACE, string.Empty);
 
                 var (startChar, _) = GetStartChar(upperMessage.Substring(COMMAND_FUNDHELPER_LIBRARY.Length));
-                var isNoAt = false;
-                var isNoReply = false;
                 switch (startChar)
                 {
                     case 'H':
@@ -74,13 +73,11 @@ namespace SheepQQBot3.View
                         break;
                     default:
                         // 不支持提示
-                        isNoReply = false;
                         sendMessage.Append($"{ENTER}不支持的命令内容!");
                         break;
                 }
 
-                if (!isNoReply)
-                    Api.SendGroupMessage(groupId, $"{(isNoAt ? string.Empty : $"[CQ:at,qq={targetId}]")}{sendMessage}");
+                await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}{sendMessage}");
             }
             catch (Exception)
             {

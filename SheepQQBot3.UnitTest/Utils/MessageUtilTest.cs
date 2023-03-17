@@ -1,4 +1,4 @@
-﻿using Yamei.Common;
+﻿using SheepQQBot3.Model;
 using static SheepQQBot3.SDK.Client.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
@@ -44,20 +44,9 @@ public class MessageUtilTest
         //    ""sub_type"":""normal"",""time"":1610090450,""user_id"":252961222}";
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
 
-        var dt = 1677327578.ToDateTime();
-        ;
-
-        //var fileName = HttpExtensions
-        //    .HttpDownloadAsync("https://i.pixiv.re/c/540x540_70/img-master/img/2022/03/11/21/02/20/96838020_p0_master1200.jpg")
-        //    .Result;
-
-        var jsonText = HttpExtensions.HttpGetAsync(
-            $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id=123").Result;
-
-        ;
-
         #endregion Test
 
+        //var zap = PushExtensions.PushBarkMessageAsync(message: "测试");
         //var api = new OpenAI_API.OpenAIAPI("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");
         //IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest request);
 
@@ -77,19 +66,19 @@ public class MessageUtilTest
     {
         var message = ProcessCQMessage("zstlpmdm[CQ:at,qq=22222][CQ:face,id=123,kd=456]sheep");
         var element1 = message[0];
-        Assert.AreEqual("text", element1.Type);
+        Assert.AreEqual(ElementType.text, element1.Type);
         Assert.AreEqual("zstlpmdm", element1.Data.Text);
 
         var element2 = message[1];
-        Assert.AreEqual("at", element2.Type);
+        Assert.AreEqual(ElementType.at, element2.Type);
         Assert.AreEqual("22222", element2.Data.QQ);
 
         var element3 = message[2];
-        Assert.AreEqual("face", element3.Type);
+        Assert.AreEqual(ElementType.face, element3.Type);
         Assert.AreEqual("123", element3.Data.Id);
 
         var element4 = message[3];
-        Assert.AreEqual("text", element4.Type);
+        Assert.AreEqual(ElementType.text, element4.Type);
         Assert.AreEqual("sheep", element4.Data.Text);
     }
 
@@ -97,7 +86,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementAt()
     {
         var element = ProcessCQAreaMessage("[CQ:at,qq=22222]");
-        Assert.AreEqual("at", element.Type);
+        Assert.AreEqual(ElementType.at, element.Type);
         Assert.AreEqual("22222", element.Data.QQ);
     }
 
@@ -105,7 +94,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementText()
     {
         var element = ProcessCQAreaMessage("zstlpmdm");
-        Assert.AreEqual("text", element.Type);
+        Assert.AreEqual(ElementType.text, element.Type);
         Assert.AreEqual("zstlpmdm", element.Data.Text);
     }
 
@@ -113,7 +102,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementFace()
     {
         var element = ProcessCQAreaMessage("[CQ:face,id=123,kd=456]");
-        Assert.AreEqual("face", element.Type);
+        Assert.AreEqual(ElementType.face, element.Type);
         Assert.AreEqual("123", element.Data.Id);
     }
 
@@ -121,7 +110,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementImage()
     {
         var element = ProcessCQAreaMessage("[CQ:image,File=http://baidu.com/1.jpg]");
-        Assert.AreEqual("image", element.Type);
+        Assert.AreEqual(ElementType.image, element.Type);
         Assert.AreEqual("http://baidu.com/1.jpg", element.Data.File);
     }
 
@@ -129,7 +118,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementRecord()
     {
         var element = ProcessCQAreaMessage("[CQ:record,File=http://baidu.com/1.mp3]");
-        Assert.AreEqual("record", element.Type);
+        Assert.AreEqual(ElementType.record, element.Type);
         Assert.AreEqual("http://baidu.com/1.mp3", element.Data.File);
     }
 
@@ -137,7 +126,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementVideo()
     {
         var element = ProcessCQAreaMessage("[CQ:video,File=http://baidu.com/1.mp4]");
-        Assert.AreEqual("video", element.Type);
+        Assert.AreEqual(ElementType.video, element.Type);
         Assert.AreEqual("http://baidu.com/1.mp4", element.Data.File);
     }
 
@@ -145,28 +134,28 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementRps()
     {
         var element = ProcessCQAreaMessage("[CQ:rps]");
-        Assert.AreEqual("rps", element.Type);
+        Assert.AreEqual(ElementType.rps, element.Type);
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementDice()
     {
         var element = ProcessCQAreaMessage("[CQ:dice]");
-        Assert.AreEqual("dice", element.Type);
+        Assert.AreEqual(ElementType.dice, element.Type);
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementShake()
     {
         var element = ProcessCQAreaMessage("[CQ:shake]");
-        Assert.AreEqual("shake", element.Type);
+        Assert.AreEqual(ElementType.shake, element.Type);
     }
 
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementPoke()
     {
         var element = ProcessCQAreaMessage("[CQ:poke,type=126,id=2003]");
-        Assert.AreEqual("poke", element.Type);
+        Assert.AreEqual(ElementType.poke, element.Type);
         Assert.AreEqual("126", element.Data.Type);
         Assert.AreEqual("2003", element.Data.Id);
     }
@@ -175,7 +164,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementAnonymous()
     {
         var element = ProcessCQAreaMessage("[CQ:anonymous,ignore=0]");
-        Assert.AreEqual("anonymous", element.Type);
+        Assert.AreEqual(ElementType.anonymous, element.Type);
         Assert.AreEqual("0", element.Data.Ignore);
     }
 
@@ -183,7 +172,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementShare()
     {
         var element = ProcessCQAreaMessage("[CQ:share,url=http://baidu.com,title=百度]");
-        Assert.AreEqual("share", element.Type);
+        Assert.AreEqual(ElementType.share, element.Type);
         Assert.AreEqual("http://baidu.com", element.Data.Url);
         Assert.AreEqual("百度", element.Data.Title);
     }
@@ -192,12 +181,12 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementContact()
     {
         var element = ProcessCQAreaMessage("[CQ:contact,type=qq,id=10001000]");
-        Assert.AreEqual("contact", element.Type);
+        Assert.AreEqual(ElementType.contact, element.Type);
         Assert.AreEqual("qq", element.Data.Type);
         Assert.AreEqual("10001000", element.Data.Id);
 
         element = ProcessCQAreaMessage("[CQ:contact,type=group,id=100100]");
-        Assert.AreEqual("contact", element.Type);
+        Assert.AreEqual(ElementType.contact, element.Type);
         Assert.AreEqual("group", element.Data.Type);
         Assert.AreEqual("100100", element.Data.Id);
     }
@@ -206,7 +195,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementLocation()
     {
         var element = ProcessCQAreaMessage("[CQ:location,lat=39.8969426,lon=116.3109099,title=牌面,content=马厩]");
-        Assert.AreEqual("location", element.Type);
+        Assert.AreEqual(ElementType.location, element.Type);
         Assert.AreEqual("39.8969426", element.Data.Lat);
         Assert.AreEqual("116.3109099", element.Data.Lon);
         Assert.AreEqual("牌面", element.Data.Title);
@@ -217,12 +206,12 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementMusic()
     {
         var element = ProcessCQAreaMessage("[CQ:music,type=163,id=28949129]");
-        Assert.AreEqual("music", element.Type);
+        Assert.AreEqual(ElementType.music, element.Type);
         Assert.AreEqual("163", element.Data.Type);
         Assert.AreEqual("28949129", element.Data.Id);
 
         element = ProcessCQAreaMessage("[CQ:music,type=custom,Url=http://baidu.com,Audio=http://baidu.com/1.mp3,Title=音乐标题]");
-        Assert.AreEqual("music", element.Type);
+        Assert.AreEqual(ElementType.music, element.Type);
         Assert.AreEqual("custom", element.Data.Type);
         Assert.AreEqual("http://baidu.com", element.Data.Url);
         Assert.AreEqual("http://baidu.com/1.mp3", element.Data.Audio);
@@ -233,7 +222,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementReply()
     {
         var element = ProcessCQAreaMessage("[CQ:reply,id=123456]");
-        Assert.AreEqual("reply", element.Type);
+        Assert.AreEqual(ElementType.reply, element.Type);
         Assert.AreEqual("123456", element.Data.Id);
     }
 
@@ -261,10 +250,11 @@ public class MessageUtilTest
     [TestMethod]
     public void ProcessCQAreaMessageTest_ElementJson()
     {
-        var element = ProcessCQAreaMessage("[CQ:xml,data=<?xml version=\"1.0\" + " +
-                                           "encoding=\"utf-8\"?><msg templateID=\"12345\" action=\"web\" brief=\"RPG\" " +
-                                           "serviceID=\"1\" Url=\"http://pcro.jp/\"><item layout=\"2\"><picture cover=\"\"/>" +
-                                           "<Title>ぷちっとくろにくる</Title><summary>カワイイ</summary></item><source/></msg>,resid=1]");
+        var element = ProcessCQAreaMessage(
+            "[CQ:xml,data=<?xml version=\"1.0\" " +
+            "encoding=\"utf-8\"?><msg templateID=\"12345\" action=\"web\" brief=\"RPG\" " +
+            "serviceID=\"1\" Url=\"http://pcro.jp/\"><item layout=\"2\"><picture cover=\"\"/>" +
+            "<Title>ぷちっとくろにくる</Title><summary>カワイイ</summary></item><source/></msg>,resid=1]");
         ;
     }
 
@@ -272,7 +262,7 @@ public class MessageUtilTest
     public void ProcessCQAreaMessageTest_ElementYM_ifnotidle()
     {
         var element = ProcessCQAreaMessage("[CQ:ym_ifnotidle,data=5000]");
-        Assert.AreEqual("ym_ifnotidle", element.Type);
+        Assert.AreEqual(ElementType.ym_ifnotidle, element.Type);
         Assert.AreEqual("5000", element.Data.Data);
     }
 }

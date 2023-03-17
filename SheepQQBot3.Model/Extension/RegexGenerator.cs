@@ -16,6 +16,9 @@ namespace SheepQQBot3.Model.Extension
         [GeneratedRegex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline)]
         public static partial Regex GetCQCode();
 
+        [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
+        public static partial Regex CQCodeRemoveCQAt();
+
         [GeneratedRegex(@",url=.+?(?=[,\]])")]
         public static partial Regex CQCodeRemoveUrl();
 
@@ -51,5 +54,11 @@ namespace SheepQQBot3.Model.Extension
 
         [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
         public static partial Regex CmdStart();
+
+        [GeneratedRegex(@"\[CQ:image.+\]")]
+        public static partial Regex CQImage();
+
+        [GeneratedRegex(@"(?<=url=).+(?=\?)")]
+        public static partial Regex CQImageUrl();
     }
 }

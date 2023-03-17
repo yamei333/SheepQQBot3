@@ -79,12 +79,12 @@ namespace SheepQQBot3.SDK.Event
 
         private void ProcessMessage(ReceiveData receiveData)
         {
-            switch (receiveData.Message_Type)
+            switch (receiveData.MessageTargetType)
             {
-                case MessageType.Group:
+                case MessageTargetType.Group:
                     OnGroupMessage?.Invoke(null, new GroupMessage(receiveData));
                     break;
-                case MessageType.Private:
+                case MessageTargetType.Private:
                     break;
                 default:
                     throw new ArgumentOutOfRangeException();

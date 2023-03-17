@@ -27,4 +27,13 @@ public static class BotExtensions
         var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["gocqexe"]?.Replace(".exe", string.Empty));
         processes.ForEach(each => each.Kill());
     }
+
+    /// <summary>
+    /// 关闭Bark进程
+    /// </summary>
+    public static void KillBarkexe()
+    {
+        var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["barkexe"]?.Replace(".exe", string.Empty));
+        processes.ForEach(each => each.Kill());
+    }
 }

@@ -1,10 +1,10 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
 
 namespace SheepQQBot3.SDK.Client
 {
@@ -49,22 +49,23 @@ namespace SheepQQBot3.SDK.Client
 
         public static Element ProcessCQAreaMessage(string message)
         {
-            var cqCode = _regGetCQCode.Match(message);
-            var cqType = cqCode.Value;
-            switch (cqType.ToLower())
+            var cqCode = _regGetCQCode.Match(message).Value;
+            if (string.IsNullOrEmpty(cqCode))
+                return new Element(ElementType.text, new ElementBaseData(message));
+
+            var cqType = (ElementType)Enum.Parse(typeof(ElementType), cqCode, true);
+            switch (cqType)
             {
-                case "":
-                    return new Element("text", new ElementBaseData(message));
-                case "ym_play":
-                    YameiExtensions.PlaySe(GetElementBaseData().File);
-                    return new Element("text", new ElementBaseData(string.Empty));
-                case "ym_play3":
-                    YameiExtensions.PlaySe3(GetElementBaseData().File);
-                    return new Element("text", new ElementBaseData(string.Empty));
-                case "json":
-                    return new Element(cqType, GetElementBaseData_Json());
-                case "xml":
-                    return new Element(cqType, GetElementBaseData_Xml());
+                //case "ym_play":
+                //    YameiExtensions.PlaySe(GetElementBaseData().File);
+                //    return new Element(ElementType.text, new ElementBaseData(string.Empty));
+                //case "ym_play3":
+                //    YameiExtensions.PlaySe3(GetElementBaseData().File);
+                //    return new Element(ElementType.text, new ElementBaseData(string.Empty));
+                //case "json":
+                //    return new Element(cqType, GetElementBaseData_Json());
+                //case "xml":
+                //    return new Element(cqType, GetElementBaseData_Xml());
                 //case "image":
                 //    return new Element(cqType, GetElementBaseData_Image());
                 //case "File":
@@ -105,7 +106,7 @@ namespace SheepQQBot3.SDK.Client
             {
                 var subIndex = cqCode.Length + 5;
                 var subMessage = message.Substring(subIndex, message.Length - cqCode.Length - 6);
-                var xmlString = new Regex(@"Data=\<\?xml.*\>", RegexOptions.Singleline).Match(subMessage).Value;
+                var xmlString = new Regex(@"data=\<\?xml.+\>", RegexOptions.Singleline).Match(subMessage).Value;
                 subMessage = subMessage.Replace(xmlString, string.Empty);
                 var subJsonContent = string.Join(",", subMessage.Split(',')
                     .Where(each => !string.IsNullOrEmpty(each)).ToArray()

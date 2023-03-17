@@ -27,6 +27,12 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(Cookies))]
         public string Cookies { get; set; }
 
+        /// <summary>
+        /// BarkKey
+        /// </summary>
+        [Key(nameof(BarkKey))]
+        public string BarkKey { get; set; }
+
         [Key(nameof(_resin))]
         private bool _resin;
 
@@ -100,11 +106,13 @@ namespace SheepQQBot3.Model.Config
             Guid id,
             string configName,
             string cookies,
+            string barkKey,
             long targetId)
         {
             Id = id;
             ConfigName = configName;
             Cookies = cookies;
+            BarkKey = barkKey;
             TargetId = targetId;
             Resin = true;
             DailyMission = true;

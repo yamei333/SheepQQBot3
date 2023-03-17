@@ -7,11 +7,13 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="Masuit.Tools.Net" Version="2.5.9.3" />
     <PackageReference Include="MessagePack" Version="2.4.59" />
     <PackageReference Include="MessagePackAnalyzer" Version="2.4.59">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.0.0" />
   </ItemGroup>
 
   <ItemGroup>

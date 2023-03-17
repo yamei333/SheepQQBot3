@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Enums;
 using Yamei.Common;
 
 namespace SheepQQBot3.Model
@@ -34,12 +33,12 @@ namespace SheepQQBot3.Model
         [JsonPropertyName("messageid")]
         public int MessageId { get; set; }
 
-        [JsonPropertyName("messagetype")]
-        public MessageType MessageType { get; set; }
-
         [JsonPropertyName("sender")]
         public Sender Sender { get; set; }
 
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
         public GroupMessage(ReceiveData receiveData)
         {
             DateTime = receiveData.Time.ToDateTime();
@@ -50,7 +49,6 @@ namespace SheepQQBot3.Model
             Message = receiveData.Message;
             RawMessage = receiveData.Raw_Message;
             MessageId = receiveData.Message_Id;
-            MessageType = receiveData.Message_Type;
             Sender = receiveData.Sender;
         }
 
@@ -61,7 +59,7 @@ namespace SheepQQBot3.Model
             Message = clientData.Message;
             RawMessage = clientData.Raw_Message;
             MessageId = clientData.Message_Id;
-            //LogMessageType = clientData.Message_Type;
+            //LogMessageType = clientData.MessageTargetType;
             Sender = clientData.Sender;
         }
     }

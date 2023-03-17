@@ -116,7 +116,7 @@ namespace SheepQQBot3.SDK.Client
                     }
                     else
                     {
-                        YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [Message_Type:null]{receiveData.Message}-{receiveData.Wording}");
+                        YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [MessageTargetType:null]{receiveData.Message}-{receiveData.Wording}");
                     }
                     break;
                 default:

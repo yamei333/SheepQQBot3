@@ -18,7 +18,7 @@ namespace Yamei.Common
         /// <summary>
         /// 获取给定日期是本月的第几天和倒数第几天
         /// </summary>
-        public static (int DayOfMonth, int LastDayOfMonth) GetDayOfMonthAndLastDayOfMonth(DateTime date)
+        public static (int DayOfMonth, int LastDayOfMonth) GetDayOfMonthAndLastDayOfMonth(this DateTime date)
         {
             var dayOfMonth = date.Day;
             var lastDayOfMonth = DateTime.DaysInMonth(date.Year, date.Month) - dayOfMonth + 1;
