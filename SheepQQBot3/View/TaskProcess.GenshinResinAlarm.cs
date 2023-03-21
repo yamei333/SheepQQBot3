@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -59,8 +58,6 @@ public static partial class TaskProcess
                                     if (!genshinResinAlarm.IsActive)
                                         return;
 
-                                    setConfig.GenshinResinAlarmedList ??=
-                                        new Dictionary<(Guid, GenshinDailyNoteAlarmType), DateTime>();
                                     DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
                                     await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
                                 }
@@ -128,6 +125,8 @@ public static partial class TaskProcess
                 return;
             }
 
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"Zap!errorMessage=[{errorMessage}], RISK_ACCOUNT={RISK_ACCOUNT}");
             YameiLogExtensions.WriteLog(LogType.Error,
                 $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
             AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.HResult}({e.Message})"));

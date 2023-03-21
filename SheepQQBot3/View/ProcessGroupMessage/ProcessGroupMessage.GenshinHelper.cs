@@ -53,7 +53,7 @@ namespace SheepQQBot3.View
                     var role = roles[0];
                     var sendMessage = string.Empty;
                     var (dayOfMonth, lastDayOfMonth) = dateNow.GetDayOfMonthAndLastDayOfMonth();
-                    var abyssTotalStar = 0;
+                    var abyssTotalStar = -1;
                     var abyssFloor = string.Empty;
                     if (dayOfMonth is 13 or 14 or 15
                         || lastDayOfMonth is 1 or 2 or 3)
@@ -75,11 +75,13 @@ namespace SheepQQBot3.View
                             ? $"你体力都没用完, 要亏辣鸡圣遗物!"
                             : dailyNote.ResinFullTime.Hour <= 15
                                 ? $"你体力会在{dailyNote.ResinFullTime:HH:mm:ss}回满, 我觉得不是很保险"
-                                : abyssTotalStar < 36
-                                    ? abyssTotalStar > 0
-                                        ? $"都TM{dayOfMonth}号了, 你深渊才打到{abyssFloor}! 真菜啊!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
-                                        : $"都TM{dayOfMonth}号了, 你深渊还没打! 还要不要石头了!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
-                                    : $"辣鸡任务都搞定了, 今天又是完美的一天";
+                                : abyssTotalStar == -1
+                                    ? $"辣鸡任务都搞定了, 今天又是完美的一天"
+                                    : abyssTotalStar < 36
+                                        ? abyssTotalStar > 0
+                                            ? $"都TM{dayOfMonth}号了, 你深渊才打到{abyssFloor}! 真菜啊!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
+                                            : $"都TM{dayOfMonth}号了, 你深渊还没打! 还要不要石头了!{ENTER}其他辣鸡任务都搞定了, 完美了, 但又没完全完美"
+                                        : $"辣鸡任务都搞定了, 今天又是完美的一天";
                     var resin = dailyNote.CurrentResin < 40
                         ? string.Empty
                         : $"{ENTER}树脂: {dailyNote.CurrentResin}/{dailyNote.MaxResin} ({dailyNote.ResinFullTime:yyyy/M/d HH:mm})";
@@ -88,7 +90,7 @@ namespace SheepQQBot3.View
                         : $"{ENTER}每日: {(dailyNote.FinishedTaskNumber == dailyNote.TotalTaskNumber
                             ? "完成任务但未领取"
                             : $"任务还差{dailyNote.TotalTaskNumber - dailyNote.FinishedTaskNumber}个未完成!")}";
-                    var potCoin = dailyNote.CurrentHomeCoin < 1600
+                    var potCoin = dailyNote.CurrentHomeCoin < 2040
                         ? string.Empty
                         : $"{ENTER}宝钱: {dailyNote.CurrentHomeCoin}/{dailyNote.MaxHomeCoin} ({dailyNote.HomeCoinFullTime:yyyy/M/d HH:mm})";
                     var transformerStr = !transformer.Obtained

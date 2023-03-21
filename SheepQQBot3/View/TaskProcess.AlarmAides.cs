@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
@@ -69,7 +68,6 @@ namespace SheepQQBot3.View
                                     if (!condition.IsMatch(dateNowStr))
                                         return;
 
-                                    setConfig.AlarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
                                     // 删除过期发送内容
                                     DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
                                     // 发送闹钟助手消息

@@ -32,7 +32,6 @@ namespace SheepQQBot3.SDK.Client
                     {
                         // MEMO : 忙时, 触发
                         //messageList.Add(new Element("text", new ElementBaseData($"闲时:{CommonUtil.GetIdleTime()}")));
-                        messageList.Remove(ymElement);
                     }
                     else
                     {
@@ -48,17 +47,21 @@ namespace SheepQQBot3.SDK.Client
             });
             ProcessYmMessage(ElementType.ym_bark, ProcessYmBark);
 
-            await SendDataAsync("send_group_msg", new ParamData
+            if (messageList?.Any() == true)
             {
-                Group_Id = groupId.ToString(),
-                Message = messageList
-            });
+                await SendDataAsync("send_group_msg", new ParamData
+                {
+                    Group_Id = groupId.ToString(),
+                    Message = messageList
+                });
+            }
 
             void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
             {
                 var ymElementData = messageList.FirstOrDefault(each => each.Type == ymElementType);
                 if (ymElementData != null)
                 {
+                    messageList.Remove(ymElementData);
                     action(ymElementData);
                 }
             }
@@ -72,7 +75,8 @@ namespace SheepQQBot3.SDK.Client
                     if (!alarmAideConfigs.TryGetValue(redirectId, out var alarmAideConfig)) return;
 
                     var alarmTexts = alarmAideConfig.AlarmTexts;
-                    if (alarmTexts.Count > 0) await SendGroupMessage(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
+                    if (alarmTexts.Count > 0)
+                        await SendGroupMessage(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
 
                     return;
                 }
@@ -85,7 +89,6 @@ namespace SheepQQBot3.SDK.Client
 
             async void ProcessYmBark(Element ymElement)
             {
-                messageList.Remove(ymElement);
                 var elementData = ymElement.Data;
                 if (!string.IsNullOrEmpty(elementData.Data))
                 {

@@ -107,7 +107,7 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// http下载
         /// </summary>
-        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(string url)
+        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(string url, bool checkOnly = false)
         {
             var tempFileName = Guid.NewGuid().ToString();
             var response = await HttpGetAsync(url);
@@ -123,13 +123,14 @@ namespace SheepQQBot3.Model.Extension
 
             const string cachePathName = "Cache";
             CommonExtensions.CreatePath(cachePathName);
-            //Masuit.Tools.Media.ImageUtilities.ResizeImage()
-            var stream = await response.Content.ReadAsStreamAsync();
-            var image = await Image.LoadAsync(stream);
-            await image.ResizeImage(image.Width, image.Height - 1)
-                .SaveAsPngAsync($"{cachePathName}/{tempFileName}.png");
-            //var fs = new FileStream($"{cachePathName}/{tempFileName}.{fileExtend}", FileMode.CreateNew);
-            //await response.Content.CopyToAsync(fs);
+            if (!checkOnly)
+            {
+                var stream = await response.Content.ReadAsStreamAsync();
+                var image = await Image.LoadAsync(stream);
+                await image.ResizeImage(image.Width, image.Height - 1)
+                    .SaveAsPngAsync($"{cachePathName}/{tempFileName}.png");
+            }
+
             return (true, $"{tempFileName}.png");
         }
     }

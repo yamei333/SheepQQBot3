@@ -3,16 +3,16 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Setu
 {
-    public class SetuResponse_Nyanxyz
+    public class SetuResponse_NyanCatda
     {
-        public SetuData_Nyanxyz Data { get; set; }
+        public SetuData_NyanCatda Data { get; set; }
     }
 
-    public class SetuData_Nyanxyz
+    public class SetuData_NyanCatda
     {
         public List<string> Url { get; set; }
 
         [JsonIgnore]
-        public string SetuInfo => $"来源:未知";
+        public string SetuInfo => $"来源:PIXIV";
     }
 }
