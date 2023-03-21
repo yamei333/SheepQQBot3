@@ -1,5 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
@@ -39,7 +38,6 @@ public static partial class TaskProcess
                                 if (!liveAlarmConfig.IsActive)
                                     return;
 
-                                setConfig.LiveAlarmedList ??= new Dictionary<Guid, DateTime>();
                                 // 删除过期记录
                                 DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
                                 // 发送基金播报消息

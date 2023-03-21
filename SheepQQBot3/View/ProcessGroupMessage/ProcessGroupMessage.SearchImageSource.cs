@@ -40,10 +40,18 @@ namespace SheepQQBot3.View
             await Api.SendGroupMessage(groupId, "图片搜索中...");
             var sauceNaoRequest = await HttpExtensions.GetFromJsonAsync<SauceNaoRequest>(
                 $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
-                $"&db=999&output_type=2&numres=1&url={url}");
+                $"&db=999&output_type=2&url={url}");
             if (sauceNaoRequest.Results?.Count > 0)
             {
-                var result = sauceNaoRequest.Results.First();
+                var results = sauceNaoRequest.Results;
+                var result = results.FirstOrDefault(each => each.Data.ExtUrls != null);
+                if (result == null)
+                {
+                    await Api.SendGroupMessage(groupId, "没有包含链接信息的图源!");
+                    return false;
+                }
+
+                //var result = sauceNaoRequest.Results.First();
                 var header = result.Header;
                 var similarity = header.Similarity;
                 if (similarity >= 70)

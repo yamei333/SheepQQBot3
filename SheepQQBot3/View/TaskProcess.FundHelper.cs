@@ -39,7 +39,6 @@ namespace SheepQQBot3.View
                                     if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))
                                         return;
 
-                                    setConfig.FundAlarmedList ??= new Dictionary<Guid, DateTime>();
                                     // 删除过期发送内容
                                     DeleteExpiredData(setConfig.FundAlarmedList, dateNow);
                                     // 发送基金播报消息
@@ -51,7 +50,6 @@ namespace SheepQQBot3.View
                                 {
                                     if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr)) return;
 
-                                    setConfig.FundLimitObservedList ??= new Dictionary<Guid, DateTime>();
                                     // 删除过期发送内容
                                     DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
                                     // 发送基金阈值观测消息

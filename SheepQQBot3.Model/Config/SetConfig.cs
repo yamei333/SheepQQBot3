@@ -103,11 +103,19 @@ namespace SheepQQBot3.Model.Config
 
         #region 已执行内容的保存
 
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<Guid, DateTime> _alarmAideAlarmedList;
+
         /// <summary>
         /// 保存已提醒闹钟列表
         /// </summary>
         [Key(nameof(AlarmAideAlarmedList))]
-        public Dictionary<Guid, DateTime> AlarmAideAlarmedList { get; set; }
+        public Dictionary<Guid, DateTime> AlarmAideAlarmedList
+        {
+            get => _alarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
+            set => _alarmAideAlarmedList = value;
+        }
 
         /// <summary>
         /// 保存群自定义提醒内容
@@ -115,38 +123,78 @@ namespace SheepQQBot3.Model.Config
         [Key(nameof(CustomGroupAlarms))]
         public Dictionary<Guid, CustomGroupAlarm> CustomGroupAlarms { get; set; }
 
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<Guid, DateTime> _fundAlarmedList;
+
         /// <summary>
         /// 保存已执行基金播报任务
         /// </summary>
         [Key(nameof(FundAlarmedList))]
-        public Dictionary<Guid, DateTime> FundAlarmedList { get; set; }
+        public Dictionary<Guid, DateTime> FundAlarmedList
+        {
+            get => _fundAlarmedList ??= new Dictionary<Guid, DateTime>();
+            set => _fundAlarmedList = value;
+        }
+
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<Guid, DateTime> _fundLimitObservedList;
 
         /// <summary>
         /// 保存已执行基金观测任务
         /// </summary>
         [Key(nameof(FundLimitObservedList))]
-        public Dictionary<Guid, DateTime> FundLimitObservedList { get; set; }
+        public Dictionary<Guid, DateTime> FundLimitObservedList
+        {
+            get => _fundLimitObservedList ??= new Dictionary<Guid, DateTime>();
+            set => _fundLimitObservedList = value;
+        }
+
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<Guid, DateTime> _liveAlarmedList;
 
         /// <summary>
         /// 保存已执行直播提醒任务 (不缓存)
         /// </summary>
         [JsonIgnore]
         [IgnoreMember]
-        public Dictionary<Guid, DateTime> LiveAlarmedList { get; set; }
+        public Dictionary<Guid, DateTime> LiveAlarmedList
+        {
+            get => _liveAlarmedList ??= new Dictionary<Guid, DateTime>();
+            set => _liveAlarmedList = value;
+        }
+
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> _genshinResinAlarmedList;
 
         /// <summary>
         /// 保存已执行原神每日提醒任务 (不缓存)
         /// </summary>
         [JsonIgnore]
         [IgnoreMember]
-        public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList { get; set; }
+        public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList
+        {
+            get => _genshinResinAlarmedList ??= new Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime>();
+            set => _genshinResinAlarmedList = value;
+        }
+
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<long, DateTime> _setuSendHistorys;
 
         /// <summary>
         /// 保存已发送的色图记录
         /// </summary>
         [JsonIgnore]
         [IgnoreMember]
-        public Dictionary<long, DateTime> SetuSendHistorys { get; set; }
+        public Dictionary<long, DateTime> SetuSendHistorys
+        {
+            get => _setuSendHistorys ??= new Dictionary<long, DateTime>();
+            set => _setuSendHistorys = value;
+        }
 
         #endregion 已执行内容的保存
 

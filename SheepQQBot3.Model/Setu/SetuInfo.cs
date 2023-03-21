@@ -18,6 +18,16 @@
             SourceText = sourceText;
             SourceUrl = sourceUrl;
             ImageUrl = imageUrl;
+            IsSuccess = true;
+        }
+
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        public SetuInfo(SetuType setuType)
+        {
+            SetuType = setuType;
+            IsSuccess = false;
         }
 
         /// <summary>
@@ -39,12 +49,17 @@
         /// 压缩图片地址
         /// </summary>
         public string ImageUrl { get; set; }
+
+        /// <summary>
+        /// 色图取得成功
+        /// </summary>
+        public bool IsSuccess { get; set; }
     }
 
     public enum SetuType
     {
         Lolicon,
         Yuban,
-        RainChan,
+        NyanCatda,
     }
 }
