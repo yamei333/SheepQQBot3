@@ -73,7 +73,7 @@ namespace SheepQQBot3.View
                         ? $"你每日都没做完, 你怎么睡得着!"
                         : dailyNote.CurrentResin >= 60
                             ? $"你体力都没用完, 要亏辣鸡圣遗物!"
-                            : dailyNote.ResinFullTime.Hour <= 15
+                            : dailyNote.ResinFullTime.Hour <= 14
                                 ? $"你体力会在{dailyNote.ResinFullTime:HH:mm:ss}回满, 我觉得不是很保险"
                                 : abyssTotalStar == -1
                                     ? $"辣鸡任务都搞定了, 今天又是完美的一天"

@@ -1,0 +1,25 @@
+﻿using System.Text.Json.Serialization;
+
+namespace SheepQQBot3.Model.Setu
+{
+    public class SetuData_Jitsu
+    {
+        [JsonPropertyName("url")]
+        public string Url { get; set; }
+
+        /// <summary>
+        /// 画师
+        /// </summary>
+        [JsonPropertyName("user")]
+        public string Author { get; set; }
+
+        /// <summary>
+        /// pixiv 图片ID
+        /// </summary>
+        [JsonPropertyName("pid")]
+        public int Pid { get; set; }
+
+        [JsonIgnore]
+        public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";
+    }
+}

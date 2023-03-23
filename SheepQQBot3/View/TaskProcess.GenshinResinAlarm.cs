@@ -29,7 +29,7 @@ public static partial class TaskProcess
     /// <summary>
     /// 风控账户
     /// </summary>
-    private const string RISK_ACCOUNT = "1034";
+    private const string RISK_ACCOUNT = " (1034)";
 
     /// <summary>
     /// 原神每日提醒
@@ -125,8 +125,6 @@ public static partial class TaskProcess
                 return;
             }
 
-            YameiLogExtensions.WriteLog(LogType.Error,
-                $"Zap!errorMessage=[{errorMessage}], RISK_ACCOUNT={RISK_ACCOUNT}");
             YameiLogExtensions.WriteLog(LogType.Error,
                 $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
             AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.HResult}({e.Message})"));

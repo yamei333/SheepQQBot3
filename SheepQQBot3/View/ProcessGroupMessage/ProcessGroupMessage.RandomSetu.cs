@@ -108,7 +108,7 @@ namespace SheepQQBot3.View
                 _setuKeyWords = new List<string>();
                 var startText = new[]
                 {
-                    "涩","色","瑟"
+                    "涩","色","瑟","铯"
                 };
                 var endText = new[]
                 {
@@ -122,7 +122,6 @@ namespace SheepQQBot3.View
             // MEMO : 或者字数在10字以内, 并包含色图关键字
             var tag = string.Empty;
             var setuKeywordCheck = false;
-
             if (upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY))
             {
                 setuKeywordCheck = true;
@@ -265,18 +264,20 @@ StartSetu:
                     }
                 }
 
-//SendSetuNotReadyMessage($"的CD被增加了({addSecond}秒)");
+                var revertCD = DateTime.MinValue;
 SendSetu:
                 try
                 {
                     Func<string, Task<SetuInfo>>[] randomSetuKeyword = {
                         SetuExtensions.GetSetu_Lolicon,
                         SetuExtensions.GetSetu_Yuban,
+                        SetuExtensions.GetSetu_Jitsu,
                     };
                     Func<string, Task<SetuInfo>>[] randomSetu = {
                         SetuExtensions.GetSetu_Lolicon,
                         SetuExtensions.GetSetu_Yuban,
                         SetuExtensions.GetSetu_NyanCatda,
+                        SetuExtensions.GetSetu_Jitsu,
                     };
 
                     await Api.SendGroupMessage(groupId,
@@ -292,26 +293,32 @@ SendSetu:
                     if (!setuInfo.IsSuccess)
                     {
                         await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}{_setuKexiStart.Random()}色图库中没找到色图~,{_setuKexiEnd.Random()}.");
+                        config.SetuSendHistorys[groupId] = revertCD;
                         return true;
                     }
 
                     await Api.SendGroupMessage(groupId,
-                        CQCode.Image(CommonExtensions.GetCachePath(fileName)) +
+                        "[预览图等后续]" +
                         $"{ENTER}{setuInfo.SourceText}" +
                         $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}" +
                         $"{ENTER}API提供:{setuInfo.SetuType}" +
                         $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
 
+                    await Api.SendGroupMessage(groupId,
+                        CQCode.Image(CommonExtensions.GetCachePath(fileName)));
+
                     if (r18Bonus)
                     {
                         Func<string, Task<SetuInfo>>[] randomSetuR18Keyword = {
                             SetuExtensions.GetSetu_Lolicon_R18,
-                            SetuExtensions.GetSetu_Yuban_R18
+                            SetuExtensions.GetSetu_Yuban_R18,
+                            SetuExtensions.GetSetu_Jitsu_R18,
                         };
                         Func<string, Task<SetuInfo>>[] randomSetuR18 = {
                             SetuExtensions.GetSetu_Lolicon_R18,
                             SetuExtensions.GetSetu_Yuban_R18,
-                            SetuExtensions.GetSetu_NyanCatda_R18
+                            SetuExtensions.GetSetu_NyanCatda_R18,
+                            SetuExtensions.GetSetu_Jitsu_R18,
                         };
 
                         var (setuInfoR18, _) = await GetSetu(() => !string.IsNullOrEmpty(tag)
@@ -350,6 +357,7 @@ SendSetu:
 
                 void AddCD()
                 {
+                    revertCD = dateNow.AddSeconds(Rand.Next(3, 15));
                     config.SetuSendHistorys[groupId] = config.SetuSendHistorys.ContainsKey(groupId)
                         ? (config.SetuSendHistorys[groupId] > dateNow
                             ? config.SetuSendHistorys[groupId]

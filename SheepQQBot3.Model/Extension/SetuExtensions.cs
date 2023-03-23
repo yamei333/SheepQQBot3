@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonLibrary;
@@ -65,10 +66,11 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}&replace_url=https://{PixivReTarget}";
-                var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Yuban>(url);
-                if (setuResponse == null)
+                var request = await HttpExtensions.HttpGetAsync(url);
+                if (!request.IsSuccessStatusCode)
                     return new SetuInfo(SetuType.Yuban);
 
+                var setuResponse = await request.Content.ReadFromJsonAsync<SetuResponse_Yuban>();
                 setuData = setuResponse.Data.First();
             }
             catch (Exception e)
@@ -109,6 +111,38 @@ namespace SheepQQBot3.Model.Extension
             return new SetuInfo(
                 SetuType.NyanCatda,
                 setuData.SetuInfo,
+                imageUrl,
+                imageUrl.ToSmallImageUrl());
+        }
+
+        public static async Task<SetuInfo> GetSetu_Jitsu(string tag)
+            => await GetSetu_Jitsu_Core(tag);
+
+        public static async Task<SetuInfo> GetSetu_Jitsu_R18(string tag)
+            => await GetSetu_Jitsu_Core(tag, true);
+
+        private static async Task<SetuInfo> GetSetu_Jitsu_Core(string tag, bool r18 = false)
+        {
+            SetuData_Jitsu setuData;
+            try
+            {
+                var url = @$"https://image.anosu.top/pixiv/json?proxy=i.pixiv.re{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? 1 : 0)}";
+                var setuDatas = await HttpExtensions.GetFromJsonAsync<SetuData_Jitsu[]>(url);
+                if (!setuDatas.Any())
+                    return new SetuInfo(SetuType.Jitsu);
+
+                setuData = setuDatas.First();
+            }
+            catch (Exception e)
+            {
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Jitsu_Core-{e.Message}");
+                setuData = new SetuData_Jitsu();
+            }
+
+            var imageUrl = setuData.Url;
+            return new SetuInfo(
+                SetuType.Jitsu,
+                "来源:PIXIV",
                 imageUrl,
                 imageUrl.ToSmallImageUrl());
         }
