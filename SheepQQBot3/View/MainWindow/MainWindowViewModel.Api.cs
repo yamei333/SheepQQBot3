@@ -14,7 +14,7 @@ namespace SheepQQBot3.View
 {
     partial class MainWindowViewModel
     {
-        private const int MaxLogCount = 2000;
+        private const int MaxLogCount = 1000;
 
         private static readonly Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new();
 

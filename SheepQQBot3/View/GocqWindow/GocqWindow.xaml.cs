@@ -93,7 +93,7 @@ namespace SheepQQBot3.View
                         {
                             AppendRichText(result, color);
                             var blocks = RichTextBox.Document.Blocks;
-                            if (blocks.Count > 2000)
+                            if (blocks.Count > 1000)
                                 blocks.Remove(blocks.FirstBlock);
 
                             if (LogAutoScroll.IsChecked == true)
