@@ -61,5 +61,6 @@
         Lolicon,
         Yuban,
         NyanCatda,
+        Jitsu,
     }
 }

@@ -4,9 +4,6 @@ namespace SheepQQBot3.Model.Setu
 {
     public class SetuResponse_Yuban
     {
-        [JsonPropertyName("detail")]
-        public string Detail { get; set; }
-
         [JsonPropertyName("data")]
         public SetuData_Yuban[] Data { get; set; }
     }
