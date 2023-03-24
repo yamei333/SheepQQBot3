@@ -298,14 +298,9 @@ SendSetu:
                     }
 
                     await Api.SendGroupMessage(groupId,
-                        "[预览图等后续]" +
-                        $"{ENTER}{setuInfo.SourceText}" +
+                        $"{setuInfo.SourceText}" +
                         $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}" +
-                        $"{ENTER}API提供:{setuInfo.SetuType}" +
-                        $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
-
-                    await Api.SendGroupMessage(groupId,
-                        CQCode.Image(CommonExtensions.GetCachePath(fileName)));
+                        $"{ENTER}API提供:{setuInfo.SetuType}");
 
                     if (r18Bonus)
                     {
@@ -338,9 +333,12 @@ SendSetu:
                             $"[这是一张额外的金色传说色图, 不可预览]" +
                             $"{ENTER}{setuInfoR18.SourceText}" +
                             $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}" +
-                            $"{ENTER}API提供:{setuInfoR18.SetuType}" +
-                            $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
+                            $"{ENTER}API提供:{setuInfoR18.SetuType}");
                     }
+
+                    await Api.SendGroupMessage(groupId,
+                        CQCode.Image(CommonExtensions.GetCachePath(fileName)) +
+                        $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
                 }
                 catch (Exception)
                 {
