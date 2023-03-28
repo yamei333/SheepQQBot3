@@ -44,7 +44,7 @@ public static partial class TaskProcess
                 if (Api?.IsConnected == true)
                 {
                     var dateNow = DateTime.Now;
-                    if (dateNow.Hour is not (>= 2 and <= 7))
+                    if (dateNow.Hour is not (>= 3 and <= 7))
                     {
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
@@ -58,7 +58,7 @@ public static partial class TaskProcess
                                     if (!genshinResinAlarm.IsActive)
                                         return;
 
-                                    DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 600);
+                                    DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 900);
                                     await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
                                 }
                             });

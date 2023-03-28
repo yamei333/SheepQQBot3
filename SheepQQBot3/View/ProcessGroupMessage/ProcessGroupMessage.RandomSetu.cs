@@ -28,9 +28,24 @@ namespace SheepQQBot3.View
         private const string COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY = "#STCD#";
 
         /// <summary>
+        /// 色图清空CD命令
+        /// </summary>
+        private const string COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY = "#STQKCD#";
+
+        /// <summary>
+        /// 色图清空LV命令
+        /// </summary>
+        private const string COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY = "#STQKLV#";
+
+        /// <summary>
+        /// 色图清空所有命令
+        /// </summary>
+        private const string COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY = "#STQKALL#";
+
+        /// <summary>
         /// 色图的基础CD, 不能发得太频繁
         /// </summary>
-        private const int sendBaseDelay = 300;
+        private const int sendBaseDelay = 240;
 
         private static List<string> _setuKeyWords;
 
@@ -95,11 +110,80 @@ namespace SheepQQBot3.View
             var message = groupMessage.Message;
             var upperMessage = message.ToUpper();
             var dateNow = DateTime.Now;
-            if (targetId == PublicVar.AdminId && upperMessage == COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY)
+            if (upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY))
             {
-                // MEMO : 显CD
-                var sendMessage = $"当前色图CD为 [{GetCD()}]";
-                await Api.SendGroupMessage(groupId, sendMessage);
+                if (upperMessage == COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY)
+                {
+                    // MEMO : 显Lv
+                    var sendMessage = $"{CQCode.At(targetId)} 当前色图状态为 Lv{(config.SetuSenderLv.ContainsKey(targetId)
+                        ? config.SetuSenderLv[targetId]
+                        : 0)}";
+                    await Api.SendGroupMessage(groupId, sendMessage);
+                }
+                else if (targetId == PublicVar.AdminId)
+                {
+                    if (long.TryParse(upperMessage.Replace(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY, string.Empty),
+                        out var searchTargetId))
+                    {
+                        // MEMO : 显CD
+                        var sendMessage = $"当前色图CD为 [{GetCD(searchTargetId)}]" +
+                            $"[Lv{(config.SetuSenderLv.ContainsKey(searchTargetId)
+                                ? config.SetuSenderLv[searchTargetId]
+                                : 0)}]";
+                        await Api.SendGroupMessage(groupId, sendMessage);
+                    }
+                    else
+                    {
+                        await Api.SendGroupMessage(groupId, "输入不正确");
+                    }
+                }
+
+                return true;
+            }
+            if (targetId == PublicVar.AdminId && upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY))
+            {
+                if (long.TryParse(upperMessage.Replace(COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY, string.Empty), out var searchTargetId))
+                {
+                    // MEMO : 清空CD
+                    config.SetuSendHistorys.Remove(searchTargetId);
+                    var sendMessage = $"CD已清空!";
+                    await Api.SendGroupMessage(groupId, sendMessage);
+                }
+                else
+                {
+                    await Api.SendGroupMessage(groupId, "输入不正确");
+                }
+                return true;
+            }
+            if (targetId == PublicVar.AdminId && upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY))
+            {
+                if (long.TryParse(upperMessage.Replace(COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY, string.Empty), out var searchTargetId))
+                {
+                    // MEMO : 清空Lv
+                    config.SetuSenderLv.Remove(searchTargetId);
+                    var sendMessage = $"Lv已清空!";
+                    await Api.SendGroupMessage(groupId, sendMessage);
+                }
+                else
+                {
+                    await Api.SendGroupMessage(groupId, "输入不正确");
+                }
+                return true;
+            }
+            if (targetId == PublicVar.AdminId && upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY))
+            {
+                if (long.TryParse(upperMessage.Replace(COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY, string.Empty), out var searchTargetId))
+                {
+                    // MEMO : 清空CD
+                    config.SetuSendHistorys.Remove(searchTargetId);
+                    config.SetuSenderLv.Remove(searchTargetId);
+                    var sendMessage = $"色图状态已重置!";
+                    await Api.SendGroupMessage(groupId, sendMessage);
+                }
+                else
+                {
+                    await Api.SendGroupMessage(groupId, "输入不正确");
+                }
                 return true;
             }
 
@@ -118,8 +202,7 @@ namespace SheepQQBot3.View
                 startText.ForEach(eachStart => endText.ForEach(eachEnd => _setuKeyWords.Add(eachStart + eachEnd)));
             }
 
-            // MEMO : 命令为#st#
-            // MEMO : 或者字数在10字以内, 并包含色图关键字
+            // MEMO : 命令为#st# (#st#支持关键字)
             var tag = string.Empty;
             var setuKeywordCheck = false;
             if (upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY))
@@ -128,7 +211,7 @@ namespace SheepQQBot3.View
                 tag = message[4..];
                 goto StartSetu;
             }
-
+            // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
             if (upperMessage.GetByteCount() <= 24 && _setuKeyWords.Any(upperMessage.EndsWith))
             {
                 setuKeywordCheck = true;
@@ -143,6 +226,9 @@ StartSetu:
                 var addSecond = 0;
                 var addLevel = SetuAddLevel.Normal;
                 var canSendSetu = false;
+                if (!config.SetuSenderLv.TryGetValue(targetId, out var setuSenderLv))
+                    setuSenderLv = 0;
+
                 if (!PublicVar.IsDebug && targetId == PublicVar.AdminId)
                 {
                     // MEMO : ADMIN无限制要色图
@@ -150,17 +236,21 @@ StartSetu:
                 }
                 else
                 {
-                    var hasHistory = config.SetuSendHistorys.TryGetValue(groupId, out var nextCanSendDate);
+                    // MEMO : 可发色图时间获得
+                    if (!config.SetuSendHistorys.TryGetValue(targetId, out var nextCanSendDate))
+                        nextCanSendDate = DateTime.MinValue;
+
                     List<RandomWeight<SendSetuConfig>> randActions;
-                    if (!hasHistory || dateNow > nextCanSendDate)
+
+                    if (dateNow > nextCanSendDate)
                     {
                         if ((dateNow - nextCanSendDate).TotalMinutes >= 30)
                         {
                             randActions = new List<RandomWeight<SendSetuConfig>>
                             {
-                                new(1000, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true)),
+                                new(1000, new SendSetuConfig(sendBaseDelay + Rand.Next(-60, 60), SetuAddLevel.Normal, true)),
                                 new(50, new SendSetuConfig(0, SetuAddLevel.Free, true)),
-                                new(10, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true, true)),
+                                new(10, new SendSetuConfig(sendBaseDelay + Rand.Next(-60, 60), SetuAddLevel.Normal, true, true)),
                                 new(3, new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
                             };
                         }
@@ -168,13 +258,21 @@ StartSetu:
                         {
                             randActions = new List<RandomWeight<SendSetuConfig>>
                             {
-                                new(1000, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true)),
-                                new(200, new SendSetuConfig(Rand.Next(3, 15), SetuAddLevel.Normal)),
-                                new(200, new SendSetuConfig(Rand.Next(5, 30), SetuAddLevel.Normal)),
-                                new(100, new SendSetuConfig(Rand.Next(8, 45), SetuAddLevel.Double)),
-                                new(50, new SendSetuConfig(Rand.Next(10, 60), SetuAddLevel.SuperDouble)),
+                                new(1000, new SendSetuConfig(
+                                    sendBaseDelay + (int) (60 * Math.Pow(setuSenderLv, 2)) + Rand.Next(-60, 60),
+                                    SetuAddLevel.Normal, true)),
+                                new(200 + (int) (100 * Math.Pow(setuSenderLv, 1.2)),
+                                    new SendSetuConfig(Rand.Next(3, 15), SetuAddLevel.Normal)),
+                                new(200 + (int) (100 * Math.Pow(setuSenderLv, 1.2)),
+                                    new SendSetuConfig(Rand.Next(5, 30), SetuAddLevel.Normal)),
+                                new(100 + (int) (50 * Math.Pow(setuSenderLv, 1.2)),
+                                    new SendSetuConfig(Rand.Next(8, 45), SetuAddLevel.Double)),
+                                new(50 + (int) (20 * Math.Pow(setuSenderLv, 1.2)),
+                                    new SendSetuConfig(Rand.Next(10, 60), SetuAddLevel.SuperDouble)),
                                 new(50, new SendSetuConfig(0, SetuAddLevel.Free, true)),
-                                new(10, new SendSetuConfig(sendBaseDelay + Rand.Next(-180, 180), SetuAddLevel.Normal, true, true)),
+                                new(10, new SendSetuConfig(
+                                    sendBaseDelay + (int) (60 * Math.Pow(setuSenderLv, 2)) + Rand.Next(-60, 60),
+                                    SetuAddLevel.Normal, true, true)),
                                 new(3, new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
                             };
                         }
@@ -189,9 +287,10 @@ StartSetu:
                             new(750, new SendSetuConfig(Rand.Next(10, 60) * 8, SetuAddLevel.Golden)),
                             new(300, new SendSetuConfig(Rand.Next(10, 60) * 16, SetuAddLevel.Platinum)),
                             new(150, new SendSetuConfig(Rand.Next(10, 60) * 32, SetuAddLevel.Diamond)),
+                            new(10, new SendSetuConfig(Rand.Next(10, 60) * 256, SetuAddLevel.Death)),
                             new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, SetuAddLevel.Luck)),
-                            new(750, new SendSetuConfig(Rand.Next(5, 60) * -4, SetuAddLevel.LuckSuper)),
-                            new(300, new SendSetuConfig(Rand.Next(5, 60) * -16, SetuAddLevel.LuckGolden)),
+                            new(600, new SendSetuConfig(Rand.Next(5, 60) * -4, SetuAddLevel.LuckSuper)),
+                            new(200, new SendSetuConfig(Rand.Next(5, 60) * -16, SetuAddLevel.LuckGolden)),
                             //new(200, new SendSetuConfig(0, SetuAddLevel.Free)),
                         };
                     }
@@ -204,14 +303,49 @@ StartSetu:
                     {
                         // MEMO : 应该不会发生
                     }
+
+                    // MEMO : 色图Lv减少
+                    if (setuSenderLv > 0)
+                    {
+                        var totalMinutes = (dateNow - nextCanSendDate).TotalMinutes;
+                        if (totalMinutes >= 60)
+                            setuSenderLv = setuSenderLv - (int)(totalMinutes / 60);
+                    }
+
+                    // MEMO : 参数注入意图
+                    if (tag!.Contains("&"))
+                    {
+                        SetSetuValues(new SendSetuConfig(300, SetuAddLevel.SuperDouble));
+                        setuSenderLv = setuSenderLv + 3;
+                    }
+
+                    // MEMO : 色图Lv增加
+                    if (canSendSetu)
+                    {
+                        if (!upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY)
+                            && !string.IsNullOrEmpty(tag))
+                        {
+                            setuSenderLv++;
+                        }
+
+                        if ((dateNow - nextCanSendDate).TotalMinutes <= 10)
+                            setuSenderLv++;
+                    }
+
+                    if (setuSenderLv < 0)
+                        setuSenderLv = 0;
+
+                    config.SetuSenderLv[targetId] = setuSenderLv;
                 }
 
                 if (PublicVar.IsDebug)
                 {
                     await Api.SendGroupMessage(groupId, "[DEBUG]" +
-                                                        $"{ENTER}是否可发: {canSendSetu}" +
-                                                        $"{ENTER}增加时间: {addSecond}s" +
-                                                        $"{ENTER}色图CD: {GetCD()}");
+                        $"{ENTER}目标对象: {targetId}" +
+                        $"{ENTER}色图Lv: {setuSenderLv}" +
+                        $"{ENTER}是否发送: {canSendSetu}" +
+                        $"{ENTER}增加时间: {addSecond}s" +
+                        $"{ENTER}色图CD: {GetCD(targetId)}");
                 }
 
                 if (!canSendSetu)
@@ -226,7 +360,7 @@ StartSetu:
                             $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}" +
                             $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                             //+ $" (+{addSecond}s)"
-                            (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
+                            (isShowDate ? $" [CD {GetCD(targetId)}]" : string.Empty);
                     }
                     //else if (addSecond == 0)
                     //{
@@ -243,7 +377,7 @@ StartSetu:
                         sendMessage = $"{CQCode.At(targetId)} "
                                       + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                                       + $" ({addSecond}s)"
-                                      + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
+                                      + (isShowDate ? $" [CD {GetCD(targetId)}]" : string.Empty);
                     }
 
                     await Api.SendGroupMessage(groupId, sendMessage);
@@ -257,8 +391,8 @@ StartSetu:
                     {
                         // MEMO : 白嫖
                         var sendMessage = $"{CQCode.At(targetId)} "
-                            + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
-                            + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
+                            + $"什么!? 你成功白嫖了一张{tag}{_setuKeyWords.Random()}!"
+                            + (isShowDate ? $" [CD {GetCD(targetId)}]" : string.Empty);
                         await Api.SendGroupMessage(groupId, sendMessage);
                         goto SendSetu;
                     }
@@ -268,12 +402,26 @@ StartSetu:
 SendSetu:
                 try
                 {
-                    Func<string, Task<SetuInfo>>[] randomSetuKeyword = {
-                        SetuExtensions.GetSetu_Lolicon,
-                        SetuExtensions.GetSetu_Yuban,
-                        SetuExtensions.GetSetu_Jitsu,
+                    var randomSetuKeyword = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_Lolicon),
+                        new(8, SetuExtensions.GetSetu_Yuban),
+                        new(3, SetuExtensions.GetSetu_Jitsu),
                     };
-                    Func<string, Task<SetuInfo>>[] randomSetu = {
+                    var randomSetu = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_Lolicon),
+                        new(8, SetuExtensions.GetSetu_Yuban),
+                        new(6, SetuExtensions.GetSetu_NyanCatda),
+                        new(3, SetuExtensions.GetSetu_Jitsu),
+                    };
+
+                    //Func<string, Task<SetuInfo>>[] randomSetuKeyword = {
+                    //    SetuExtensions.GetSetu_Lolicon,
+                    //    SetuExtensions.GetSetu_Yuban,
+                    //    SetuExtensions.GetSetu_Jitsu,
+                    //};
+                    Func<string, Task<SetuInfo>>[] randomSetuDefault = {
                         SetuExtensions.GetSetu_Lolicon,
                         SetuExtensions.GetSetu_Yuban,
                         SetuExtensions.GetSetu_NyanCatda,
@@ -284,8 +432,12 @@ SendSetu:
                         $"{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
 
                     var (setuInfo, fileName) = await GetSetu(() => !string.IsNullOrEmpty(tag)
-                        ? randomSetuKeyword.Random().Invoke(tag)
-                        : randomSetu.Random().Invoke(tag),
+                        ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
+                            ? funcResult.Value.Invoke(tag)
+                            : randomSetuDefault.Random().Invoke(tag)
+                        : randomSetu.TryGetRandomWeight(out var funcResult2)
+                            ? funcResult2.Value.Invoke(tag)
+                            : randomSetuDefault.Random().Invoke(tag),
                         false);
                     if (setuInfo == null)
                         return false;
@@ -304,21 +456,27 @@ SendSetu:
 
                     if (r18Bonus)
                     {
-                        Func<string, Task<SetuInfo>>[] randomSetuR18Keyword = {
-                            SetuExtensions.GetSetu_Lolicon_R18,
-                            SetuExtensions.GetSetu_Yuban_R18,
-                            SetuExtensions.GetSetu_Jitsu_R18,
+                        var randomSetuR18Keyword = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                        {
+                            new(10, SetuExtensions.GetSetu_Lolicon_R18),
+                            new(8, SetuExtensions.GetSetu_Yuban_R18),
+                            new(3, SetuExtensions.GetSetu_Jitsu_R18),
                         };
-                        Func<string, Task<SetuInfo>>[] randomSetuR18 = {
-                            SetuExtensions.GetSetu_Lolicon_R18,
-                            SetuExtensions.GetSetu_Yuban_R18,
-                            SetuExtensions.GetSetu_NyanCatda_R18,
-                            SetuExtensions.GetSetu_Jitsu_R18,
+                        var randomSetuR18 = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                        {
+                            new(10, SetuExtensions.GetSetu_Lolicon_R18),
+                            new(8, SetuExtensions.GetSetu_Yuban_R18),
+                            new(6, SetuExtensions.GetSetu_NyanCatda_R18),
+                            new(3, SetuExtensions.GetSetu_Jitsu_R18),
                         };
 
                         var (setuInfoR18, _) = await GetSetu(() => !string.IsNullOrEmpty(tag)
-                            ? randomSetuR18Keyword.Random().Invoke(tag)
-                            : randomSetuR18.Random().Invoke(tag),
+                            ? randomSetuR18Keyword.TryGetRandomWeight(out var funcResult)
+                                ? funcResult.Value.Invoke(tag)
+                                : randomSetuDefault.Random().Invoke(tag)
+                            : randomSetuR18.TryGetRandomWeight(out var funcResult2)
+                                ? funcResult2.Value.Invoke(tag)
+                                : randomSetuDefault.Random().Invoke(tag),
                             true);
                         if (setuInfoR18 == null)
                             return false;
@@ -330,7 +488,7 @@ SendSetu:
                         }
 
                         await Api.SendGroupMessage(groupId,
-                            $"[这是一张额外的金色传说色图, 不可预览]" +
+                            $"[这是一张额外的金色传说{tag}色图, 不可预览]" +
                             $"{ENTER}{setuInfoR18.SourceText}" +
                             $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}" +
                             $"{ENTER}API提供:{setuInfoR18.SetuType}");
@@ -338,7 +496,7 @@ SendSetu:
 
                     await Api.SendGroupMessage(groupId,
                         CQCode.Image(CommonExtensions.GetCachePath(fileName)) +
-                        $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{_setuKeyWords.Random()}{_setuGetted.Random()}");
+                        $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{tag}{_setuKeyWords.Random()}{_setuGetted.Random()}");
                 }
                 catch (Exception)
                 {
@@ -356,9 +514,9 @@ SendSetu:
                 void AddCD()
                 {
                     revertCD = dateNow.AddSeconds(Rand.Next(3, 15));
-                    config.SetuSendHistorys[groupId] = config.SetuSendHistorys.ContainsKey(groupId)
-                        ? (config.SetuSendHistorys[groupId] > dateNow
-                            ? config.SetuSendHistorys[groupId]
+                    config.SetuSendHistorys[targetId] = config.SetuSendHistorys.ContainsKey(targetId)
+                        ? (config.SetuSendHistorys[targetId] > dateNow
+                            ? config.SetuSendHistorys[targetId]
                             : dateNow).AddSeconds(addSecond)
                         : dateNow.AddSeconds(addSecond);
                 }
@@ -449,12 +607,12 @@ SendSetu:
 
             return true;
 
-            string GetCD()
+            string GetCD(long searchId)
             {
-                return $"{(config.SetuSendHistorys.ContainsKey(groupId)
-                    ? (dateNow >= config.SetuSendHistorys[groupId]
+                return $"{(config.SetuSendHistorys.ContainsKey(searchId)
+                    ? (dateNow >= config.SetuSendHistorys[searchId]
                         ? "可使用"
-                        : config.SetuSendHistorys[groupId].ToString("HH:mm:ss"))
+                        : config.SetuSendHistorys[searchId].ToString("HH:mm:ss"))
                     : "无记录")}";
             }
         }
@@ -500,6 +658,7 @@ SendSetu:
                 SetuAddLevel.Golden => "黄金加倍",
                 SetuAddLevel.Platinum => "白金加倍",
                 SetuAddLevel.Diamond => "钻石加倍",
+                SetuAddLevel.Death => "死亡加倍",
                 SetuAddLevel.Luck => "幸运",
                 SetuAddLevel.LuckSuper => "超级幸运",
                 SetuAddLevel.LuckGolden => "黄金幸运",
@@ -539,6 +698,11 @@ SendSetu:
         /// 钻石加倍
         /// </summary>
         Diamond,
+
+        /// <summary>
+        /// 死亡加倍
+        /// </summary>
+        Death,
 
         /// <summary>
         /// 幸运
