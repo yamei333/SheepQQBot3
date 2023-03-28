@@ -18,6 +18,7 @@ namespace SheepQQBot3.Extensions
     public static class ConfigExtensions
     {
         public static readonly string ConfigPath = "config.json";
+        private static object _syncLock = new object();
 
         /// <summary>
         /// 读取配置
@@ -134,12 +135,15 @@ namespace SheepQQBot3.Extensions
             if (!Vm.IsLoadComplete)
                 return;
 
-            var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs), new JsonSerializerOptions
+            lock (_syncLock)
             {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true
-            });
-            File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+                var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs), new JsonSerializerOptions
+                {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    WriteIndented = true
+                });
+                File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+            }
 
             // MEMO : OldVersion
             //var jsonConfig = new JsonConfig(jsonText);
