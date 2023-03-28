@@ -42,8 +42,8 @@ namespace SheepQQBot3.Model.Config
             TargetType switch
             {
                 BotConfigTargetType.Common => null,
-                BotConfigTargetType.Group => GetHttpIcon($"https://p.qlogo.cn/gh/{TargetId}/{TargetId}/100/"),
-                BotConfigTargetType.Private => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=100"),
+                BotConfigTargetType.Group => GetHttpIcon($"https://p.qlogo.cn/gh/{TargetId}/{TargetId}/40/"),
+                BotConfigTargetType.Private => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=40"),
                 _ => throw new NotImplementedException()
             };
 
@@ -188,8 +188,7 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 保存已发送的色图记录
         /// </summary>
-        [JsonIgnore]
-        [IgnoreMember]
+        [Key(nameof(SetuSendHistorys))]
         public Dictionary<long, DateTime> SetuSendHistorys
         {
             get => _setuSendHistorys ??= new Dictionary<long, DateTime>();
@@ -201,10 +200,9 @@ namespace SheepQQBot3.Model.Config
         private Dictionary<long, int> _setuSenderLv;
 
         /// <summary>
-        /// 保存要色图者的Lv
+        /// 保存色图斗士Lv
         /// </summary>
-        [JsonIgnore]
-        [IgnoreMember]
+        [Key(nameof(SetuSenderLv))]
         public Dictionary<long, int> SetuSenderLv
         {
             get => _setuSenderLv ??= new Dictionary<long, int>();
