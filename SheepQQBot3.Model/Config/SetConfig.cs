@@ -196,6 +196,21 @@ namespace SheepQQBot3.Model.Config
             set => _setuSendHistorys = value;
         }
 
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<long, int> _setuSenderLv;
+
+        /// <summary>
+        /// 保存要色图者的Lv
+        /// </summary>
+        [JsonIgnore]
+        [IgnoreMember]
+        public Dictionary<long, int> SetuSenderLv
+        {
+            get => _setuSenderLv ??= new Dictionary<long, int>();
+            set => _setuSenderLv = value;
+        }
+
         #endregion 已执行内容的保存
 
         /// <summary>
