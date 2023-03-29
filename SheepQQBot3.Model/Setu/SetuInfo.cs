@@ -12,22 +12,23 @@
             SetuType setuType,
             string sourceText,
             string sourceUrl,
-            string imageUrl)
+            string imageUrl,
+            SetuResult setuResult)
         {
             SetuType = setuType;
             SourceText = sourceText;
             SourceUrl = sourceUrl;
             ImageUrl = imageUrl;
-            IsSuccess = true;
+            Result = setuResult;
         }
 
         /// <summary>
         /// 默认构造函数
         /// </summary>
-        public SetuInfo(SetuType setuType)
+        public SetuInfo(SetuType setuType, SetuResult result)
         {
             SetuType = setuType;
-            IsSuccess = false;
+            Result = result;
         }
 
         /// <summary>
@@ -51,9 +52,9 @@
         public string ImageUrl { get; set; }
 
         /// <summary>
-        /// 色图取得成功
+        /// 色图取得状态
         /// </summary>
-        public bool IsSuccess { get; set; }
+        public SetuResult Result { get; set; }
     }
 
     public enum SetuType
@@ -62,5 +63,13 @@
         Yuban,
         NyanCatda,
         Jitsu,
+    }
+
+    public enum SetuResult
+    {
+        Successed,
+        ApiError,
+        NoSearchResult,
+        OtherError,
     }
 }

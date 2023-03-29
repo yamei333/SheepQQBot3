@@ -275,7 +275,7 @@ StartSetu:
                     List<RandomWeight<SendSetuConfig>> randActions;
                     if (dateNow > nextCanSendDate)
                     {
-                        if ((dateNow - nextCanSendDate).TotalMinutes >= 30)
+                        if ((dateNow - nextCanSendDate).TotalMinutes >= 30 + setuSenderLv * 10)
                         {
                             randActions = new List<RandomWeight<SendSetuConfig>>
                             {
@@ -468,12 +468,30 @@ SendSetu:
                     if (setuInfo == null)
                         return false;
 
-                    if (!setuInfo.IsSuccess)
+                    switch (setuInfo.Result)
                     {
-                        await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
-                            $"色图库中没找到色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
-                        config.SetuSendHistorys[groupId] = revertCD;
-                        return true;
+                        case SetuResult.Successed:
+                            break;
+                        case SetuResult.ApiError:
+                            await Api.SendGroupMessage(groupId,
+                                $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                $"Api炸了[{setuInfo.SetuType}],色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                            config.SetuSendHistorys[groupId] = revertCD;
+                            return true;
+                        case SetuResult.NoSearchResult:
+                            await Api.SendGroupMessage(groupId,
+                                $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                $"色图库中没找到色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                            config.SetuSendHistorys[groupId] = revertCD;
+                            return true;
+                        case SetuResult.OtherError:
+                            await Api.SendGroupMessage(groupId,
+                                $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                $"Api未知错误[{setuInfo.SetuType}],色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                            config.SetuSendHistorys[groupId] = revertCD;
+                            return true;
+                        default:
+                            throw new ArgumentOutOfRangeException();
                     }
 
                     await Api.SendGroupMessage(groupId,
@@ -508,10 +526,30 @@ SendSetu:
                         if (setuInfoR18 == null)
                             return false;
 
-                        if (!setuInfoR18.IsSuccess)
+                        switch (setuInfoR18.Result)
                         {
-                            await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}{_setuKexiStart.Random()}色图库中没找到金色传说色图~,{_setuKexiEnd.Random()}.");
-                            return true;
+                            case SetuResult.Successed:
+                                break;
+                            case SetuResult.ApiError:
+                                await Api.SendGroupMessage(groupId,
+                                    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                    $"Api炸了[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                                config.SetuSendHistorys[groupId] = revertCD;
+                                return true;
+                            case SetuResult.NoSearchResult:
+                                await Api.SendGroupMessage(groupId,
+                                    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                    $"色图库中没找到金色传说色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                                config.SetuSendHistorys[groupId] = revertCD;
+                                return true;
+                            case SetuResult.OtherError:
+                                await Api.SendGroupMessage(groupId,
+                                    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                    $"Api未知错误[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}");
+                                config.SetuSendHistorys[groupId] = revertCD;
+                                return true;
+                            default:
+                                throw new ArgumentOutOfRangeException();
                         }
 
                         await Api.SendGroupMessage(groupId,
@@ -556,59 +594,31 @@ SendSetu:
                 async Task<(SetuInfo, string)> GetSetu(Func<Task<SetuInfo>> getSetuInfoFunc, bool checkImageOnly)
                 {
                     var setuInfo = await getSetuInfoFunc.Invoke();
-                    if (PublicVar.IsDebug)
-                    {
-                        await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
-                            $"{ENTER}SearchTag: {tag}" +
-                            $"{ENTER}SetuType: {setuInfo.SetuType}" +
-                            $"{ENTER}SmallUrl: {setuInfo.ImageUrl}" +
-                            $"{ENTER}SourceUrl: {setuInfo.SourceUrl}" +
-                            $"{ENTER}IsSuccess: {setuInfo.IsSuccess}");
-                    }
+                    DebugSendSetuInfo();
 
                     var fileName = string.Empty;
                     var getSuccessed = false;
-                    const int maxRetryTimes = 5;
+                    const int maxRetryTimes = 4;
                     var retryTimes = 0;
-                    while (!getSuccessed)
+                    while (!getSuccessed && retryTimes <= maxRetryTimes)
                     {
-                        if (!setuInfo.IsSuccess)
+                        if (setuInfo.Result == SetuResult.Successed)
+                        {
+                            (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl, checkImageOnly);
+                            if (getSuccessed)
+                                continue;
+                        }
+                        else if (setuInfo.Result == SetuResult.NoSearchResult)
                         {
                             getSuccessed = true;
                             continue;
                         }
 
-                        if (string.IsNullOrEmpty(setuInfo.ImageUrl))
-                        {
-                            retryTimes++;
-                            setuInfo = await getSetuInfoFunc.Invoke();
-                            CommonUtil.Sleep(500);
-                            continue;
-                        }
-
-                        (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl, checkImageOnly);
-                        if (getSuccessed)
-                            continue;
-
+                        //await Api.SendGroupMessage(groupId,
+                        //    $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
                         retryTimes++;
-                        if (retryTimes <= maxRetryTimes)
-                        {
-                            //await Api.SendGroupMessage(groupId,
-                            //    $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
-                            setuInfo = await getSetuInfoFunc.Invoke();
-                            if (PublicVar.IsDebug)
-                            {
-                                await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
-                                                                    $"{ENTER}SetuType: {setuInfo.SetuType}" +
-                                                                    $"{ENTER}SmallUrl: {setuInfo.ImageUrl}" +
-                                                                    $"{ENTER}SourceUrl: {setuInfo.SourceUrl}");
-                            }
-                        }
-                        else
-                        {
-                            getSuccessed = true;
-                        }
-
+                        setuInfo = await getSetuInfoFunc.Invoke();
+                        DebugSendSetuInfo();
                         CommonUtil.Sleep(500);
                     }
 
@@ -618,7 +628,7 @@ SendSetu:
                         return (setuInfo, string.Empty);
                     }
 
-                    if (!checkImageOnly && setuInfo.IsSuccess)
+                    if (!checkImageOnly && setuInfo.Result == SetuResult.Successed)
                     {
                         var isFileExists = false;
                         while (!isFileExists)
@@ -630,6 +640,27 @@ SendSetu:
                     }
 
                     return (setuInfo, fileName);
+
+                    async void DebugSendSetuInfo()
+                    {
+                        if (!PublicVar.IsDebug)
+                            return;
+
+                        if (setuInfo.Result == SetuResult.Successed)
+                        {
+                            await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
+                                                                $"{ENTER}SetuType: {setuInfo.SetuType}" +
+                                                                $"{ENTER}SetuResult: {setuInfo.Result}" +
+                                                                $"{ENTER}SmallUrl: {setuInfo.ImageUrl}" +
+                                                                $"{ENTER}SourceUrl: {setuInfo.SourceUrl}");
+                        }
+                        else
+                        {
+                            await Api.SendGroupMessage(groupId, "[DEBUG]SetuInfo" +
+                                                                $"{ENTER}SetuType: {setuInfo.SetuType}" +
+                                                                $"{ENTER}SetuResult: {setuInfo.Result}");
+                        }
+                    }
                 }
             }
             else

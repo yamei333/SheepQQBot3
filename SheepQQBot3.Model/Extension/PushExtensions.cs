@@ -14,6 +14,8 @@ namespace SheepQQBot3.Model.Extension
     /// </summary>
     public static class PushExtensions
     {
+        public const string TITLE = "哈莉提醒";
+
         /// <summary>
         /// 使用Bark给手机推送
         /// </summary>
