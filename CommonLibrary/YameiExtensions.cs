@@ -4,6 +4,9 @@ namespace Yamei.Common
 {
     public static class YameiExtensions
     {
+        public static string ToSignString(this int number)
+            => number >= 0 ? $"+{number}" : $"{number}";
+
         public static readonly DateTime StartTime = new DateTime(1970, 1, 1).Add(TimeZoneInfo.Local.BaseUtcOffset);
 
         public static DateTime ToDateTime(this long timeStamp)

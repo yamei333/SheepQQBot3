@@ -109,6 +109,9 @@ namespace SheepQQBot3.Model.Extension
         /// </summary>
         public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(string url, bool checkOnly = false)
         {
+            if (string.IsNullOrEmpty(url))
+                return (false, string.Empty);
+
             var tempFileName = Guid.NewGuid().ToString();
             var response = await HttpGetAsync(url);
             if (response?.StatusCode != HttpStatusCode.OK)
