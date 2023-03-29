@@ -250,6 +250,10 @@ StartSetu:
                     setuSenderLv = 0;
 
                 var oldSetuSenderLv = setuSenderLv;
+                var changeLvTime = 0;
+                var changeLvEyi = 0;
+                var changeLvTag = 0;
+                var changeLvFast = 0;
                 if (!PublicVar.IsDebug && targetId == PublicVar.AdminId)
                 {
                     // MEMO : ADMIN无限制要色图
@@ -265,8 +269,11 @@ StartSetu:
                     if (setuSenderLv > 0)
                     {
                         var totalMinutes = (dateNow - nextCanSendDate).TotalMinutes;
-                        if (totalMinutes >= 90)
-                            setuSenderLv = setuSenderLv - (int)(totalMinutes / 90);
+                        if (totalMinutes >= 90 && nextCanSendDate != DateTime.MinValue)
+                        {
+                            changeLvTime = -(int)(totalMinutes / 90);
+                            setuSenderLv = setuSenderLv + changeLvTime;
+                        }
                     }
 
                     if (setuSenderLv < 0)
@@ -339,6 +346,7 @@ StartSetu:
                     if (tag!.Contains("&") || tag!.Contains("%26"))
                     {
                         SetSetuValues(new SendSetuConfig(600, SetuAddLevel.Golden));
+                        changeLvEyi = 3;
                         setuSenderLv = setuSenderLv + 3;
                     }
 
@@ -348,11 +356,15 @@ StartSetu:
                         if (!upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY)
                             && !string.IsNullOrEmpty(tag))
                         {
+                            changeLvTag = 1;
                             setuSenderLv++;
                         }
 
                         if ((dateNow - nextCanSendDate).TotalMinutes <= 10)
+                        {
+                            changeLvFast = 1;
                             setuSenderLv++;
+                        }
                     }
 
                     if (setuSenderLv < 0)
@@ -587,9 +599,24 @@ SendSetu:
                 }
 
                 string GetSetuLvInfo()
-                    => $"[斗士Lv{oldSetuSenderLv}{(addSetuSenderLv != 0
-                        ? $"(本次{(addSetuSenderLv > 0 ? $"+{addSetuSenderLv}" : $"{addSetuSenderLv}")})"
-                        : string.Empty)}]";
+                {
+                    var addString = string.Empty;
+                    if (changeLvTime < 0)
+                        addString += $",时间冷却{changeLvTime.ToSignString()}";
+                    if (changeLvEyi > 0)
+                        addString += $",搞事{changeLvEyi.ToSignString()}";
+                    if (changeLvTag > 0)
+                        addString += $",关键词搜索{changeLvTag.ToSignString()}";
+                    if (changeLvFast > 0)
+                        addString += $",频率过快{changeLvFast.ToSignString()}";
+                    if (!string.IsNullOrEmpty(addString))
+                        addString = addString[1..];
+
+                    var addLvString = (string.IsNullOrEmpty(addString)
+                        ? string.Empty
+                        : $"本次{addSetuSenderLv.ToSignString()}({addString})");
+                    return $"[斗士Lv{oldSetuSenderLv}] {addLvString}";
+                }
 
                 async Task<(SetuInfo, string)> GetSetu(Func<Task<SetuInfo>> getSetuInfoFunc, bool checkImageOnly)
                 {
@@ -672,11 +699,18 @@ SendSetu:
 
             string GetCD(long searchId)
             {
-                return $"{(config.SetuSendHistorys.ContainsKey(searchId)
-                    ? (dateNow >= config.SetuSendHistorys[searchId]
-                        ? "可使用"
-                        : config.SetuSendHistorys[searchId].ToString("HH:mm:ss"))
-                    : "无记录")}";
+                if (!config.SetuSendHistorys.ContainsKey(searchId))
+                    return "无记录";
+
+                if (dateNow >= config.SetuSendHistorys[searchId])
+                {
+                    var totalMinutes = (dateNow - config.SetuSendHistorys[searchId]).TotalMinutes;
+                    return totalMinutes >= 90
+                        ? $"可Lv{-(int)(totalMinutes / 90)}"
+                        : "可使用";
+                }
+
+                return config.SetuSendHistorys[searchId].ToString("HH:mm:ss");
             }
         }
     }
