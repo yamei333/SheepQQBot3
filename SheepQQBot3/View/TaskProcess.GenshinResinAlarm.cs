@@ -9,6 +9,7 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.GenshinHelper;
 using Xunkong.Hoyolab;
 using Xunkong.Hoyolab.Account;
 using Xunkong.Hoyolab.DailyNote;
@@ -51,9 +52,9 @@ public static partial class TaskProcess
                             .ForEach(setConfig =>
                             {
                                 setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
-                                    .ForEach(DeleteExpiredDataAction);
+                                    .ForEach(SendGenshinDailyNoteAlarmMessageAction);
 
-                                async void DeleteExpiredDataAction(GenshinResinAlarm genshinResinAlarm)
+                                async void SendGenshinDailyNoteAlarmMessageAction(GenshinResinAlarm genshinResinAlarm)
                                 {
                                     if (!genshinResinAlarm.IsActive)
                                         return;
@@ -138,6 +139,23 @@ public static partial class TaskProcess
         var dateNowStr = now.ToConditionString(HolidayInfo);
         var sendMessage = string.Empty;
 
+        #region WB提醒
+
+        if (RegexGenerator.GenshinWBAlarm().IsMatch(dateNowStr))
+        {
+            var genshinGachaInfoRequest = await HttpExtensions.GetFromJsonAsync<GenshinGachaInfoRequest>(
+                "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json");
+            var gachaInfo = genshinGachaInfoRequest?.Data.List.FirstOrDefault(each => each.GachaName == "角色活动");
+            if (gachaInfo != null)
+            {
+                var diffDays = (int)(now - gachaInfo.BeginTime).TotalDays;
+                if (diffDays is 0 or 1 or 2)
+                    SendBarkMessageAsync($"[原神WB签到提醒]-WB签到第{diffDays + 1}天!");
+            }
+        }
+
+        #endregion WB提醒
+
         #region 树脂
 
         if (genshinResinAlarm.Resin)
@@ -211,16 +229,7 @@ public static partial class TaskProcess
             if (string.IsNullOrEmpty(sendMessage))
                 return;
 
-            var barkKey = genshinResinAlarm.BarkKey;
-            if (!string.IsNullOrEmpty(barkKey))
-            {
-                var barkMessage = regRemoveCQAt.Replace(sendMessage, string.Empty);
-                await PushExtensions.PushBarkMessageAsync(
-                    barkKey,
-                    barkMessage,
-                    "哈莉提醒");
-            }
-
+            SendBarkMessageAsync(regRemoveCQAt.Replace(sendMessage, string.Empty));
             switch (targetType)
             {
                 case BotConfigTargetType.Group:
@@ -237,6 +246,18 @@ public static partial class TaskProcess
                 default:
                     throw new ArgumentOutOfRangeException(
                         $"{nameof(SendGenshinDailyNoteAlarmMessage)}.{nameof(setConfig.TargetType)}", targetType.ToString());
+            }
+        }
+
+        async void SendBarkMessageAsync(string barkMessage)
+        {
+            var barkKey = genshinResinAlarm.BarkKey;
+            if (!string.IsNullOrEmpty(barkKey))
+            {
+                await PushExtensions.PushBarkMessageAsync(
+                    barkKey,
+                    barkMessage,
+                    PushExtensions.TITLE);
             }
         }
     }
