@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Enums
@@ -6,42 +7,45 @@ namespace SheepQQBot3.Model.Enums
     [JsonConverter(typeof(JsonStringEnumConverter))]
     public enum BotFunctionType
     {
+        [Display(Name = "闹钟助手")]
         Common_AlarmAide = 0,
+
+        [Display(Name = "闹钟助手投稿")]
         Common_AlarmAideSubmit = 1,
+
+        [Display(Name = "黑名单")]
         Common_BlackList = 2,
+
+        [Display(Name = "私聊配置")]
         Private_AdminConfig = 1000,
+
+        [Display(Name = "复读机杀手")]
         Group_RepeaterKiller = 2000,
+
+        [Display(Name = "群提醒")]
         Group_CustomGroupAlarm = 2001,
+
+        [Display(Name = "复读撤回消息")]
         Group_RepeatRevokeMessage = 2002,
+
+        [Display(Name = "基金助手")]
         Group_FundHelper = 2003,
+
+        [Display(Name = "随机色图")]
         Group_RandomSetu = 2004,
+
+        [Display(Name = "直播提醒")]
         Group_LiveAlarm = 2005,
+
+        [Display(Name = "图源搜索")]
         Group_SearchImageSource = 2006,
+
+        [Display(Name = "原神助手")]
         Group_GenshinHelper = 2200,
     }
 
     public static class BotFunctionTypeExtensions
     {
-        public static string ToFunctionName(this BotFunctionType botFunctionType)
-        {
-            return botFunctionType switch
-            {
-                BotFunctionType.Common_AlarmAide => "闹钟助手",
-                BotFunctionType.Common_AlarmAideSubmit => "闹钟助手投稿",
-                BotFunctionType.Common_BlackList => "黑名单",
-                BotFunctionType.Private_AdminConfig => "私聊配置",
-                BotFunctionType.Group_RepeaterKiller => "复读机杀手",
-                BotFunctionType.Group_CustomGroupAlarm => "群提醒",
-                BotFunctionType.Group_RepeatRevokeMessage => "复读撤回消息",
-                BotFunctionType.Group_FundHelper => "基金助手",
-                BotFunctionType.Group_RandomSetu => "随机色图",
-                BotFunctionType.Group_LiveAlarm => "直播提醒",
-                BotFunctionType.Group_SearchImageSource => "图源搜索",
-                BotFunctionType.Group_GenshinHelper => "原神助手",
-                _ => throw new System.NotImplementedException()
-            };
-        }
-
         /// <summary>
         /// 所有显示TAB的功能
         /// </summary>

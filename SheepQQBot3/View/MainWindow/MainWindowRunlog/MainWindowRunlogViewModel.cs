@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
 using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
@@ -56,7 +57,7 @@ namespace SheepQQBot3.View
             var result = new List<RunLogMessage>
             {
                 new($"时间: {runLog.DateTimeStrFFF}"),
-                new($"类型: {runLog.MessageTypeStr}")
+                new($"类型: {runLog.LogMessageType.GetDisplay()}")
             };
             switch (runLog.LogMessageType)
             {

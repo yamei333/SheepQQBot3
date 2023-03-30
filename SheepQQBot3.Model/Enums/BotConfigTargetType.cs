@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Enums
@@ -12,16 +13,19 @@ namespace SheepQQBot3.Model.Enums
         /// <summary>
         /// 系统
         /// </summary>
+        [Display(Name = "系统消息")]
         Common = 0,
 
         /// <summary>
         /// 群
         /// </summary>
+        [Display(Name = "群消息")]
         Group = 1,
 
         /// <summary>
         /// 个人
         /// </summary>
+        [Display(Name = "私聊消息")]
         Private = 2,
     }
 
