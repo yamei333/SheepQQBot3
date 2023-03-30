@@ -156,10 +156,10 @@ namespace System
         //    }
         //}
 
-        public static string GetCachePath(string fileName)
+        public static string GetPath(string directoryName, string fileName)
         {
             var appPath = Environment.CurrentDirectory;
-            return $"file:///{appPath.Replace(@"\", "/")}/Cache/{fileName}";
+            return $"file:///{appPath.Replace(@"\", "/")}/{directoryName}/{fileName}";
         }
 
         public static void CreatePath(string pathName)

@@ -82,13 +82,9 @@ namespace SheepQQBot3.View
 
                 return true;
             }
-            else
-            {
-                // 无匹配结果,或API超过使用次数限制
-                // 暂不处理
-                return false;
-            }
 
+            // 无匹配结果,或API超过使用次数限制
+            // 暂不处理
             return false;
         }
     }

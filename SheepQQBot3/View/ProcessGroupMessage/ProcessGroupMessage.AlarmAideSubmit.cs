@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CommonLibrary;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -19,6 +20,12 @@ namespace SheepQQBot3.View
         /// </summary>
         private const string COMMAND_ALARMAIDE_SUBMIT_LIBRARY = "#TG#";
 
+        /// <summary>
+        /// 投稿文件夹名
+        /// </summary>
+        private const string TG_DIRECTORY_NAME = "TgImage";
+
+        private static readonly Regex _regReplaceImage = RegexGenerator.CQCodeReplaceImage();
         private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
         private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
@@ -55,13 +62,34 @@ namespace SheepQQBot3.View
                 return false;
             }
 
-            var alarmMessage = message
-                .Substring(COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length);
+            var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
+            var resendAlarmMessage = alarmMessage;
             // MEMO : 有image表情的时候移除url和subType
             if (alarmMessage.IndexOf("CQ:image", StringComparison.Ordinal) > 0)
             {
-                alarmMessage = _regRemoveUrl.Replace(alarmMessage, string.Empty);
-                alarmMessage = _regRemoveSubType.Replace(alarmMessage, string.Empty);
+                var matches = _regReplaceImage.Matches(alarmMessage);
+                matches.ForEach(match =>
+                {
+                    var picUrl = match.Groups[1].Value;
+                    var replaceContent = match.Groups[0].Value;
+                    var (isSuccessed, fileName) = HttpExtensions
+                        .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
+                        .Result;
+                    if (isSuccessed)
+                    {
+                        alarmMessage = alarmMessage.Replace(
+                            replaceContent,
+                            CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName));
+                    }
+                    else
+                    {
+                        alarmMessage = _regRemoveUrl.Replace(alarmMessage, string.Empty);
+                        alarmMessage = _regRemoveSubType.Replace(alarmMessage, string.Empty);
+                    }
+
+                    resendAlarmMessage = _regRemoveUrl.Replace(resendAlarmMessage, string.Empty);
+                    resendAlarmMessage = _regRemoveSubType.Replace(resendAlarmMessage, string.Empty);
+                });
             }
 
             try
@@ -78,7 +106,7 @@ namespace SheepQQBot3.View
                     // MEMO : 添加闹钟助手内容
                     alarmTexts.TryAdd(alarmTexts.GetSequence(), alarmMessage);
                     // MEMO : 发送反馈
-                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 投稿成功!!\n{alarmMessage}");
+                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 投稿成功!!\n{resendAlarmMessage}");
                     ConfigExtensions.SaveConfig();
                     return true;
                 }
@@ -86,6 +114,7 @@ namespace SheepQQBot3.View
             catch (Exception)
             {
                 await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 发生错误! 投稿内容有误!!");
+                YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
                 return false;
             }
         }

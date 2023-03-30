@@ -15,7 +15,7 @@ namespace SheepQQBot3.SDK.Client
     {
         private static readonly Regex _regGetCQArea = RegexGenerator.GetCQArea();
         private static readonly Regex _regGetCQCode = RegexGenerator.GetCQCode();
-        private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
+        private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeReplaceImage();
         private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
         public static List<Element> ProcessCQMessage(string message)
