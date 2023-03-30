@@ -73,7 +73,7 @@
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
                                 <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
-                                           Text="{Binding MessageTypeStr}" />
+                                           Text="{Binding TargetTypeStr}" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

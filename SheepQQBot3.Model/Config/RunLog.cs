@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text;
 using System.Text.Json.Serialization;
+using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 
@@ -36,8 +37,11 @@ namespace SheepQQBot3.Model.Config
         public bool HasGroupId => !string.IsNullOrEmpty(GroupId);
 
         public LogMessageType LogMessageType { get; set; }
-        public string MessageType { get; set; }
 
+        [JsonIgnore]
+        public string TargetTypeStr => TargetType.GetDisplay();
+
+        public BotConfigTargetType TargetType { get; set; }
         public string OperatorId { get; set; }
         public string SenderId { get; set; }
         public string GroupId { get; set; }
@@ -76,33 +80,13 @@ namespace SheepQQBot3.Model.Config
             };
 
         /// <summary>
-        /// <see cref="LogMessageType"/>说明
-        /// </summary>
-        public string MessageTypeStr
-            => LogMessageType switch
-            {
-                LogMessageType.MetaData => "元事件",
-                LogMessageType.GroupMessage => "群消息",
-                LogMessageType.GroupRevokeMessage => "群消息撤回",
-                LogMessageType.GroupPoke => "群戳一戳",
-                LogMessageType.AlarmAide => "闹钟助手",
-                LogMessageType.FundHelper => "基金助手",
-                LogMessageType.LiveAlarm => "直播提醒",
-                LogMessageType.GenshinDailyNoteAlarm => "原神每日提醒",
-                LogMessageType.System_Info => "Bot消息",
-                LogMessageType.System_Error => "Bot错误",
-                LogMessageType.System_Warning => "Bot警告",
-                LogMessageType.BlockedByServer => "账号风控",
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-        /// <summary>
         /// 初始化
         /// </summary>
-        protected RunLog(LogMessageType logMessageType, string content)
+        protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, string content)
         {
             _logDate = DateTime.Now;
             LogMessageType = logMessageType;
+            TargetType = targetType;
             SenderId = SystemSenderId;
             Content = content;
             IsBlackList = false;
@@ -111,8 +95,8 @@ namespace SheepQQBot3.Model.Config
         /// <summary>
         /// 初始化
         /// </summary>
-        protected RunLog(LogMessageType logMessageType, long senderId, string content)
-            : this(logMessageType, content)
+        protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, long senderId, string content)
+            : this(logMessageType, targetType, content)
         {
             SenderId = senderId.ToString();
         }
@@ -122,7 +106,8 @@ namespace SheepQQBot3.Model.Config
     public class RunLog_SystemInfo : RunLog
     {
         /// <inheritdoc />
-        public RunLog_SystemInfo(string content) : base(LogMessageType.System_Info, content)
+        public RunLog_SystemInfo(string content)
+            : base(LogMessageType.System_Info, BotConfigTargetType.Common, content)
         { }
     }
 
@@ -130,7 +115,8 @@ namespace SheepQQBot3.Model.Config
     public class RunLog_SystemWarning : RunLog
     {
         /// <inheritdoc />
-        public RunLog_SystemWarning(string content) : base(LogMessageType.System_Warning, content)
+        public RunLog_SystemWarning(string content)
+            : base(LogMessageType.System_Warning, BotConfigTargetType.Common, content)
         { }
     }
 
@@ -138,7 +124,8 @@ namespace SheepQQBot3.Model.Config
     public class RunLog_SystemError : RunLog
     {
         /// <inheritdoc />
-        public RunLog_SystemError(string content) : base(LogMessageType.System_Error, content)
+        public RunLog_SystemError(string content)
+            : base(LogMessageType.System_Error, BotConfigTargetType.Common, content)
         { }
     }
 
@@ -147,7 +134,7 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_GroupMessage(GroupMessage groupMessage)
-            : base(LogMessageType.GroupMessage, groupMessage.Sender!.User_Id, groupMessage.Message!)
+            : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.User_Id, groupMessage.Message!)
         {
             GroupId = groupMessage.GroupId.ToString();
         }
@@ -169,7 +156,7 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_GroupRevokeMessage(GroupRevokeMessage groupRevokeMessage)
-            : base(LogMessageType.GroupRevokeMessage, groupRevokeMessage.UserId, "撤回消息")
+            : base(LogMessageType.GroupRevokeMessage, BotConfigTargetType.Group, groupRevokeMessage.UserId, "撤回消息")
         {
             OperatorId = groupRevokeMessage.OperatorId.ToString();
             GroupId = groupRevokeMessage.GroupId.ToString();
@@ -182,7 +169,7 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_GroupPoke(GroupPoke groupPoke)
-            : base(LogMessageType.GroupPoke, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
+            : base(LogMessageType.GroupPoke, BotConfigTargetType.Group, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
         {
             OperatorId = groupPoke.SenderId.ToString();
             GroupId = groupPoke.GroupId.ToString();
@@ -197,20 +184,8 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_AlarmAide(BotConfigTargetType targetType, long targetId, string content)
-            : base(LogMessageType.AlarmAide, targetId, content)
+            : base(LogMessageType.AlarmAide, targetType, targetId, content)
         {
-            switch (targetType)
-            {
-                case BotConfigTargetType.Group:
-                    GroupId = "群消息";
-                    break;
-                case BotConfigTargetType.Private:
-                    GroupId = "私聊消息";
-                    break;
-                case BotConfigTargetType.Common:
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
-            }
         }
     }
 
@@ -221,20 +196,8 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_FundHelper(BotConfigTargetType targetType, long targetId, string content)
-            : base(LogMessageType.FundHelper, targetId, content)
+            : base(LogMessageType.FundHelper, targetType, targetId, content)
         {
-            switch (targetType)
-            {
-                case BotConfigTargetType.Group:
-                    GroupId = "群消息";
-                    break;
-                case BotConfigTargetType.Private:
-                    GroupId = "私聊消息";
-                    break;
-                case BotConfigTargetType.Common:
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
-            }
         }
     }
 
@@ -245,21 +208,9 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
-            : base(LogMessageType.LiveAlarm, targetId, content)
+            : base(LogMessageType.LiveAlarm, targetType, targetId, content)
         {
             OtherId = otherId;
-            switch (targetType)
-            {
-                case BotConfigTargetType.Group:
-                    MessageType = "群消息";
-                    break;
-                case BotConfigTargetType.Private:
-                    MessageType = "私聊消息";
-                    break;
-                case BotConfigTargetType.Common:
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
-            }
         }
     }
 
@@ -270,20 +221,8 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_GenshinDailyNoteAlarm(BotConfigTargetType targetType, long senderId, string content)
-            : base(LogMessageType.GenshinDailyNoteAlarm, senderId, content)
+            : base(LogMessageType.GenshinDailyNoteAlarm, targetType, senderId, content)
         {
-            switch (targetType)
-            {
-                case BotConfigTargetType.Group:
-                    MessageType = "群消息";
-                    break;
-                case BotConfigTargetType.Private:
-                    MessageType = "私聊消息";
-                    break;
-                case BotConfigTargetType.Common:
-                default:
-                    throw new ArgumentOutOfRangeException(nameof(targetType), targetType, null);
-            }
         }
     }
 
@@ -294,7 +233,7 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_BlockedByServer(string message)
-            : base(LogMessageType.BlockedByServer, 0, message)
+            : base(LogMessageType.BlockedByServer, BotConfigTargetType.Common, message)
         {
         }
     }

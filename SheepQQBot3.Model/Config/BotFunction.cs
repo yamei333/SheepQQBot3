@@ -1,4 +1,5 @@
 ﻿using System.Text.Json.Serialization;
+using Masuit.Tools.Systems;
 using MessagePack;
 using SheepQQBot3.Model.Enums;
 
@@ -10,9 +11,12 @@ namespace SheepQQBot3.Model.Config
     [MessagePackObject]
     public class BotFunction
     {
+        /// <summary>
+        /// 获得BotFunctionType的Display属性
+        /// </summary>
         [JsonIgnore]
         [IgnoreMember]
-        public string DisplayName => BotFunctionType.ToFunctionName();
+        public string DisplayName => BotFunctionType.GetDisplay();
 
         [Key(nameof(BotFunctionType))]
         public BotFunctionType BotFunctionType { get; }

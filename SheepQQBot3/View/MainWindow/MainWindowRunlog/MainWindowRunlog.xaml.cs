@@ -22,7 +22,7 @@ namespace SheepQQBot3.View
         private void RunLog_OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             var selectedRunLog = _vm.SelectedRunLog;
-            if (selectedRunLog == null || !selectedRunLog.IsGroupMessage)
+            if (selectedRunLog is not {IsGroupMessage: true})
                 e.Handled = true;
         }
 
