@@ -44,6 +44,11 @@ namespace SheepQQBot3.View
         private const string COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY = "#STQKALL#";
 
         /// <summary>
+        /// 缓存文件夹名称
+        /// </summary>
+        private const string CACHE_DIRECTORY_NAME = "Cache";
+
+        /// <summary>
         /// 色图的基础CD, 不能发得太频繁
         /// </summary>
         private const int sendBaseDelay = 180;
@@ -572,7 +577,7 @@ SendSetu:
                     }
 
                     await Api.SendGroupMessage(groupId,
-                        CQCode.Image(CommonExtensions.GetCachePath(fileName)) +
+                        CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName)) +
                         $"{ENTER}{CQCode.At(targetId)}{_setuYouwant.Random()}{sourceTag}{_setuKeyWords.Random()}{_setuGetted.Random()}");
                 }
                 catch (Exception)
@@ -631,7 +636,8 @@ SendSetu:
                     {
                         if (setuInfo.Result == SetuResult.Successed)
                         {
-                            (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(setuInfo.ImageUrl, checkImageOnly);
+                            (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
+                                setuInfo.ImageUrl, CACHE_DIRECTORY_NAME, true, checkImageOnly);
                             if (getSuccessed)
                                 continue;
                         }
@@ -660,7 +666,7 @@ SendSetu:
                         var isFileExists = false;
                         while (!isFileExists)
                         {
-                            isFileExists = File.Exists($"Cache/{fileName}");
+                            isFileExists = File.Exists($"{CACHE_DIRECTORY_NAME}/{fileName}");
                             CommonUtil.Sleep(100);
                         }
                         CommonExtensions.DeleteExpiredCache();

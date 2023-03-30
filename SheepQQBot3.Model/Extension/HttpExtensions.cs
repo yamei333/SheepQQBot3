@@ -107,7 +107,8 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// http下载
         /// </summary>
-        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(string url, bool checkOnly = false)
+        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
+            string url, string path, bool needResize, bool checkOnly = false)
         {
             if (string.IsNullOrEmpty(url))
                 return (false, string.Empty);
@@ -124,14 +125,20 @@ namespace SheepQQBot3.Model.Extension
             //    _ => "png"
             //};
 
-            const string cachePathName = "Cache";
-            CommonExtensions.CreatePath(cachePathName);
+            CommonExtensions.CreatePath(path);
             if (!checkOnly)
             {
                 var stream = await response.Content.ReadAsStreamAsync();
                 var image = await Image.LoadAsync(stream);
-                await image.ResizeImage(image.Width, image.Height - 1)
-                    .SaveAsPngAsync($"{cachePathName}/{tempFileName}.png");
+                if (needResize)
+                {
+                    await image.ResizeImage(image.Width, image.Height - 1)
+                        .SaveAsPngAsync($"{path}/{tempFileName}.png");
+                }
+                else
+                {
+                    await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                }
             }
 
             return (true, $"{tempFileName}.png");

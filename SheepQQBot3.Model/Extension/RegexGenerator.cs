@@ -19,6 +19,9 @@ namespace SheepQQBot3.Model.Extension
         [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
         public static partial Regex CQCodeRemoveCQAt();
 
+        [GeneratedRegex(@"(?<=file=).+?image,subType=\d,url=(.+?)(?=[,\]])")]
+        public static partial Regex CQCodeReplaceImage();
+
         [GeneratedRegex(@",url=.+?(?=[,\]])")]
         public static partial Regex CQCodeRemoveUrl();
 
