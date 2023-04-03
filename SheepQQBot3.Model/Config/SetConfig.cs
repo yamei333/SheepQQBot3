@@ -186,13 +186,27 @@ namespace SheepQQBot3.Model.Config
         private Dictionary<long, DateTime> _setuSendHistorys;
 
         /// <summary>
-        /// 保存已发送的色图记录
+        /// 色图发送历史记录
         /// </summary>
         [Key(nameof(SetuSendHistorys))]
         public Dictionary<long, DateTime> SetuSendHistorys
         {
             get => _setuSendHistorys ??= new Dictionary<long, DateTime>();
             set => _setuSendHistorys = value;
+        }
+
+        [JsonIgnore]
+        [IgnoreMember]
+        private Dictionary<long, DateTime> _canSetuSendCDs;
+
+        /// <summary>
+        /// 保存色图的CD
+        /// </summary>
+        [Key(nameof(CanSetuSendCDs))]
+        public Dictionary<long, DateTime> CanSetuSendCDs
+        {
+            get => _canSetuSendCDs ??= new Dictionary<long, DateTime>();
+            set => _canSetuSendCDs = value;
         }
 
         [JsonIgnore]

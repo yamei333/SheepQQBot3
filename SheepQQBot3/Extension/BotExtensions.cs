@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
@@ -35,5 +36,14 @@ public static class BotExtensions
     {
         var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["barkexe"]?.Replace(".exe", string.Empty));
         processes.ForEach(each => each.Kill());
+    }
+
+    public static string GetSetuSuccessPercent(int setuDoushiLv)
+    {
+        var failedSum = 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
+                            + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
+                            + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
+                            + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
+        return $"色图成功率为 {3190 / (3190.0 + failedSum):0.00%}";
     }
 }
