@@ -1361,5 +1361,19 @@ namespace Yamei.Common
                 _ => 0
             };
         }
+
+        /// <summary>
+        /// 带有上限的AddCopy
+        /// </summary>
+        /// <returns></returns>
+        public static List<T> AddCopyLimit<T>(this List<T> enumerable, T value, int maxCount)
+            where T : notnull
+        {
+            enumerable.Add(value);
+            if (enumerable.Count > maxCount)
+                enumerable.RemoveAt(0);
+
+            return new List<T>(enumerable);
+        }
     }
 }
