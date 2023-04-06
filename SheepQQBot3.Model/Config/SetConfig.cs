@@ -183,16 +183,16 @@ namespace SheepQQBot3.Model.Config
 
         [JsonIgnore]
         [IgnoreMember]
-        private Dictionary<long, DateTime> _setuSendHistorys;
+        private Dictionary<long, DateTime> _setuSendRecords;
 
         /// <summary>
-        /// 色图发送历史记录
+        /// 色图最后发送时间记录
         /// </summary>
-        [Key(nameof(SetuSendHistorys))]
-        public Dictionary<long, DateTime> SetuSendHistorys
+        [Key(nameof(SetuSendLastRecords))]
+        public Dictionary<long, DateTime> SetuSendLastRecords
         {
-            get => _setuSendHistorys ??= new Dictionary<long, DateTime>();
-            set => _setuSendHistorys = value;
+            get => _setuSendRecords ??= new Dictionary<long, DateTime>();
+            set => _setuSendRecords = value;
         }
 
         [JsonIgnore]
