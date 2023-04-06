@@ -1,9 +1,8 @@
-﻿using System;
-using System.Text;
+﻿using System.Text;
 
 namespace SheepQQBot3.Model.Extension
 {
-    public static class StringExtension
+    public static class StringExtensions
     {
         /// <summary>
         /// 取得字符串字节数
@@ -119,5 +118,86 @@ namespace SheepQQBot3.Model.Extension
 
             return h[m, n];    // 编辑距离
         }
+
+        /// <summary>
+        /// string.Contains 拓展
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool ContainsAny(
+            this string str,
+            string[] conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+            => conditionStr.Any(each => str.Contains(each, stringComparison));
+
+        /// <summary>
+        /// string.Contains 拓展
+        /// <see cref="IEnumerable{T}"/>版本
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool ContainsAny(
+            this string str,
+            IEnumerable<string> conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+            => conditionStr.Any(each => str.Contains(each, stringComparison));
+
+        /// <summary>
+        /// string.StartsWith 拓展
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool StartsWithAny(
+            this string str,
+            string[] conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+            => conditionStr.Any(each => str.StartsWith(each, stringComparison));
+
+        /// <summary>
+        /// string.StartsWith 拓展
+        /// <see cref="IEnumerable{T}"/>版本
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool StartsWithAny(
+            this string str,
+            IEnumerable<string> conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCulture)
+            => conditionStr.Any(each => str.StartsWith(each, stringComparison));
+
+        /// <summary>
+        /// string.EndsWith 拓展
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool EndsWithAny(
+            this string str,
+            string[] conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCulture)
+            => conditionStr.Any(each => str.EndsWith(each, stringComparison));
+
+        /// <summary>
+        /// string.EndsWith 拓展
+        /// <see cref="IEnumerable{T}"/>版本
+        /// </summary>
+        /// <param name="str">对象字符串</param>
+        /// <param name="conditionStr">查找字符串组</param>
+        /// <param name="stringComparison"><see cref="StringComparison"/></param>
+        /// <returns>结果</returns>
+        public static bool EndsWithAny(
+        this string str,
+            IEnumerable<string> conditionStr,
+            StringComparison stringComparison = StringComparison.CurrentCulture)
+            => conditionStr.Any(each => str.EndsWith(each, stringComparison));
     }
 }
