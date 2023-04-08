@@ -28,7 +28,7 @@ namespace SheepQQBot3.View
         public static bool CustomGroupAlarm(Dictionary<Guid, CustomGroupAlarm> customGroupAlarms, GroupMessage groupMessage)
         {
             var groupId = groupMessage.GroupId;
-            var targetId = groupMessage.Sender.User_Id;
+            var targetId = groupMessage.Sender.UserId;
             var message = groupMessage.Message;
             var upperMessage = message.ToUpper();
             if (!upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY))

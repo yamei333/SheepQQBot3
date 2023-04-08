@@ -11,25 +11,35 @@ namespace SheepQQBot3.Model
         /// 接口方法
         /// </summary>
         [JsonPropertyName("action")]
-        public string action { get; }
+        public string Action { get; }
 
         [JsonPropertyName("params")]
         public ParamData ParamData { get; set; }
 
-        public SendData(string action, ParamData paramData)
+        /// <summary>
+        /// 回声
+        /// </summary>
+        [JsonPropertyName("echo")]
+        public string Echo { get; set; }
+
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        public SendData(string action, ParamData paramData, string echo)
         {
-            this.action = action;
+            this.Action = action;
             this.ParamData = paramData;
+            this.Echo = echo;
         }
     }
 
     public class ParamData
     {
         [JsonPropertyName("group_id")]
-        public string Group_Id { get; set; }
+        public string GroupId { get; set; }
 
         [JsonPropertyName("user_id")]
-        public string User_Id { get; set; }
+        public string UserId { get; set; }
 
         [JsonPropertyName("message_id")]
         public string Message_Id { get; set; }
@@ -50,9 +60,12 @@ namespace SheepQQBot3.Model
         public string Card { get; set; }
 
         [JsonPropertyName("group_name")]
-        public string Group_Name { get; set; }
+        public string GroupName { get; set; }
 
         [JsonPropertyName("message")]
         public List<Element> Message { get; set; }
+
+        [JsonPropertyName("no_cache")]
+        public bool NoCache { get; set; }
     }
 }

@@ -66,5 +66,8 @@ namespace SheepQQBot3.Model.Extension
 
         [GeneratedRegex(@"(?<=url=).+(?=\?)")]
         public static partial Regex CQImageUrl();
+
+        [GeneratedRegex(@"""echo"":""(.+?)""")]
+        public static partial Regex CQAPI_GetEcho();
     }
 }

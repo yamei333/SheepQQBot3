@@ -134,9 +134,10 @@ namespace SheepQQBot3.Model.Config
     {
         /// <inheritdoc />
         public RunLog_GroupMessage(GroupMessage groupMessage)
-            : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.User_Id, groupMessage.Message!)
+            : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.UserId, groupMessage.Message!)
         {
             GroupId = groupMessage.GroupId.ToString();
+            MessageId = groupMessage.MessageId.ToString();
         }
     }
 

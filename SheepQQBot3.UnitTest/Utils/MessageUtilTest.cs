@@ -1,5 +1,5 @@
 ﻿using SheepQQBot3.Model;
-using static SheepQQBot3.SDK.Client.MessageUtil;
+using static SheepQQBot3.Model.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
 
@@ -20,8 +20,8 @@ public class MessageUtilTest
 
         //var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData
         //{
-        //    Group_Id = "11111",
-        //    Message = new List<Element>
+        //    GroupId = "11111",
+        //    Messages = new List<Element>
         //    {
         //        new Element("text", new ElementBaseData("测试消息"))
         //    }
