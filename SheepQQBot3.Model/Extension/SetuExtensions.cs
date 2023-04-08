@@ -35,7 +35,7 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
-                    $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}{(string.IsNullOrEmpty(tag) ? "" : $"&tag={tag}")}&size=small&size=original{(r18 ? "&r18=1" : string.Empty)}";
+                    $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}{(string.IsNullOrEmpty(tag) ? "" : $"&tag={tag}")}{(r18 ? "&r18=1" : string.Empty)}";
                 var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url);
                 if (setuResponse == null)
                     return new SetuInfo(SetuType.Lolicon, SetuResult.ApiError);
@@ -56,7 +56,7 @@ namespace SheepQQBot3.Model.Extension
                 SetuType.Lolicon,
                 setuData.SetuInfo,
                 setuData.Urls.Original,
-                setuData.Urls.Small,
+                ToSmallImageUrl(setuData.Urls.Original),
                 hasException ? SetuResult.OtherError : SetuResult.Successed);
         }
 
@@ -94,7 +94,7 @@ namespace SheepQQBot3.Model.Extension
                 SetuType.Yuban,
                 setuData.SetuInfo,
                 setuData.Urls.Original,
-                setuData.Urls.Medium,
+                ToSmallImageUrl(setuData.Urls.Original),
                 hasException ? SetuResult.OtherError : SetuResult.Successed);
         }
 

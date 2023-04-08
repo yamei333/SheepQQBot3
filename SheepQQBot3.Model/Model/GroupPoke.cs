@@ -23,7 +23,7 @@ namespace SheepQQBot3.Model
             DateTime = receiveData.Time.ToDateTime();
             SenderId = receiveData.Sender_Id;
             TargetId = receiveData.Target_Id;
-            GroupId = receiveData.Group_Id;
+            GroupId = receiveData.GroupId;
         }
     }
 }

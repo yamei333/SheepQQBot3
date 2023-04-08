@@ -3,10 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
 
-namespace SheepQQBot3.SDK.Client
+namespace SheepQQBot3.Model
 {
     /// <summary>
     /// Message相关方法

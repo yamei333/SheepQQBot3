@@ -65,20 +65,30 @@ namespace SheepQQBot3.SDK.Client
             _client.Start(socket =>
             {
                 _connection = socket;
-                socket.OnOpen = () => OnOpen?.Invoke(null, null);
-                socket.OnClose = () => OnClose?.Invoke(null, null);
+                socket.OnOpen = () => OnOpen?.Invoke(null, EventArgs.Empty);
+                socket.OnClose = () => OnClose?.Invoke(null, EventArgs.Empty);
                 socket.OnMessage = jsonInfo =>
                 {
                     try
                     {
-                        ProcessClientReceiveData(GetReceiveData(jsonInfo));
+                        if (_regGetEcho.IsMatch(jsonInfo))
+                        {
+                            var match = _regGetEcho.Match(jsonInfo);
+                            var echo = Guid.Parse(match.Groups[1].Value);
+                            if (echo == Guid.Empty)
+                                ProcessClientReceiveData(GetReceiveData(jsonInfo));
+                            else
+                                _interaciveJsons.Add(echo, jsonInfo);
+                        }
+                        else
+                        {
+                            ProcessClientReceiveData(GetReceiveData(jsonInfo));
+                        }
                     }
                     catch (Exception e)
                     {
                         YameiLogExtensions.WriteLog(LogType.Error, $"ProcessClientReceiveData-{e.Message}\r\n{jsonInfo}");
                     }
-
-                    ProcessClientReceiveData(GetReceiveData(jsonInfo));
                 };
             });
 
@@ -131,12 +141,22 @@ namespace SheepQQBot3.SDK.Client
         private void ProcessGetMessage(ClientData clientData)
             => OnGetGroupMessage?.Invoke(null, new GroupMessage(clientData));
 
-        private async Task<bool> SendDataAsync(string actionType, ParamData paramData)
+        private async Task<bool> SendDataAsync(string actionType, ParamData paramData, Guid echo = default)
         {
             if (_connection?.IsAvailable != true)
                 return false;
 
-            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData), CommonExtensions.JsonOption);
+            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo.ToString()), CommonExtensions.JsonOption);
+            await _connection.Send(jsonText);
+            return true;
+        }
+
+        private async Task<bool> SendDataAsync(string actionType, GroupForwardMessageParamData paramData)
+        {
+            if (_connection?.IsAvailable != true)
+                return false;
+
+            var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData), CommonExtensions.JsonOption);
             await _connection.Send(jsonText);
             return true;
         }

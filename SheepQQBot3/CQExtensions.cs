@@ -10,5 +10,8 @@
 
         public static string Image(string filePath)
             => $"[CQ:image,file={filePath}]";
+
+        public static string Reply(long targetId, long messageId)
+            => $"[CQ:reply,qq={targetId},id={messageId}]";
     }
 }

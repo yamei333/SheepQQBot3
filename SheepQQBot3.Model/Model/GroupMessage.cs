@@ -42,23 +42,23 @@ namespace SheepQQBot3.Model
         public GroupMessage(ReceiveData receiveData)
         {
             DateTime = receiveData.Time.ToDateTime();
-            UserId = receiveData.User_Id;
+            UserId = receiveData.UserId;
             Anonymous = receiveData.Anonymous;
             Font = receiveData.Font;
-            GroupId = receiveData.Group_Id;
+            GroupId = receiveData.GroupId;
             Message = receiveData.Message;
-            RawMessage = receiveData.Raw_Message;
-            MessageId = receiveData.Message_Id;
+            RawMessage = receiveData.RawMessage;
+            MessageId = receiveData.MessageId;
             Sender = receiveData.Sender;
         }
 
         public GroupMessage(ClientData clientData)
         {
             DateTime = clientData.Time.ToDateTime();
-            GroupId = clientData.Group_Id;
+            GroupId = clientData.GroupId;
             Message = clientData.Message;
-            RawMessage = clientData.Raw_Message;
-            MessageId = clientData.Message_Id;
+            RawMessage = clientData.RawMessage;
+            MessageId = clientData.MessageId;
             //LogMessageType = clientData.MessageTargetType;
             Sender = clientData.Sender;
         }

@@ -30,7 +30,7 @@ namespace SheepQQBot3.View
 
             var sendMessage = new StringBuilder();
             var groupId = groupMessage.GroupId;
-            var targetId = groupMessage.Sender.User_Id;
+            var targetId = groupMessage.Sender.UserId;
             try
             {
                 var changedMessageSpace = message[COMMAND_FUNDHELPER_LIBRARY.Length..];

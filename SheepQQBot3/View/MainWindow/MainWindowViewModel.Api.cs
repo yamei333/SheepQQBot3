@@ -4,7 +4,6 @@ using System.Linq;
 using System.Text.Json;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
-using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
@@ -15,8 +14,6 @@ namespace SheepQQBot3.View
     partial class MainWindowViewModel
     {
         private const int MaxLogCount = 1000;
-
-        private static readonly Dictionary<int, Action<GroupMessage>> GetMessageCallBacks = new();
 
         private DateTime _lastBlockedTime = DateTime.MinValue;
 
@@ -37,12 +34,9 @@ namespace SheepQQBot3.View
             };
             cqApi.OnGetGroupMessage += (o, groupMessage) =>
             {
-                var messageId = groupMessage.MessageId;
-                if (!GetMessageCallBacks.TryGetValue(messageId, out var processAction))
-                    return;
-
-                processAction(groupMessage);
-                GetMessageCallBacks.Remove(messageId);
+                YameiLogExtensions.WriteLog(
+                    LogType.Quest,
+                    $"不应该发生的分支-{groupMessage.Message}");
             };
             cqApi.OnSendMessageError += (o, clientReceiveData) =>
             {
@@ -92,24 +86,11 @@ namespace SheepQQBot3.View
                 AddRunLog(new RunLog_GroupRevokeMessage(groupRevokeMessage));
 
                 var groupId = groupRevokeMessage.GroupId;
-                var messageId = groupRevokeMessage.MessageId;
                 var targetId = groupRevokeMessage.UserId;
                 if (groupRevokeMessage.OperatorId == targetId)
                 {
-                    GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, config =>
-                    {
-                        if (targetId == PublicVar.AdminId)
-                        {
-                            // MEMO : ADMIN不复读撤回消息
-                            return;
-                        }
-
-                        GetMessageCallBacks.Add(messageId, RepeatRevokeMessage);
-                        CqApi.GetMessage(groupRevokeMessage.MessageId);
-
-                        async void RepeatRevokeMessage(GroupMessage groupMessage)
-                            => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupMessage);
-                    });
+                    GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RepeatRevokeMessage);
+                    async void RepeatRevokeMessage(SetConfig config) => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupRevokeMessage);
                 }
             };
             cqEvent.OnGroupMessage += (o, groupMessage) =>

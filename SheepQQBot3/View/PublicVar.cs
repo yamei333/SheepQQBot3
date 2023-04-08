@@ -12,6 +12,11 @@ namespace SheepQQBot3.View
     public static class PublicVar
     {
         /// <summary>
+        /// Bot名称
+        /// </summary>
+        public const string BOT_NAME = "助手哈莉";
+
+        /// <summary>
         /// 随机数产生器
         /// </summary>
         public static Random Rand = new Random();
@@ -25,6 +30,11 @@ namespace SheepQQBot3.View
         /// 管理员ID
         /// </summary>
         public static readonly long AdminId = long.Parse(ConfigurationManager.AppSettings["adminId"]!);
+
+        /// <summary>
+        /// BotID
+        /// </summary>
+        public static readonly long BotId = long.Parse(ConfigurationManager.AppSettings["selfId"]!);
 
         /// <summary>
         /// 半角逗号

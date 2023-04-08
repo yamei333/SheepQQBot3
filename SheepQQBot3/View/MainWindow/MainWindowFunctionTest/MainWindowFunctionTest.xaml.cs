@@ -1,5 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
+using SheepQQBot3.Model;
 using static SheepQQBot3.View.PublicVar;
 
 namespace SheepQQBot3.View
@@ -31,8 +32,14 @@ namespace SheepQQBot3.View
 
         private void TestSendJsonMessage(object sender, RoutedEventArgs e)
         {
-            if (long.TryParse(TxtTestSendJsonMessage_GroupId.Text, out var groupId))
-                Vm.CqApi.SendGroupMessage(groupId, TxtTestSendJsonMessage_Content.Text, Vm.SetConfigs);
+            //Vm.CqApi.SendGroupForwardMessage(15873217, new GroupForwardMessage[]
+            //{
+            //    new ("SDPM", 173629299, "我太弱了"),
+            //    new ("SDPM", 173629299, "我没有任何牌面!"),
+            //});
+
+            //if (long.TryParse(TxtTestSendJsonMessage_GroupId.Text, out var groupId))
+            //    Vm.CqApi.SendGroupMessage(groupId, TxtTestSendJsonMessage_Content.Text, Vm.SetConfigs);
         }
     }
 }

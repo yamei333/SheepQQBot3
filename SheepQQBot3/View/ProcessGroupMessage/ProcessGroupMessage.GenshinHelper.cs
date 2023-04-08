@@ -30,7 +30,7 @@ namespace SheepQQBot3.View
             GroupMessage groupMessage)
         {
             // MEMO : 非管理员/投稿者
-            var targetId = groupMessage.Sender.User_Id;
+            var targetId = groupMessage.Sender.UserId;
             if (genshinResinAlarms?.Keys.Contains(targetId) != true)
                 return false;
 

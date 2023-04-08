@@ -8,25 +8,25 @@ namespace SheepQQBot3.Model
         public bool Group { get; set; }
 
         [JsonPropertyName("group_id")]
-        public long Group_Id { get; set; }
+        public long GroupId { get; set; }
 
         [JsonPropertyName("message")]
         public string Message { get; set; }
 
         [JsonPropertyName("message_id")]
-        public int Message_Id { get; set; }
+        public int MessageId { get; set; }
 
         [JsonPropertyName("message_seq")]
-        public int Message_Seq { get; set; }
+        public int MessageSeq { get; set; }
 
         [JsonPropertyName("message_type")]
-        public string Message_Type { get; set; }
+        public string MessageType { get; set; }
 
         [JsonPropertyName("raw_message")]
-        public string Raw_Message { get; set; }
+        public string RawMessage { get; set; }
 
         [JsonPropertyName("read_id")]
-        public int Read_Id { get; set; }
+        public int ReadId { get; set; }
 
         [JsonPropertyName("time")]
         public int Time { get; set; }

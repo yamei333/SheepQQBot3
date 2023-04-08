@@ -40,6 +40,10 @@ namespace SheepQQBot3.Model
         location,
         music,
         reply,
+        /// <summary>
+        /// 合并转发节点
+        /// </summary>
+        node,
 
         /// <summary>
         /// 雅美自定义_消息重定向

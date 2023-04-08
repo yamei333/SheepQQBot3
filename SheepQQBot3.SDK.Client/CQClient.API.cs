@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.Json;
+using System.Text.RegularExpressions;
+using System.Threading;
 using System.Threading.Tasks;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -13,6 +16,13 @@ namespace SheepQQBot3.SDK.Client
 {
     partial class CQAPI
     {
+        private readonly object _syncLockInteractive = new object();
+
+        private string _interaciveJson;
+        private readonly Dictionary<Guid, string> _interaciveJsons = new Dictionary<Guid, string>();
+
+        private readonly Regex _regGetEcho = RegexGenerator.CQAPI_GetEcho();
+
         /// <summary>
         /// 发送群消息
         /// </summary>
@@ -51,7 +61,7 @@ namespace SheepQQBot3.SDK.Client
             {
                 await SendDataAsync("send_group_msg", new ParamData
                 {
-                    Group_Id = groupId.ToString(),
+                    GroupId = groupId.ToString(),
                     Message = messageList
                 });
             }
@@ -105,7 +115,7 @@ namespace SheepQQBot3.SDK.Client
         public async Task SendPrivateMessage(long userId, string message)
             => await SendDataAsync("send_private_msg", new ParamData
             {
-                User_Id = userId.ToString(),
+                UserId = userId.ToString(),
                 Message = MessageUtil.ProcessCQMessage(message)
             });
 
@@ -131,6 +141,22 @@ namespace SheepQQBot3.SDK.Client
         }
 
         /// <summary>
+        /// 发送群消息
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="groupForwardMessages">消息内容</param>
+        public async Task SendGroupForwardMessage(long groupId, IEnumerable<GroupForwardMessage> messages)
+        {
+            await SendDataAsync("send_group_forward_msg", new GroupForwardMessageParamData
+            {
+                GroupId = groupId.ToString(),
+                Messages = messages
+                    .Select(each => new GroupForwardMessageElement(each))
+                    .ToList()
+            });
+        }
+
+        /// <summary>
         /// 撤回消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
@@ -141,14 +167,27 @@ namespace SheepQQBot3.SDK.Client
             });
 
         /// <summary>
-        /// 获取消息
+        /// 获取群消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public async void GetMessage(int messageId)
-            => await SendDataAsync("get_msg", new ParamData
+        public bool TryGetGroupMessage(int messageId, out GroupMessage groupMessage)
+        {
+            lock (_syncLockInteractive)
             {
-                Message_Id = messageId.ToString()
-            });
+                var echo = Guid.NewGuid();
+                SendDataAsync("get_msg", new ParamData
+                {
+                    Message_Id = messageId.ToString()
+                }, echo);
+
+                groupMessage = GetReply(echo, jsonInfo =>
+                {
+                    var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
+                    return new GroupMessage(clientReceiveData.Data);
+                });
+                return groupMessage != null;
+            }
+        }
 
         /// <summary>
         /// 发送好友赞
@@ -158,7 +197,7 @@ namespace SheepQQBot3.SDK.Client
         public async void SendLike(long userId, int times)
             => await SendDataAsync("send_like", new ParamData
             {
-                User_Id = userId.ToString(),
+                UserId = userId.ToString(),
                 Times = times.ToString()
             });
 
@@ -171,8 +210,8 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupKick(long groupId, long userId, bool isReject = false)
             => await SendDataAsync("set_group_kick", new ParamData
             {
-                Group_Id = groupId.ToString(),
-                User_Id = userId.ToString(),
+                GroupId = groupId.ToString(),
+                UserId = userId.ToString(),
                 Reject_Add_Request = isReject.ToString()
             });
 
@@ -185,8 +224,8 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupBan(long groupId, long userId, int duration)
             => await SendDataAsync("set_group_ban", new ParamData
             {
-                Group_Id = groupId.ToString(),
-                User_Id = userId.ToString(),
+                GroupId = groupId.ToString(),
+                UserId = userId.ToString(),
                 Duration = duration.ToString()
             });
 
@@ -198,7 +237,7 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupAllBan(long groupId, bool enable)
             => await SendDataAsync("set_group_whole_ban", new ParamData
             {
-                Group_Id = groupId.ToString(),
+                GroupId = groupId.ToString(),
                 Enable = enable.ToString()
             });
 
@@ -211,7 +250,7 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupCard(long groupId, int userId, string card)
             => await SendDataAsync("set_group_card", new ParamData
             {
-                Group_Id = groupId.ToString(),
+                GroupId = groupId.ToString(),
                 Enable = userId.ToString(),
                 Card = card
             });
@@ -224,8 +263,45 @@ namespace SheepQQBot3.SDK.Client
         public async void SetGroupName(long groupId, string groupName)
             => await SendDataAsync("set_group_name", new ParamData
             {
-                Group_Id = groupId.ToString(),
-                Group_Name = groupName
+                GroupId = groupId.ToString(),
+                GroupName = groupName
             });
+
+        /// <summary>
+        /// 获得群成员名单
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        /// <param name="groupMembers">群成员列表</param>
+        [CQAPI_Interactive]
+        public bool TryGetGroupMembers(long groupId, out Dictionary<long, GroupMember> groupMembers)
+        {
+            lock (_syncLockInteractive)
+            {
+                var echo = Guid.NewGuid();
+                SendDataAsync("get_group_member_list", new ParamData
+                {
+                    GroupId = groupId.ToString(),
+                    NoCache = false
+                }, echo);
+
+                groupMembers = GetReply(echo, jsonText =>
+                {
+                    var clientData = JsonSerializer.Deserialize<ClientReceiveData_GroupMember>(jsonText);
+                    return clientData.Data.ToDictionary(each => each.UserId, each => each);
+                });
+                return groupMembers != null;
+            }
+        }
+
+        private T GetReply<T>(Guid echo, Func<string, T> getFunc)
+            where T : class
+        {
+            SpinWait.SpinUntil(() => _interaciveJsons.ContainsKey(echo), TimeSpan.FromSeconds(5));
+            if (!_interaciveJsons.TryGetValue(echo, out var jsonText))
+                return null;
+
+            _interaciveJsons.Remove(echo);
+            return getFunc(jsonText);
+        }
     }
 }

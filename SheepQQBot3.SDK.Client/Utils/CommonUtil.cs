@@ -56,7 +56,7 @@ namespace SheepQQBot3.SDK.Client
             return lastUserAction.DwTime;
         }
 
-        public static byte[] GetSendData(SendData sendData)
+        public static byte[] GetSendData(SendGroupForwardMessageData sendData)
         {
             var jsonText = JsonSerializer.Serialize(sendData);
             return Encoding.UTF8.GetBytes(jsonText);
