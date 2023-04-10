@@ -42,7 +42,7 @@ namespace SheepQQBot3.Model
         public string UserId { get; set; }
 
         [JsonPropertyName("message_id")]
-        public string Message_Id { get; set; }
+        public string MessageId { get; set; }
 
         [JsonPropertyName("times")]
         public string Times { get; set; }

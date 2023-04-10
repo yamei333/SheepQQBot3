@@ -114,13 +114,13 @@ namespace SheepQQBot3.SDK.Client
             }
 
             var data = receiveData.Data;
-            switch (data.Message_Type)
+            switch (data.MessageType)
             {
                 case "group":
                     ProcessGetMessage(data);
                     break;
                 case null:
-                    if (receiveData.Data != null && receiveData.Data?.Message_Id != 0)
+                    if (receiveData.Data != null && receiveData.Data?.MessageId != 0)
                     {
                         // MEMO : 发送消息的反馈, 不处理
                     }
@@ -130,7 +130,7 @@ namespace SheepQQBot3.SDK.Client
                     }
                     break;
                 default:
-                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {data.Message_Type}-{receiveData.Message}-{receiveData.Wording}");
+                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {data.MessageType}-{receiveData.Message}-{receiveData.Wording}");
                     break;
             }
         }
@@ -156,7 +156,8 @@ namespace SheepQQBot3.SDK.Client
             if (_connection?.IsAvailable != true)
                 return false;
 
-            var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData), CommonExtensions.JsonOption);
+            var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData),
+                CommonExtensions.JsonOption);
             await _connection.Send(jsonText);
             return true;
         }

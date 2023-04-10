@@ -7,6 +7,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.Fund;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.View.PublicVar;
@@ -15,6 +16,8 @@ namespace SheepQQBot3.View
 {
     public static partial class TaskProcess
     {
+        public const int FUND_MAX_TRYTIMES = 5;
+
         /// <summary>
         /// 基金助手 (播报/阈值监控)
         /// </summary>
@@ -101,12 +104,15 @@ namespace SheepQQBot3.View
                 .Where(each => each.IsActive)
                 .Select(each => each.FundId)
                 .ToArray();
-            if (fundIds.Length == 0)
+            FundData fundInfo = null;
+            if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
+            {
+                fundInfo = await FundExtensions.GetFundDataAsync(fundIds);
+                return fundInfo != null;
+            }))
+            {
                 return;
-
-            var fundInfo = FundExtensions.GetFundData(fundIds);
-            if (fundInfo == null)
-                return;
+            }
 
             var sendMessage = FundExtensions.GetFundAlarmString(fundInfo, alarmFundConfigs);
             if (string.IsNullOrEmpty(sendMessage))
@@ -156,12 +162,16 @@ namespace SheepQQBot3.View
                 .Select(each => each.FundId)
                 .Distinct()
                 .ToArray();
-            if (fundIds.Length == 0)
-                return;
 
-            var fundInfo = FundExtensions.GetFundData(fundIds);
-            if (fundInfo == null)
+            FundData fundInfo = null;
+            if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
+                {
+                    fundInfo = await FundExtensions.GetFundDataAsync(fundIds);
+                    return fundInfo != null;
+                }))
+            {
                 return;
+            }
 
             var sendMessage = FundExtensions.GetFundLimitString(fundInfo, activeFundLimitObserveConfigs);
             if (string.IsNullOrEmpty(sendMessage))

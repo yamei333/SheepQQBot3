@@ -28,9 +28,9 @@ namespace SheepQQBot3.Model
         {
             DateTime = receiveData.Time.ToDateTime();
             OperatorId = receiveData.Operator_Id;
-            UserId = receiveData.User_Id;
-            GroupId = receiveData.Group_Id;
-            MessageId = receiveData.Message_Id;
+            UserId = receiveData.UserId;
+            GroupId = receiveData.GroupId;
+            MessageId = receiveData.MessageId;
         }
     }
 }

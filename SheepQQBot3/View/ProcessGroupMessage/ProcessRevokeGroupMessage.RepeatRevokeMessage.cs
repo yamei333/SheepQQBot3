@@ -28,29 +28,28 @@ namespace SheepQQBot3.View
         /// <summary>
         /// 复读撤回消息
         /// </summary>
-        /// <param name="groupMessage"><see cref="GroupMessage"/></param>
+        /// <param name="groupRevokeMessage"><see cref="GroupRevokeMessage"/></param>
         /// <returns></returns>
         public static async Task<bool> RepeatRevokeMessage(GroupRevokeMessage groupRevokeMessage)
         {
-            var operatorId = groupRevokeMessage.OperatorId;
-            var groupId = groupRevokeMessage.GroupId;
-            if (operatorId == PublicVar.AdminId)
+            if (!PublicVar.IsDebug && groupRevokeMessage.OperatorId == PublicVar.AdminId)
             {
                 // MEMO : ADMIN不复读撤回消息
                 return true;
             }
 
-            if (!Api.TryGetGroupMessage(groupRevokeMessage.MessageId, out var groupMessage))
-                return false;
+            //if (!Api.TryGetGroupMessage(groupRevokeMessage.MessageId, out var groupMessage))
+            //    return false;
 
-            var sender = groupMessage.Sender;
-            var targetId = sender.UserId;
+            //var sender = groupMessage.Sender;
+            //var targetId = sender.UserId;
             var sendMessages = new List<GroupForwardMessage>
             {
-                new(sender.CardName, targetId, groupMessage.Message),
-                new(PublicVar.BOT_NAME, PublicVar.BotId, _repeatSllhh.Random())
+                //new(sender.CardName, targetId, groupMessage.Message),
+                new(groupRevokeMessage.MessageId),
+                new(PublicVar.BOT_NAME, PublicVar.BotId, _repeatSllhh.Random()),
             };
-            await Api.SendGroupForwardMessage(groupId, sendMessages);
+            await Api.SendGroupForwardMessage(groupRevokeMessage.GroupId, sendMessages);
             return true;
         }
     }

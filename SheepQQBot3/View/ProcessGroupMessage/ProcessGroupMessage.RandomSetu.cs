@@ -291,9 +291,7 @@ StartSetu:
                 if ((dateNow - setuSendHistory).TotalSeconds <= 20 + setuSenderLv * 10)
                 {
                     // MEMO : 20秒内不连续响应
-                    if (PublicVar.IsDebug)
-                        await Api.SendGroupMessage(groupId, "[DEBUG]当前在'不连续响应'时间");
-
+                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 太快了, 休息一下吧");
                     return true;
                 }
 
@@ -362,10 +360,8 @@ StartSetu:
                     {
                         if ((nextCanSendDate - dateNow).TotalSeconds >= 300 - (int)(setuSenderLv * 150.0 / 15))
                         {
-                            if (PublicVar.IsDebug)
-                                await Api.SendGroupMessage(groupId, "[DEBUG]当前在'老实点儿等着'时间");
-
                             // MEMO : CD5分钟以上, 老实等着吧
+                            await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} CD还早呢, 先歇着吧");
                             return true;
                         }
 
@@ -408,7 +404,7 @@ StartSetu:
                             setuSenderLv++;
                         }
 
-                        if ((dateNow - nextCanSendDate).TotalMinutes <= 10)
+                        if ((dateNow - nextCanSendDate).TotalSeconds <= 300)
                         {
                             changeLvFast = 1;
                             setuSenderLv++;
@@ -518,8 +514,8 @@ SendSetu:
                         SetuExtensions.GetSetu_Jitsu,
                     };
 
-                    //await Api.SendGroupMessage(groupId,
-                    //    $"{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
+                    await Api.SendGroupMessage(groupId,
+                        $"{CQCode.Reply(targetId, groupMessage.MessageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
 
                     var (setuInfo, fileName) = await GetSetu(() => !string.IsNullOrEmpty(tag)
                         ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
@@ -560,9 +556,7 @@ SendSetu:
 
                     var sendMessages = new List<GroupForwardMessage>
                     {
-                        new(string.IsNullOrEmpty(groupMessage.Sender.Card)
-                            ? groupMessage.Sender.NickName
-                            : groupMessage.Sender.Card, targetId, message),
+                        new(groupMessage.MessageId),
                         new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
                         new($"{setuInfo.SetuType}", BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
                         new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +

@@ -89,8 +89,8 @@ namespace SheepQQBot3.View
                 var targetId = groupRevokeMessage.UserId;
                 if (groupRevokeMessage.OperatorId == targetId)
                 {
-                    GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RepeatRevokeMessage);
-                    async void RepeatRevokeMessage(SetConfig config) => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupRevokeMessage);
+                    GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RunAction);
+                    async void RunAction(SetConfig config) => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupRevokeMessage);
                 }
             };
             cqEvent.OnGroupMessage += (o, groupMessage) =>
