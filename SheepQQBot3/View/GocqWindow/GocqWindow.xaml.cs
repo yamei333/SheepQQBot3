@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
-using SheepQQBot3.Extension;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
@@ -42,8 +41,16 @@ namespace SheepQQBot3.View
 
         private async void LaunchChildProcess()
         {
-            var hasGocqHttp = true;
             var gocqexe = ConfigurationManager.AppSettings["gocqexe"];
+            var gocqPath = ConfigurationManager.AppSettings["gocq"];
+            var gocqExePath = Path.Combine(gocqPath, gocqexe);
+            if (!File.Exists(gocqExePath))
+            {
+                Vm.AddRunLog(new RunLog_SystemError("gocq-http 不存在!"));
+                return;
+            }
+
+            var hasGocqHttp = true;
             var gocqName = gocqexe?.Replace(".exe", string.Empty);
             while (hasGocqHttp)
             {
@@ -53,16 +60,8 @@ namespace SheepQQBot3.View
                     gocqProcesses.ForEach(each => each.Kill());
             }
 
-            if (!Gocq.HasExited)
+            if (Gocq is { HasExited: false })
                 Gocq.Kill();
-
-            var gocqPath = ConfigurationManager.AppSettings["gocq"];
-            var gocqExePath = Path.Combine(gocqPath, gocqexe);
-            if (!File.Exists(gocqExePath))
-            {
-                Vm.AddRunLog(new RunLog_SystemError("gocq-http 不存在!"));
-                return;
-            }
 
             Gocq = new Process
             {
@@ -78,7 +77,6 @@ namespace SheepQQBot3.View
                 }
             };
             Gocq.Start();
-            Gocq.HideWindow();
             Vm.AddRunLog(new RunLog_SystemInfo("gocq-http 已启动"));
             await Task.Run(() =>
             {

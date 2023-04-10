@@ -10,7 +10,6 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
-using SheepQQBot3.Extension;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
@@ -42,8 +41,16 @@ namespace SheepQQBot3.View
 
         private async void LaunchChildProcess()
         {
-            var hasBarkHttp = true;
             var barkexe = ConfigurationManager.AppSettings["barkexe"];
+            var barkPath = ConfigurationManager.AppSettings["bark"];
+            var barkExePath = Path.Combine(barkPath, barkexe);
+            if (!File.Exists(barkExePath))
+            {
+                Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 不存在"));
+                return;
+            }
+
+            var hasBarkHttp = true;
             var barkName = barkexe?.Replace(".exe", string.Empty);
             while (hasBarkHttp)
             {
@@ -53,16 +60,8 @@ namespace SheepQQBot3.View
                     barkProcesses.ForEach(each => each.Kill());
             }
 
-            if (!Bark.HasExited)
+            if (Bark is { HasExited: false })
                 Bark.Kill();
-
-            var barkPath = ConfigurationManager.AppSettings["bark"];
-            var barkExePath = Path.Combine(barkPath, barkexe);
-            if (!File.Exists(barkExePath))
-            {
-                Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 不存在"));
-                return;
-            }
 
             Bark = new Process
             {
@@ -79,7 +78,6 @@ namespace SheepQQBot3.View
             };
 
             Bark.Start();
-            Bark.HideWindow();
             Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 已启动"));
             await Task.Run(() =>
             {
