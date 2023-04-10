@@ -131,6 +131,7 @@ namespace SheepQQBot3.View
         {
             var groupId = groupMessage.GroupId;
             var targetId = groupMessage.Sender.UserId;
+            var messageId = groupMessage.MessageId;
             var message = groupMessage.Message;
             var dateNow = DateTime.Now;
 
@@ -291,7 +292,7 @@ StartSetu:
                 if ((dateNow - setuSendHistory).TotalSeconds <= 20 + setuSenderLv * 10)
                 {
                     // MEMO : 20秒内不连续响应
-                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 太快了, 休息一下吧");
+                    await Api.SendGroupMessage(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧");
                     return true;
                 }
 
@@ -361,7 +362,7 @@ StartSetu:
                         if ((nextCanSendDate - dateNow).TotalSeconds >= 300 - (int)(setuSenderLv * 150.0 / 15))
                         {
                             // MEMO : CD5分钟以上, 老实等着吧
-                            await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} CD还早呢, 先歇着吧");
+                            await Api.SendGroupMessage(groupId, $"{CQCode.Reply(targetId, messageId)}CD还早呢, 先歇着吧");
                             return true;
                         }
 
@@ -439,7 +440,7 @@ StartSetu:
                     if (addSecond > 0)
                     {
                         // MEMO : CD增加
-                        sendMessage = $"{CQCode.At(targetId)} " +
+                        sendMessage = $"{CQCode.At(targetId)}" +
                                       $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}" +
                                       $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                       GetSetuLvInfo() +
@@ -448,7 +449,7 @@ StartSetu:
                     //else if (addSecond == 0)
                     //{
                     //    // MEMO : 白嫖
-                    //    sendMessage = $"{CQCode.at(targetId)} "
+                    //    sendMessage = $"{CQCode.at(targetId)}"
                     //                  + $"什么!? 你成功白嫖了一张{_setuKeyWords.Random()}!"
                     //                  + (isShowDate ? $" [CD {config.CanSetuSendCDs[groupId]:HH:mm:ss}]" : string.Empty);
                     //    await Api.SendGroupMessage(groupId, sendMessage);
@@ -457,7 +458,7 @@ StartSetu:
                     else
                     {
                         // MEMO : 幸运(CD减少)
-                        sendMessage = $"{CQCode.At(targetId)} "
+                        sendMessage = $"{CQCode.At(targetId)}"
                                       + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                                       + $" ({addSecond}s)"
                                       + GetSetuLvInfo()
@@ -474,7 +475,7 @@ StartSetu:
                     if (targetId != PublicVar.AdminId && addSecond == 0)
                     {
                         // MEMO : 白嫖
-                        var sendMessage = $"{CQCode.At(targetId)} "
+                        var sendMessage = $"{CQCode.At(targetId)}"
                                           + $"什么!? 你成功白嫖了一张{sourceTag}{_setuKeyWords.Random()}!"
                                           + (isShowDate ? $" [CD {GetCD(targetId)}]" : string.Empty);
                         await Api.SendGroupMessage(groupId, sendMessage);
@@ -515,7 +516,7 @@ SendSetu:
                     };
 
                     await Api.SendGroupMessage(groupId,
-                        $"{CQCode.Reply(targetId, groupMessage.MessageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
+                        $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...");
 
                     var (setuInfo, fileName) = await GetSetu(() => !string.IsNullOrEmpty(tag)
                         ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
@@ -556,7 +557,7 @@ SendSetu:
 
                     var sendMessages = new List<GroupForwardMessage>
                     {
-                        new(groupMessage.MessageId),
+                        new(messageId),
                         new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
                         new($"{setuInfo.SetuType}", BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
                         new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
@@ -793,7 +794,7 @@ SendSetu:
                             ? config.CanSetuSendCDs[targetId]
                             : dateNow).AddSeconds(addSecond)
                         : dateNow.AddSeconds(addSecond);
-                    var sendMessage = $"{CQCode.At(targetId)} " +
+                    var sendMessage = $"{CQCode.At(targetId)}" +
                         $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
                         $"[斗士Lv{setuSenderLv}] {addLvString}";
                     await Api.SendGroupMessage(groupId, sendMessage);
