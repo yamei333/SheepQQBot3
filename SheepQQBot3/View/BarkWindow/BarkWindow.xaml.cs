@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
+using SheepQQBot3.Extension;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
@@ -35,6 +37,7 @@ namespace SheepQQBot3.View
                 Visibility = Visibility.Collapsed;
                 WindowStyle = WindowStyle.SingleBorderWindow;
             };
+            RichTextBox.Document.Blocks.Clear();
         }
 
         private async void LaunchChildProcess()
@@ -50,18 +53,25 @@ namespace SheepQQBot3.View
                     barkProcesses.ForEach(each => each.Kill());
             }
 
-            if (Bark is { HasExited: false })
+            if (!Bark.HasExited)
                 Bark.Kill();
 
             var barkPath = ConfigurationManager.AppSettings["bark"];
+            var barkExePath = Path.Combine(barkPath, barkexe);
+            if (!File.Exists(barkExePath))
+            {
+                Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 不存在"));
+                return;
+            }
+
             Bark = new Process
             {
                 StartInfo =
                 {
                     WorkingDirectory = barkPath!,
-                    FileName = "cmd.exe",
+                    FileName = barkExePath,
                     UseShellExecute = false,
-                    Arguments = "/C bark-server_windows_amd64 -addr 0.0.0.0:30008 -data ./bark-data",
+                    Arguments = "-addr 0.0.0.0:30008 -data ./bark-data",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
                     CreateNoWindow = true
@@ -69,6 +79,7 @@ namespace SheepQQBot3.View
             };
 
             Bark.Start();
+            Bark.HideWindow();
             Vm.AddRunLog(new RunLog_SystemInfo("BarkServer 已启动"));
             await Task.Run(() =>
             {

@@ -2,6 +2,7 @@
 using System.ComponentModel;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,6 +10,7 @@ using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
 using System.Windows.Threading;
+using SheepQQBot3.Extension;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
@@ -35,6 +37,7 @@ namespace SheepQQBot3.View
                 Visibility = Visibility.Collapsed;
                 WindowStyle = WindowStyle.SingleBorderWindow;
             };
+            RichTextBox.Document.Blocks.Clear();
         }
 
         private async void LaunchChildProcess()
@@ -50,25 +53,32 @@ namespace SheepQQBot3.View
                     gocqProcesses.ForEach(each => each.Kill());
             }
 
-            if (Gocq is { HasExited: false })
+            if (!Gocq.HasExited)
                 Gocq.Kill();
 
             var gocqPath = ConfigurationManager.AppSettings["gocq"];
+            var gocqExePath = Path.Combine(gocqPath, gocqexe);
+            if (!File.Exists(gocqExePath))
+            {
+                Vm.AddRunLog(new RunLog_SystemError("gocq-http 不存在!"));
+                return;
+            }
+
             Gocq = new Process
             {
                 StartInfo =
                 {
                     WorkingDirectory = gocqPath!,
-                    FileName = "cmd.exe",
+                    FileName = gocqExePath,
                     UseShellExecute = false,
-                    Arguments = "/K go-cqhttp_windows_amd64.exe -faststart",
+                    Arguments = "-faststart",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
                     CreateNoWindow = true,
                 }
             };
-
             Gocq.Start();
+            Gocq.HideWindow();
             Vm.AddRunLog(new RunLog_SystemInfo("gocq-http 已启动"));
             await Task.Run(() =>
             {
