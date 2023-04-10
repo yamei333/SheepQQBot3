@@ -163,7 +163,7 @@ namespace SheepQQBot3.SDK.Client
         public async void DeleteMessage(int messageId)
             => await SendDataAsync("delete_msg", new ParamData
             {
-                Message_Id = messageId.ToString()
+                MessageId = messageId.ToString()
             });
 
         /// <summary>
@@ -177,7 +177,7 @@ namespace SheepQQBot3.SDK.Client
                 var echo = Guid.NewGuid();
                 SendDataAsync("get_msg", new ParamData
                 {
-                    Message_Id = messageId.ToString()
+                    MessageId = messageId.ToString()
                 }, echo);
 
                 groupMessage = GetReply(echo, jsonInfo =>

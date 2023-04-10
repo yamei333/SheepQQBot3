@@ -37,7 +37,7 @@ namespace SheepQQBot3.Model
         public long Operator_Id { get; set; }
 
         [JsonPropertyName("user_id")]
-        public long User_Id { get; set; }
+        public long UserId { get; set; }
 
         [JsonPropertyName("sender_id")]
         public long Sender_Id { get; set; }
@@ -52,13 +52,13 @@ namespace SheepQQBot3.Model
         public int Font { get; set; }
 
         [JsonPropertyName("group_id")]
-        public long Group_Id { get; set; }
+        public long GroupId { get; set; }
 
         [JsonPropertyName("message")]
         public string Message { get; set; }
 
         [JsonPropertyName("message_id")]
-        public int Message_Id { get; set; }
+        public int MessageId { get; set; }
 
         /// <summary>
         /// 消息目标类型
@@ -67,7 +67,7 @@ namespace SheepQQBot3.Model
         public MessageTargetType MessageTargetType { get; set; }
 
         [JsonPropertyName("raw_message")]
-        public string Raw_Message { get; set; }
+        public string RawMessage { get; set; }
 
         [JsonPropertyName("sender")]
         public Sender Sender { get; set; }

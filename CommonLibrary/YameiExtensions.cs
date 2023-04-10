@@ -61,5 +61,24 @@ namespace Yamei.Common
                     SpinWait.SpinUntil(() => false, delay);
             });
         }
+
+        /// <summary>
+        /// 尝试N次取值
+        /// </summary>
+        /// <param name="maxTimes">最大尝试次数</param>
+        /// <param name="getFunc">取值函数</param>
+        /// <returns>是否取值成功</returns>
+        public static async Task<bool> TryTimesAsync(this int maxTimes, Func<Task<bool>> getFunc)
+        {
+            var times = 1;
+            var getResultSuccess = false;
+            while (times <= maxTimes && !getResultSuccess)
+            {
+                getResultSuccess = await getFunc();
+                times++;
+            }
+
+            return getResultSuccess;
+        }
     }
 }

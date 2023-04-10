@@ -9,7 +9,7 @@ namespace SheepQQBot3.UnitTest.Extensions
         [TestMethod]
         public void GetFundTest()
         {
-            var fundData = FundExtensions.GetFundData("004235", "161725")!;
+            var fundData = FundExtensions.GetFundDataAsync(new[]{"004235", "161725"})!.Result;
             Assert.AreEqual("中欧价值智选混合C", fundData.Data?[0].Name);
             Assert.AreEqual("招商中证白酒指数(LOF)A", fundData.Data?[1].Name);
 

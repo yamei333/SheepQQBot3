@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Text.Json;
+using System.Threading.Tasks;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Fund;
@@ -17,18 +19,22 @@ namespace SheepQQBot3.Model.Extension
         /// </summary>
         /// <param name="fundIds"></param>
         /// <returns></returns>
-        public static FundData GetFundData(params string[] fundIds)
+        public static async Task<FundData> GetFundDataAsync(IEnumerable<string> fundIds)
         {
-            if (fundIds.Length == 0)
+            var fundIdArray = fundIds as string[] ?? fundIds.ToArray();
+            if (fundIdArray.Any() != true)
                 return null;
 
-            var fundJsonText = HttpExtensions.GetString($"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIds)}");
-            if (string.IsNullOrEmpty(fundJsonText))
-                return null;
+            var fundData = await HttpExtensions.GetFromJsonAsync<FundData>(
+                $"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIdArray)}");
+
+            //var fundJsonText = HttpExtensions.GetString();
+            //if (string.IsNullOrEmpty(fundJsonText))
+            //    return null;
 
             //var fundJsonText =
             //    "{\"code\":200,\"message\":\"操作成功\",\"traceId\":\"991464084dbc4e22f12188d4d19c1a72\",\"data\":[{\"code\":\"004235\",\"name\":\"中欧价值智选混合C\",\"netWorth\":4.5556,\"expectWorth\":4.5106,\"totalWorth\":4.5556,\"expectGrowth\":\"-0.99\",\"dayGrowth\":\"-0.94\",\"lastWeekGrowth\":\"1.3459\",\"lastMonthGrowth\":\"3.31\",\"lastThreeMonthsGrowth\":\"24.72\",\"lastSixMonthsGrowth\":\"-6.85\",\"lastYearGrowth\":\"-3.87\",\"netWorthDate\":\"2022-07-22\",\"expectWorthDate\":\"2022-07-25 13:19:00\"},{\"code\":\"161725\",\"name\":\"招商中证白酒指数(LOF)A\",\"netWorth\":1.1816,\"expectWorth\":1.1861,\"totalWorth\":2.8977,\"expectGrowth\":\"0.38\",\"dayGrowth\":\"-0.2\",\"lastWeekGrowth\":\"-1.1875\",\"lastMonthGrowth\":\"-0.34\",\"lastThreeMonthsGrowth\":\"11.18\",\"lastSixMonthsGrowth\":\"-4.48\",\"lastYearGrowth\":\"-14.22\",\"netWorthDate\":\"2022-07-22\",\"expectWorthDate\":\"2022-07-25 13:18:00\"}]}";
-            var fundData = JsonSerializer.Deserialize<FundData>(fundJsonText);
+            //var fundData = JsonSerializer.Deserialize<FundData>(fundJsonText);
             return fundData;
         }
 

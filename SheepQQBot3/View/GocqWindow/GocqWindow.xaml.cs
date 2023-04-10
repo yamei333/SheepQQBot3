@@ -61,7 +61,7 @@ namespace SheepQQBot3.View
                     WorkingDirectory = gocqPath!,
                     FileName = "cmd.exe",
                     UseShellExecute = false,
-                    Arguments = "/C go-cqhttp_windows_amd64.exe -faststart",
+                    Arguments = "/K go-cqhttp_windows_amd64.exe -faststart",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
                     CreateNoWindow = true,
