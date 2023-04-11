@@ -5,6 +5,11 @@
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>disable</Nullable>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>None</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="NAudio" Version="2.1.0" />

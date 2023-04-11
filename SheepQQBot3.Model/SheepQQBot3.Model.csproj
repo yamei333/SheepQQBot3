@@ -5,6 +5,11 @@
     <Nullable>disable</Nullable>
     <UseWPF>true</UseWPF>
   </PropertyGroup>
+  
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>None</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+  </PropertyGroup>
 
   <ItemGroup>
     <PackageReference Include="Masuit.Tools.Net" Version="2.5.9.4" />
