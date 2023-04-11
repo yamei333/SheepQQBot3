@@ -17,6 +17,9 @@ namespace SheepQQBot3
 
         private void App_OnStartup(object sender, StartupEventArgs e)
         {
+            BotExtensions.KillGocqexe();
+            BotExtensions.KillBarkexe();
+
             var args = Environment.GetCommandLineArgs();
             PublicVar.IsDebug = args.Contains("-debug");
         }

@@ -141,10 +141,10 @@ namespace SheepQQBot3.SDK.Client
         }
 
         /// <summary>
-        /// 发送群消息
+        /// 发送合并转发群消息
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="groupForwardMessages">消息内容</param>
+        /// <param name="messages">消息内容</param>
         public async Task SendGroupForwardMessage(long groupId, IEnumerable<GroupForwardMessage> messages)
         {
             await SendDataAsync("send_group_forward_msg", new GroupForwardMessageParamData
@@ -186,6 +186,29 @@ namespace SheepQQBot3.SDK.Client
                     return new GroupMessage(clientReceiveData.Data);
                 });
                 return groupMessage != null;
+            }
+        }
+
+        /// <summary>
+        /// 获取群消息历史记录
+        /// </summary>
+        /// <param name="groupId">群号</param>
+        public bool TryGetHistoryGroupMessages(long groupId, out HistoryMessage[] historyMessages)
+        {
+            lock (_syncLockInteractive)
+            {
+                var echo = Guid.NewGuid();
+                SendDataAsync("get_group_msg_history", new ParamData
+                {
+                    GroupId = groupId.ToString()
+                }, echo);
+
+                historyMessages = GetReply(echo, jsonInfo =>
+                {
+                    var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
+                    return clientReceiveData.Data.Messages;
+                });
+                return historyMessages != null;
             }
         }
 

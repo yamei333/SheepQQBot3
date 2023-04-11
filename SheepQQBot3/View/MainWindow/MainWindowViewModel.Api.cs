@@ -4,16 +4,19 @@ using System.Linq;
 using System.Text.Json;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Event;
+using Yamei.Common;
 
 namespace SheepQQBot3.View
 {
     partial class MainWindowViewModel
     {
         private const int MaxLogCount = 1000;
+        private const int MaxStoreProcessedMessageCount = 20;
 
         private DateTime _lastBlockedTime = DateTime.MinValue;
 
@@ -27,6 +30,21 @@ namespace SheepQQBot3.View
                 AddRunLog(new RunLog_SystemInfo("API 连接成功"));
                 if (PublicVar.IsDebug)
                     cqApi.SendGroupMessage(15873217, "测试Bot启动完成!");
+
+                // MEMO : 处理历史消息记录
+                SetConfigs.Values.ForEach(config =>
+                {
+                    if (config.TargetType == BotConfigTargetType.Group
+                        && cqApi.TryGetHistoryGroupMessages(config.TargetId, out var historyMessages))
+                    {
+                        var processedMessageIds = config.ProcessedMessageIds;
+                        historyMessages
+                            .Where(historyMessage => historyMessage.Sender.UserId != PublicVar.BotId
+                                && historyMessage.SubType == SubType.Normal
+                                && !processedMessageIds.Contains(historyMessage.MessageId))
+                            .ForEach(historyMessage => OnGroupMessage(new GroupMessage(historyMessage)));
+                    }
+                });
             };
             cqApi.OnClose += (o, data) =>
             {
@@ -93,109 +111,116 @@ namespace SheepQQBot3.View
                     async void RunAction(SetConfig config) => await ProcessRevokeGroupMessage.RepeatRevokeMessage(groupRevokeMessage);
                 }
             };
-            cqEvent.OnGroupMessage += (o, groupMessage) =>
-            {
-                var groupId = groupMessage.GroupId;
-                if (SetConfigs.Values.All(each => each.TargetId != groupId))
-                    return;
-
-                var isBlackList = false;
-                if (!GetSelectedConfig(
-                    groupId,
-                    BotFunctionType.Common_BlackList,
-                    config =>
-                    {
-                        isBlackList = config.BlackListIds.Contains(groupMessage.UserId);
-                        AddRunLog(isBlackList
-                            ? new RunLog_GroupMessageBlackList(groupMessage)
-                            : new RunLog_GroupMessage(groupMessage));
-                    }))
-                {
-                    AddRunLog(new RunLog_GroupMessage(groupMessage));
-                }
-
-                // MEMO : 黑名单用户不作处理
-                if (isBlackList)
-                    return;
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_CustomGroupAlarm, config =>
-                {
-                    StartTask(() => ProcessGroupMessage.CustomGroupAlarm(config.CustomGroupAlarms, groupMessage));
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
-                {
-                    StartTask(AlarmAideSubmit);
-                    async void AlarmAideSubmit() => await ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_FundHelper, config =>
-                {
-                    StartTask(FundHelper);
-                    async void FundHelper() => await ProcessGroupMessage.FundHelper(groupMessage);
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
-                {
-                    StartTask(RandomSetu);
-                    async void RandomSetu() => await ProcessGroupMessage.RandomSetu(config, groupMessage).ConfigureAwait(false);
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
-                {
-                    StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage));
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
-                {
-                    StartTask(GenshinHelper);
-                    async void GenshinHelper() => await ProcessGroupMessage.GenshinHelper(
-                        config.GenshinHelperConfig?.GenshinResinAlarms.Values
-                            .ToDictionary(each => each.TargetId, each => each),
-                    groupMessage);
-                });
-
-                GetSelectedConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
-                {
-                    StartTask(SearchImageSource);
-                    async void SearchImageSource() => await ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
-                });
-
-                //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
-                //    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
-
-                //var setConfig = SetConfigs.FirstOrDefault(each => each.Value.TargetId == groupMessage.GroupId).Value;
-                //if (setConfig == null)
-                //    return;
-
-                //if (groupMessage.UserId == 252961222)
-                //    _cqApi.SendMessage(LogMessageType.Group, groupMessage.GroupId, "你刚发了条消息");
-            };
+            cqEvent.OnGroupMessage += (o, groupMessage) => OnGroupMessage(groupMessage);
             cqEvent.Start();
+        }
 
-            bool GetSelectedConfig(
-                long groupId,
-                BotFunctionType botFunctionType,
-                Action<SetConfig> runAction = null)
-            {
-                var setConfig = SetConfigs.Values.FirstOrDefault(each =>
+        private void OnGroupMessage(GroupMessage groupMessage)
+        {
+            var groupId = groupMessage.GroupId;
+            var setConfig = SetConfigs.Values.FirstOrDefault(each => each.TargetId == groupId);
+            if (setConfig == null)
+                return;
+
+            // MEMO : 保存已处理的MessageId
+            setConfig.ProcessedMessageIds = setConfig.ProcessedMessageIds
+                .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
+            ConfigExtensions.SaveConfig();
+            var isBlackList = false;
+            if (!GetSelectedConfig(
+                groupId,
+                BotFunctionType.Common_BlackList,
+                config =>
                 {
-                    var botFunction =
-                        each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType);
-                    return botFunction?.IsUsed == true && each.TargetId == groupId;
-                });
-                if (setConfig == null)
-                    return false;
-
-                runAction?.Invoke(setConfig);
-                return true;
+                    isBlackList = config.BlackListIds.Contains(groupMessage.UserId);
+                    AddRunLog(isBlackList
+                        ? new RunLog_GroupMessageBlackList(groupMessage)
+                        : new RunLog_GroupMessage(groupMessage));
+                }))
+            {
+                AddRunLog(new RunLog_GroupMessage(groupMessage));
             }
+
+            // MEMO : 黑名单用户不作处理
+            if (isBlackList)
+                return;
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_CustomGroupAlarm, config =>
+            {
+                StartTask(() => ProcessGroupMessage.CustomGroupAlarm(config.CustomGroupAlarms, groupMessage));
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
+            {
+                StartTask(AlarmAideSubmit);
+                async void AlarmAideSubmit() => await ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_FundHelper, config =>
+            {
+                StartTask(FundHelper);
+                async void FundHelper() => await ProcessGroupMessage.FundHelper(groupMessage);
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
+            {
+                StartTask(RandomSetu);
+                async void RandomSetu() => await ProcessGroupMessage.RandomSetu(PublicVar.BotConfig, groupMessage).ConfigureAwait(false);
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
+            {
+                StartTask(() => ProcessGroupMessage.RepeaterKiller(groupMessage));
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
+            {
+                StartTask(GenshinHelper);
+                async void GenshinHelper() => await ProcessGroupMessage.GenshinHelper(
+                    config.GenshinHelperConfig?.GenshinResinAlarms.Values
+                        .ToDictionary(each => each.TargetId, each => each),
+                groupMessage);
+            });
+
+            GetSelectedConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
+            {
+                StartTask(SearchImageSource);
+                async void SearchImageSource() => await ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
+            });
+
+            //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
+            //    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
+
+            //var setConfig = SetConfigs.FirstOrDefault(each => each.Value.TargetId == groupMessage.GroupId).Value;
+            //if (setConfig == null)
+            //    return;
+
+            //if (groupMessage.UserId == 252961222)
+            //    _cqApi.SendMessage(LogMessageType.Group, groupMessage.GroupId, "你刚发了条消息");
+        }
+
+        private bool GetSelectedConfig(
+            long groupId,
+            BotFunctionType botFunctionType,
+            Action<SetConfig> runAction = null)
+        {
+            var setConfig = SetConfigs.Values.FirstOrDefault(each =>
+            {
+                var botFunction =
+                    each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType);
+                return botFunction?.IsUsed == true && each.TargetId == groupId;
+            });
+            if (setConfig == null)
+                return false;
+
+            runAction?.Invoke(setConfig);
+            return true;
         }
 
         /// <summary>
         /// 增加日志
         /// </summary>
-        /// <param name="runLog"></param>
+        /// <param name="runLog"><see cref="RunLog"/></param>
         public void AddRunLog(RunLog runLog)
         {
             var runLogs = new List<RunLog> { runLog };

@@ -60,7 +60,7 @@ namespace SheepQQBot3.SDK.Event
 
         private void ProcessReceiveData(ReceiveData receiveData)
         {
-            switch (receiveData.Post_Type)
+            switch (receiveData.PostType)
             {
                 case PostType.Meta_Event:
                     break;
@@ -93,13 +93,13 @@ namespace SheepQQBot3.SDK.Event
 
         private void ProcessNotice(ReceiveData receiveData)
         {
-            switch (receiveData.Notice_Type)
+            switch (receiveData.NoticeType)
             {
                 case NoticeType.Group_Recall:
                     OnGroupRevoke?.Invoke(null, new GroupRevokeMessage(receiveData));
                     break;
                 case NoticeType.Notify:
-                    switch (receiveData.Sub_Type)
+                    switch (receiveData.SubType)
                     {
                         case SubType.Poke:
                             OnGroupPoke?.Invoke(null, new GroupPoke(receiveData));
@@ -108,7 +108,7 @@ namespace SheepQQBot3.SDK.Event
                             // TODO : 群成员荣誉变更
                             break;
                         default:
-                            throw new ArgumentOutOfRangeException(nameof(receiveData.Sub_Type), receiveData.Sub_Type, "值不在正确范围内");
+                            throw new ArgumentOutOfRangeException(nameof(receiveData.SubType), receiveData.SubType, "值不在正确范围内");
                     }
                     break;
                 case NoticeType.Group_Increase:
@@ -121,7 +121,7 @@ namespace SheepQQBot3.SDK.Event
                     // TODO : 上传群文件
                     break;
                 default:
-                    throw new ArgumentOutOfRangeException(nameof(receiveData.Notice_Type), receiveData.Notice_Type, "值不在正确范围内");
+                    throw new ArgumentOutOfRangeException(nameof(receiveData.NoticeType), receiveData.NoticeType, "值不在正确范围内");
             }
         }
     }

@@ -24,18 +24,11 @@ namespace SheepQQBot3.View
     /// </summary>
     public partial class MainWindow : Window
     {
-        //private readonly BotFunction[] DefaultBotFunctions;
-
         /// <summary>
         /// 默认构造函数
         /// </summary>
         public MainWindow()
         {
-            BotExtensions.KillGocqexe();
-            BotExtensions.KillBarkexe();
-            //DefaultBotFunctions = Enum.GetNames(typeof(BotFunctionType))
-            //    .Select(each => new BotFunction((BotFunctionType)Enum.Parse(typeof(BotFunctionType), each), false))
-            //    .ToArray();
             InitializeComponent();
         }
 
@@ -255,17 +248,6 @@ namespace SheepQQBot3.View
             Vm.SetConfigs = new Dictionary<Guid, SetConfig>(setConfigs);
         }
 
-        /// <summary>
-        /// 启用/非启用时保存
-        /// </summary>
-        private void List_OnEnable(object sender, RoutedEventArgs e) => ConfigExtensions.SaveConfig();
-
-        //private void AlarmAideTextList_OnMouseRightButtonUp(object sender, MouseButtonEventArgs e)
-        //{
-        //    if (Vm.SelectedAlarmAideConfig == null)
-        //        e.Handled = true;
-        //}
-
         private void GroupList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
         {
             if (GroupList.SelectedItems.Count == 1)
@@ -286,13 +268,18 @@ namespace SheepQQBot3.View
                 this.Left = (SystemParameters.PrimaryScreenWidth - this.Width * dpiFactor) / 2;
                 this.Top = (SystemParameters.PrimaryScreenHeight - this.Height * dpiFactor) / 2;
             }
+            this.ShowInTaskbar = true;
             this.Visibility = Visibility.Visible;
             this.Show();
         }
 
         private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
         {
-            BotExtensions.KillGocqexe();
+            // MEMO : 结束时不再关闭Gocq, 以处理历史消息
+            // MEMO : debug时还是关闭(为了保持gocq进程关闭)
+            if (PublicVar.IsDebug)
+                BotExtensions.KillGocqexe();
+
             BotExtensions.KillBarkexe();
             Application.Current.Shutdown();
         }

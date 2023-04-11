@@ -1363,10 +1363,10 @@ namespace Yamei.Common
         }
 
         /// <summary>
-        /// 带有上限的AddCopy
+        /// 带有上限的CopyAdd
         /// </summary>
         /// <returns></returns>
-        public static List<T> AddCopyLimit<T>(this List<T> enumerable, T value, int maxCount)
+        public static List<T> CopyAddLimit<T>(this List<T> enumerable, T value, int maxCount)
             where T : notnull
         {
             enumerable.Add(value);
