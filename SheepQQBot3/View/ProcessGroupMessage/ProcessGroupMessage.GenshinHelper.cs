@@ -111,7 +111,7 @@ namespace SheepQQBot3.View
                 catch (Exception e)
                 {
                     YameiLogExtensions.WriteLog(e);
-                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)} 数据获取失败, 可能是cookie已失效!");
+                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}数据获取失败, 可能是cookie已失效!");
                     return false;
                 }
             }

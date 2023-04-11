@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Client;
 
 namespace SheepQQBot3.View
@@ -85,6 +86,11 @@ namespace SheepQQBot3.View
         public static GocqWindow GocqWindow;
         public static Process Bark;
         public static BarkWindow BarkWindow;
+
+        /// <summary>
+        /// Bot配置
+        /// </summary>
+        public static BotConfig BotConfig { get; set; }
 
         /// <summary>
         /// 节假日信息

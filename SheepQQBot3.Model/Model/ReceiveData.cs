@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 using SheepQQBot3.Model.Enums;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -10,40 +11,34 @@ namespace SheepQQBot3.Model
         public string Meta_Event_Type { get; set; }
 
         [JsonPropertyName("sub_type")]
-        public string Sub_Type_Value { get; set; }
+        public SubType SubType { get; set; }
 
         [JsonIgnore]
-        public SubType Sub_Type => (SubType)Enum.Parse(typeof(SubType), Sub_Type_Value, true);
+        public DateTime DateTime => Time.ToDateTime();
 
         [JsonPropertyName("time")]
         public int Time { get; set; }
 
         [JsonPropertyName("post_type")]
-        public string Post_Type_Value { get; set; }
-
-        [JsonIgnore]
-        public PostType Post_Type => (PostType)Enum.Parse(typeof(PostType), Post_Type_Value, true);
+        public PostType PostType { get; set; }
 
         [JsonPropertyName("notice_type")]
-        public string Notice_Type_Value { get; set; }
-
-        [JsonIgnore]
-        public NoticeType Notice_Type => (NoticeType)Enum.Parse(typeof(NoticeType), Notice_Type_Value, true);
+        public NoticeType NoticeType { get; set; }
 
         [JsonPropertyName("self_id")]
         public long Self_Id { get; set; }
 
         [JsonPropertyName("operator_id")]
-        public long Operator_Id { get; set; }
+        public long OperatorId { get; set; }
 
         [JsonPropertyName("user_id")]
         public long UserId { get; set; }
 
         [JsonPropertyName("sender_id")]
-        public long Sender_Id { get; set; }
+        public long SenderId { get; set; }
 
         [JsonPropertyName("target_id")]
-        public long Target_Id { get; set; }
+        public long TargetId { get; set; }
 
         [JsonPropertyName("anonymous")]
         public string Anonymous { get; set; }

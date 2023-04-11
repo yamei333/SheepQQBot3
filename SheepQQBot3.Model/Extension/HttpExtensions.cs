@@ -118,12 +118,12 @@ namespace SheepQQBot3.Model.Extension
             if (response?.StatusCode != HttpStatusCode.OK)
                 return (false, string.Empty);
 
-            //var fileExtend = response.Content.Headers.ContentType?.MediaType switch
-            //{
-            //    "image/jpeg" => "jpg",
-            //    "zap" => "zap",
-            //    _ => "png"
-            //};
+            var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+            {
+                "image/jpeg" => "jpg",
+                "image/gif" => "gif",
+                _ => "png"
+            };
 
             CommonExtensions.CreatePath(path);
             if (!checkOnly)
@@ -137,11 +137,19 @@ namespace SheepQQBot3.Model.Extension
                 }
                 else
                 {
-                    await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                    switch (fileExtend)
+                    {
+                        case "gif":
+                            await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
+                            break;
+                        default:
+                            await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                            break;
+                    }
                 }
             }
 
-            return (true, $"{tempFileName}.png");
+            return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
         }
     }
 }

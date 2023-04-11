@@ -8,6 +8,7 @@
         Width="1080"
         Height="692"
         Closing="GocqWindow_OnClosing"
+        ShowInTaskbar="False"
         WindowStartupLocation="CenterScreen"
         mc:Ignorable="d">
     <Window.Style>

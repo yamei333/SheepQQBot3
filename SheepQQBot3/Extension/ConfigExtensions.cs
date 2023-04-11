@@ -29,6 +29,8 @@ namespace SheepQQBot3.Extensions
             {
                 var botConfig = new BotConfig();
                 botConfig.InitBotFunctionIsEnabled();
+
+                PublicVar.BotConfig = botConfig;
                 Vm.SetConfigs = botConfig.SetConfigs;
                 Vm.IsLoadComplete = true;
                 return;
@@ -72,9 +74,9 @@ namespace SheepQQBot3.Extensions
                     }
                 });
                 botConfig.InitBotFunctionIsEnabled();
-
                 PrepareData(botConfig);
 
+                PublicVar.BotConfig = botConfig;
                 Vm.SetConfigs = botConfig.SetConfigs;
                 Vm.IsLoadComplete = true;
                 if (PublicVar.IsDebug)
@@ -137,7 +139,7 @@ namespace SheepQQBot3.Extensions
 
             lock (_syncLock)
             {
-                var jsonText = JsonSerializer.Serialize(new BotConfig(Vm.SetConfigs), new JsonSerializerOptions
+                var jsonText = JsonSerializer.Serialize(PublicVar.BotConfig, new JsonSerializerOptions
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true

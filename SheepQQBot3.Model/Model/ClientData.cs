@@ -1,4 +1,6 @@
-﻿using System.Text.Json.Serialization;
+﻿using System;
+using System.Text.Json.Serialization;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -27,6 +29,9 @@ namespace SheepQQBot3.Model
 
         [JsonPropertyName("read_id")]
         public int ReadId { get; set; }
+
+        [JsonIgnore]
+        public DateTime DateTime => Time.ToDateTime();
 
         [JsonPropertyName("time")]
         public int Time { get; set; }

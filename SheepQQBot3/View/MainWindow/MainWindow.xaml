@@ -15,6 +15,7 @@
         Icon="/Resource/hari003.ico"
         Initialized="MainWindow_OnInitialized"
         Loaded="MainWindow_OnLoaded"
+        ShowInTaskbar="False"
         Visibility="Collapsed"
         WindowStartupLocation="CenterScreen"
         WindowStyle="None"
