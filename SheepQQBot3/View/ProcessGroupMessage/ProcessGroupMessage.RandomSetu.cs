@@ -248,7 +248,7 @@ namespace SheepQQBot3.View
                             }
                             else
                             {
-                                doushiMessage = $"{userId} [Lv{each.Value}]";
+                                doushiMessage = $"无名色图斗士({userId}) [Lv{each.Value}]";
                             }
 
                             sendMessage += $"{ENTER}{rankIndex++}. {doushiMessage}";

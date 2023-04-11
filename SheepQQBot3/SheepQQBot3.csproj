@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.7.2.0</Version>
+    <Version>0.7.2.1</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
@@ -14,7 +14,10 @@
     <ApplicationIcon>Resource\hari003.ico</ApplicationIcon>
   </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
+    <DebugType>None</DebugType>
+    <DebugSymbols>False</DebugSymbols>
+  </PropertyGroup>
 
   <ItemGroup>
     <Compile Remove="View\Dialog\AddAlarmAideDialog\**" />
@@ -75,6 +78,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <None Update="Properties\Settings.settings">
+      <Generator>SettingsSingleFileGenerator</Generator>
+      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+    </None>
     <None Update="Resource\Kyouko04_104991561_0 128.png">
       <Pack>True</Pack>
       <PackagePath>\</PackagePath>
@@ -88,5 +95,13 @@
   <ItemGroup>
     <ProjectCapability Include="ConfigurableFileNesting" />
     <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Compile Update="Properties\Settings.Designer.cs">
+      <DesignTimeSharedInput>True</DesignTimeSharedInput>
+      <AutoGen>True</AutoGen>
+      <DependentUpon>Settings.settings</DependentUpon>
+    </Compile>
   </ItemGroup>
 </Project>
