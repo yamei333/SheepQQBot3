@@ -98,8 +98,7 @@ namespace SheepQQBot3.SDK.Client
 
         private void ProcessClientReceiveData(ClientReceiveData receiveData)
         {
-            var retCode = receiveData.RetCode;
-            if (retCode != 0)
+            if (!receiveData.IsSuccessed)
             {
                 switch (receiveData.Message)
                 {
@@ -146,19 +145,19 @@ namespace SheepQQBot3.SDK.Client
             if (_connection?.IsAvailable != true)
                 return false;
 
-            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo.ToString()), CommonExtensions.JsonOption);
-            await _connection.Send(jsonText);
+            var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), CommonExtensions.JsonOption);
+            await _connection.Send(jsonText).ConfigureAwait(false);
             return true;
         }
 
-        private async Task<bool> SendDataAsync(string actionType, GroupForwardMessageParamData paramData)
+        private async Task<bool> SendDataAsync(string actionType, GroupForwardMessageParamData paramData, Guid echo = default)
         {
             if (_connection?.IsAvailable != true)
                 return false;
 
-            var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData),
+            var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData, echo == default ? null : echo.ToString()),
                 CommonExtensions.JsonOption);
-            await _connection.Send(jsonText);
+            await _connection.Send(jsonText).ConfigureAwait(false);
             return true;
         }
     }

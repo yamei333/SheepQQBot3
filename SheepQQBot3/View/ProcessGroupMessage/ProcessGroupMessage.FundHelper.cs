@@ -77,7 +77,7 @@ namespace SheepQQBot3.View
                         break;
                 }
 
-                await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}{sendMessage}");
+                await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}");
             }
             catch (Exception)
             {

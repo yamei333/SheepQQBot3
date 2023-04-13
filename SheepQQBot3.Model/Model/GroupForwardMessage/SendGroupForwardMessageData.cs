@@ -16,10 +16,17 @@ namespace SheepQQBot3.Model
         [JsonPropertyName("params")]
         public GroupForwardMessageParamData ParamData { get; set; }
 
-        public SendGroupForwardMessageData(string action, GroupForwardMessageParamData paramData)
+        [JsonPropertyName("echo")]
+        public string Echo { get; }
+
+        /// <summary>
+        /// 默认构造函数
+        /// </summary>
+        public SendGroupForwardMessageData(string action, GroupForwardMessageParamData paramData, string echo)
         {
             this.Action = action;
             this.ParamData = paramData;
+            this.Echo = echo;
         }
     }
 

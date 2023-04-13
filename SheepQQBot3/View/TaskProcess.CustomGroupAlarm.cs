@@ -47,7 +47,7 @@ namespace SheepQQBot3.View
                                     {
                                         var alarmMessage = groupAlarm.AlarmMessage.ToCqCode(0).Result;
                                         var sendCustomMessage = $"{(groupAlarm.IsAtTarget ? $"{CQCode.At(groupAlarm.TargetId)} 小助手提醒!{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}";
-                                        await Api.SendGroupMessage(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
+                                        await Api.SendGroupMessageAsync(groupAlarm.GroupId, sendCustomMessage, Vm.SetConfigs);
                                         // MEMO : 添加为删除消息
                                         removeIds.Add(groupAlarm.Id);
                                     }

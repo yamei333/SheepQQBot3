@@ -58,7 +58,7 @@ namespace SheepQQBot3.View
             var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
             if (alarmAideConfig == null)
             {
-                await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
+                await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
                 return false;
             }
 
@@ -98,7 +98,7 @@ namespace SheepQQBot3.View
                 if (alarmTexts.Values.Any(each => each == alarmMessage))
                 {
                     // MEMO : 已存在则不添加, 发送反馈
-                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!");
+                    await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!");
                     return false;
                 }
                 else
@@ -106,7 +106,7 @@ namespace SheepQQBot3.View
                     // MEMO : 添加闹钟助手内容
                     alarmTexts.TryAdd(alarmTexts.GetSequence(), alarmMessage);
                     // MEMO : 发送反馈
-                    await Api.SendGroupForwardMessage(groupId, new GroupForwardMessage[]
+                    await Api.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
                     {
                         new(groupMessage.MessageId),
                         new(PublicVar.BOT_NAME, PublicVar.BotId, resendAlarmMessage),
@@ -118,7 +118,7 @@ namespace SheepQQBot3.View
             }
             catch (Exception)
             {
-                await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!");
+                await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!");
                 YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
                 return false;
             }

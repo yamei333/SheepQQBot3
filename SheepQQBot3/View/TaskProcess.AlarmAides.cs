@@ -102,11 +102,11 @@ namespace SheepQQBot3.View
                 switch (setConfig.TargetType)
                 {
                     case BotConfigTargetType.Group:
-                        await Api.SendGroupMessage(targetId, alarmText, Vm.SetConfigs);
+                        await Api.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs);
                         AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Group, targetId, alarmText));
                         break;
                     case BotConfigTargetType.Private:
-                        await Api.SendPrivateMessage(targetId, alarmText);
+                        await Api.SendPrivateMessageAsync(targetId, alarmText);
                         AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Private, targetId, alarmText));
                         break;
                     case BotConfigTargetType.Common:

@@ -56,9 +56,6 @@ namespace SheepQQBot3.Model.Config
             }
         }
 
-        [Key(nameof(_isActive))]
-        private bool _isActive;
-
         /// <inheritdoc />
         public AlarmAideConfig(string alarmName, string condition)
         {

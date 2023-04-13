@@ -122,11 +122,11 @@ namespace SheepQQBot3.View
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await Api.SendGroupMessage(targetId, sendMessage, Vm.SetConfigs);
+                    await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs);
                     LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
-                    await Api.SendPrivateMessage(targetId, sendMessage);
+                    await Api.SendPrivateMessageAsync(targetId, sendMessage);
                     LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:
@@ -181,11 +181,11 @@ namespace SheepQQBot3.View
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await Api.SendGroupMessage(targetId, sendMessage, Vm.SetConfigs);
+                    await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs);
                     LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
-                    await Api.SendPrivateMessage(targetId, sendMessage);
+                    await Api.SendPrivateMessageAsync(targetId, sendMessage);
                     LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:

@@ -37,7 +37,7 @@ namespace SheepQQBot3.View
             if (string.IsNullOrEmpty(url))
                 return false;
 
-            await Api.SendGroupMessage(groupId, "图片搜索中...");
+            await Api.SendGroupMessageAsync(groupId, "图片搜索中...");
             var sauceNaoRequest = await HttpExtensions.GetFromJsonAsync<SauceNaoRequest>(
                 $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
                 $"&db=999&output_type=2&url={url}");
@@ -47,7 +47,7 @@ namespace SheepQQBot3.View
                 var result = results.FirstOrDefault(each => each.Data.ExtUrls != null);
                 if (result == null)
                 {
-                    await Api.SendGroupMessage(groupId, "没有包含链接信息的图源!");
+                    await Api.SendGroupMessageAsync(groupId, "没有包含链接信息的图源!");
                     return false;
                 }
 
@@ -58,7 +58,7 @@ namespace SheepQQBot3.View
                 {
                     if (header.Hidden == 1)
                     {
-                        await Api.SendGroupMessage(groupId,
+                        await Api.SendGroupMessageAsync(groupId,
                             "[缩略图比较和谐,不发送了]" +
                             //$"{ENTER}相似度: {similarity:0.00}%" +
                             $"{ENTER}来源: {result.Data.ExtUrls.First()}");
@@ -66,7 +66,7 @@ namespace SheepQQBot3.View
                     }
                     else
                     {
-                        await Api.SendGroupMessage(groupId,
+                        await Api.SendGroupMessageAsync(groupId,
                             CQCode.Image(header.SmallImageUrl) +
                             //$"{ENTER}相似度: {similarity:0.00}%" +
                             $"{ENTER}来源: {result.Data.ExtUrls.First()}");
@@ -76,7 +76,7 @@ namespace SheepQQBot3.View
                 else
                 {
                     // MEMO : 相似度<70
-                    await Api.SendGroupMessage(groupId, "找不到相似的图片!");
+                    await Api.SendGroupMessageAsync(groupId, "找不到相似的图片!");
                     //$"{ENTER}查看全部结果: https://saucenao.com/search.php?url={url}");
                 }
 
