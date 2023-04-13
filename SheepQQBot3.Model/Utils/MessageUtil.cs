@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using SheepQQBot3.Model.Extension;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -61,10 +62,10 @@ namespace SheepQQBot3.Model
                 //case "ym_play3":
                 //    YameiExtensions.PlaySe3(GetElementBaseData().File);
                 //    return new Element(ElementType.text, new ElementBaseData(string.Empty));
-                //case "json":
-                //    return new Element(cqType, GetElementBaseData_Json());
-                //case "xml":
-                //    return new Element(cqType, GetElementBaseData_Xml());
+                case ElementType.json:
+                    return new Element(cqType, GetElementBaseData_Json());
+                case ElementType.xml:
+                    return new Element(cqType, GetElementBaseData_Xml());
                 //case "image":
                 //    return new Element(cqType, GetElementBaseData_Image());
                 //case "File":

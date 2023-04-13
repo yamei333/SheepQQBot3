@@ -21,7 +21,11 @@ namespace SheepQQBot3.View;
 
 public static partial class TaskProcess
 {
-    private static readonly Regex regRemoveCQAt = RegexGenerator.CQCodeRemoveCQAt();
+    private static readonly Regex _regRemoveCQAt = RegexGenerator.CQCodeRemoveCQAt();
+    private static readonly Regex _regGenshinWBAlarm = RegexGenerator.GenshinWBAlarm();
+    private static readonly Regex _regGenshinDailyMission = RegexGenerator.GenshinDailyMission();
+    private static readonly Regex _regGenshinPotCoin = RegexGenerator.GenshinPotCoin();
+    private static readonly Regex _regGenshinTransformer = RegexGenerator.GenshinTransformer();
 
     private static readonly string[] _resinMessage = {
         "DJLJ!", "体力爆炸了!", "树脂在燃烧!", "反正也是辣鸡圣遗物", "KJ! JS!"
@@ -60,7 +64,7 @@ public static partial class TaskProcess
                                         return;
 
                                     DeleteExpiredData(setConfig.GenshinResinAlarmedList, dateNow, 900);
-                                    await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow);
+                                    await SendGenshinDailyNoteAlarmMessage(setConfig, genshinResinAlarm, dateNow).ConfigureAwait(false);
                                 }
                             });
                     }
@@ -95,7 +99,7 @@ public static partial class TaskProcess
         GenshinRoleInfo role = default;
         try
         {
-            var roles = await client.GetGenshinRoleInfosAsync(cookie);
+            var roles = await client.GetGenshinRoleInfosAsync(cookie).ConfigureAwait(false);
             role = roles[0];
         }
         catch (HoyolabException e)
@@ -115,7 +119,7 @@ public static partial class TaskProcess
 
         try
         {
-            dailyNote = await client.GetDailyNoteAsync(role);
+            dailyNote = await client.GetDailyNoteAsync(role).ConfigureAwait(false);
         }
         catch (Exception e)
         {
@@ -141,16 +145,20 @@ public static partial class TaskProcess
 
         #region WB提醒
 
-        if (RegexGenerator.GenshinWBAlarm().IsMatch(dateNowStr))
+        if (_regGenshinWBAlarm.IsMatch(dateNowStr))
         {
             var genshinGachaInfoRequest = await HttpExtensions.GetFromJsonAsync<GenshinGachaInfoRequest>(
-                "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json");
+                "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json").ConfigureAwait(false);
             var gachaInfo = genshinGachaInfoRequest?.Data.List.FirstOrDefault(each => each.GachaName == "角色活动");
             if (gachaInfo != null)
             {
                 var diffDays = (int)(now - gachaInfo.BeginTime).TotalDays;
                 if (diffDays is 0 or 1 or 2)
+                {
                     SendBarkMessageAsync($"[原神WB签到提醒]-WB签到第{diffDays + 1}天!");
+                    if (!forceSend)
+                        setConfig.GenshinResinAlarmedList[(configId, GenshinDailyNoteAlarmType.Weibo)] = now;
+                }
             }
         }
 
@@ -170,7 +178,7 @@ public static partial class TaskProcess
                         GenshinDailyNoteAlarmType.Resin);
                     break;
                 default:
-                    if (currentResin >= 85 && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
+                    if (currentResin >= 85 && _regGenshinDailyMission.IsMatch(dateNowStr))
                     {
                         AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], " +
                                        $"体力会在明天10点前爆炸, 你怎么睡得着!",
@@ -185,7 +193,7 @@ public static partial class TaskProcess
 
         #region 每日任务
 
-        if (genshinResinAlarm.DailyMission && !dailyNote.IsExtraTaskRewardReceived && RegexGenerator.GenshinDailyMission().IsMatch(dateNowStr))
+        if (genshinResinAlarm.DailyMission && !dailyNote.IsExtraTaskRewardReceived && _regGenshinDailyMission.IsMatch(dateNowStr))
             AddSendMessage($"今天每日任务还没做, 要血亏了!", GenshinDailyNoteAlarmType.DailyMission);
 
         #endregion 每日任务
@@ -193,7 +201,7 @@ public static partial class TaskProcess
         #region 洞天宝钱
 
         var potCoin = dailyNote.CurrentHomeCoin;
-        if (genshinResinAlarm.PotCoin && RegexGenerator.GenshinPotCoin().IsMatch(dateNowStr) && potCoin >= 2100)
+        if (genshinResinAlarm.PotCoin && _regGenshinPotCoin.IsMatch(dateNowStr) && potCoin >= 2100)
             AddSendMessage($"当前洞天宝钱为[{potCoin}/{dailyNote.MaxHomeCoin}], 快满了!",
                 GenshinDailyNoteAlarmType.PotCoin);
 
@@ -204,7 +212,7 @@ public static partial class TaskProcess
         if (genshinResinAlarm.Transformer
             && dailyNote.Transformer.Obtained
             && dailyNote.Transformer.RecoveryTime.Reached
-            && RegexGenerator.GenshinTransformer().IsMatch(dateNowStr))
+            && _regGenshinTransformer.IsMatch(dateNowStr))
             AddSendMessage($"参量质变仪可用了!", GenshinDailyNoteAlarmType.Transformer);
 
         #endregion 参量质变仪
@@ -221,7 +229,7 @@ public static partial class TaskProcess
 
             sendMessage += msg;
             if (!forceSend)
-                setConfig.GenshinResinAlarmedList.Add((configId, alarmType), now);
+                setConfig.GenshinResinAlarmedList[(configId, alarmType)] = now;
         }
 
         async void SendMessage()
@@ -229,16 +237,16 @@ public static partial class TaskProcess
             if (string.IsNullOrEmpty(sendMessage))
                 return;
 
-            SendBarkMessageAsync(regRemoveCQAt.Replace(sendMessage, string.Empty));
+            SendBarkMessageAsync(_regRemoveCQAt.Replace(sendMessage, string.Empty));
             switch (targetType)
             {
                 case BotConfigTargetType.Group:
-                    await Api.SendGroupMessage(targetId, sendMessage, Vm.SetConfigs);
+                    await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                     AddRunLog(new RunLog_GenshinDailyNoteAlarm(
                         BotConfigTargetType.Group, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
-                    await Api.SendPrivateMessage(targetId, sendMessage);
+                    await Api.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                     AddRunLog(new RunLog_GenshinDailyNoteAlarm(
                         BotConfigTargetType.Private, targetId, sendMessage));
                     break;
@@ -257,7 +265,7 @@ public static partial class TaskProcess
                 await PushExtensions.PushBarkMessageAsync(
                     barkKey,
                     barkMessage,
-                    PushExtensions.TITLE);
+                    PushExtensions.TITLE).ConfigureAwait(false);
             }
         }
     }

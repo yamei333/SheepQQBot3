@@ -6,5 +6,6 @@
         DailyMission,
         PotCoin,
         Transformer,
+        Weibo,
     }
 }

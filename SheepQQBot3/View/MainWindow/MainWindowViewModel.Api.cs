@@ -29,22 +29,24 @@ namespace SheepQQBot3.View
             {
                 AddRunLog(new RunLog_SystemInfo("API 连接成功"));
                 if (PublicVar.IsDebug)
-                    cqApi.SendGroupMessage(15873217, "测试Bot启动完成!");
+                    cqApi.SendGroupMessageAsync(15873217, "测试Bot启动完成!");
+
+                SetConfigs.Values.ForEach(RunAction);
 
                 // MEMO : 处理历史消息记录
-                SetConfigs.Values.ForEach(config =>
+                async void RunAction(SetConfig config)
                 {
-                    if (config.TargetType == BotConfigTargetType.Group
-                        && cqApi.TryGetHistoryGroupMessages(config.TargetId, out var historyMessages))
-                    {
-                        var processedMessageIds = config.ProcessedMessageIds;
-                        historyMessages
-                            .Where(historyMessage => historyMessage.Sender.UserId != PublicVar.BotId
-                                && historyMessage.SubType == SubType.Normal
-                                && !processedMessageIds.Contains(historyMessage.MessageId))
-                            .ForEach(historyMessage => OnGroupMessage(new GroupMessage(historyMessage)));
-                    }
-                });
+                    if (config.TargetType != BotConfigTargetType.Group)
+                        return;
+
+                    var historyMessages = await cqApi.GetHistoryGroupMessagesAsync(config.TargetId).ConfigureAwait(false);
+                    if (historyMessages == null)
+                        return;
+
+                    var processedMessageIds = config.ProcessedMessageIds;
+                    historyMessages.Where(historyMessage => historyMessage.Sender.UserId != PublicVar.BotId && historyMessage.SubType == SubType.Normal && !processedMessageIds.Contains(historyMessage.MessageId))
+                        .ForEach(historyMessage => OnGroupMessage(new GroupMessage(historyMessage)));
+                }
             };
             cqApi.OnClose += (o, data) =>
             {

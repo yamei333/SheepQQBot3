@@ -106,12 +106,12 @@ namespace SheepQQBot3.View
                     //            .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
                     sendMessage = sendMessage + oneHint +
                         resin + dailyQuest + potCoin + transformerStr;
-                    await Api.SendGroupMessage(groupId, sendMessage);
+                    await Api.SendGroupMessageAsync(groupId, sendMessage);
                 }
                 catch (Exception e)
                 {
                     YameiLogExtensions.WriteLog(e);
-                    await Api.SendGroupMessage(groupId, $"{CQCode.At(targetId)}数据获取失败, 可能是cookie已失效!");
+                    await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}数据获取失败, 可能是cookie已失效!");
                     return false;
                 }
             }

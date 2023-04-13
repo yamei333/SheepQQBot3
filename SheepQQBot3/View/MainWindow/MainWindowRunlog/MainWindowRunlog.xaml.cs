@@ -22,7 +22,7 @@ namespace SheepQQBot3.View
         private void RunLog_OnContextMenuOpening(object sender, ContextMenuEventArgs e)
         {
             var selectedRunLog = _vm.SelectedRunLog;
-            if (selectedRunLog is not {IsGroupMessage: true})
+            if (selectedRunLog is not { IsGroupMessage: true })
                 e.Handled = true;
         }
 
@@ -34,7 +34,7 @@ namespace SheepQQBot3.View
         private void RunLog_OnRepeat(object sender, RoutedEventArgs e)
         {
             var selectedRunLog = _vm.SelectedRunLog;
-            _vm.Api.SendGroupMessage(long.Parse(selectedRunLog.GroupId), selectedRunLog.Content, _vm.SetConfigs);
+            _vm.Api.SendGroupMessageAsync(long.Parse(selectedRunLog.GroupId), selectedRunLog.Content, _vm.SetConfigs);
         }
 
         private void RunLogMessageText_OnGotFocus(object sender, RoutedEventArgs e)

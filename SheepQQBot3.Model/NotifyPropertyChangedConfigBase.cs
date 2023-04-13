@@ -9,6 +9,9 @@ namespace SheepQQBot3.Model
     [MessagePackObject]
     public abstract class NotifyPropertyChangedConfigBase : NotifyPropertyChangedBase
     {
+        /// <summary>
+        /// ID
+        /// </summary>
         [Key(nameof(Id))]
         public Guid Id { get; set; }
 

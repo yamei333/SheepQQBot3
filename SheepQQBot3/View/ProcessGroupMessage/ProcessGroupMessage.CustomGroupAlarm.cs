@@ -199,7 +199,7 @@ namespace SheepQQBot3.View
                 }
 
                 if (!isNoReply)
-                    Api.SendGroupMessage(groupId, $"{(isNoAt ? string.Empty : CQCode.At(targetId))}{sendMessage}");
+                    Api.SendGroupMessageAsync(groupId, $"{(isNoAt ? string.Empty : CQCode.At(targetId))}{sendMessage}");
             }
             catch (Exception)
             {

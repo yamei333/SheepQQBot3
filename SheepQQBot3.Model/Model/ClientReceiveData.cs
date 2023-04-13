@@ -10,6 +10,12 @@ namespace SheepQQBot3.Model
         [JsonPropertyName("retcode")]
         public int RetCode { get; set; }
 
+        /// <summary>
+        /// 是否成功
+        /// </summary>
+        [JsonIgnore]
+        public bool IsSuccessed => RetCode == 0;
+
         [JsonPropertyName("status")]
         public string Status { get; set; }
 
@@ -18,5 +24,8 @@ namespace SheepQQBot3.Model
 
         [JsonPropertyName("wording")]
         public string Wording { get; set; }
+
+        [JsonPropertyName("echo")]
+        public string Echo { get; set; }
     }
 }

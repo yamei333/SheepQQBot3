@@ -16,10 +16,7 @@ namespace SheepQQBot3.SDK.Client
 {
     partial class CQAPI
     {
-        private readonly object _syncLockInteractive = new object();
-
-        private string _interaciveJson;
-        private readonly Dictionary<Guid, string> _interaciveJsons = new Dictionary<Guid, string>();
+        private readonly Dictionary<Guid, string> _interaciveJsons = new();
 
         private readonly Regex _regGetEcho = RegexGenerator.CQAPI_GetEcho();
 
@@ -29,7 +26,13 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="groupId">群号</param>
         /// <param name="message">消息内容</param>
         /// <param name="setConfigs">已设定的消息内容, 用于消息重定义</param>
-        public async Task SendGroupMessage(long groupId, string message, Dictionary<Guid, SetConfig> setConfigs = null)
+        /// <param name="timeout">超时时间</param>
+        /// <param name="callBack">回调</param>
+        public async Task SendGroupMessageAsync(
+            long groupId, string message,
+            Dictionary<Guid, SetConfig> setConfigs = null,
+            double timeout = 5,
+            Action<ClientReceiveData> callBack = null)
         {
             var messageList = MessageUtil.ProcessCQMessage(message);
 
@@ -57,14 +60,17 @@ namespace SheepQQBot3.SDK.Client
             });
             ProcessYmMessage(ElementType.ym_bark, ProcessYmBark);
 
-            if (messageList?.Any() == true)
+            if (messageList?.Any() != true)
+                return;
+
+            var echo = Guid.NewGuid();
+            await SendDataAsync("send_group_msg", new ParamData
             {
-                await SendDataAsync("send_group_msg", new ParamData
-                {
-                    GroupId = groupId.ToString(),
-                    Message = messageList
-                });
-            }
+                GroupId = groupId.ToString(),
+                Message = messageList
+            }, echo).ConfigureAwait(false);
+
+            callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
 
             void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
             {
@@ -80,15 +86,13 @@ namespace SheepQQBot3.SDK.Client
             {
                 if (Guid.TryParse(ymElement.Data.Data, out var redirectId))
                 {
-                    var alarmAideConfigs = setConfigs.SelectMany(each => each.Value.AlarmAideConfigs.Values)
+                    var alarmAideConfigs = setConfigs!.SelectMany(each => each.Value.AlarmAideConfigs.Values)
                         .ToDictionary(each => each.Id, each => each);
                     if (!alarmAideConfigs.TryGetValue(redirectId, out var alarmAideConfig)) return;
 
                     var alarmTexts = alarmAideConfig.AlarmTexts;
-                    if (alarmTexts.Count > 0)
-                        await SendGroupMessage(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
-
-                    return;
+                    if (alarmTexts?.Count > 0)
+                        await SendGroupMessageAsync(groupId, alarmTexts.Values.Random()).ConfigureAwait(false);
                 }
                 else
                 {
@@ -102,7 +106,7 @@ namespace SheepQQBot3.SDK.Client
                 var elementData = ymElement.Data;
                 if (!string.IsNullOrEmpty(elementData.Data))
                 {
-                    await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content);
+                    await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content).ConfigureAwait(false);
                 }
             }
         }
@@ -112,8 +116,8 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="userId">群号</param>
         /// <param name="message">消息内容</param>
-        public async Task SendPrivateMessage(long userId, string message)
-            => await SendDataAsync("send_private_msg", new ParamData
+        public Task SendPrivateMessageAsync(long userId, string message)
+            => SendDataAsync("send_private_msg", new ParamData
             {
                 UserId = userId.ToString(),
                 Message = MessageUtil.ProcessCQMessage(message)
@@ -130,10 +134,10 @@ namespace SheepQQBot3.SDK.Client
             switch (type)
             {
                 case MessageTargetType.Private:
-                    await Run(() => SendPrivateMessage(targetId, message));
+                    await Run(() => SendPrivateMessageAsync(targetId, message)).ConfigureAwait(false);
                     break;
                 case MessageTargetType.Group:
-                    await Run(() => SendGroupMessage(targetId, message));
+                    await Run(() => SendGroupMessageAsync(targetId, message)).ConfigureAwait(false);
                     break;
                 default:
                     throw new ArgumentOutOfRangeException(nameof(type), type, null);
@@ -145,23 +149,31 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="messages">消息内容</param>
-        public async Task SendGroupForwardMessage(long groupId, IEnumerable<GroupForwardMessage> messages)
+        /// <param name="timeout">超时时间</param>
+        /// <param name="callBack">回调</param>
+        public async Task SendGroupForwardMessageAsync(
+            long groupId,
+            IEnumerable<GroupForwardMessage> messages,
+            double timeout = 5,
+            Action<ClientReceiveData> callBack = null)
         {
+            var echo = Guid.NewGuid();
             await SendDataAsync("send_group_forward_msg", new GroupForwardMessageParamData
             {
                 GroupId = groupId.ToString(),
                 Messages = messages
                     .Select(each => new GroupForwardMessageElement(each))
                     .ToList()
-            });
+            }, echo).ConfigureAwait(false);
+            callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
         }
 
         /// <summary>
         /// 撤回消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public async void DeleteMessage(int messageId)
-            => await SendDataAsync("delete_msg", new ParamData
+        public Task DeleteMessageAsync(int messageId)
+            => SendDataAsync("delete_msg", new ParamData
             {
                 MessageId = messageId.ToString()
             });
@@ -170,46 +182,41 @@ namespace SheepQQBot3.SDK.Client
         /// 获取群消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public bool TryGetGroupMessage(int messageId, out GroupMessage groupMessage)
+        /// <param name="timeout">超时时间</param>
+        public async Task<GroupMessage> GetGroupMessageAsync(int messageId, double timeout = 5)
         {
-            lock (_syncLockInteractive)
+            var echo = Guid.NewGuid();
+            await SendDataAsync("get_msg", new ParamData
             {
-                var echo = Guid.NewGuid();
-                SendDataAsync("get_msg", new ParamData
-                {
-                    MessageId = messageId.ToString()
-                }, echo);
+                MessageId = messageId.ToString()
+            }, echo).ConfigureAwait(false);
 
-                groupMessage = GetReply(echo, jsonInfo =>
-                {
-                    var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
-                    return new GroupMessage(clientReceiveData.Data);
-                });
-                return groupMessage != null;
-            }
+            var groupMessage = GetReply(echo, jsonInfo =>
+            {
+                var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
+                return new GroupMessage(clientReceiveData.Data);
+            }, timeout);
+            return groupMessage;
         }
 
         /// <summary>
         /// 获取群消息历史记录
         /// </summary>
         /// <param name="groupId">群号</param>
-        public bool TryGetHistoryGroupMessages(long groupId, out HistoryMessage[] historyMessages)
+        /// <param name="timeout">超时时间</param>
+        public async Task<HistoryMessage[]> GetHistoryGroupMessagesAsync(long groupId, double timeout = 5)
         {
-            lock (_syncLockInteractive)
+            var echo = Guid.NewGuid();
+            await SendDataAsync("get_group_msg_history", new ParamData
             {
-                var echo = Guid.NewGuid();
-                SendDataAsync("get_group_msg_history", new ParamData
-                {
-                    GroupId = groupId.ToString()
-                }, echo);
+                GroupId = groupId.ToString()
+            }, echo).ConfigureAwait(false);
 
-                historyMessages = GetReply(echo, jsonInfo =>
-                {
-                    var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
-                    return clientReceiveData.Data.Messages;
-                });
-                return historyMessages != null;
-            }
+            return GetReply(echo, jsonInfo =>
+            {
+                var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
+                return clientReceiveData.Data.Messages;
+            }, timeout);
         }
 
         /// <summary>
@@ -294,32 +301,28 @@ namespace SheepQQBot3.SDK.Client
         /// 获得群成员名单
         /// </summary>
         /// <param name="groupId">群号</param>
-        /// <param name="groupMembers">群成员列表</param>
+        /// <param name="timeout">超时时间</param>
         [CQAPI_Interactive]
-        public bool TryGetGroupMembers(long groupId, out Dictionary<long, GroupMember> groupMembers)
+        public async Task<Dictionary<long, GroupMember>> GetGroupMembersAsync(long groupId, double timeout = 5)
         {
-            lock (_syncLockInteractive)
+            var echo = Guid.NewGuid();
+            await SendDataAsync("get_group_member_list", new ParamData
             {
-                var echo = Guid.NewGuid();
-                SendDataAsync("get_group_member_list", new ParamData
-                {
-                    GroupId = groupId.ToString(),
-                    NoCache = false
-                }, echo);
+                GroupId = groupId.ToString(),
+                NoCache = false
+            }, echo).ConfigureAwait(false);
 
-                groupMembers = GetReply(echo, jsonText =>
-                {
-                    var clientData = JsonSerializer.Deserialize<ClientReceiveData_GroupMember>(jsonText);
-                    return clientData.Data.ToDictionary(each => each.UserId, each => each);
-                });
-                return groupMembers != null;
-            }
+            return GetReply(echo, jsonText =>
+            {
+                var clientData = JsonSerializer.Deserialize<ClientReceiveData_GroupMember>(jsonText);
+                return clientData.Data.ToDictionary(each => each.UserId, each => each);
+            }, timeout);
         }
 
-        private T GetReply<T>(Guid echo, Func<string, T> getFunc)
+        private T GetReply<T>(Guid echo, Func<string, T> getFunc, double timeout)
             where T : class
         {
-            SpinWait.SpinUntil(() => _interaciveJsons.ContainsKey(echo), TimeSpan.FromSeconds(5));
+            SpinWait.SpinUntil(() => _interaciveJsons.ContainsKey(echo), TimeSpan.FromSeconds(timeout));
             if (!_interaciveJsons.TryGetValue(echo, out var jsonText))
                 return null;
 

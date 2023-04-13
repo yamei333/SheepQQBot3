@@ -40,6 +40,17 @@ namespace SheepQQBot3.Model
         location,
         music,
         reply,
+
+        /// <summary>
+        /// xml消息节点
+        /// </summary>
+        xml,
+
+        /// <summary>
+        /// json消息节点
+        /// </summary>
+        json,
+
         /// <summary>
         /// 合并转发节点
         /// </summary>

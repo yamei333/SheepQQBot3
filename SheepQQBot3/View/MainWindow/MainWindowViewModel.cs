@@ -39,7 +39,6 @@ namespace SheepQQBot3.View
         {
             CqApi?.Dispose();
             CqEvent?.Dispose();
-            //_serviceHost?.Close();
         }
 
         /// <summary>

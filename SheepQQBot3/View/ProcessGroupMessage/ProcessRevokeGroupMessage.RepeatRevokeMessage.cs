@@ -49,7 +49,7 @@ namespace SheepQQBot3.View
                 new(groupRevokeMessage.MessageId),
                 new(PublicVar.BOT_NAME, PublicVar.BotId, _repeatSllhh.Random()),
             };
-            await Api.SendGroupForwardMessage(groupRevokeMessage.GroupId, sendMessages);
+            await Api.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages);
             return true;
         }
     }

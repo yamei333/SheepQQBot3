@@ -130,10 +130,10 @@ namespace SheepQQBot3.View
             switch (selectedSetConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    _vm.Api.SendGroupMessage(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs);
+                    _vm.Api.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs);
                     break;
                 case BotConfigTargetType.Private:
-                    _vm.Api.SendPrivateMessage(selectedSetConfig.TargetId, alarmText);
+                    _vm.Api.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText);
                     break;
                 case BotConfigTargetType.Common:
                 default:
@@ -244,10 +244,10 @@ namespace SheepQQBot3.View
             switch (selectedSetConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    _vm.Api.SendGroupMessage(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs);
+                    _vm.Api.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs);
                     break;
                 case BotConfigTargetType.Private:
-                    _vm.Api.SendPrivateMessage(selectedSetConfig.TargetId, alarmText);
+                    _vm.Api.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText);
                     break;
                 case BotConfigTargetType.Common:
                 default:
