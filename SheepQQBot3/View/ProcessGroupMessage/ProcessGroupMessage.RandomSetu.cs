@@ -354,11 +354,6 @@ StartSetu:
              .OrderByDescending(each => each.TimeStamp)
              .FirstOrDefault();
         var setuSendHistory = lastHistory?.TimeStamp.ToDateTime() ?? DateTime.MinValue;
-        //if (!botConfig.SetuSendLastRecords.TryGetValue(targetId, out var setuSendHistory))
-        //    setuSendHistory = DateTime.MinValue;
-        //if (!botConfig.SetuSenderLv.TryGetValue(targetId, out var setuSenderLv))
-        //    setuSenderLv = 0;
-
         if (setuKeywordCheck)
         {
             if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 20 + setuDoushiLv * 10)
@@ -407,7 +402,7 @@ StartSetu:
                 {
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(3000 + oldSetuSenderLv == 0 ? (int)(dateNow-setuCd).TotalMinutes : 0, new SendSetuConfig(
+                        new(3000 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             SetuAddLevel.Normal, true)),
                         new(200 + (int) (150 * Math.Pow(setuDoushiLv, 2)),
@@ -599,6 +594,8 @@ SendSetu:
                             .ConfigureAwait(false);
                         setuDoushiInfo.SetuCD = revertCD.ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
+                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, false, isFree, false))
+                            .ConfigureAwait(false);
                         return true;
                     case SetuResult.NoSearchResult:
                         await Api.SendGroupMessageAsync(groupId,
@@ -606,7 +603,9 @@ SendSetu:
                             $"色图库中没找到色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             .ConfigureAwait(false);
                         //setuDoushiInfo.SetuCD = revertCD.ToTimeStamp();
-                        //BotDb.Update(setuDoushiInfo);
+                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, true, isFree, r18Bonus))
+                            .ConfigureAwait(false);
+                        BotDb.Update(setuDoushiInfo);
                         return true;
                     case SetuResult.OtherError:
                         await Api.SendGroupMessageAsync(groupId,
@@ -615,6 +614,8 @@ SendSetu:
                             .ConfigureAwait(false);
                         setuDoushiInfo.SetuCD = revertCD.ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
+                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, true, isFree, false))
+                            .ConfigureAwait(false);
                         return true;
                     default:
                         throw new ArgumentOutOfRangeException(setuInfo.Result.ToString());
