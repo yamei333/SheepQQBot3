@@ -7,175 +7,186 @@ using CommonLibrary;
 using SheepQQBot3.Model.Setu;
 using Yamei.Common;
 
-namespace SheepQQBot3.Model.Extension
+namespace SheepQQBot3.Model.Extension;
+
+public static class SetuExtensions
 {
-    public static class SetuExtensions
+    /// <summary>
+    /// Pximg地址, 无法直接使用
+    /// </summary>
+    private const string Pximg = "i.pximg.net";
+
+    /// <summary>
+    /// Pixiv反代目标地址
+    /// </summary>
+    private const string PixivReTarget = "i.pixiv.re";
+
+    public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
+        => GetSetu_Lolicon_CoreAsync(tag);
+
+    public static Task<SetuInfo> GetSetu_Lolicon_R18Async(string tag)
+        => GetSetu_Lolicon_CoreAsync(tag, true);
+
+    private static async Task<SetuInfo> GetSetu_Lolicon_CoreAsync(string tag, bool r18 = false)
     {
-        /// <summary>
-        /// Pximg地址, 无法直接使用
-        /// </summary>
-        private const string Pximg = "i.pximg.net";
-
-        /// <summary>
-        /// Pixiv反代目标地址
-        /// </summary>
-        private const string PixivReTarget = "i.pixiv.re";
-
-        public static async Task<SetuInfo> GetSetu_Lolicon(string tag)
-            => await GetSetu_Lolicon_Core(tag);
-
-        public static async Task<SetuInfo> GetSetu_Lolicon_R18(string tag)
-            => await GetSetu_Lolicon_Core(tag, true);
-
-        private static async Task<SetuInfo> GetSetu_Lolicon_Core(string tag, bool r18 = false)
+        SetuData_Lolicon setuData;
+        var setuJsonText = string.Empty;
+        var hasException = false;
+        try
         {
-            SetuData_Lolicon setuData;
-            var setuJsonText = string.Empty;
-            var hasException = false;
-            try
-            {
-                var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
-                    $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}{(string.IsNullOrEmpty(tag) ? "" : $"&tag={tag}")}{(r18 ? "&r18=1" : string.Empty)}";
-                var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url);
-                if (setuResponse == null)
-                    return new SetuInfo(SetuType.Lolicon, SetuResult.ApiError);
+            var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
+                      $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
+            var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
+            if (setuResponse == null)
+                return new SetuInfo(SetuType.Lolicon, SetuResult.ApiError);
 
-                if (!setuResponse.Data.Any())
-                    return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
+            if (!setuResponse.Data.Any())
+                return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
 
-                setuData = setuResponse.Data.First();
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{e.Message}\r\n{setuJsonText}");
-                setuData = new SetuData_Lolicon();
-                hasException = true;
-            }
-
-            return new SetuInfo(
-                SetuType.Lolicon,
-                setuData.SetuInfo,
-                setuData.Urls.Original,
-                ToSmallImageUrl(setuData.Urls.Original),
-                hasException ? SetuResult.OtherError : SetuResult.Successed);
+            setuData = setuResponse.Data.First();
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{e.Message}\r\n{setuJsonText}");
+            setuData = new SetuData_Lolicon();
+            hasException = true;
         }
 
-        public static async Task<SetuInfo> GetSetu_Yuban(string tag)
-            => await GetSetu_Yuban_Core(tag);
+        return new SetuInfo(
+            SetuType.Lolicon,
+            setuData.SetuInfo,
+            setuData.Urls.Original,
+            ToSmallImageUrl(setuData.Urls.Original),
+            hasException ? SetuResult.OtherError : SetuResult.Successed);
 
-        public static async Task<SetuInfo> GetSetu_Yuban_R18(string tag)
-            => await GetSetu_Yuban_Core(tag, true);
+        string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}";
 
-        private static async Task<SetuInfo> GetSetu_Yuban_Core(string tag, bool r18 = false)
+        string GetUrlTagString()
         {
-            SetuData_Yuban setuData;
-            var hasException = false;
-            try
-            {
-                var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}&replace_url=https://{PixivReTarget}";
-                var request = await HttpExtensions.HttpGetAsync(url);
-                if (request == null)
-                    return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
+            if (string.IsNullOrEmpty(tag))
+                return GetDateString();
 
-                if (!request.IsSuccessStatusCode)
-                    return new SetuInfo(SetuType.Yuban, SetuResult.NoSearchResult);
+            return tag.Contains('|')
+                ? $"&{string.Join('&', tag.Split('|').Select(each => $"tag={each}"))}"
+                : $"&tag={tag}";
+        }
+    }
 
-                var setuResponse = await request.Content.ReadFromJsonAsync<SetuResponse_Yuban>();
-                setuData = setuResponse.Data.First();
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Yuban_Core-{e.Message}");
-                setuData = new SetuData_Yuban();
-                hasException = true;
-            }
+    public static Task<SetuInfo> GetSetu_YubanAsync(string tag)
+        => GetSetu_Yuban_CoreAsync(tag);
 
-            return new SetuInfo(
-                SetuType.Yuban,
-                setuData.SetuInfo,
-                setuData.Urls.Original,
-                ToSmallImageUrl(setuData.Urls.Original),
-                hasException ? SetuResult.OtherError : SetuResult.Successed);
+    public static Task<SetuInfo> GetSetu_Yuban_R18Async(string tag)
+        => GetSetu_Yuban_CoreAsync(tag, true);
+
+    private static async Task<SetuInfo> GetSetu_Yuban_CoreAsync(string tag, bool r18 = false)
+    {
+        SetuData_Yuban setuData;
+        var hasException = false;
+        try
+        {
+            var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}&replace_url=https://{PixivReTarget}";
+            var request = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
+            if (request == null)
+                return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
+
+            if (!request.IsSuccessStatusCode)
+                return new SetuInfo(SetuType.Yuban, SetuResult.NoSearchResult);
+
+            var setuResponse = await request.Content.ReadFromJsonAsync<SetuResponse_Yuban>().ConfigureAwait(false);
+            setuData = setuResponse.Data.First();
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Yuban_Core-{e.Message}");
+            setuData = new SetuData_Yuban();
+            hasException = true;
         }
 
-        public static async Task<SetuInfo> GetSetu_NyanCatda(string tag)
-            => await GetSetu_NyanCatda_Core(tag);
+        return new SetuInfo(
+            SetuType.Yuban,
+            setuData.SetuInfo,
+            setuData.Urls.Original,
+            ToSmallImageUrl(setuData.Urls.Original),
+            hasException ? SetuResult.OtherError : SetuResult.Successed);
+    }
 
-        public static async Task<SetuInfo> GetSetu_NyanCatda_R18(string tag)
-            => await GetSetu_NyanCatda_Core(tag, true);
+    public static Task<SetuInfo> GetSetu_NyanCatdaAsync(string tag)
+        => GetSetu_NyanCatda_CoreAsync(tag);
 
-        private static async Task<SetuInfo> GetSetu_NyanCatda_Core(string tag, bool r18 = false)
+    public static Task<SetuInfo> GetSetu_NyanCatda_R18Async(string tag)
+        => GetSetu_NyanCatda_CoreAsync(tag, true);
+
+    private static async Task<SetuInfo> GetSetu_NyanCatda_CoreAsync(string tag, bool r18 = false)
+    {
+        SetuData_NyanCatda setuData;
+        var hasException = false;
+        try
         {
-            SetuData_NyanCatda setuData;
-            var hasException = false;
-            try
-            {
-                var url = @$"https://api.nyan.xyz/httpapi/sexphoto?num=1&r18={(r18 ? "true" : "false")}";
-                var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url);
-                if (setuResponse == null)
-                    return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
+            var url = @$"https://api.nyan.xyz/httpapi/sexphoto?num=1&r18={(r18 ? "true" : "false")}";
+            var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
+            if (setuResponse == null)
+                return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
 
-                setuData = setuResponse.Data;
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_NyanCatda_Core-{e.Message}");
-                setuData = new SetuData_NyanCatda();
-                hasException = true;
-            }
-
-            var imageUrl = setuData.Url.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivReTarget);
-            return new SetuInfo(
-                SetuType.NyanCatda,
-                setuData.SetuInfo,
-                imageUrl,
-                imageUrl.ToSmallImageUrl(),
-                hasException ? SetuResult.OtherError : SetuResult.Successed);
+            setuData = setuResponse.Data;
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_NyanCatda_Core-{e.Message}");
+            setuData = new SetuData_NyanCatda();
+            hasException = true;
         }
 
-        public static async Task<SetuInfo> GetSetu_Jitsu(string tag)
-            => await GetSetu_Jitsu_Core(tag);
+        var imageUrl = setuData.Url.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivReTarget);
+        return new SetuInfo(
+            SetuType.NyanCatda,
+            setuData.SetuInfo,
+            imageUrl,
+            imageUrl.ToSmallImageUrl(),
+            hasException ? SetuResult.OtherError : SetuResult.Successed);
+    }
 
-        public static async Task<SetuInfo> GetSetu_Jitsu_R18(string tag)
-            => await GetSetu_Jitsu_Core(tag, true);
+    public static Task<SetuInfo> GetSetu_JitsuAsync(string tag)
+        => GetSetu_Jitsu_CoreAsync(tag);
 
-        private static async Task<SetuInfo> GetSetu_Jitsu_Core(string tag, bool r18 = false)
+    public static Task<SetuInfo> GetSetu_Jitsu_R18Async(string tag)
+        => GetSetu_Jitsu_CoreAsync(tag, true);
+
+    private static async Task<SetuInfo> GetSetu_Jitsu_CoreAsync(string tag, bool r18 = false)
+    {
+        SetuData_Jitsu setuData;
+        var hasException = false;
+        try
         {
-            SetuData_Jitsu setuData;
-            var hasException = false;
-            try
-            {
-                var url = @$"https://image.anosu.top/pixiv/json?proxy=i.pixiv.re{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? 1 : 0)}";
-                var setuDatas = await HttpExtensions.GetFromJsonAsync<SetuData_Jitsu[]>(url);
-                if (setuDatas == null)
-                    return new SetuInfo(SetuType.Jitsu, SetuResult.ApiError);
+            var url = @$"https://image.anosu.top/pixiv/json?proxy=i.pixiv.re{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? 1 : 0)}";
+            var setuDatas = await HttpExtensions.GetFromJsonAsync<SetuData_Jitsu[]>(url);
+            if (setuDatas == null)
+                return new SetuInfo(SetuType.Jitsu, SetuResult.ApiError);
 
-                if (!setuDatas.Any())
-                    return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
+            if (!setuDatas.Any())
+                return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
 
-                setuData = setuDatas.First();
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Jitsu_Core-{e.Message}");
-                setuData = new SetuData_Jitsu();
-                hasException = true;
-            }
-
-            var imageUrl = setuData.Url;
-            return new SetuInfo(
-                SetuType.Jitsu,
-                "来源:PIXIV",
-                imageUrl,
-                imageUrl.ToSmallImageUrl(),
-                hasException ? SetuResult.OtherError : SetuResult.Successed);
+            setuData = setuDatas.First();
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Jitsu_Core-{e.Message}");
+            setuData = new SetuData_Jitsu();
+            hasException = true;
         }
 
-        private static string ToSmallImageUrl(this string url)
-        {
-            var temp = url.Replace("img-original", "c/540x540_70/img-master");
-            var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
-            return reg.Replace(temp, "_master1200.jpg");
-        }
+        var imageUrl = setuData.Url;
+        return new SetuInfo(
+            SetuType.Jitsu,
+            "来源:PIXIV",
+            imageUrl,
+            imageUrl.ToSmallImageUrl(),
+            hasException ? SetuResult.OtherError : SetuResult.Successed);
+    }
+
+    private static string ToSmallImageUrl(this string url)
+    {
+        var temp = url.Replace("img-original", "c/540x540_70/img-master");
+        var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
+        return reg.Replace(temp, "_master1200.jpg");
     }
 }

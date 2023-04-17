@@ -1,31 +1,30 @@
 ﻿using SheepQQBot3.Model.Config;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public partial class MainWindowRepeaterKillerViewModel : MainWindowViewModelBase
 {
-    public partial class MainWindowRepeaterKillerViewModel : MainWindowViewModelBase
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public MainWindowRepeaterKillerViewModel()
     {
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public MainWindowRepeaterKillerViewModel()
-        {
-        }
+    }
 
-        private RepeaterKillerConfig _repeaterKillerConfig;
-        /// <summary>
-        /// 复读机杀手配置
-        /// </summary>
-        public RepeaterKillerConfig RepeaterKillerConfig
+    private RepeaterKillerConfig _repeaterKillerConfig;
+    /// <summary>
+    /// 复读机杀手配置
+    /// </summary>
+    public RepeaterKillerConfig RepeaterKillerConfig
+    {
+        get => _repeaterKillerConfig;
+        set
         {
-            get => _repeaterKillerConfig;
-            set
-            {
-                if (_repeaterKillerConfig == value)
-                    return;
+            if (_repeaterKillerConfig == value)
+                return;
 
-                _repeaterKillerConfig = value;
-                OnPropertyChanged(nameof(RepeaterKillerConfig));
-            }
+            _repeaterKillerConfig = value;
+            OnPropertyChanged(nameof(RepeaterKillerConfig));
         }
     }
 }

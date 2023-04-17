@@ -1,17 +1,16 @@
-﻿namespace SheepQQBot3
+﻿namespace SheepQQBot3;
+
+public static class CQCode
 {
-    public static class CQCode
-    {
-        public static string At(long targetId)
-            => $"[CQ:at,qq={targetId}]";
+    public static string At(long targetId)
+        => $"[CQ:at,qq={targetId}]";
 
-        public static string AtAll()
-            => $"[CQ:at,qq=all]";
+    public static string AtAll()
+        => $"[CQ:at,qq=all]";
 
-        public static string Image(string filePath)
-            => $"[CQ:image,file={filePath}]";
+    public static string Image(string filePath)
+        => $"[CQ:image,file={filePath}]";
 
-        public static string Reply(long targetId, int messageId)
-            => $"[CQ:reply,qq={targetId},id={messageId}]";
-    }
+    public static string Reply(long targetId, int messageId)
+        => $"[CQ:reply,qq={targetId},id={messageId}]";
 }

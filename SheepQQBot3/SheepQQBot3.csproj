@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.8.0.0</Version>
+    <Version>0.9.1.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
@@ -61,7 +61,7 @@
 
   <ItemGroup>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
-    <PackageReference Include="Masuit.Tools.Net" Version="2.5.9.4" />
+    <PackageReference Include="Masuit.Tools.Net" Version="2.5.9.8" />
   </ItemGroup>
 
   <ItemGroup>

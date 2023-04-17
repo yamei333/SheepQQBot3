@@ -1,11 +1,10 @@
-﻿namespace SheepQQBot3.Model
+﻿namespace SheepQQBot3.Model;
+
+public enum GenshinDailyNoteAlarmType
 {
-    public enum GenshinDailyNoteAlarmType
-    {
-        Resin,
-        DailyMission,
-        PotCoin,
-        Transformer,
-        Weibo,
-    }
+    Resin,
+    DailyMission,
+    PotCoin,
+    Transformer,
+    Weibo,
 }

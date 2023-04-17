@@ -3,54 +3,53 @@ using System.Windows;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Model.Enums;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+/// <summary>
+/// AddLiveAlarmDialog.xaml 的交互逻辑
+/// </summary>
+public partial class AddLiveAlarmDialog
+    : AddDialogWindowBase<AddLiveAlarmDialogViewModel>
 {
     /// <summary>
-    /// AddLiveAlarmDialog.xaml 的交互逻辑
+    /// 直播间房间号
     /// </summary>
-    public partial class AddLiveAlarmDialog
-        : AddDialogWindowBase<AddLiveAlarmDialogViewModel>
+    public long LiveRoomId { get; set; }
+
+    /// <summary>
+    /// 直播平台(类型)
+    /// </summary>
+    public LiveType LiveType { get; set; }
+
+    /// <inheritdoc />
+    public AddLiveAlarmDialog(Window owner, object menuItem, DialogMode mode)
+        : base(owner, menuItem, mode)
+        => InitializeComponent();
+
+    /// <inheritdoc />
+    protected override void OnLoaded(object sender, RoutedEventArgs e)
     {
-        /// <summary>
-        /// 直播间房间号
-        /// </summary>
-        public long LiveRoomId { get; set; }
+        if (Mode != DialogMode.Edit)
+            return;
 
-        /// <summary>
-        /// 直播平台(类型)
-        /// </summary>
-        public LiveType LiveType { get; set; }
+        Vm.LiveRoomId = LiveRoomId;
+        Vm.SelectedAddLiveAlarmDialogConfig = Vm.AddLiveAlarmDialogConfigs
+            .First(each => each.LiveType == LiveType);
 
-        /// <inheritdoc />
-        public AddLiveAlarmDialog(Window owner, object menuItem, DialogMode mode)
-            : base(owner, menuItem, mode)
-            => InitializeComponent();
+        if (Mode == DialogMode.Add)
+            TxtLiveRoomId.SelectAll();
+    }
 
-        /// <inheritdoc />
-        protected override void OnLoaded(object sender, RoutedEventArgs e)
-        {
-            if (Mode != DialogMode.Edit)
-                return;
+    private void OK_Click(object sender, RoutedEventArgs e)
+    {
+        LiveRoomId = Vm.LiveRoomId.GetValueOrDefault();
+        LiveType = Vm.SelectedAddLiveAlarmDialogConfig.LiveType;
+        DialogResult = true;
+    }
 
-            Vm.LiveRoomId = LiveRoomId;
-            Vm.SelectedAddLiveAlarmDialogConfig = Vm.AddLiveAlarmDialogConfigs
-                .First(each => each.LiveType == LiveType);
-
-            if (Mode == DialogMode.Add)
-                TxtLiveRoomId.SelectAll();
-        }
-
-        private void OK_Click(object sender, RoutedEventArgs e)
-        {
-            LiveRoomId = Vm.LiveRoomId.GetValueOrDefault();
-            LiveType = Vm.SelectedAddLiveAlarmDialogConfig.LiveType;
-            DialogResult = true;
-        }
-
-        private void Cancel_Click(object sender, RoutedEventArgs e)
-        {
-            DialogResult = false;
-            Close();
-        }
+    private void Cancel_Click(object sender, RoutedEventArgs e)
+    {
+        DialogResult = false;
+        Close();
     }
 }

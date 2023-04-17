@@ -2,70 +2,69 @@
 using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
-namespace SheepQQBot3.Model
+namespace SheepQQBot3.Model;
+
+[Serializable]
+public class SendData
 {
-    [Serializable]
-    public class SendData
+    /// <summary>
+    /// 接口方法
+    /// </summary>
+    [JsonPropertyName("action")]
+    public string Action { get; }
+
+    [JsonPropertyName("params")]
+    public ParamData ParamData { get; set; }
+
+    /// <summary>
+    /// 回声
+    /// </summary>
+    [JsonPropertyName("echo")]
+    public string Echo { get; set; }
+
+    /// <summary>
+    /// 默认构造函数
+    /// </summary>
+    public SendData(string action, ParamData paramData, string echo)
     {
-        /// <summary>
-        /// 接口方法
-        /// </summary>
-        [JsonPropertyName("action")]
-        public string Action { get; }
-
-        [JsonPropertyName("params")]
-        public ParamData ParamData { get; set; }
-
-        /// <summary>
-        /// 回声
-        /// </summary>
-        [JsonPropertyName("echo")]
-        public string Echo { get; set; }
-
-        /// <summary>
-        /// 默认构造函数
-        /// </summary>
-        public SendData(string action, ParamData paramData, string echo)
-        {
-            this.Action = action;
-            this.ParamData = paramData;
-            this.Echo = echo;
-        }
+        this.Action = action;
+        this.ParamData = paramData;
+        this.Echo = echo;
     }
+}
 
-    public class ParamData
-    {
-        [JsonPropertyName("group_id")]
-        public string GroupId { get; set; }
+public class ParamData
+{
+    [JsonPropertyName("group_id")]
+    public string GroupId { get; set; }
 
-        [JsonPropertyName("user_id")]
-        public string UserId { get; set; }
+    [JsonPropertyName("user_id")]
+    public string UserId { get; set; }
 
-        [JsonPropertyName("message_id")]
-        public string MessageId { get; set; }
+    [JsonPropertyName("message_id")]
+    public string MessageId { get; set; }
 
-        [JsonPropertyName("times")]
-        public string Times { get; set; }
+    [JsonPropertyName("times")]
+    public string Times { get; set; }
 
-        [JsonPropertyName("reject_add_request")]
-        public string Reject_Add_Request { get; set; }
+    [JsonPropertyName("reject_add_request")]
+    public string Reject_Add_Request { get; set; }
 
-        [JsonPropertyName("duration")]
-        public string Duration { get; set; }
+    [JsonPropertyName("duration")]
+    public string Duration { get; set; }
 
-        [JsonPropertyName("enable")]
-        public string Enable { get; set; }
+    [JsonPropertyName("enable")]
+    public string Enable { get; set; }
 
-        [JsonPropertyName("card")]
-        public string Card { get; set; }
+    [JsonPropertyName("card")]
+    public string Card { get; set; }
 
-        [JsonPropertyName("group_name")]
-        public string GroupName { get; set; }
+    [JsonPropertyName("group_name")]
+    public string GroupName { get; set; }
 
-        [JsonPropertyName("message")]
-        public List<Element> Message { get; set; }
+    [JsonPropertyName("message")]
+    public List<Element> Message { get; set; }
 
-        [JsonPropertyName("no_cache")]
-        public bool NoCache { get; set; }
-    }
+    [JsonPropertyName("no_cache")]
+    public bool NoCache { get; set; }
 }

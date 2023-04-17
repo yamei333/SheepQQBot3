@@ -1,37 +1,36 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace SheepQQBot3.Model.Setu
+namespace SheepQQBot3.Model.Setu;
+
+public class SetuResponse_Lolicon
 {
-    public class SetuResponse_Lolicon
-    {
-        [JsonPropertyName("data")]
-        public SetuData_Lolicon[] Data { get; set; }
-    }
+    [JsonPropertyName("data")]
+    public SetuData_Lolicon[] Data { get; set; }
+}
 
-    public class SetuData_Lolicon
-    {
-        [JsonPropertyName("urls")]
-        public SetuData_Lolicon_Url Urls { get; set; }
+public class SetuData_Lolicon
+{
+    [JsonPropertyName("urls")]
+    public SetuData_Lolicon_Url Urls { get; set; }
 
-        /// <summary>
-        /// 画师
-        /// </summary>
-        [JsonPropertyName("author")]
-        public string Author { get; set; }
+    /// <summary>
+    /// 画师
+    /// </summary>
+    [JsonPropertyName("author")]
+    public string Author { get; set; }
 
-        /// <summary>
-        /// pixiv 图片ID
-        /// </summary>
-        [JsonPropertyName("pid")]
-        public int Pid { get; set; }
+    /// <summary>
+    /// pixiv 图片ID
+    /// </summary>
+    [JsonPropertyName("pid")]
+    public int Pid { get; set; }
 
-        [JsonIgnore]
-        public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";
-    }
+    [JsonIgnore]
+    public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";
+}
 
-    public class SetuData_Lolicon_Url
-    {
-        [JsonPropertyName("original")]
-        public string Original { get; set; }
-    }
+public class SetuData_Lolicon_Url
+{
+    [JsonPropertyName("original")]
+    public string Original { get; set; }
 }

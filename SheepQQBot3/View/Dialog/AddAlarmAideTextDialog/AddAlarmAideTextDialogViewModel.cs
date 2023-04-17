@@ -1,36 +1,35 @@
 ﻿using System.ComponentModel;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public class AddAlarmAideTextDialogViewModel : INotifyPropertyChanged
 {
-    public class AddAlarmAideTextDialogViewModel : INotifyPropertyChanged
+    public string _alarmContent;
+
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public AddAlarmAideTextDialogViewModel()
     {
-        public string _alarmContent;
+        AlarmContent = string.Empty;
+    }
 
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
-
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public AddAlarmAideTextDialogViewModel()
+    /// <summary>
+    /// 闹钟提醒内容
+    /// </summary>
+    public string AlarmContent
+    {
+        get => _alarmContent;
+        set
         {
-            AlarmContent = string.Empty;
-        }
+            if (_alarmContent == value)
+                return;
 
-        /// <summary>
-        /// 闹钟提醒内容
-        /// </summary>
-        public string AlarmContent
-        {
-            get => _alarmContent;
-            set
-            {
-                if (_alarmContent == value)
-                    return;
-
-                _alarmContent = value;
-                OnPropertyChanged(nameof(AlarmContent));
-            }
+            _alarmContent = value;
+            OnPropertyChanged(nameof(AlarmContent));
         }
     }
 }

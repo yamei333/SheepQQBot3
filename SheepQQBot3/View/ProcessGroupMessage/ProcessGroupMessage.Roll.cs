@@ -1,0 +1,59 @@
+﻿using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
+using SheepQQBot3.Model;
+using static SheepQQBot3.View.PublicVar;
+
+namespace SheepQQBot3.View;
+
+public static partial class ProcessGroupMessage
+{
+    /// <summary>
+    /// Roll点命令开头
+    /// </summary>
+    private const string COMMAND_ROLL = "#R#";
+
+    /// <summary>
+    /// 图源搜索
+    /// </summary>
+    /// <param name="groupMessage"><see cref="GroupMessage"/></param>
+    /// <returns></returns>
+    public static async Task<bool> RollAsync(GroupMessage groupMessage)
+    {
+        var groupId = groupMessage.GroupId;
+        var targetId = groupMessage.Sender.UserId;
+        var messageId = groupMessage.MessageId;
+        var message = groupMessage.Message;
+        // MEMO : 命令格式检查
+        if (!message.StartsWith(COMMAND_ROLL, StringComparison.CurrentCultureIgnoreCase))
+            return false;
+
+        var contentMessage = message[3..];
+        if (string.IsNullOrEmpty(contentMessage))
+        {
+            await SendRollResult(100).ConfigureAwait(false);
+            return true;
+        }
+
+        var regNumber = new Regex(@"\d+");
+        if (regNumber.IsMatch(contentMessage))
+        {
+            await SendRollResult(int.Parse(contentMessage)).ConfigureAwait(false);
+        }
+        else
+        {
+            await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}命令格式有误!")
+                .ConfigureAwait(false);
+        }
+
+        // 无匹配结果,或API超过使用次数限制
+        // 暂不处理
+        return true;
+
+        Task SendRollResult(int maxRollNumber)
+        {
+            return Api.SendGroupMessageAsync(groupId,
+                $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
+        }
+    }
+}

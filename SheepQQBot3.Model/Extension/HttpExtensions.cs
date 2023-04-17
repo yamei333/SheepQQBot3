@@ -8,148 +8,117 @@ using CommonLibrary;
 using Masuit.Tools.Media;
 using SixLabors.ImageSharp;
 
-namespace SheepQQBot3.Model.Extension
+namespace SheepQQBot3.Model.Extension;
+
+public static class HttpExtensions
 {
-    public static class HttpExtensions
+    public static readonly HttpClient HttpClient = new();
+
+    static HttpExtensions()
     {
-        /// <summary>
-        /// HttpGet返回string
-        /// </summary>
-        public static string GetString(string url)
+        HttpClient.Timeout = TimeSpan.FromSeconds(15);
+    }
+
+    /// <summary>
+    /// HttpGet返回json对应类类<see cref="T"/>, 不需要使用<see cref="Task.ConfigureAwait"/>
+    /// </summary>
+    public static async Task<T> GetFromJsonAsync<T>(string url)
+        where T : class
+    {
+        try
         {
-            try
-            {
-                return SendHttpResponse(url).Content.ReadAsStringAsync().Result;
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-                return null;
-            }
+            return await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.JsonOption).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// HttpGet返回string, 不需要使用<see cref="Task.ConfigureAwait"/>
-        /// </summary>
-        public static async Task<string> GetStringAsync(string url)
+        catch (Exception e)
         {
-            try
-            {
-                var httpClient = new HttpClient();
-                return await httpClient.GetStringAsync(url).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetStringAsync)}-{e.Message}-{url}");
-                return null;
-            }
+            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
+            return null;
         }
+    }
 
-        /// <summary>
-        /// HttpGet返回json对应类类<see cref="T"/>, 不需要使用<see cref="Task.ConfigureAwait"/>
-        /// </summary>
-        public static async Task<T> GetFromJsonAsync<T>(string url)
-            where T : class
+    /// <summary>
+    /// 发送http请求
+    /// </summary>
+    public static HttpResponseMessage SendHttpResponse(
+        string url,
+        HttpMethod method = null,
+        string content = "",
+        string mediaType = "")
+    {
+        var httpMethod = method ?? HttpMethod.Get;
+        var httpRequestMessage = new HttpRequestMessage(httpMethod, url);
+        httpRequestMessage.Content = string.IsNullOrEmpty(mediaType)
+            ? new StringContent(content, Encoding.UTF8)
+            : new StringContent(content, Encoding.UTF8, mediaType);
+        try
         {
-            try
-            {
-                var httpClient = new HttpClient();
-                httpClient.Timeout = TimeSpan.FromSeconds(15);
-                return await httpClient.GetFromJsonAsync<T>(url).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
-                return null;
-            }
+            return HttpClient.Send(httpRequestMessage);
         }
-
-        /// <summary>
-        /// 发送http请求
-        /// </summary>
-        public static HttpResponseMessage SendHttpResponse(
-            string url,
-            HttpMethod method = null,
-            string content = "",
-            string mediaType = "")
+        catch (Exception e)
         {
-            var httpClient = new HttpClient();
-            var httpMethod = method ?? HttpMethod.Get;
-            var httpRequestMessage = new HttpRequestMessage(httpMethod, url);
-            httpRequestMessage.Content = string.IsNullOrEmpty(mediaType)
-                ? new StringContent(content, Encoding.UTF8)
-                : new StringContent(content, Encoding.UTF8, mediaType);
-            try
-            {
-                return httpClient.Send(httpRequestMessage);
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-                return null;
-            }
+            YameiLogExtensions.WriteLog(e);
+            return null;
         }
+    }
 
-        public static async Task<HttpResponseMessage> HttpGetAsync(string url)
+    public static async Task<HttpResponseMessage> HttpGetAsync(string url)
+    {
+        try
         {
-            try
-            {
-                var httpClient = new HttpClient();
-                return await httpClient.GetAsync(url).ConfigureAwait(false);
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
-                return null;
-            }
+            return await HttpClient.GetAsync(url).ConfigureAwait(false);
         }
-
-        /// <summary>
-        /// http下载
-        /// </summary>
-        public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
-            string url, string path, bool needResize, bool checkOnly = false)
+        catch (Exception e)
         {
-            if (string.IsNullOrEmpty(url))
-                return (false, string.Empty);
+            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
+            return null;
+        }
+    }
 
-            var tempFileName = Guid.NewGuid().ToString();
-            var response = await HttpGetAsync(url);
-            if (response?.StatusCode != HttpStatusCode.OK)
-                return (false, string.Empty);
+    /// <summary>
+    /// http下载
+    /// </summary>
+    public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
+        string url, string path, bool needResize, bool checkOnly = false)
+    {
+        if (string.IsNullOrEmpty(url))
+            return (false, string.Empty);
 
-            var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+        var tempFileName = Guid.NewGuid().ToString();
+        var response = await HttpGetAsync(url);
+        if (response?.StatusCode != HttpStatusCode.OK)
+            return (false, string.Empty);
+
+        var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+        {
+            "image/jpeg" => "jpg",
+            "image/gif" => "gif",
+            _ => "png"
+        };
+
+        CommonExtensions.CreatePath(path);
+        if (!checkOnly)
+        {
+            var stream = await response.Content.ReadAsStreamAsync();
+            var image = await Image.LoadAsync(stream);
+            if (needResize)
             {
-                "image/jpeg" => "jpg",
-                "image/gif" => "gif",
-                _ => "png"
-            };
-
-            CommonExtensions.CreatePath(path);
-            if (!checkOnly)
+                await image.ResizeImage(image.Width, image.Height - 1)
+                    .SaveAsPngAsync($"{path}/{tempFileName}.png");
+            }
+            else
             {
-                var stream = await response.Content.ReadAsStreamAsync();
-                var image = await Image.LoadAsync(stream);
-                if (needResize)
+                switch (fileExtend)
                 {
-                    await image.ResizeImage(image.Width, image.Height - 1)
-                        .SaveAsPngAsync($"{path}/{tempFileName}.png");
-                }
-                else
-                {
-                    switch (fileExtend)
-                    {
-                        case "gif":
-                            await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
-                            break;
-                        default:
-                            await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
-                            break;
-                    }
+                    case "gif":
+                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
+                        break;
+                    default:
+                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                        break;
                 }
             }
-
-            return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
         }
+
+        return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
     }
 }

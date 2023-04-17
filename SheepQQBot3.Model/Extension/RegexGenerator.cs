@@ -1,73 +1,63 @@
 ﻿using System.Text.RegularExpressions;
 
-namespace SheepQQBot3.Model.Extension
+namespace SheepQQBot3.Model.Extension;
+
+public static partial class RegexGenerator
 {
-    public static partial class RegexGenerator
-    {
-        [GeneratedRegex("[^0-9]+")]
-        public static partial Regex Number();
+    [GeneratedRegex("[^0-9]+")]
+    public static partial Regex Number();
 
-        [GeneratedRegex("@\"(?<=id=)\\d+\"")]
-        public static partial Regex GetImageId_RainChan();
+    [GeneratedRegex("@\"(?<=id=)\\d+\"")]
+    public static partial Regex GetImageId_RainChan();
 
-        [GeneratedRegex(@"\[CQ:[a-z]+.*?\]", RegexOptions.Singleline)]
-        public static partial Regex GetCQArea();
+    [GeneratedRegex(@"\[CQ:[a-z]+.*?\]", RegexOptions.Singleline)]
+    public static partial Regex GetCQArea();
 
-        [GeneratedRegex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline)]
-        public static partial Regex GetCQCode();
+    [GeneratedRegex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline)]
+    public static partial Regex GetCQCode();
 
-        [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
-        public static partial Regex CQCodeRemoveCQAt();
+    [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
+    public static partial Regex CQCodeRemoveCQAt();
 
-        [GeneratedRegex(@"(?<=file=).+?image,subType=\d,url=(.+?)(?=[,\]])")]
-        public static partial Regex CQCodeReplaceImage();
+    [GeneratedRegex(@"(?<=file=).+?image,subType=\d,url=(.+?)(?=[,\]])")]
+    public static partial Regex CQCodeReplaceImage();
 
-        [GeneratedRegex(@",url=.+?(?=[,\]])")]
-        public static partial Regex CQCodeRemoveUrl();
+    [GeneratedRegex(@",url=.+?(?=[,\]])")]
+    public static partial Regex CQCodeRemoveUrl();
 
-        [GeneratedRegex(@",subType=.+?(?=[,\]])")]
-        public static partial Regex CQCodeRemoveSubType();
+    [GeneratedRegex(@",subType=.+?(?=[,\]])")]
+    public static partial Regex CQCodeRemoveSubType();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d{1} 10:00:\d{2}")]
-        public static partial Regex FundAlarmTime1();
+    [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]
+    public static partial Regex HolidayInfo();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d{1} 14:45:\d{2}")]
-        public static partial Regex FundAlarmTime2();
+    [GeneratedRegex(@"\$.+\$")]
+    public static partial Regex ConditionJsonText();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d{1} 14:30:\d{2}")]
-        public static partial Regex FundLimitTime();
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(55|56|57|58|59):\d{2}")]
+    public static partial Regex GenshinResin();
 
-        [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]
-        public static partial Regex HolidayInfo();
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(50|51|52|53|54):\d{2}")]
+    public static partial Regex GenshinDailyMission();
 
-        [GeneratedRegex(@"\$.+\$")]
-        public static partial Regex ConditionJsonText();
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (09|13|18|23|01):(00|01|02|03|04):\d{2}")]
+    public static partial Regex GenshinPotCoin();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(55|56|57|58|59):\d{2}")]
-        public static partial Regex GenshinResin();
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):(00|01|02|03|04):\d{2}")]
+    public static partial Regex GenshinTransformer();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(50|51|52|53|54):\d{2}")]
-        public static partial Regex GenshinDailyMission();
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):(05|06|07|08|09):\d{2}")]
+    public static partial Regex GenshinWbAlarm();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (09|13|18|23|01):(00|01|02|03|04):\d{2}")]
-        public static partial Regex GenshinPotCoin();
+    [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
+    public static partial Regex CmdStart();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):(00|01|02|03|04):\d{2}")]
-        public static partial Regex GenshinTransformer();
+    [GeneratedRegex(@"\[CQ:image.+\]")]
+    public static partial Regex CQImage();
 
-        [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):(05|06|07|08|09):\d{2}")]
-        public static partial Regex GenshinWBAlarm();
+    [GeneratedRegex(@"(?<=url=).+(?=\?)")]
+    public static partial Regex CQImageUrl();
 
-        [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
-        public static partial Regex CmdStart();
-
-        [GeneratedRegex(@"\[CQ:image.+\]")]
-        public static partial Regex CQImage();
-
-        [GeneratedRegex(@"(?<=url=).+(?=\?)")]
-        public static partial Regex CQImageUrl();
-
-        [GeneratedRegex(@"""echo"":""(.+?)""")]
-        public static partial Regex CQAPI_GetEcho();
-    }
+    [GeneratedRegex(@"""echo"":""(.+?)""")]
+    public static partial Regex CQAPI_GetEcho();
 }
