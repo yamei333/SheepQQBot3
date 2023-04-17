@@ -1,6 +1,5 @@
-﻿namespace SheepQQBot3.SDK.Client
+﻿namespace SheepQQBot3.SDK.Client;
+
+partial class CQAPI
 {
-    partial class CQAPI
-    {
-    }
 }

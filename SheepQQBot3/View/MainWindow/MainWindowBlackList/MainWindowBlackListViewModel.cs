@@ -1,29 +1,28 @@
-﻿namespace SheepQQBot3.View
+﻿namespace SheepQQBot3.View;
+
+public partial class MainWindowBlackListViewModel : MainWindowViewModelBase
 {
-    public partial class MainWindowBlackListViewModel : MainWindowViewModelBase
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public MainWindowBlackListViewModel()
     {
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public MainWindowBlackListViewModel()
-        {
-        }
+    }
 
-        private long? _selectedMemberId;
-        /// <summary>
-        /// 选中的成员ID
-        /// </summary>
-        public long? SelectedMemberId
+    private long? _selectedMemberId;
+    /// <summary>
+    /// 选中的成员ID
+    /// </summary>
+    public long? SelectedMemberId
+    {
+        get => _selectedMemberId;
+        set
         {
-            get => _selectedMemberId;
-            set
-            {
-                if (_selectedMemberId == value)
-                    return;
+            if (_selectedMemberId == value)
+                return;
 
-                _selectedMemberId = value;
-                OnPropertyChanged(nameof(SelectedMemberId));
-            }
+            _selectedMemberId = value;
+            OnPropertyChanged(nameof(SelectedMemberId));
         }
     }
 }

@@ -5,237 +5,236 @@ using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 
-namespace SheepQQBot3.Model.Config
+namespace SheepQQBot3.Model.Config;
+
+/// <summary>
+/// 运行日志
+/// </summary>
+public class RunLog
 {
+    private const string DefaultColor = "Black";
+    private const string SystemSenderId = "系统";
+
+    [JsonIgnore]
+    public string DateTimeStr => _logDate.ToString("HH:mm:ss");
+
+    [JsonIgnore]
+    public string DateTimeStrFFF => _logDate.ToString("HH:mm:ss.fff");
+
+    [JsonIgnore]
+    public string ContentTitle => Content.ByteSubstring(80, "...");
+
+    [JsonIgnore]
+    public bool IsWarp => Encoding.Default.GetBytes(Content).Length > 42;
+
+    [JsonIgnore]
+    public bool IsGroupMessage => LogMessageType == LogMessageType.GroupMessage;
+
     /// <summary>
-    /// 运行日志
+    /// 是否有GroudId
     /// </summary>
-    public class RunLog
-    {
-        private const string DefaultColor = "Black";
-        private const string SystemSenderId = "系统";
+    [JsonIgnore]
+    public bool HasGroupId => !string.IsNullOrEmpty(GroupId);
 
-        [JsonIgnore]
-        public string DateTimeStr => _logDate.ToString("HH:mm:ss");
+    public LogMessageType LogMessageType { get; set; }
 
-        [JsonIgnore]
-        public string DateTimeStrFFF => _logDate.ToString("HH:mm:ss.fff");
+    [JsonIgnore]
+    public string TargetTypeStr => TargetType.GetDisplay();
 
-        [JsonIgnore]
-        public string ContentTitle => Content.ByteSubstring(80, "...");
+    public BotConfigTargetType TargetType { get; set; }
+    public string OperatorId { get; set; }
+    public string SenderId { get; set; }
+    public string GroupId { get; set; }
+    public string TargetId { get; set; }
 
-        [JsonIgnore]
-        public bool IsWarp => Encoding.Default.GetBytes(Content).Length > 42;
+    /// <summary>
+    /// 其他ID
+    /// </summary>
+    public string OtherId { get; set; }
 
-        [JsonIgnore]
-        public bool IsGroupMessage => LogMessageType == LogMessageType.GroupMessage;
+    public string MessageId { get; set; }
+    public string Content { get; set; }
+    public bool IsBlackList { get; set; }
 
-        /// <summary>
-        /// 是否有GroudId
-        /// </summary>
-        [JsonIgnore]
-        public bool HasGroupId => !string.IsNullOrEmpty(GroupId);
+    private readonly DateTime _logDate;
 
-        public LogMessageType LogMessageType { get; set; }
-
-        [JsonIgnore]
-        public string TargetTypeStr => TargetType.GetDisplay();
-
-        public BotConfigTargetType TargetType { get; set; }
-        public string OperatorId { get; set; }
-        public string SenderId { get; set; }
-        public string GroupId { get; set; }
-        public string TargetId { get; set; }
-
-        /// <summary>
-        /// 其他ID
-        /// </summary>
-        public string OtherId { get; set; }
-
-        public string MessageId { get; set; }
-        public string Content { get; set; }
-        public bool IsBlackList { get; set; }
-
-        private readonly DateTime _logDate;
-
-        /// <summary>
-        /// 消息颜色
-        /// </summary>
-        public string MessageColor
-            => LogMessageType switch
-            {
-                LogMessageType.MetaData => DefaultColor,
-                LogMessageType.GroupMessage => DefaultColor,
-                LogMessageType.GroupRevokeMessage => DefaultColor,
-                LogMessageType.GroupPoke => DefaultColor,
-                LogMessageType.System_Info => DefaultColor,
-                LogMessageType.AlarmAide => DefaultColor,
-                LogMessageType.FundHelper => DefaultColor,
-                LogMessageType.LiveAlarm => DefaultColor,
-                LogMessageType.GenshinDailyNoteAlarm => DefaultColor,
-                LogMessageType.System_Error => "Red",
-                LogMessageType.System_Warning => "Blue",
-                LogMessageType.BlockedByServer => "Blue",
-                _ => throw new ArgumentOutOfRangeException()
-            };
-
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, string content)
+    /// <summary>
+    /// 消息颜色
+    /// </summary>
+    public string MessageColor
+        => LogMessageType switch
         {
-            _logDate = DateTime.Now;
-            LogMessageType = logMessageType;
-            TargetType = targetType;
-            SenderId = SystemSenderId;
-            Content = content;
-            IsBlackList = false;
-        }
+            LogMessageType.MetaData => DefaultColor,
+            LogMessageType.GroupMessage => DefaultColor,
+            LogMessageType.GroupRevokeMessage => DefaultColor,
+            LogMessageType.GroupPoke => DefaultColor,
+            LogMessageType.System_Info => DefaultColor,
+            LogMessageType.AlarmAide => DefaultColor,
+            LogMessageType.FundHelper => DefaultColor,
+            LogMessageType.LiveAlarm => DefaultColor,
+            LogMessageType.GenshinDailyNoteAlarm => DefaultColor,
+            LogMessageType.System_Error => "Red",
+            LogMessageType.System_Warning => "Blue",
+            LogMessageType.BlockedByServer => "Blue",
+            _ => throw new ArgumentOutOfRangeException()
+        };
 
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, long senderId, string content)
-            : this(logMessageType, targetType, content)
-        {
-            SenderId = senderId.ToString();
-        }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_SystemInfo : RunLog
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, string content)
     {
-        /// <inheritdoc />
-        public RunLog_SystemInfo(string content)
-            : base(LogMessageType.System_Info, BotConfigTargetType.Common, content)
-        { }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_SystemWarning : RunLog
-    {
-        /// <inheritdoc />
-        public RunLog_SystemWarning(string content)
-            : base(LogMessageType.System_Warning, BotConfigTargetType.Common, content)
-        { }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_SystemError : RunLog
-    {
-        /// <inheritdoc />
-        public RunLog_SystemError(string content)
-            : base(LogMessageType.System_Error, BotConfigTargetType.Common, content)
-        { }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_GroupMessage : RunLog
-    {
-        /// <inheritdoc />
-        public RunLog_GroupMessage(GroupMessage groupMessage)
-            : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.UserId, groupMessage.Message!)
-        {
-            GroupId = groupMessage.GroupId.ToString();
-            MessageId = groupMessage.MessageId.ToString();
-        }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_GroupMessageBlackList : RunLog_GroupMessage
-    {
-        /// <inheritdoc />
-        public RunLog_GroupMessageBlackList(GroupMessage groupMessage)
-            : base(groupMessage)
-        {
-            IsBlackList = true;
-        }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_GroupRevokeMessage : RunLog
-    {
-        /// <inheritdoc />
-        public RunLog_GroupRevokeMessage(GroupRevokeMessage groupRevokeMessage)
-            : base(LogMessageType.GroupRevokeMessage, BotConfigTargetType.Group, groupRevokeMessage.UserId, "撤回消息")
-        {
-            OperatorId = groupRevokeMessage.OperatorId.ToString();
-            GroupId = groupRevokeMessage.GroupId.ToString();
-            MessageId = groupRevokeMessage.MessageId.ToString();
-        }
-    }
-
-    /// <inheritdoc />
-    public class RunLog_GroupPoke : RunLog
-    {
-        /// <inheritdoc />
-        public RunLog_GroupPoke(GroupPoke groupPoke)
-            : base(LogMessageType.GroupPoke, BotConfigTargetType.Group, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
-        {
-            OperatorId = groupPoke.SenderId.ToString();
-            GroupId = groupPoke.GroupId.ToString();
-            TargetId = groupPoke.TargetId.ToString();
-        }
+        _logDate = DateTime.Now;
+        LogMessageType = logMessageType;
+        TargetType = targetType;
+        SenderId = SystemSenderId;
+        Content = content;
+        IsBlackList = false;
     }
 
     /// <summary>
-    /// 闹钟助手日志类型
+    /// 初始化
     /// </summary>
-    public class RunLog_AlarmAide : RunLog
+    protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, long senderId, string content)
+        : this(logMessageType, targetType, content)
     {
-        /// <inheritdoc />
-        public RunLog_AlarmAide(BotConfigTargetType targetType, long targetId, string content)
-            : base(LogMessageType.AlarmAide, targetType, targetId, content)
-        {
-        }
+        SenderId = senderId.ToString();
     }
+}
 
-    /// <summary>
-    /// 基金助手日志类型
-    /// </summary>
-    public class RunLog_FundHelper : RunLog
+/// <inheritdoc />
+public class RunLog_SystemInfo : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_SystemInfo(string content)
+        : base(LogMessageType.System_Info, BotConfigTargetType.Common, content)
+    { }
+}
+
+/// <inheritdoc />
+public class RunLog_SystemWarning : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_SystemWarning(string content)
+        : base(LogMessageType.System_Warning, BotConfigTargetType.Common, content)
+    { }
+}
+
+/// <inheritdoc />
+public class RunLog_SystemError : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_SystemError(string content)
+        : base(LogMessageType.System_Error, BotConfigTargetType.Common, content)
+    { }
+}
+
+/// <inheritdoc />
+public class RunLog_GroupMessage : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_GroupMessage(GroupMessage groupMessage)
+        : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.UserId, groupMessage.Message!)
     {
-        /// <inheritdoc />
-        public RunLog_FundHelper(BotConfigTargetType targetType, long targetId, string content)
-            : base(LogMessageType.FundHelper, targetType, targetId, content)
-        {
-        }
+        GroupId = groupMessage.GroupId.ToString();
+        MessageId = groupMessage.MessageId.ToString();
     }
+}
 
-    /// <summary>
-    /// 直播提醒日志类型
-    /// </summary>
-    public class RunLog_LiveAlarm : RunLog
+/// <inheritdoc />
+public class RunLog_GroupMessageBlackList : RunLog_GroupMessage
+{
+    /// <inheritdoc />
+    public RunLog_GroupMessageBlackList(GroupMessage groupMessage)
+        : base(groupMessage)
     {
-        /// <inheritdoc />
-        public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
-            : base(LogMessageType.LiveAlarm, targetType, targetId, content)
-        {
-            OtherId = otherId;
-        }
+        IsBlackList = true;
     }
+}
 
-    /// <summary>
-    /// 原神每日提醒日志类型
-    /// </summary>
-    public class RunLog_GenshinDailyNoteAlarm : RunLog
+/// <inheritdoc />
+public class RunLog_GroupRevokeMessage : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_GroupRevokeMessage(GroupRevokeMessage groupRevokeMessage)
+        : base(LogMessageType.GroupRevokeMessage, BotConfigTargetType.Group, groupRevokeMessage.UserId, "撤回消息")
     {
-        /// <inheritdoc />
-        public RunLog_GenshinDailyNoteAlarm(BotConfigTargetType targetType, long senderId, string content)
-            : base(LogMessageType.GenshinDailyNoteAlarm, targetType, senderId, content)
-        {
-        }
+        OperatorId = groupRevokeMessage.OperatorId.ToString();
+        GroupId = groupRevokeMessage.GroupId.ToString();
+        MessageId = groupRevokeMessage.MessageId.ToString();
     }
+}
 
-    /// <summary>
-    /// 风控消息(发送被屏蔽)
-    /// </summary>
-    public class RunLog_BlockedByServer : RunLog
+/// <inheritdoc />
+public class RunLog_GroupPoke : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_GroupPoke(GroupPoke groupPoke)
+        : base(LogMessageType.GroupPoke, BotConfigTargetType.Group, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
     {
-        /// <inheritdoc />
-        public RunLog_BlockedByServer(string message)
-            : base(LogMessageType.BlockedByServer, BotConfigTargetType.Common, message)
-        {
-        }
+        OperatorId = groupPoke.SenderId.ToString();
+        GroupId = groupPoke.GroupId.ToString();
+        TargetId = groupPoke.TargetId.ToString();
+    }
+}
+
+/// <summary>
+/// 闹钟助手日志类型
+/// </summary>
+public class RunLog_AlarmAide : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_AlarmAide(BotConfigTargetType targetType, long targetId, string content)
+        : base(LogMessageType.AlarmAide, targetType, targetId, content)
+    {
+    }
+}
+
+/// <summary>
+/// 基金助手日志类型
+/// </summary>
+public class RunLog_FundHelper : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_FundHelper(BotConfigTargetType targetType, long targetId, string content)
+        : base(LogMessageType.FundHelper, targetType, targetId, content)
+    {
+    }
+}
+
+/// <summary>
+/// 直播提醒日志类型
+/// </summary>
+public class RunLog_LiveAlarm : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
+        : base(LogMessageType.LiveAlarm, targetType, targetId, content)
+    {
+        OtherId = otherId;
+    }
+}
+
+/// <summary>
+/// 原神每日提醒日志类型
+/// </summary>
+public class RunLog_GenshinDailyNoteAlarm : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_GenshinDailyNoteAlarm(BotConfigTargetType targetType, long senderId, string content)
+        : base(LogMessageType.GenshinDailyNoteAlarm, targetType, senderId, content)
+    {
+    }
+}
+
+/// <summary>
+/// 风控消息(发送被屏蔽)
+/// </summary>
+public class RunLog_BlockedByServer : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_BlockedByServer(string message)
+        : base(LogMessageType.BlockedByServer, BotConfigTargetType.Common, message)
+    {
     }
 }

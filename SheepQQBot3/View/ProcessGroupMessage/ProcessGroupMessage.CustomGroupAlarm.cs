@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -9,204 +10,201 @@ using SheepQQBot3.Model.Extension;
 using Yamei.Common;
 using static SheepQQBot3.View.PublicVar;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public static partial class ProcessGroupMessage
 {
-    public static partial class ProcessGroupMessage
+    /// <summary>
+    /// 群提醒方法命令的开头
+    /// </summary>
+    private const string COMMAND_CUSTOM_GROUP_ALARM_LIBRARY = "#YM#";
+
+    /// <summary>
+    /// 自定义群提醒
+    /// <para>可在群内设置消息提醒</para>
+    /// </summary>
+    /// <param name="customGroupAlarms"></param>
+    /// <param name="groupMessage"></param>
+    /// <returns></returns>
+    public static async Task<bool> CustomGroupAlarmAsync(Dictionary<Guid, CustomGroupAlarm> customGroupAlarms, GroupMessage groupMessage)
     {
-        /// <summary>
-        /// 群提醒方法命令的开头
-        /// </summary>
-        private const string COMMAND_CUSTOM_GROUP_ALARM_LIBRARY = "#YM#";
+        var groupId = groupMessage.GroupId;
+        var targetId = groupMessage.Sender.UserId;
+        var message = groupMessage.Message;
+        var upperMessage = message.ToUpper();
+        if (!upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY))
+            return false;
 
-        /// <summary>
-        /// 自定义群提醒
-        /// <para>可在群内设置消息提醒</para>
-        /// </summary>
-        /// <param name="customGroupAlarms"></param>
-        /// <param name="groupMessage"></param>
-        /// <returns></returns>
-        public static bool CustomGroupAlarm(Dictionary<Guid, CustomGroupAlarm> customGroupAlarms, GroupMessage groupMessage)
+        var sendMessage = new StringBuilder();
+        var dateNow = DateTime.Now;
+        try
         {
-            var groupId = groupMessage.GroupId;
-            var targetId = groupMessage.Sender.UserId;
-            var message = groupMessage.Message;
-            var upperMessage = message.ToUpper();
-            if (!upperMessage.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY))
-                return false;
+            var changedMessageSpace = message[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..]
+                .Replace(COMMA_FULL, COMMA);
 
-            var sendMessage = new StringBuilder();
-            var dateNow = DateTime.Now;
-            try
+            var changedMessage = changedMessageSpace
+                .Replace(SPACE, string.Empty);
+
+            var (startChar1, startChar2) = GetStartChar(upperMessage[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..]);
+            var isNoAt = false;
+            var isNoReply = false;
+            var groupAlarms = customGroupAlarms.ToValueList();
+            switch (startChar1)
             {
-                var changedMessageSpace = message
-                    .Substring(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length)
-                    .Replace(COMMA_FULL, COMMA);
+                case 'C':
+                    var errorMsg = $"{PublicVar.ENTER}输入格式有误, 请输入 #ym#ch 查询帮助!";
+                    var messageArraySpace = changedMessageSpace.Split(COMMA);
+                    //var messageArray = changedMessage.Split(COMMA);
+                    //switch (messageArraySpace.Length)
+                    //{
+                    //    case 4:
+                    //        isNoAt = messageArray[3].Equals("1");
+                    //        isNoResponse = messageArray[2].Equals("1");
+                    //        break;
+                    //    case 3:
+                    //        isNoResponse = messageArray[2].Equals("1");
+                    //        break;
+                    //    default:
+                    //        break;
+                    //}
 
-                var changedMessage = changedMessageSpace
-                    .Replace(SPACE, string.Empty);
-
-                var (startChar1, startChar2) = GetStartChar(upperMessage.Substring(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length));
-                var isNoAt = false;
-                var isNoReply = false;
-                var groupAlarms = customGroupAlarms.ToValueList();
-                switch (startChar1)
-                {
-                    case 'C':
-                        var errorMsg = $"{PublicVar.ENTER}输入格式有误, 请输入 #ym#ch 查询帮助!";
-                        var messageArraySpace = changedMessageSpace.Split(COMMA);
-                        //var messageArray = changedMessage.Split(COMMA);
-                        //switch (messageArraySpace.Length)
-                        //{
-                        //    case 4:
-                        //        isNoAt = messageArray[3].Equals("1");
-                        //        isNoResponse = messageArray[2].Equals("1");
-                        //        break;
-                        //    case 3:
-                        //        isNoResponse = messageArray[2].Equals("1");
-                        //        break;
-                        //    default:
-                        //        break;
-                        //}
-
-                        switch (startChar2)
-                        {
-                            case 'H':
-                                isNoReply = false;
-                                sendMessage.Append($" 群提醒功能介绍:" +
-                                    $"{ENTER}#ym#ca收菜,60 -> 60分钟后发送提醒消息, 内容为'收菜'" +
-                                    $"{ENTER}#ym#ca收菜,2019-7-13 19:00 -> 在指定时间(只精确到分)发送提醒消息, 内容为'收菜'" +
-                                    $"{ENTER}#ym#ca收菜,19:00 -> 同上, 省略日期时为当天提醒" +
-                                    $"{ENTER}#ym#cd2019-7-13 19:00 -> 删除2019-7-13 19:00的提醒, 如用分钟增加的提醒可以用cl命令查询具体时间" +
-                                    $"{ENTER}#ym#cl -> 列出当前还未提醒的项目" +
-                                    $"{ENTER}特殊参数: (在消息内包含)" +
-                                    $"{ENTER}[at-22222] at某人" +
-                                    $"{ENTER}[-na] 提醒时不at自己" +
-                                    $"{ENTER}[-nr] 添加提醒时不发送反馈");
-                                break;
-                            case 'A':
-                                var isTimeFormat = messageArraySpace[1].Contains(":");
-                                //var addMessage = TextExtensions.Replace2CQCode(messageArraySpace[0].Substring(2));
-                                string addMessage;
-                                (addMessage, isNoAt, isNoReply) = messageArraySpace[0].Substring(2).ToCqCode(targetId);
-                                if (isTimeFormat && DateTime.TryParse(messageArraySpace[1], out var addDate))
+                    switch (startChar2)
+                    {
+                        case 'H':
+                            isNoReply = false;
+                            sendMessage.Append($" 群提醒功能介绍:" +
+                                               $"{ENTER}#ym#ca收菜,60 -> 60分钟后发送提醒消息, 内容为'收菜'" +
+                                               $"{ENTER}#ym#ca收菜,2019-7-13 19:00 -> 在指定时间(只精确到分)发送提醒消息, 内容为'收菜'" +
+                                               $"{ENTER}#ym#ca收菜,19:00 -> 同上, 省略日期时为当天提醒" +
+                                               $"{ENTER}#ym#cd2019-7-13 19:00 -> 删除2019-7-13 19:00的提醒, 如用分钟增加的提醒可以用cl命令查询具体时间" +
+                                               $"{ENTER}#ym#cl -> 列出当前还未提醒的项目" +
+                                               $"{ENTER}特殊参数: (在消息内包含)" +
+                                               $"{ENTER}[at-22222] at某人" +
+                                               $"{ENTER}[-na] 提醒时不at自己" +
+                                               $"{ENTER}[-nr] 添加提醒时不发送反馈");
+                            break;
+                        case 'A':
+                            var isTimeFormat = messageArraySpace[1].Contains(':');
+                            //var addMessage = TextExtensions.Replace2CQCode(messageArraySpace[0].Substring(2));
+                            (var addMessage, isNoAt, isNoReply) = messageArraySpace[0][2..].ToCqCode(targetId);
+                            if (isTimeFormat && DateTime.TryParse(messageArraySpace[1], out var addDate))
+                            {
+                                AddCustomAlarm(addDate, addMessage);
+                            }
+                            else
+                            {
+                                if (isTimeFormat && DateTime.TryParse($"{dateNow.ToYYYYMDD()} {messageArraySpace[1]}", out var addDate2))
                                 {
-                                    AddCustomAlarm(addDate, addMessage);
+                                    AddCustomAlarm(addDate2, addMessage);
                                 }
                                 else
                                 {
-                                    if (isTimeFormat && DateTime.TryParse($"{dateNow.ToYYYYMDD()} {messageArraySpace[1]}", out var addDate2))
-                                    {
-                                        AddCustomAlarm(addDate2, addMessage);
-                                    }
+                                    if (int.TryParse(messageArraySpace[1], out var addMinute))
+                                        AddCustomAlarm(dateNow.AddMinutes(addMinute), addMessage);
                                     else
-                                    {
-                                        if (int.TryParse(messageArraySpace[1], out var addMinute))
-                                            AddCustomAlarm(dateNow.AddMinutes(addMinute), addMessage);
-                                        else
-                                            sendMessage.Append(errorMsg);
-                                    }
-                                }
-                                break;
-                            case 'D':
-                                var deleteInfo = messageArraySpace[0].Substring(2);
-                                if (DateTime.TryParse(deleteInfo, out var deleteDate))
-                                {
-                                    DeleteUserAlarmCustom(deleteDate);
-                                }
-                                else
-                                {
-                                    if (DateTime.TryParse($"{dateNow.ToYYYYMDD()} {deleteInfo}", out var deleteDate2))
-                                    {
-                                        DeleteUserAlarmCustom(deleteDate2);
-                                    }
-                                    else
-                                    {
                                         sendMessage.Append(errorMsg);
-                                    }
                                 }
-                                break;
-                            case 'L':
-                                isNoReply = false;
-                                var listArray = changedMessageSpace.Split(COMMA);
-                                var isShowId = listArray.Length == 2 && listArray[1].Trim() == "1";
-                                groupAlarms
-                                    .Where(each => each.TargetId == targetId)
-                                    .OrderBy(each => each.AlarmDate)
-                                    .ForEach(customGroupAlarm =>
-                                    {
-                                        var alarmMessage = customGroupAlarm.AlarmMessage.ToNormalText();
-                                        alarmMessage = alarmMessage.ByteSubstring(isShowId ? 56 : 20);
-                                        sendMessage.Append($"{ENTER}[{(isShowId ? customGroupAlarm.Id.ToString() : string.Empty)}]"
-                                            + $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}] {alarmMessage}");
-                                    });
-
-                                if (string.IsNullOrEmpty(sendMessage.ToString()))
-                                    sendMessage.Append($"{ENTER}无任何提醒记录!");
-
-                                break;
-                            case 'T':
-                                isNoReply = false;
-                                sendMessage.Append($"{ENTER}{messageArraySpace[0][2..].ToCqCode(targetId).Result}");
-                                break;
-                            default:
-                                sendMessage.Append(errorMsg);
-                                break;
-                        }
-                        break;
-
-                        void AddCustomAlarm(DateTime addDateTime, string addMessage)
-                        {
-                            var addDateString = addDateTime.ToYYYYMMDDHHMMSS();
-                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - addDateTime).TotalSeconds == 0);
-                            if (groupAlarm != null)
+                            }
+                            break;
+                        case 'D':
+                            var deleteInfo = messageArraySpace[0][2..];
+                            if (DateTime.TryParse(deleteInfo, out var deleteDate))
                             {
-                                // 有记录, 则提示
-                                sendMessage.Append($"{ENTER}已存在 {addDateString} 的提醒记录!" +
-                                    $"{ENTER}提醒内容: {groupAlarm.AlarmMessage}");
+                                DeleteUserAlarmCustom(deleteDate);
                             }
                             else
                             {
-                                // 无记录, 则添加并发送反馈
-                                var newId = Guid.NewGuid();
-                                customGroupAlarms.Add(newId, new CustomGroupAlarm(newId, groupId, targetId, addDateTime, addMessage, !isNoAt));
-                                sendMessage.Append($"{ENTER}已添加时间为 {addDateString} 的提醒记录!");
-                                ConfigExtensions.SaveConfig();
+                                if (DateTime.TryParse($"{dateNow.ToYYYYMDD()} {deleteInfo}", out var deleteDate2))
+                                {
+                                    DeleteUserAlarmCustom(deleteDate2);
+                                }
+                                else
+                                {
+                                    sendMessage.Append(errorMsg);
+                                }
                             }
-                        }
+                            break;
+                        case 'L':
+                            isNoReply = false;
+                            var listArray = changedMessageSpace.Split(COMMA);
+                            var isShowId = listArray.Length == 2 && listArray[1].Trim() == "1";
+                            groupAlarms
+                                .Where(each => each.TargetId == targetId)
+                                .OrderBy(each => each.AlarmDate)
+                                .ForEach(customGroupAlarm =>
+                                {
+                                    var alarmMessage = customGroupAlarm.AlarmMessage.ToNormalText();
+                                    alarmMessage = alarmMessage.ByteSubstring(isShowId ? 56 : 20);
+                                    sendMessage.Append($"{ENTER}[{(isShowId ? customGroupAlarm.Id.ToString() : string.Empty)}]"
+                                                       + $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}] {alarmMessage}");
+                                });
 
-                        void DeleteUserAlarmCustom(DateTime deleteDateTime)
+                            if (string.IsNullOrEmpty(sendMessage.ToString()))
+                                sendMessage.Append($"{ENTER}无任何提醒记录!");
+
+                            break;
+                        case 'T':
+                            isNoReply = false;
+                            sendMessage.Append($"{ENTER}{messageArraySpace[0][2..].ToCqCode(targetId).Result}");
+                            break;
+                        default:
+                            sendMessage.Append(errorMsg);
+                            break;
+                    }
+                    break;
+
+                    void AddCustomAlarm(DateTime addDateTime, string addMessage)
+                    {
+                        var addDateString = addDateTime.ToYYYYMMDDHHMMSS();
+                        var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - addDateTime).TotalSeconds == 0);
+                        if (groupAlarm != null)
                         {
-                            var deleteDateString = deleteDateTime.ToYYYYMMDDHHMMSS();
-                            var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - deleteDateTime).TotalSeconds <= 1);
-                            if (groupAlarm != null)
-                            {
-                                // 有记录, 则删除并发送反馈
-                                var deleteId = groupAlarm.Id;
-                                customGroupAlarms.Remove(deleteId);
-                                sendMessage.Append($"{ENTER}已删除 {deleteDateString}({deleteId}) 的提醒记录!");
-                            }
-                            else
-                            {
-                                // 无记录, 则提醒错误
-                                sendMessage.Append($"{ENTER}不存在 {deleteDateString} 的提醒记录!");
-                            }
+                            // 有记录, 则提示
+                            sendMessage.Append($"{ENTER}已存在 {addDateString} 的提醒记录!" +
+                                               $"{ENTER}提醒内容: {groupAlarm.AlarmMessage}");
                         }
-                    default:
-                        // 不支持提示
-                        isNoReply = false;
-                        sendMessage.Append($"{ENTER}不支持的命令内容!");
-                        break;
-                }
+                        else
+                        {
+                            // 无记录, 则添加并发送反馈
+                            var newId = Guid.NewGuid();
+                            customGroupAlarms.Add(newId, new CustomGroupAlarm(newId, groupId, targetId, addDateTime, addMessage, !isNoAt));
+                            sendMessage.Append($"{ENTER}已添加时间为 {addDateString} 的提醒记录!");
+                            ConfigExtensions.SaveConfig();
+                        }
+                    }
 
-                if (!isNoReply)
-                    Api.SendGroupMessageAsync(groupId, $"{(isNoAt ? string.Empty : CQCode.At(targetId))}{sendMessage}");
-            }
-            catch (Exception)
-            {
-                return false;
+                    void DeleteUserAlarmCustom(DateTime deleteDateTime)
+                    {
+                        var deleteDateString = deleteDateTime.ToYYYYMMDDHHMMSS();
+                        var groupAlarm = groupAlarms.FirstOrDefault(each => (each.AlarmDate - deleteDateTime).TotalSeconds <= 1);
+                        if (groupAlarm != null)
+                        {
+                            // 有记录, 则删除并发送反馈
+                            var deleteId = groupAlarm.Id;
+                            customGroupAlarms.Remove(deleteId);
+                            sendMessage.Append($"{ENTER}已删除 {deleteDateString}({deleteId}) 的提醒记录!");
+                        }
+                        else
+                        {
+                            // 无记录, 则提醒错误
+                            sendMessage.Append($"{ENTER}不存在 {deleteDateString} 的提醒记录!");
+                        }
+                    }
+                default:
+                    // 不支持提示
+                    isNoReply = false;
+                    sendMessage.Append($"{ENTER}不支持的命令内容!");
+                    break;
             }
 
-            return true;
+            if (!isNoReply)
+                await Api.SendGroupMessageAsync(groupId, $"{(isNoAt ? string.Empty : CQCode.At(targetId))}{sendMessage}").ConfigureAwait(false);
         }
+        catch (Exception)
+        {
+            return false;
+        }
+
+        return true;
     }
 }

@@ -1,81 +1,80 @@
 ﻿using System.Collections.Generic;
 using SheepQQBot3.Model.Config;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public partial class MainWindowAlarmAideViewModel : MainWindowViewModelBase
 {
-    public partial class MainWindowAlarmAideViewModel : MainWindowViewModelBase
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public MainWindowAlarmAideViewModel()
     {
-        /// <summary>
-        /// 初始化
-        /// </summary>
-        public MainWindowAlarmAideViewModel()
+    }
+
+    private AlarmAideConfig _selectedAlarmAideConfig;
+    public AlarmAideConfig SelectedAlarmAideConfig
+    {
+        get => _selectedAlarmAideConfig;
+        set
         {
+            if (_selectedAlarmAideConfig == value)
+                return;
+
+            _selectedAlarmAideConfig = value;
+            SelectedAlarmText = default;
+            OnPropertyChanged(nameof(SelectedAlarmAideConfig));
         }
+    }
 
-        private AlarmAideConfig _selectedAlarmAideConfig;
-        public AlarmAideConfig SelectedAlarmAideConfig
+    private KeyValuePair<int, string> _selectedAlarmText;
+    /// <summary>
+    /// 选中的提醒列表内容
+    /// </summary>
+    public KeyValuePair<int, string> SelectedAlarmText
+    {
+        get => _selectedAlarmText;
+        set
         {
-            get => _selectedAlarmAideConfig;
-            set
-            {
-                if (_selectedAlarmAideConfig == value)
-                    return;
+            if (_selectedAlarmText.Key == value.Key && _selectedAlarmText.Value == value.Value)
+                return;
 
-                _selectedAlarmAideConfig = value;
-                SelectedAlarmText = default;
-                OnPropertyChanged(nameof(SelectedAlarmAideConfig));
-            }
+            _selectedAlarmText = value;
+            OnPropertyChanged(nameof(SelectedAlarmText));
         }
+    }
 
-        private KeyValuePair<int, string> _selectedAlarmText;
-        /// <summary>
-        /// 选中的提醒列表内容
-        /// </summary>
-        public KeyValuePair<int, string> SelectedAlarmText
+    private int _selectedMemberId;
+    /// <summary>
+    /// 选中的提醒列表内容
+    /// </summary>
+    public int SelectedMemberId
+    {
+        get => _selectedMemberId;
+        set
         {
-            get => _selectedAlarmText;
-            set
-            {
-                if (_selectedAlarmText.Key == value.Key && _selectedAlarmText.Value == value.Value)
-                    return;
+            if (_selectedMemberId == value)
+                return;
 
-                _selectedAlarmText = value;
-                OnPropertyChanged(nameof(SelectedAlarmText));
-            }
+            _selectedMemberId = value;
+            OnPropertyChanged(nameof(SelectedMemberId));
         }
+    }
 
-        private int _selectedMemberId;
-        /// <summary>
-        /// 选中的提醒列表内容
-        /// </summary>
-        public int SelectedMemberId
+    private bool _isSingleSelectedAlarmAideText;
+    /// <summary>
+    /// 是否单选提醒列表内容
+    /// </summary>
+    public bool IsSingleSelectedAlarmAideText
+    {
+        get => _isSingleSelectedAlarmAideText;
+        set
         {
-            get => _selectedMemberId;
-            set
-            {
-                if (_selectedMemberId == value)
-                    return;
+            if (_isSingleSelectedAlarmAideText == value)
+                return;
 
-                _selectedMemberId = value;
-                OnPropertyChanged(nameof(SelectedMemberId));
-            }
-        }
-
-        private bool _isSingleSelectedAlarmAideText;
-        /// <summary>
-        /// 是否单选提醒列表内容
-        /// </summary>
-        public bool IsSingleSelectedAlarmAideText
-        {
-            get => _isSingleSelectedAlarmAideText;
-            set
-            {
-                if (_isSingleSelectedAlarmAideText == value)
-                    return;
-
-                _isSingleSelectedAlarmAideText = value;
-                OnPropertyChanged(nameof(IsSingleSelectedAlarmAideText));
-            }
+            _isSingleSelectedAlarmAideText = value;
+            OnPropertyChanged(nameof(IsSingleSelectedAlarmAideText));
         }
     }
 }

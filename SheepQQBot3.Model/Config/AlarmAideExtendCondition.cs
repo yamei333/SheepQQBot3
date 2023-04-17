@@ -1,10 +1,9 @@
 ﻿using System.Text.Json.Serialization;
 
-namespace SheepQQBot3.Model.Config
+namespace SheepQQBot3.Model.Config;
+
+public class AlarmAideExtendCondition
 {
-    public class AlarmAideExtendCondition
-    {
-        [JsonPropertyName("dayofmonthoffset")]
-        public int? DayOfMonthOffset { get; set; }
-    }
+    [JsonPropertyName("dayofmonthoffset")]
+    public int? DayOfMonthOffset { get; set; }
 }

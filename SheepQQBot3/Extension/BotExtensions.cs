@@ -38,7 +38,7 @@ public static class BotExtensions
         processes.ForEach(each => each.Kill());
     }
 
-    public static string GetSetuSuccessPercent(int setuDoushiLv)
+    public static string GetSetuSuccessPercent(long setuDoushiLv)
     {
         var failedSum = 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
                             + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))

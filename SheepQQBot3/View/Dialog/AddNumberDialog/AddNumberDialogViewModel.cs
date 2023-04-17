@@ -1,29 +1,28 @@
 ﻿using SheepQQBot3.Model;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public class AddNumberDialogViewModel : NotifyPropertyChangedBase
 {
-    public class AddNumberDialogViewModel : NotifyPropertyChangedBase
+    public AddNumberDialogViewModel()
     {
-        public AddNumberDialogViewModel()
-        {
-            AddNumber = null;
-        }
+        AddNumber = null;
+    }
 
-        private int? _addNumber;
-        /// <summary>
-        /// 新增的数字
-        /// </summary>
-        public int? AddNumber
+    private int? _addNumber;
+    /// <summary>
+    /// 新增的数字
+    /// </summary>
+    public int? AddNumber
+    {
+        get => _addNumber;
+        set
         {
-            get => _addNumber;
-            set
-            {
-                if (_addNumber == value)
-                    return;
+            if (_addNumber == value)
+                return;
 
-                _addNumber = value;
-                OnPropertyChanged(nameof(AddNumber));
-            }
+            _addNumber = value;
+            OnPropertyChanged(nameof(AddNumber));
         }
     }
 }

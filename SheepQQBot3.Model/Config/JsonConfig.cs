@@ -1,16 +1,15 @@
 ﻿using MessagePack;
 
-namespace SheepQQBot3.Model.Config
-{
-    [MessagePackObject]
-    public class JsonConfig
-    {
-        [Key(nameof(JsonConfigString))]
-        public string JsonConfigString { get; set; }
+namespace SheepQQBot3.Model.Config;
 
-        public JsonConfig(string jsonConfigString)
-        {
-            JsonConfigString = jsonConfigString;
-        }
+[MessagePackObject]
+public class JsonConfig
+{
+    [Key(nameof(JsonConfigString))]
+    public string JsonConfigString { get; set; }
+
+    public JsonConfig(string jsonConfigString)
+    {
+        JsonConfigString = jsonConfigString;
     }
 }

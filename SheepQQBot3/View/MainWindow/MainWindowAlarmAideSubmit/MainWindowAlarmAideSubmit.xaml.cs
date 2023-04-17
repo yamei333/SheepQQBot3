@@ -4,59 +4,58 @@ using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using Yamei.Common;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+/// <summary>
+/// MainWindowAlarmAideSubmit.xaml 的交互逻辑
+/// </summary>
+public partial class MainWindowAlarmAideSubmit
 {
-    /// <summary>
-    /// MainWindowAlarmAideSubmit.xaml 的交互逻辑
-    /// </summary>
-    public partial class MainWindowAlarmAideSubmit
+    private static MainWindowAlarmAideSubmitViewModel _vm => PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
+
+    public MainWindowAlarmAideSubmit()
     {
-        private static MainWindowAlarmAideSubmitViewModel _vm => PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
+        InitializeComponent();
+    }
 
-        public MainWindowAlarmAideSubmit()
-        {
-            InitializeComponent();
-        }
+    private void MainWindowAlarmAideSubmit_OnLoaded(object sender, RoutedEventArgs e)
+    {
+        DataContext = PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
+        _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
+    }
 
-        private void MainWindowAlarmAideSubmit_OnLoaded(object sender, RoutedEventArgs e)
-        {
-            DataContext = PublicVar.Vm.MainWindowAlarmAideSubmitViewModel;
-            _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
-        }
+    /// <summary>
+    /// 闹钟助手投稿配置内容列表-新增
+    /// </summary>
+    private void AlarmAideSubmitMemberList_OnAdd(object sender, RoutedEventArgs e)
+    {
+        var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "闹钟助手投稿ID");
+        if (addNumberDialog.ShowDialog() != true)
+            return;
 
-        /// <summary>
-        /// 闹钟助手投稿配置内容列表-新增
-        /// </summary>
-        private void AlarmAideSubmitMemberList_OnAdd(object sender, RoutedEventArgs e)
-        {
-            var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "闹钟助手投稿ID");
-            if (addNumberDialog.ShowDialog() != true)
-                return;
+        var alarmAideMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
+        _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
+            .CopyAdd(alarmAideMemberId);
+        _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
+        _vm.SelectedMemberId = alarmAideMemberId;
+        ConfigExtensions.SaveConfig();
+    }
 
-            var alarmAideMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
-                .CopyAdd(alarmAideMemberId);
-            _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
-            _vm.SelectedMemberId = alarmAideMemberId;
-            ConfigExtensions.SaveConfig();
-        }
+    /// <summary>
+    /// 闹钟助手投稿配置内容列表-删除
+    /// </summary>
+    private void AlarmAideSubmitMemberList_OnDelete(object sender, RoutedEventArgs e)
+    {
+        if (!MainWindowUtil.ShowDeleteDialog())
+            return;
 
-        /// <summary>
-        /// 闹钟助手投稿配置内容列表-删除
-        /// </summary>
-        private void AlarmAideSubmitMemberList_OnDelete(object sender, RoutedEventArgs e)
-        {
-            if (!MainWindowUtil.ShowDeleteDialog())
-                return;
+        if (!_vm.SelectedMemberId.HasValue)
+            return;
 
-            if (!_vm.SelectedMemberId.HasValue)
-                return;
-
-            _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
-                .CopyRemove(_vm.SelectedMemberId.Value);
-            _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
-            _vm.SelectedMemberId = null;
-            ConfigExtensions.SaveConfig();
-        }
+        _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
+            .CopyRemove(_vm.SelectedMemberId.Value);
+        _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
+        _vm.SelectedMemberId = null;
+        ConfigExtensions.SaveConfig();
     }
 }

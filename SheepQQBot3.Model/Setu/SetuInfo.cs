@@ -1,75 +1,74 @@
-﻿namespace SheepQQBot3.Model.Setu
+﻿namespace SheepQQBot3.Model.Setu;
+
+/// <summary>
+/// 色图信息
+/// </summary>
+public class SetuInfo
 {
     /// <summary>
-    /// 色图信息
+    /// 默认构造函数
     /// </summary>
-    public class SetuInfo
+    public SetuInfo(
+        SetuType setuType,
+        string sourceText,
+        string sourceUrl,
+        string imageUrl,
+        SetuResult setuResult)
     {
-        /// <summary>
-        /// 默认构造函数
-        /// </summary>
-        public SetuInfo(
-            SetuType setuType,
-            string sourceText,
-            string sourceUrl,
-            string imageUrl,
-            SetuResult setuResult)
-        {
-            SetuType = setuType;
-            SourceText = sourceText;
-            SourceUrl = sourceUrl;
-            ImageUrl = imageUrl;
-            Result = setuResult;
-        }
-
-        /// <summary>
-        /// 默认构造函数
-        /// </summary>
-        public SetuInfo(SetuType setuType, SetuResult result)
-        {
-            SetuType = setuType;
-            Result = result;
-        }
-
-        /// <summary>
-        /// 显示文本
-        /// </summary>
-        public SetuType SetuType { get; set; }
-
-        /// <summary>
-        /// 显示文本
-        /// </summary>
-        public string SourceText { get; set; }
-
-        /// <summary>
-        /// 图源地址
-        /// </summary>
-        public string SourceUrl { get; set; }
-
-        /// <summary>
-        /// 压缩图片地址
-        /// </summary>
-        public string ImageUrl { get; set; }
-
-        /// <summary>
-        /// 色图取得状态
-        /// </summary>
-        public SetuResult Result { get; set; }
+        SetuType = setuType;
+        SourceText = sourceText;
+        SourceUrl = sourceUrl;
+        ImageUrl = imageUrl;
+        Result = setuResult;
     }
 
-    public enum SetuType
+    /// <summary>
+    /// 默认构造函数
+    /// </summary>
+    public SetuInfo(SetuType setuType, SetuResult result)
     {
-        Lolicon,
-        Yuban,
-        NyanCatda,
-        Jitsu,
+        SetuType = setuType;
+        Result = result;
     }
 
-    public enum SetuResult
-    {
-        Successed,
-        ApiError,
-        NoSearchResult,
-        OtherError,
-    }
+    /// <summary>
+    /// 显示文本
+    /// </summary>
+    public SetuType SetuType { get; set; }
+
+    /// <summary>
+    /// 显示文本
+    /// </summary>
+    public string SourceText { get; set; }
+
+    /// <summary>
+    /// 图源地址
+    /// </summary>
+    public string SourceUrl { get; set; }
+
+    /// <summary>
+    /// 压缩图片地址
+    /// </summary>
+    public string ImageUrl { get; set; }
+
+    /// <summary>
+    /// 色图取得状态
+    /// </summary>
+    public SetuResult Result { get; set; }
+}
+
+public enum SetuType
+{
+    Lolicon,
+    Yuban,
+    NyanCatda,
+    Jitsu,
+}
+
+public enum SetuResult
+{
+    Successed,
+    ApiError,
+    NoSearchResult,
+    OtherError,
 }

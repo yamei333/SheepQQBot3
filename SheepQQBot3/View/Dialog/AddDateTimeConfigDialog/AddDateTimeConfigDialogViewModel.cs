@@ -1,47 +1,46 @@
 ﻿using System.ComponentModel;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+public class AddDateTimeConfigDialogViewModel : INotifyPropertyChanged
 {
-    public class AddDateTimeConfigDialogViewModel : INotifyPropertyChanged
+    /// <inheritdoc/>
+    public event PropertyChangedEventHandler PropertyChanged;
+
+    public void OnPropertyChanged(string propertyName)
+        => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
+
+    public AddDateTimeConfigDialogViewModel()
     {
-        /// <inheritdoc/>
-        public event PropertyChangedEventHandler PropertyChanged;
+        AlarmName = string.Empty;
+        Condition = @"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (01|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|00):00:\d{2}";
+    }
 
-        public void OnPropertyChanged(string propertyName)
-            => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-
-        public AddDateTimeConfigDialogViewModel()
+    private string _alarmName;
+    public string AlarmName
+    {
+        get => _alarmName;
+        set
         {
-            AlarmName = string.Empty;
-            Condition = @"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (01|09|10|11|12|13|14|15|16|17|18|19|20|21|22|23|00):00:\d{2}";
+            if (_alarmName == value)
+                return;
+
+            _alarmName = value;
+            OnPropertyChanged(nameof(AlarmName));
         }
+    }
 
-        private string _alarmName;
-        public string AlarmName
+    private string _condition;
+    public string Condition
+    {
+        get => _condition;
+        set
         {
-            get => _alarmName;
-            set
-            {
-                if (_alarmName == value)
-                    return;
+            if (_condition == value)
+                return;
 
-                _alarmName = value;
-                OnPropertyChanged(nameof(AlarmName));
-            }
-        }
-
-        private string _condition;
-        public string Condition
-        {
-            get => _condition;
-            set
-            {
-                if (_condition == value)
-                    return;
-
-                _condition = value;
-                OnPropertyChanged(nameof(Condition));
-            }
+            _condition = value;
+            OnPropertyChanged(nameof(Condition));
         }
     }
 }
