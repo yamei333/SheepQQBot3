@@ -44,6 +44,6 @@ public static class BotExtensions
                             + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
                             + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
                             + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
-        return $"色图成功率为 {3190 / (3190.0 + failedSum):0.00%}";
+        return $"色图基础成功率为 {3190 / (3190.0 + failedSum):0.00%}";
     }
 }

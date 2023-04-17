@@ -168,7 +168,7 @@ partial class CQAPI
                     countInfos.Where(each => each.GetSuccessedCount >= 3),
                     each => each.GetSuccessedPercent);
                 if (kingSuccessed != null)
-                    sendMessage += $"\r\n[色图王者]{GetSetuSenderName(kingSuccessed.TargetId)} 成功{kingSuccessed.GetSuccessedCount}次, 成功率 {kingSuccessed.GetSuccessedPercent:00%}";
+                    sendMessage += $"\r\n[色图王者]{GetSetuSenderName(kingSuccessed.TargetId)} 成功{kingSuccessed.GetSuccessedCount}次, 成功率 {kingSuccessed.GetSuccessedPercent:#0%}";
                 else
                     sendMessage += $"\r\n[色图王者]无人上榜! 堂堂大群竟无王者";
 
@@ -177,7 +177,7 @@ partial class CQAPI
                     .OrderBy(each => each.GetSuccessedPercent, true)
                     .FirstOrDefault();
                 if (kingCount != null)
-                    sendMessage += $"\r\n[狂怒斗士]{GetSetuSenderName(kingCount.TargetId)} 请求{kingCount.Count}次, 成功率 {kingCount.GetSuccessedPercent:00%}";
+                    sendMessage += $"\r\n[狂怒斗士]{GetSetuSenderName(kingCount.TargetId)} 请求{kingCount.Count}次, 成功率 {kingCount.GetSuccessedPercent:#0%}";
                 else
                     sendMessage += $"\r\n[狂怒斗士]无人上榜! 无人狂怒, 甚好";
 
