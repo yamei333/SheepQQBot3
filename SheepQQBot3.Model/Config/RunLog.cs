@@ -1,9 +1,7 @@
 ﻿using System;
-using System.Text;
 using System.Text.Json.Serialization;
 using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -20,12 +18,6 @@ public class RunLog
 
     [JsonIgnore]
     public string DateTimeStrFFF => _logDate.ToString("HH:mm:ss.fff");
-
-    [JsonIgnore]
-    public string ContentTitle => Content.ByteSubstring(80, "...");
-
-    [JsonIgnore]
-    public bool IsWarp => Encoding.Default.GetBytes(Content).Length > 42;
 
     [JsonIgnore]
     public bool IsGroupMessage => LogMessageType == LogMessageType.GroupMessage;

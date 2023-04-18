@@ -97,24 +97,16 @@
                                     Header="内容">
                         <GridViewColumn.CellTemplate>
                             <DataTemplate>
-                                <TextBlock Text="{Binding ContentTitle}">
-                                    <TextBlock.Style>
-                                        <Style BasedOn="{StaticResource AlarmAideTextBlockStyle}"
-                                               TargetType="TextBlock">
-                                            <Style.Setters>
-                                                <Setter Property="Height" Value="16" />
-                                                <Setter Property="TextWrapping" Value="NoWrap" />
-                                            </Style.Setters>
-                                            <Style.Triggers>
-                                                <DataTrigger Binding="{Binding IsWarp}"
-                                                             Value="true">
-                                                    <Setter Property="Height" Value="32" />
-                                                    <Setter Property="TextWrapping" Value="Wrap" />
-                                                </DataTrigger>
-                                            </Style.Triggers>
-                                        </Style>
-                                    </TextBlock.Style>
-                                </TextBlock>
+                                <TextBox MaxHeight="34"
+                                         Background="Transparent"
+                                         BorderBrush="{x:Null}"
+                                         Foreground="{Binding LogMessageType,
+                                                              Converter={StaticResource RunLogColorConverter}}"
+                                         IsHitTestVisible="False"
+                                         IsReadOnly="True"
+                                         Text="{Binding Content,
+                                                        Mode=OneWay}"
+                                         TextWrapping="Wrap" />
                             </DataTemplate>
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>

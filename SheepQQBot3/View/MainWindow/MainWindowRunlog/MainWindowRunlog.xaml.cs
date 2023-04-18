@@ -29,8 +29,6 @@ public partial class MainWindowRunlog : UserControl
     /// <summary>
     /// 复读这条消息
     /// </summary>
-    /// <param name="sender"></param>
-    /// <param name="e"></param>
     private void RunLog_OnRepeat(object sender, RoutedEventArgs e)
     {
         var selectedRunLog = _vm.SelectedRunLog;

@@ -27,6 +27,18 @@ public static class YameiExtensions
     public static long ToTimeStamp(this DateTime dateTime)
         => (long)(dateTime - StartTime).TotalSeconds;
 
+    public static long AddSeconds(this long timeStamp, long addValue)
+        => timeStamp + addValue;
+
+    public static long AddMinutes(this long timeStamp, long addValue)
+        => timeStamp + addValue * 60;
+
+    public static long AddHours(this long timeStamp, long addValue)
+        => timeStamp + addValue * 3600;
+
+    public static long AddDays(this long timeStamp, long addValue)
+        => timeStamp + addValue * 86400;
+
     public static long ToLong(this bool boolValue) => boolValue ? 1 : 0;
 
     public static int ToInt(this bool boolValue) => boolValue ? 1 : 0;

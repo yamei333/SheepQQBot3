@@ -23,6 +23,7 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
         StartTask(TaskProcess.GenshinResinAlarm);
+        StartTask(TaskProcess.RandomSetu);
     }
 
     /// <summary>
