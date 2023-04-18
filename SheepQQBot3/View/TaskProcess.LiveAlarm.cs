@@ -40,8 +40,8 @@ public static partial class TaskProcess
 
                                 // 删除过期记录
                                 DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
-                                // 发送基金播报消息
-                                await SendLiveAlarmMessage(setConfig, liveAlarmConfig, dateNow);
+                                // 发送直播提醒消息
+                                await SendLiveAlarmMessage(setConfig, liveAlarmConfig, dateNow).ConfigureAwait(false);
                             }
                         });
                 }

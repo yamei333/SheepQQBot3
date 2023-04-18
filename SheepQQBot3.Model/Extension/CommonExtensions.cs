@@ -134,6 +134,12 @@ public static class CommonExtensions
     public static void Sleep(int timeout, Func<bool> condition = null)
         => SpinWait.SpinUntil(condition ?? (() => false), timeout);
 
+    public static void SleepSeconds(int timeout, Func<bool> condition = null)
+        => SpinWait.SpinUntil(condition ?? (() => false), timeout * 1000);
+
+    public static void SleepMinutes(int timeout, Func<bool> condition = null)
+        => SpinWait.SpinUntil(condition ?? (() => false), timeout * 60000);
+
     public static bool IsMatch(this string regString, string targetString)
         => new Regex(regString, RegexOptions.Multiline).IsMatch(targetString);
 

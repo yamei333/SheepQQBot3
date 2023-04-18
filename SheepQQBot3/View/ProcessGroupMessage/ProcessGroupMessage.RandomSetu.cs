@@ -168,7 +168,7 @@ public static partial class ProcessGroupMessage
                     var searchSetuDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
                     setuDoushiLv = searchSetuDoushiInfo?.SetuDoushiLv ?? 0;
                     // MEMO : 显CD
-                    var sendMessage = $"目标色图斗士Lv{setuDoushiLv} CD[{GetCD(searchSetuDoushiInfo)}], " +
+                    var sendMessage = $"目标色图斗士Lv{setuDoushiLv} CD[{GetCD()}], " +
                                       $"{BotExtensions.GetSetuSuccessPercent(setuDoushiLv)}";
                     await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 }
@@ -371,7 +371,6 @@ StartSetu:
             var canSendSetu = false;
 
             var oldSetuSenderLv = setuDoushiLv;
-            var changeLvTime = 0;
             var changeLvTag = 0;
             var changeLvFast = 0;
             if ((!PublicVar.IsDebug || isSetuDebug) && targetId == PublicVar.AdminId)
@@ -381,22 +380,6 @@ StartSetu:
             }
             else
             {
-                // MEMO : 色图Lv减少
-                if (setuDoushiLv > 0)
-                {
-                    var totalMinutes = (dateNow - setuCd).TotalMinutes;
-                    if (totalMinutes >= 90 && setuCd != DateTime.MinValue)
-                    {
-                        var changeLvTimePoint = (long)(totalMinutes / 90);
-                        while (setuDoushiLv > 0 && changeLvTimePoint >= setuDoushiLv)
-                        {
-                            changeLvTimePoint -= setuDoushiLv;
-                            changeLvTime--;
-                            setuDoushiLv--;
-                        }
-                    }
-                }
-
                 List<RandomWeight<SendSetuConfig>> randActions;
                 if (dateNow > setuCd)
                 {
@@ -467,15 +450,12 @@ StartSetu:
                         setuDoushiLv++;
                     }
 
-                    if ((dateNow - setuCd).TotalSeconds <= 300)
+                    if ((dateNow - setuCd).TotalSeconds <= 180)
                     {
                         changeLvFast = 1;
                         setuDoushiLv++;
                     }
                 }
-
-                if (setuDoushiLv < 0)
-                    setuDoushiLv = 0;
 
                 if (setuDoushiLv > MaxSenderLv)
                     setuDoushiLv = MaxSenderLv;
@@ -491,7 +471,7 @@ StartSetu:
                                                          $"{ENTER}色图Lv: {setuDoushiLv}" +
                                                          $"{ENTER}是否发送: {canSendSetu}" +
                                                          $"{ENTER}增加时间: {addSecond}s" +
-                                                         $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
+                                                         $"{ENTER}色图CD: {GetCD()}")
                     .ConfigureAwait(false);
             }
 
@@ -509,7 +489,7 @@ StartSetu:
                                   $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}" +
                                   $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                   GetSetuLvInfo() +
-                                  (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                  (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
                 }
                 else
                 {
@@ -518,7 +498,7 @@ StartSetu:
                                   + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                                   + $" ({addSecond}s)"
                                   + GetSetuLvInfo()
-                                  + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                  + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
                 }
 
                 await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, false, isSearchTag, false, false, false))
@@ -537,7 +517,7 @@ StartSetu:
                     isFree = true;
                     var sendMessage = $"{CQCode.At(targetId)}"
                                       + $"什么!? 你成功白嫖了一张{sourceTag}{_setuKeyWords.Random()}!"
-                                      + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                      + (isShowDate ? $" [CD {GetCD()}]" : string.Empty);
                     await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                     goto SendSetu;
                 }
@@ -724,10 +704,8 @@ SendSetu:
             string GetSetuLvInfo()
             {
                 var addString = string.Empty;
-                if (changeLvTime < 0)
-                    addString += $",时间冷却{changeLvTime.ToSignString()}";
                 if (changeLvTag > 0)
-                    addString += $",关键词搜索{changeLvTag.ToSignString()}";
+                    addString += $",搜索{changeLvTag.ToSignString()}";
                 if (changeLvFast > 0)
                     addString += $",频率过快{changeLvFast.ToSignString()}";
                 if (!string.IsNullOrEmpty(addString))
@@ -854,32 +832,7 @@ SendSetu:
 
         return true;
 
-        string GetCD(SetuDoushiInfo stdsInfo)
-        {
-            var cd = (stdsInfo?.SetuCD ?? 0).ToDateTime();
-            var tempSetuDoushiLv = stdsInfo?.SetuDoushiLv ?? 0;
-            if (dateNow >= cd)
-            {
-                var totalMinutes = (dateNow - cd).TotalMinutes;
-                var tempChangeLvTime = 0;
-                if (totalMinutes >= 90 && cd.ToTimeStamp() != 0)
-                {
-                    var changeLvTimePoint = (long)(totalMinutes / 90);
-                    while (tempSetuDoushiLv > 0 && changeLvTimePoint >= tempSetuDoushiLv)
-                    {
-                        changeLvTimePoint -= tempSetuDoushiLv;
-                        tempChangeLvTime--;
-                        tempSetuDoushiLv--;
-                    }
-                }
-
-                return tempChangeLvTime != 0
-                    ? $"可Lv{tempChangeLvTime}"
-                    : "可使用";
-            }
-
-            return setuCd.ToString("HH:mm:ss");
-        }
+        string GetCD() => dateNow >= setuCd ? "可使用" : setuCd.ToString("HH:mm:ss");
     }
 }
 
