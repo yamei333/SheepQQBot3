@@ -158,7 +158,7 @@ public static partial class ProcessGroupMessage
             if (message.Equals(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
                 // MEMO : 显Lv
-                var sendMessage = $"当前色图斗士Lv{setuDoushiLv}, " +
+                var sendMessage = $"当前色图斗士Lv{setuDoushiInfo.CalcSetuDoushiLv(dateNow)}, " +
                                   $"{BotExtensions.GetSetuSuccessPercent(setuDoushiInfo, dateNow)}";
                 await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
             }
@@ -180,11 +180,12 @@ public static partial class ProcessGroupMessage
                     }
                     else
                     {
-                        var searchSetuDoushiInfo =
-                            await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
-                        setuDoushiLv = searchSetuDoushiInfo?.SetuDoushiLv ?? 0;
+                        var searchSetuDoushiInfo = await BotDb.SetuDoushiInfos
+                            .FindAsync(searchTargetId).ConfigureAwait(false)
+                            ?? new SetuDoushiInfo(searchTargetId);
                         // MEMO : 显CD
-                        var sendMessage = $"目标色图斗士Lv{setuDoushiLv} CD[{GetCD(searchSetuDoushiInfo)}], " +
+                        var sendMessage = $"目标色图斗士Lv{searchSetuDoushiInfo.CalcSetuDoushiLv(dateNow)} " +
+                                          $"CD[{GetCD(searchSetuDoushiInfo)}], " +
                                           $"{BotExtensions.GetSetuSuccessPercent(searchSetuDoushiInfo, dateNow)}";
                         await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                     }
@@ -289,6 +290,12 @@ public static partial class ProcessGroupMessage
             var sendMessage = "=====色图斗士Lv排行=====";
             var rankIndex = 1;
             BotDb.SetuDoushiInfos
+                .AsEnumerable()
+                .Select(info => new
+                {
+                    info.TargetId,
+                    SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
+                })
                 .OrderByDescending(info => info.SetuDoushiLv)
                 .Take(5)
                 .ForEach(info =>
@@ -408,6 +415,7 @@ StartSetu:
             var canSendSetu = false;
 
             var oldSetuSenderLv = setuDoushiLv;
+            var changeLvTime = 0;
             var changeLvTag = 0;
             var changeLvFast = 0;
             if ((!PublicVar.IsDebug || isSetuDebug) && targetId == PublicVar.AdminId)
@@ -417,6 +425,18 @@ StartSetu:
             }
             else
             {
+                // MEMO : 色图Lv减少
+                if (setuDoushiLv > 0 && setuCd != DateTime.MinValue)
+                {
+                    var changeLvTimePoint = (long)((dateNow - setuCd).TotalMinutes / 90);
+                    while (setuDoushiLv > 0 && changeLvTimePoint >= setuDoushiLv)
+                    {
+                        changeLvTimePoint -= setuDoushiLv;
+                        changeLvTime--;
+                        setuDoushiLv--;
+                    }
+                }
+
                 List<RandomWeight<SendSetuConfig>> randActions;
                 if (dateNow > setuCd)
                 {
@@ -734,10 +754,12 @@ SendSetu:
             string GetSetuLvInfo()
             {
                 var addString = string.Empty;
+                if (changeLvTime < 0)
+                    addString += $",冷却{changeLvTime.ToSignString()}";
                 if (changeLvTag > 0)
                     addString += $",搜索{changeLvTag.ToSignString()}";
                 if (changeLvFast > 0)
-                    addString += $",频率过快{changeLvFast.ToSignString()}";
+                    addString += $",频率快{changeLvFast.ToSignString()}";
                 if (!string.IsNullOrEmpty(addString))
                     addString = addString[1..];
 

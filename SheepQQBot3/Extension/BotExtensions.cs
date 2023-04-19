@@ -44,7 +44,7 @@ public static class BotExtensions
     /// </summary>
     public static string GetSetuSuccessPercent(SetuDoushiInfo setuDoushiInfo, DateTime dateNow)
     {
-        var setuDoushiLv = setuDoushiInfo?.SetuDoushiLv ?? 0;
+        var setuDoushiLv = setuDoushiInfo?.CalcSetuDoushiLv(dateNow) ?? 0;
         var setuCd = setuDoushiInfo?.SetuCD ?? 0;
         var timeAdd = setuDoushiLv == 0 && setuCd != 0 ? (int)(dateNow - setuCd.ToDateTime()).TotalMinutes : 0;
         var failedSum = 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
