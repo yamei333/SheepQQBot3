@@ -68,12 +68,20 @@ public static partial class TaskProcess
         if (!forceSend && setConfig.LiveAlarmedList.ContainsKey(configId))
             return;
 
-        //var liveType = liveAlarmConfig.LiveType;
         var liveRoomId = liveAlarmConfig.LiveRoomId;
-        var liveRoomResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
-            $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
-        if (liveRoomResponse == null)
+        LiveRoomResponse liveRoomResponse;
+        try
+        {
+            liveRoomResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
+                $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
+                .ConfigureAwait(false);
+            if (liveRoomResponse == null)
+                return;
+        }
+        catch (TaskCanceledException)
+        {
             return;
+        }
 
         var liveRoomResponseData = liveRoomResponse.Data;
         if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)

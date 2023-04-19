@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
+using SheepQQBot3.DBModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;
@@ -38,12 +39,18 @@ public static class BotExtensions
         processes.ForEach(each => each.Kill());
     }
 
-    public static string GetSetuSuccessPercent(long setuDoushiLv)
+    /// <summary>
+    /// 取得色图成功率
+    /// </summary>
+    public static string GetSetuSuccessPercent(SetuDoushiInfo setuDoushiInfo, DateTime dateNow)
     {
+        var setuDoushiLv = setuDoushiInfo?.SetuDoushiLv ?? 0;
+        var setuCd = setuDoushiInfo?.SetuCD ?? 0;
+        var timeAdd = setuDoushiLv == 0 && setuCd != 0 ? (int)(dateNow - setuCd.ToDateTime()).TotalMinutes : 0;
         var failedSum = 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
                             + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
                             + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
                             + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
-        return $"色图基础成功率为 {3190 / (3190.0 + failedSum):0.00%}";
+        return $"色图成功率 {(3190 + timeAdd) / (3190.0 + timeAdd + failedSum):0.00%}";
     }
 }

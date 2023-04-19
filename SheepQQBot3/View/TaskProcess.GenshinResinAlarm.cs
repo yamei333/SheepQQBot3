@@ -76,7 +76,7 @@ public static partial class TaskProcess
                 YameiLogExtensions.WriteLog(e);
             }
 
-            CommonExtensions.Sleep(240000);
+            CommonExtensions.Sleep(480000);
         }
     }
 
