@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.Model.Setu;
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SheepQQBot3.Model.Setu;
 
 /// <summary>
 /// 色图信息
@@ -68,7 +70,14 @@ public enum SetuType
 public enum SetuResult
 {
     Successed,
+    [Display(Name = "Api炸了")]
     ApiError,
+
     NoSearchResult,
+
+    [Display(Name = "Api超时")]
+    Timeout,
+
+    [Display(Name = "Api未知错误")]
     OtherError,
 }

@@ -34,19 +34,19 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\$.+\$")]
     public static partial Regex ConditionJsonText();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(55|56|57|58|59):\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:5\d:\d{2}")]
     public static partial Regex GenshinResin();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:(50|51|52|53|54):\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:5\d:\d{2}")]
     public static partial Regex GenshinDailyMission();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (09|13|18|23|01):(00|01|02|03|04):\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (09|13|18|23|01):0\d:\d{2}")]
     public static partial Regex GenshinPotCoin();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):(00|01|02|03|04):\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):0\d:\d{2}")]
     public static partial Regex GenshinTransformer();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):(05|06|07|08|09):\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):0\d:\d{2}")]
     public static partial Regex GenshinWbAlarm();
 
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
