@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
-using SheepQQBot3.DBModel;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;

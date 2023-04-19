@@ -5,7 +5,7 @@ using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
-using SheepQQBot3.DBModel;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -151,7 +151,7 @@ partial class CQAPI
                         RequestSuccessedPercent = isRequestSuccessedPercent,
                         GetSuccessedCount = isGetSuccessedCount,
                         GetSuccessedPercent = isGetSuccessedPercent,
-                        SearchTagCount = items.Count(each => each.IsSearchTag.ToBool()),
+                        SearchTagCount = items.Count(each => each.IsSearchTag),
                         FreeCount = items.Count(each => each.IsFree.ToBool()),
                         R18BonusCount = items.Count(each => each.IsR18Bonus.ToBool()),
                     };

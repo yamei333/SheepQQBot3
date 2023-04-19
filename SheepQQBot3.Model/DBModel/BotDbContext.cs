@@ -5,7 +5,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace SheepQQBot3.DBModel
+namespace SheepQQBot3.DbModel
 {
     public partial class BotDbContext : DbContext
     {
@@ -24,12 +24,19 @@ namespace SheepQQBot3.DBModel
             {
                 entity.HasKey(e => e.TargetId);
 
+                entity.HasIndex(e => e.TargetId, "KEY_TargetId")
+                    .IsUnique();
+
                 entity.Property(e => e.TargetId).ValueGeneratedNever();
             });
 
             modelBuilder.Entity<SetuSendHistory>(entity =>
             {
                 entity.HasKey(e => new { e.TargetId, e.TimeStamp });
+
+                entity.Property(e => e.SearchKeyword)
+                    .IsRequired()
+                    .HasDefaultValueSql("搜索");
             });
 
             OnModelCreatingPartial(modelBuilder);

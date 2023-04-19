@@ -4,7 +4,7 @@ using System.Text.Json;
 using System.Threading.Tasks;
 using CommonLibrary;
 using Fleck;
-using SheepQQBot3.DBModel;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 
 namespace SheepQQBot3.SDK.Client;
