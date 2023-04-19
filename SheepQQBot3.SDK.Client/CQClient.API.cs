@@ -133,7 +133,7 @@ partial class CQAPI
                 .Where(history => history.TimeStamp >= dateNowStartTimestamp && history.TimeStamp < dateNowEndTimestamp)
                 .GroupBy(history => history.TargetId,
                     (key, group) => new { TargetId = key, Items = group.ToList() })
-                .ToList()
+                .AsEnumerable()
                 .Select(gp =>
                 {
                     var items = gp.Items;
