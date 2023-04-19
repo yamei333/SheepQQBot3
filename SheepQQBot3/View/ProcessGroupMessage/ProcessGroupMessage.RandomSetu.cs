@@ -5,7 +5,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
 using Masuit.Tools.Systems;
-using SheepQQBot3.DBModel;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -166,12 +166,28 @@ public static partial class ProcessGroupMessage
             {
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY.Length..], out var searchTargetId))
                 {
-                    var searchSetuDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
-                    setuDoushiLv = searchSetuDoushiInfo?.SetuDoushiLv ?? 0;
-                    // MEMO : 显CD
-                    var sendMessage = $"目标色图斗士Lv{setuDoushiLv} CD[{GetCD(searchSetuDoushiInfo)}], " +
-                                      $"{BotExtensions.GetSetuSuccessPercent(searchSetuDoushiInfo, dateNow)}";
-                    await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    if (searchTargetId < 100)
+                    {
+                        var vtuberSetuDoushiInfo = new SetuDoushiInfo
+                        {
+                            TargetId = 0,
+                            SetuCD = dateNow.ToTimeStamp(),
+                            SetuDoushiLv = searchTargetId
+                        };
+                        var sendMessage = $"虚拟色图斗士Lv{searchTargetId}," +
+                                          $"{BotExtensions.GetSetuSuccessPercent(vtuberSetuDoushiInfo, dateNow)}";
+                        await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    }
+                    else
+                    {
+                        var searchSetuDoushiInfo =
+                            await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
+                        setuDoushiLv = searchSetuDoushiInfo?.SetuDoushiLv ?? 0;
+                        // MEMO : 显CD
+                        var sendMessage = $"目标色图斗士Lv{setuDoushiLv} CD[{GetCD(searchSetuDoushiInfo)}], " +
+                                          $"{BotExtensions.GetSetuSuccessPercent(searchSetuDoushiInfo, dateNow)}";
+                        await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    }
                 }
                 else
                 {
@@ -350,17 +366,37 @@ StartSetu:
             tag = changeTag;
 
         var isSearchTag = !string.IsNullOrEmpty(tag);
-        var lastHistory = BotDb.SetuSendHistorys
-             .Where(each => each.TargetId == targetId)
-             .OrderByDescending(each => each.TimeStamp)
-             .FirstOrDefault();
+        var targetSetuSendHistorys = BotDb.SetuSendHistorys
+            .Where(each => each.TargetId == targetId)
+            .ToList();
+        var lastHistory = Enumerable.MaxBy(targetSetuSendHistorys, each => each.TimeStamp);
+        var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
+        if (!string.IsNullOrEmpty(lastKeyword))
+        {
+            // MEMO : 最后2次色图都有关键字
+            var last2Historys = targetSetuSendHistorys
+                .OrderByDescending(history => history.TimeStamp)
+                .Where(history => !history.IsR18Bonus.ToBool()
+                    && history.IsRequestSuccessed.ToBool())
+                .Take(2)
+                .ToList();
+            if (last2Historys.Count == 2 && last2Historys
+                .All(history => history.SearchKeyword == lastKeyword
+                    && !history.IsGetSuccessed.ToBool()))
+            {
+                setuDoushiInfo.SetuCD = dateNow.AddHours(120).ToTimeStamp();
+                BotDb.Update(setuDoushiInfo);
+                return true;
+            }
+        }
+
         var setuSendHistory = lastHistory?.TimeStamp.ToDateTime() ?? DateTime.MinValue;
         if (setuKeywordCheck)
         {
             if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 20 + setuDoushiLv * 10)
             {
                 // MEMO : 20秒内不连续响应
-                await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧").ConfigureAwait(false);
+                //await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧").ConfigureAwait(false);
                 return true;
             }
 
@@ -409,7 +445,7 @@ StartSetu:
                     if ((setuCd - dateNow).TotalSeconds >= 300 - (int)(setuDoushiLv * 150.0 / 15))
                     {
                         // MEMO : CD5分钟以上, 老实等着吧
-                        await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}CD还早呢, 先歇着吧").ConfigureAwait(false);
+                        //await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}CD还早呢, 先歇着吧").ConfigureAwait(false);
                         return true;
                     }
 
@@ -502,7 +538,7 @@ StartSetu:
                                   + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
                 }
 
-                await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, false, isSearchTag, false, false, false))
+                await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, false, false, false, false))
                     .ConfigureAwait(false);
                 await Api.SendGroupMessageAsync(groupId, sendMessage)
                     .ConfigureAwait(false);
@@ -524,7 +560,7 @@ StartSetu:
                 }
             }
 
-            var revertCD = DateTime.MinValue;
+            var revertCd = DateTime.MinValue;
 SendSetu:
             try
             {
@@ -573,10 +609,10 @@ SendSetu:
                             $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
                             $"色图库中没找到色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             .ConfigureAwait(false);
-                        //setuDoushiInfo.SetuCD = revertCD.ToTimeStamp();
-                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, true, isFree, r18Bonus))
+                        //setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
+                        //BotDb.Update(setuDoushiInfo);
+                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, r18Bonus))
                             .ConfigureAwait(false);
-                        BotDb.Update(setuDoushiInfo);
                         return true;
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
@@ -585,9 +621,9 @@ SendSetu:
                             $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
                             $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             .ConfigureAwait(false);
-                        setuDoushiInfo.SetuCD = revertCD.ToTimeStamp();
+                        setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
-                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, false, isFree, false))
+                        await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, false))
                             .ConfigureAwait(false);
                         return true;
                     default:
@@ -639,25 +675,25 @@ SendSetu:
                                 $"{setuInfoR18.SourceText}" +
                                 $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
                             break;
-                        case SetuResult.ApiError:
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
-                                $"{_setuKexiStart.Random()}" +
-                                $"Api炸了, 金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
-                            break;
                         case SetuResult.NoSearchResult:
                             sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
                                 $"{_setuKexiStart.Random()}" +
                                 $"色图库中没找到金色传说色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
                             break;
+                        case SetuResult.ApiError:
+                        case SetuResult.Timeout:
                         case SetuResult.OtherError:
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
-                                $"{_setuKexiStart.Random()}" +
-                                $"Api未知错误, 金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
+                            await Api.SendGroupMessageAsync(groupId,
+                                $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
+                                .ConfigureAwait(false);
+                            await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, true))
+                                .ConfigureAwait(false);
                             break;
                     }
                 }
 
-                await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, true, isSearchTag, true, isFree, r18Bonus))
+                await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, true, isFree, r18Bonus))
                     .ConfigureAwait(false);
                 await Api.SendGroupForwardMessageAsync(groupId, sendMessages, 15, RunAction)
                     .ConfigureAwait(false);
@@ -689,9 +725,10 @@ SendSetu:
 
             void AddCD()
             {
-                revertCD = dateNow.AddSeconds(Rand.Next(3, 15));
+                revertCd = dateNow.AddSeconds(20);
                 setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
                     .AddSeconds(addSecond).ToTimeStamp();
+                BotDb.Update(setuDoushiInfo);
             }
 
             string GetSetuLvInfo()

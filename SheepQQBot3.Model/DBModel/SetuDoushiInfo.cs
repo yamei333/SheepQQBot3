@@ -3,7 +3,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace SheepQQBot3.DBModel
+namespace SheepQQBot3.DbModel
 {
     public partial class SetuDoushiInfo
     {

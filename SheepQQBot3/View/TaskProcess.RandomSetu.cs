@@ -33,9 +33,13 @@ public static partial class TaskProcess
                     })
                     .ForEach(doushiInfo =>
                     {
-                        doushiInfo.SetuCD = doushiInfo.SetuCD.AddMinutes(doushiInfo.SetuDoushiLv * 90);
+                        var oldSetuCd = doushiInfo.SetuCD;
+                        var oldSetuDoushiLv = doushiInfo.SetuDoushiLv;
+                        doushiInfo.SetuCD = oldSetuCd.AddMinutes(oldSetuDoushiLv * 90);
                         doushiInfo.SetuDoushiLv -= 1;
                         BotDb.Update(doushiInfo);
+                        YameiLogExtensions.WriteLog(LogType.Info, $"{doushiInfo.TargetId} 的斗士Lv由Lv{oldSetuDoushiLv}变为Lv{doushiInfo.SetuDoushiLv}, " +
+                            $"CD由{oldSetuCd.ToDateTime().ToYYYYMMDDHHMMSS()}变为{doushiInfo.SetuCD.ToDateTime().ToYYYYMMDDHHMMSS()}");
                     });
             }
             catch (Exception e)

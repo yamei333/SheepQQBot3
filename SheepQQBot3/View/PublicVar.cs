@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
-using SheepQQBot3.DBModel;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Client;
 

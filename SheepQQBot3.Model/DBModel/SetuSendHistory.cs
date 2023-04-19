@@ -3,14 +3,14 @@
 using System;
 using System.Collections.Generic;
 
-namespace SheepQQBot3.DBModel
+namespace SheepQQBot3.DbModel
 {
     public partial class SetuSendHistory
     {
         public long TargetId { get; set; }
         public long TimeStamp { get; set; }
+        public string SearchKeyword { get; set; }
         public long IsRequestSuccessed { get; set; }
-        public long IsSearchTag { get; set; }
         public long IsGetSuccessed { get; set; }
         public long IsFree { get; set; }
         public long IsR18Bonus { get; set; }

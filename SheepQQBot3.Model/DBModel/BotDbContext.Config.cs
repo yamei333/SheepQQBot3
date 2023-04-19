@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.ChangeTracking;
 
-namespace SheepQQBot3.DBModel
+namespace SheepQQBot3.DbModel
 {
     /// <summary>
     /// BotDbContext连接部分
