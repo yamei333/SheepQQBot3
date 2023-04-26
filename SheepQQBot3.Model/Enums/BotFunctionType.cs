@@ -16,14 +16,17 @@ public enum BotFunctionType
     [Display(Name = "黑名单")]
     Common_BlackList = 2,
 
+    [Display(Name = "自定义提醒")]
+    Common_CustomAlarm = 3,
+
+    [Display(Name = "KEY配置")]
+    Common_KeyConfig = 4,
+
     [Display(Name = "私聊配置")]
     Private_AdminConfig = 1000,
 
     [Display(Name = "复读机杀手")]
     Group_RepeaterKiller = 2000,
-
-    [Display(Name = "群提醒")]
-    Group_CustomGroupAlarm = 2001,
 
     [Display(Name = "复读撤回消息")]
     Group_RepeatRevokeMessage = 2002,

@@ -6,6 +6,7 @@ using System.Linq;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.View;
 using Yamei.Common;
 
 namespace SheepQQBot3.Extensions;
@@ -52,5 +53,17 @@ public static class BotExtensions
                             + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
                             + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
         return $"色图成功率 {(3190 + timeAdd) / (3190.0 + timeAdd + failedSum):0.00%}";
+    }
+
+    /// <summary>
+    /// 是否有用户函数
+    /// </summary>
+    public static bool HasUserConfig(long targetId, UserConfigType userConfigType)
+    {
+        var userConfigs = PublicVar.BotConfig.UserConfigs;
+        return userConfigs != null
+            && userConfigs.TryGetValue(targetId, out var userConfig)
+            && userConfig != null
+            && userConfig.ContainsKey(userConfigType);
     }
 }

@@ -94,17 +94,19 @@ public static class CommonExtensions
     /// <param name="input">输入内容</param>
     /// <param name="senderId">发送者Id</param>
     /// <returns>替换结果</returns>
-    public static (string Result, bool IsNoAt, bool IsNoReply) ToCqCode(this string input, long senderId = 0)
+    public static (string Result, bool IsNoAt, bool IsNoReply, bool IsLoop, bool isBark) ToCqCode(this string input, long senderId = 0)
     {
         var result = input;
-        var isNoAt = Replace($"\\{KH_LEFT}-na{KH_RIGHT}", string.Empty);
-        var isNoReply = Replace($"\\{KH_LEFT}-nr{KH_RIGHT}", string.Empty);
-        Replace($"\\{KH_LEFT}at-self{KH_RIGHT}", $"[CQ:at,qq={senderId}]");
-        Replace($"\\{KH_LEFT}at-(?<str>[0-9]+?){KH_RIGHT}", "[CQ:at,qq=${str}]");
-        Replace($"\\{KH_LEFT}image-(?<str>.+?){KH_RIGHT}", "[CQ:image,File=${str}]");
-        Replace($"\\{KH_LEFT}play-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play,File=${str}]");
-        Replace($"\\{KH_LEFT}play3-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play3,File=${str}]");
-        return (result, isNoAt, isNoReply);
+        var isNoAt = Replace($@"\{KH_LEFT}-na{KH_RIGHT}", string.Empty);
+        var isNoReply = Replace($@"\{KH_LEFT}-nr{KH_RIGHT}", string.Empty);
+        var isLoop = Replace($@"\{KH_LEFT}-loop{KH_RIGHT}", string.Empty);
+        var isBark = Replace($@"\{KH_LEFT}-bark{KH_RIGHT}", string.Empty);
+        Replace($@"\{KH_LEFT}at-self{KH_RIGHT}", $"[CQ:at,qq={senderId}]");
+        Replace($@"\{KH_LEFT}at-(?<str>[0-9]+?){KH_RIGHT}", "[CQ:at,qq=${str}]");
+        Replace($@"\{KH_LEFT}image-(?<str>.+?){KH_RIGHT}", "[CQ:image,File=${str}]");
+        Replace($@"\{KH_LEFT}play-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play,File=${str}]");
+        Replace($@"{KH_LEFT}play3-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play3,File=${str}]");
+        return (result, isNoAt, isNoReply, isLoop, isBark);
 
         bool Replace(string pattern, string replacement)
         {
@@ -123,8 +125,8 @@ public static class CommonExtensions
     public static string ToNormalText(this string input)
     {
         var result = input;
-        Replace($"\\[CQ:at,qq=(?<str>[0-9]+?)]", "[at-${str}]");
-        Replace($"\\[CQ:image,File=(?<str>.++?)]", "[image-${str}]");
+        Replace(@"\[CQ:at,qq=(?<str>[0-9]+?)]", "[at-${str}]");
+        Replace(@"\[CQ:image,file=(?<str>.+?)\]", "[image-${str}]");
         return result;
 
         void Replace(string pattern, string replacement)

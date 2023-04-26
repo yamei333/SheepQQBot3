@@ -26,7 +26,7 @@ public class ReceiveData
     public NoticeType NoticeType { get; set; }
 
     [JsonPropertyName("self_id")]
-    public long Self_Id { get; set; }
+    public long SelfId { get; set; }
 
     [JsonPropertyName("operator_id")]
     public long OperatorId { get; set; }

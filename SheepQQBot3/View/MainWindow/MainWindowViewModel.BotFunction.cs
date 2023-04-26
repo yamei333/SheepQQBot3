@@ -12,14 +12,12 @@ partial class MainWindowViewModel
     /// </summary>
     public CancellationTokenSource CancelToken { get; set; }
 
-    public List<Task> taskList;
-
     private void InitBotFunctions()
     {
         var cancelToken = new CancellationTokenSource();
         CancelToken = cancelToken;
         StartTask(TaskProcess.AlarmAides);
-        StartTask(TaskProcess.CustomGroupAlarm);
+        StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
         StartTask(TaskProcess.GenshinResinAlarm);
@@ -36,7 +34,7 @@ partial class MainWindowViewModel
     /// 开始一个Bot的Task
     /// </summary>
     /// <param name="method"></param>
-    private void StartTaskList(Action method)
+    private static void StartTaskList(ICollection<Task> taskList, Action method)
     {
         var task = new Task(method);
         taskList.Add(task);

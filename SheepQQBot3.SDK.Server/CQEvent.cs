@@ -45,7 +45,7 @@ public partial class CQEvent : IDisposable
             {
                 try
                 {
-                    ProcessReceiveData(GetReceiveData(jsonInfo));
+                     ProcessReceiveData(GetReceiveData(jsonInfo));
                 }
                 catch (Exception e)
                 {
@@ -82,9 +82,12 @@ public partial class CQEvent : IDisposable
         switch (receiveData.MessageTargetType)
         {
             case MessageTargetType.Group:
-                OnGroupMessage?.Invoke(null, new GroupMessage(receiveData));
+                OnGroupMessage?.Invoke(this, new GroupMessage(receiveData));
                 break;
             case MessageTargetType.Private:
+                if (receiveData.SubType is SubType.Friend or SubType.Group)
+                    OnPrivateMessage?.Invoke(this, new PrivateMessage(receiveData));
+
                 break;
             default:
                 throw new ArgumentOutOfRangeException(receiveData.MessageTargetType.ToString());

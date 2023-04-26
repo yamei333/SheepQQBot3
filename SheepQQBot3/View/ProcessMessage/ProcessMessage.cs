@@ -2,7 +2,7 @@
 
 namespace SheepQQBot3.View;
 
-public static partial class ProcessGroupMessage
+public static partial class ProcessMessage
 {
     /// <summary>
     /// 取得字符串第1, 2个字符

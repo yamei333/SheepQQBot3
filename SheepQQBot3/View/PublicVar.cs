@@ -31,6 +31,11 @@ public static class PublicVar
     /// <summary>
     /// 管理员ID
     /// </summary>
+    public static readonly long CommonId = 22222;
+
+    /// <summary>
+    /// 管理员ID
+    /// </summary>
     public static readonly long AdminId = long.Parse(ConfigurationManager.AppSettings["adminId"]!);
 
     /// <summary>

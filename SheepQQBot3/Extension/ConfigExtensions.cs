@@ -139,12 +139,20 @@ public static class ConfigExtensions
 
         lock (_syncLock)
         {
-            var jsonText = JsonSerializer.Serialize(PublicVar.BotConfig, new JsonSerializerOptions
+            try
             {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                WriteIndented = true
-            });
-            File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+                var jsonText = JsonSerializer.Serialize(PublicVar.BotConfig, new JsonSerializerOptions
+                {
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+                    WriteIndented = true
+                });
+                File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
         }
 
         // MEMO : OldVersion
