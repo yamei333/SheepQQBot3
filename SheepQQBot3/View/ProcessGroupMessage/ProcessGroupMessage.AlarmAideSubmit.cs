@@ -16,7 +16,7 @@ namespace SheepQQBot3.View;
 public static partial class ProcessGroupMessage
 {
     /// <summary>
-    /// 群提醒投稿方法命令的开头
+    /// 闹钟助手投稿方法命令的开头
     /// </summary>
     private const string COMMAND_ALARMAIDE_SUBMIT_LIBRARY = "#TG#";
 

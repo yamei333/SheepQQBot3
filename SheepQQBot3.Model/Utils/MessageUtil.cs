@@ -17,6 +17,11 @@ public static class MessageUtil
     private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeReplaceImage();
     private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
+    /// <summary>
+    /// 将消息处理为支持gocq发送的消息
+    /// </summary>
+    /// <param name="message"></param>
+    /// <returns></returns>
     public static List<Element> ProcessCQMessage(string message)
     {
         var processIndex = 0;
@@ -29,7 +34,7 @@ public static class MessageUtil
                 if (cqAreaResult.Index != processIndex)
                 {
                     // CQ区域前包含其他文本, 先处理文本
-                    messageResult.Add(ProcessCQAreaMessage(message[processIndex..(cqAreaResult.Index - processIndex)]));
+                    messageResult.Add(ProcessCQAreaMessage(message[processIndex..cqAreaResult.Index]));
                     processIndex = cqAreaResult.Index;
                 }
 

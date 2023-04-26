@@ -42,14 +42,17 @@ public static class TargetTypeExtensions
         {
             BotConfigTargetType.Common => new HashSet<BotFunctionType>
             {
-                BotFunctionType.Common_AlarmAide
+                BotFunctionType.Common_AlarmAide,
+                BotFunctionType.Common_BlackList,
+                BotFunctionType.Common_CustomAlarm,
+                BotFunctionType.Common_KeyConfig,
             },
             BotConfigTargetType.Group => new HashSet<BotFunctionType>
             {
                 BotFunctionType.Common_AlarmAide,
                 BotFunctionType.Common_AlarmAideSubmit,
                 BotFunctionType.Common_BlackList,
-                BotFunctionType.Group_CustomGroupAlarm,
+                BotFunctionType.Common_CustomAlarm,
                 BotFunctionType.Group_RepeatRevokeMessage,
                 BotFunctionType.Group_FundHelper,
                 BotFunctionType.Group_RandomSetu,

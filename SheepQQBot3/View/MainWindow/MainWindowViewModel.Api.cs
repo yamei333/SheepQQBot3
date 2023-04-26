@@ -118,12 +118,31 @@ partial class MainWindowViewModel
             var targetId = groupRevokeMessage.UserId;
             if (groupRevokeMessage.OperatorId == targetId)
             {
-                GetSelectedConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RunAction);
+                GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RunAction);
                 void RunAction(SetConfig config) => ProcessRevokeGroupMessage.RepeatRevokeMessageAsync(groupRevokeMessage);
             }
         };
-        cqEvent.OnGroupMessage += (o, groupMessage) => OnGroupMessage(groupMessage);
+        cqEvent.OnGroupMessage += (o, message) => OnGroupMessage(message);
+        cqEvent.OnPrivateMessage += (o, message) => OnPrivateMessage(message);
         cqEvent.Start();
+    }
+
+    private void OnPrivateMessage(PrivateMessage privateMessage)
+    {
+        var userId = privateMessage.UserId;
+        var taskList = new List<Task>();
+        GetSelectedCommonConfig(BotFunctionType.Common_KeyConfig, config =>
+        {
+            StartTaskList(taskList, KeyConfig);
+            void KeyConfig() => ProcessMessage.KeyConfigAsync(privateMessage);
+        });
+        GetSelectedCommonConfig(BotFunctionType.Common_CustomAlarm, config =>
+        {
+            StartTaskList(taskList, CustomGroupAlarm);
+            void CustomGroupAlarm() => ProcessMessage.CustomPrivateAlarmAsync(privateMessage);
+        });
+
+        Task.WaitAll(taskList.ToArray());
     }
 
     private void OnGroupMessage(GroupMessage groupMessage)
@@ -138,7 +157,7 @@ partial class MainWindowViewModel
             .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
         ConfigExtensions.SaveConfig();
         var isBlackList = false;
-        if (!GetSelectedConfig(
+        if (!GetSelectedGroupConfig(
             groupId,
             BotFunctionType.Common_BlackList,
             config =>
@@ -156,39 +175,39 @@ partial class MainWindowViewModel
         if (isBlackList)
             return;
 
-        taskList = new List<Task>();
-        GetSelectedConfig(groupId, BotFunctionType.Group_CustomGroupAlarm, config =>
+        var taskList = new List<Task>();
+        GetSelectedGroupConfig(groupId, BotFunctionType.Common_CustomAlarm, config =>
         {
-            StartTaskList(CustomGroupAlarm);
-            void CustomGroupAlarm() => ProcessGroupMessage.CustomGroupAlarmAsync(config.CustomGroupAlarms, groupMessage);
+            StartTaskList(taskList, CustomGroupAlarm);
+            void CustomGroupAlarm() => ProcessMessage.CustomGroupAlarmAsync(groupMessage);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
         {
-            StartTaskList(AlarmAideSubmit);
+            StartTaskList(taskList, AlarmAideSubmit);
             void AlarmAideSubmit() => ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_FundHelper, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_FundHelper, config =>
         {
-            StartTaskList(FundHelper);
+            StartTaskList(taskList, FundHelper);
             void FundHelper() => ProcessGroupMessage.FundHelper(groupMessage);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
         {
-            StartTaskList(RandomSetu);
+            StartTaskList(taskList, RandomSetu);
             async void RandomSetu() => await ProcessGroupMessage.RandomSetuAsync(PublicVar.BotConfig, groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
         {
-            StartTaskList(() => ProcessGroupMessage.RepeaterKiller(groupMessage));
+            StartTaskList(taskList, () => ProcessGroupMessage.RepeaterKiller(groupMessage));
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
         {
-            StartTaskList(GenshinHelper);
+            StartTaskList(taskList, GenshinHelper);
 
             void GenshinHelper() => ProcessGroupMessage.GenshinHelperAsync(
                 config.GenshinHelperConfig?.GenshinResinAlarms.Values
@@ -196,15 +215,15 @@ partial class MainWindowViewModel
                 groupMessage);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
         {
-            StartTaskList(SearchImageSource);
+            StartTaskList(taskList, SearchImageSource);
             async void SearchImageSource() => await ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedConfig(groupId, BotFunctionType.Group_Roll, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_Roll, config =>
         {
-            StartTaskList(Roll);
+            StartTaskList(taskList, Roll);
             async void Roll() => await ProcessGroupMessage.RollAsync(groupMessage).ConfigureAwait(false);
         });
 
@@ -220,17 +239,46 @@ partial class MainWindowViewModel
         //    _cqApi.SendMessage(LogMessageType.Group, groupMessage.GroupId, "你刚发了条消息");
     }
 
-    private bool GetSelectedConfig(
+    private bool GetSelectedPrivateConfig(
+        long userId,
+        BotFunctionType botFunctionType,
+        Action<SetConfig> runAction = null)
+    {
+        var setConfig = SetConfigs.Values
+            .Where(each => each.TargetType == BotConfigTargetType.Private)
+            .FirstOrDefault(each => each.TargetId == userId
+                && each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType)?.IsUsed == true);
+        if (setConfig == null)
+            return false;
+
+        runAction?.Invoke(setConfig);
+        return true;
+    }
+
+    private bool GetSelectedCommonConfig(
+        BotFunctionType botFunctionType,
+        Action<SetConfig> runAction = null)
+    {
+        var setConfig = SetConfigs.Values
+            .Where(each => each.TargetType == BotConfigTargetType.Common)
+            .FirstOrDefault(each => each.TargetId == PublicVar.CommonId
+                && each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType)?.IsUsed == true);
+        if (setConfig == null)
+            return false;
+
+        runAction?.Invoke(setConfig);
+        return true;
+    }
+
+    private bool GetSelectedGroupConfig(
         long groupId,
         BotFunctionType botFunctionType,
         Action<SetConfig> runAction = null)
     {
-        var setConfig = SetConfigs.Values.FirstOrDefault(each =>
-        {
-            var botFunction =
-                each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType);
-            return botFunction?.IsUsed == true && each.TargetId == groupId;
-        });
+        var setConfig = SetConfigs.Values
+            .Where(each => each.TargetType == BotConfigTargetType.Group)
+            .FirstOrDefault(each => each.TargetId == groupId
+                && each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType)?.IsUsed == true);
         if (setConfig == null)
             return false;
 

@@ -225,14 +225,24 @@ partial class CQAPI
     }
 
     /// <summary>
-    /// 发送群消息
+    /// 发送私聊消息
     /// </summary>
     /// <param name="userId">群号</param>
     /// <param name="message">消息内容</param>
     public Task SendPrivateMessageAsync(long userId, string message)
+        => SendPrivateMessageAsync(userId, null, message);
+
+    /// <summary>
+    /// 发送私聊消息
+    /// </summary>
+    /// <param name="userId">群号</param>
+    /// <param name="groupId">临时消息的群号</param>
+    /// <param name="message">消息内容</param>
+    public Task SendPrivateMessageAsync(long userId, long? groupId, string message)
         => SendDataAsync("send_private_msg", new ParamData
         {
             UserId = userId.ToString(),
+            GroupId = groupId.HasValue ? groupId.ToString() : null,
             Message = MessageUtil.ProcessCQMessage(message)
         });
 
@@ -242,12 +252,12 @@ partial class CQAPI
     /// <param name="type"><see cref="ElementType"/></param>
     /// <param name="targetId">群号</param>
     /// <param name="message">消息内容</param>
-    public async void SendMessage(MessageTargetType type, long targetId, string message, BotDbContext botDb)
+    public async Task SendMessageAsync(MessageTargetType type, long targetId, string message)
     {
         switch (type)
         {
             case MessageTargetType.Private:
-                await Run(() => SendPrivateMessageAsync(targetId, message)).ConfigureAwait(false);
+                await Run(() => SendPrivateMessageAsync(targetId, null, message)).ConfigureAwait(false);
                 break;
             case MessageTargetType.Group:
                 await Run(() => SendGroupMessageAsync(targetId, message)).ConfigureAwait(false);

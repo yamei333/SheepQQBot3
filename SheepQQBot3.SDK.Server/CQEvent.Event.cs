@@ -14,6 +14,8 @@ public partial class CQEvent
 
     public event EventHandler<GroupMessage> OnGroupMessage;
 
+    public event EventHandler<PrivateMessage> OnPrivateMessage;
+
     public event EventHandler<GroupRevokeMessage> OnGroupRevoke;
 
     public event EventHandler<GroupPoke> OnGroupPoke;

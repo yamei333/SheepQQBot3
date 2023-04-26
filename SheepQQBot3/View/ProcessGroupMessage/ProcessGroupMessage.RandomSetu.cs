@@ -174,7 +174,7 @@ public static partial class ProcessGroupMessage
                             SetuCD = dateNow.ToTimeStamp(),
                             SetuDoushiLv = searchTargetId
                         };
-                        var sendMessage = $"虚拟色图斗士Lv{searchTargetId}," +
+                        var sendMessage = $"虚拟色图斗士Lv{searchTargetId}, " +
                                           $"{BotExtensions.GetSetuSuccessPercent(vtuberSetuDoushiInfo, dateNow)}";
                         await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                     }

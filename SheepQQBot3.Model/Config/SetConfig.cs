@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Configuration;
 using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
@@ -41,10 +42,9 @@ public class SetConfig
     public BitmapImage Icon =>
         TargetType switch
         {
-            BotConfigTargetType.Common => null,
+            BotConfigTargetType.Common => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={ConfigurationManager.AppSettings["selfId"]}&spec=40"),
             BotConfigTargetType.Group => GetHttpIcon($"https://p.qlogo.cn/gh/{TargetId}/{TargetId}/40/"),
             BotConfigTargetType.Private => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=40"),
-            _ => throw new NotImplementedException()
         };
 
     /// <summary>
@@ -130,12 +130,6 @@ public class SetConfig
         get => _alarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
         set => _alarmAideAlarmedList = value;
     }
-
-    /// <summary>
-    /// 保存群自定义提醒内容
-    /// </summary>
-    [Key(nameof(CustomGroupAlarms))]
-    public Dictionary<Guid, CustomGroupAlarm> CustomGroupAlarms { get; set; }
 
     [JsonIgnore]
     [IgnoreMember]
@@ -238,7 +232,6 @@ public class SetConfig
         FundAlarmedList = new Dictionary<Guid, DateTime>();
         FundLimitObservedList = new Dictionary<Guid, DateTime>();
         LiveAlarmedList = new Dictionary<Guid, DateTime>();
-        CustomGroupAlarms = new Dictionary<Guid, CustomGroupAlarm>();
         RepeaterKillerConfigs = new Dictionary<Guid, RepeaterKillerConfig>();
         LiveAlarmConfigs = new Dictionary<Guid, LiveAlarmConfig>();
         InitBotFunctionIsEnabled();
