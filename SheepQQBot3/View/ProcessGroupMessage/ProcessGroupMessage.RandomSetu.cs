@@ -445,17 +445,17 @@ StartSetu:
                         new(3000 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             SetuAddLevel.Normal, true)),
-                        new(200 + (int) (150 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(3, 15), SetuAddLevel.Normal)),
-                        new(200 + (int) (150 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(5, 30), SetuAddLevel.Normal)),
-                        new(100 + (int) (75 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(8, 45), SetuAddLevel.Double)),
-                        new(50 + (int) (40 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(10, 60), SetuAddLevel.SuperDouble)),
+                        new(200 + (int)(150 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                            new SendSetuConfig(Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
+                        new(200 + (int)(150 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                            new SendSetuConfig(Rand.Next(3 + (int)(2 * Math.Pow(setuDoushiLv, 2)), 30 + (int)(10 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
+                        new(100 + (int)(75 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                            new SendSetuConfig(Rand.Next(5 + (int)(3 * Math.Pow(setuDoushiLv, 2)), 45 + (int)(15 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Double)),
+                        new(50 + (int)(40 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                            new SendSetuConfig(Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.SuperDouble)),
                         new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0, SetuAddLevel.Free, true)),
                         new(30 - (int)(setuDoushiLv * 27.0 / MaxSenderLv), new SendSetuConfig(
-                            SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
+                            SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             SetuAddLevel.Normal, true, true)),
                         new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
                     };
@@ -471,17 +471,16 @@ StartSetu:
 
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(10000, new SendSetuConfig(Rand.Next(10, 60), SetuAddLevel.Normal)),
-                        new(3500, new SendSetuConfig(Rand.Next(10, 60) * 2, SetuAddLevel.Double)),
-                        new(1500, new SendSetuConfig(Rand.Next(10, 60) * 4, SetuAddLevel.SuperDouble)),
-                        new(750, new SendSetuConfig(Rand.Next(10, 60) * 8, SetuAddLevel.Golden)),
-                        new(300, new SendSetuConfig(Rand.Next(10, 60) * 16, SetuAddLevel.Platinum)),
-                        new(150, new SendSetuConfig(Rand.Next(10, 60) * 32, SetuAddLevel.Diamond)),
-                        new(10, new SendSetuConfig(Rand.Next(10, 60) * 256, SetuAddLevel.Death)),
+                        new(10000, new SendSetuConfig((int)(Rand.Next(10, 60) * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Normal)),
+                        new(3500, new SendSetuConfig((int)(Rand.Next(10, 60) * 2 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Double)),
+                        new(1500, new SendSetuConfig((int)(Rand.Next(10, 60) * 4 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.SuperDouble)),
+                        new(750, new SendSetuConfig((int)(Rand.Next(10, 60) * 8 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Golden)),
+                        new(300, new SendSetuConfig((int)(Rand.Next(10, 60) * 16 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Platinum)),
+                        new(150, new SendSetuConfig((int)(Rand.Next(10, 60) * 32 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Diamond)),
+                        new(10, new SendSetuConfig((int)(Rand.Next(10, 60) * 256 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Death)),
                         new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, SetuAddLevel.Luck)),
                         new(600, new SendSetuConfig(Rand.Next(5, 60) * -4, SetuAddLevel.LuckSuper)),
                         new(200, new SendSetuConfig(Rand.Next(5, 60) * -16, SetuAddLevel.LuckGolden)),
-                        //new(200, new SendSetuConfig(0, SetuAddLevel.Free)),
                     };
                 }
 
