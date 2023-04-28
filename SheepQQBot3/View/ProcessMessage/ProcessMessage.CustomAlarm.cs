@@ -1,5 +1,7 @@
 ﻿using System;
+using System.Data;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -19,6 +21,14 @@ public static partial class ProcessMessage
     private const string COMMAND_CUSTOM_GROUP_ALARM_LIBRARY = "#TX#";
 
     private const string ERROR_MESSAGE = $"{ENTER}输入格式有误, 请输入 #tx#ch 查询帮助!";
+
+    private const int COMMAND_CUSTOM_GROUP_ALARM_MINLENGTH = 6;
+
+    private const int COMMAND_CUSTOM_GROUP_ALARM_CONTENT_MINLENGTH = 2;
+
+    private static Regex regCustomAlarmDateTime = RegexGenerator.CustomAlarm_DateTime();
+    private static Regex regCustomAlarmTime = RegexGenerator.CustomAlarm_Time();
+    private static Regex regCustomAlarmMinutes = RegexGenerator.CustomAlarm_Minutes();
 
     /// <summary>
     /// 自定义提醒(群版)
@@ -54,16 +64,20 @@ public static partial class ProcessMessage
         long targetId,
         string message)
     {
-        if (!message.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+        if (message.Length < COMMAND_CUSTOM_GROUP_ALARM_MINLENGTH
+            || !message.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+        {
             return false;
+        }
+
+        message = message[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..];
 
         try
         {
             var dateNow = DateTime.Now;
             var sendMessage = string.Empty;
-            var changedMessageSpace = message[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..]
-                .Replace(COMMA_FULL, COMMA);
-            var (startChar1, startChar2) = GetStartChar(message[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..]);
+            var (startChar1, startChar2) = GetStartChar(message);
+            message = message[COMMAND_CUSTOM_GROUP_ALARM_CONTENT_MINLENGTH..];
             var isNoAt = false;
             var isNoReply = false;
             var customAlarms = PublicVar.BotConfig.CustomAlarms;
@@ -71,18 +85,16 @@ public static partial class ProcessMessage
             switch (startChar1)
             {
                 case 'C':
-                    var messageArraySpace = changedMessageSpace.Split(COMMA);
                     switch (startChar2)
                     {
                         case 'H':
                             sendMessage += $"自定义提醒功能命令:" +
-                                $"{ENTER}#tx#ca收菜,60 -> 60分钟后发送提醒消息, 内容为'收菜'" +
-                                $"{ENTER}#tx#ca收菜,2019-7-13 19:00 -> 在指定时间发送提醒消息, 内容为'收菜'" +
-                                $"{ENTER}#tx#ca收菜,19:00 -> 同上, 省略日期时为当天提醒" +
+                                $"{ENTER}#tx#ca收菜$60$ -> 60分钟后发送提醒消息, 内容为'收菜'" +
+                                $"{ENTER}#tx#ca收菜$2019-7-13 19:00$ -> 在指定时间发送提醒消息, 内容为'收菜'" +
+                                $"{ENTER}#tx#ca收菜$19:00$ -> 同上, 省略日期时为当天提醒" +
                                 $"{ENTER}#tx#cd2019-7-13 19:00 -> 删除2019-7-13 19:00的提醒" +
                                 $"{ENTER}#tx#cd[id] -> 使用ID删除提醒" +
                                 $"{ENTER}#tx#cl -> 列出当前还未提醒的项目" +
-                                $"{ENTER}#tx#cl,1 -> 列出当前还未提醒的项目(带ID)" +
                                 $"{ENTER}特殊参数: (在消息内包含)" +
                                 $"{ENTER}[at-22222] at某人" +
                                 $"{ENTER}[-na] 提醒时不at自己" +
@@ -91,85 +103,65 @@ public static partial class ProcessMessage
                                 $"{ENTER}[-bark] 发送bark推送(需要配置BarkKey)";
                             break;
                         case 'A':
-                            var isTimeFormat = messageArraySpace[1].Contains(':');
-                            (var addMessage, isNoAt, isNoReply, var isLoop, var isBark) = messageArraySpace[0][2..].ToCqCode(targetId);
-                            if (isBark && !BotExtensions.HasUserConfig(targetId, UserConfigType.BarkKey))
+                            if (GetAddCustomAlarmDate(out var addAlarmDateTime))
                             {
-                                const string barkKeyError = "BarkKey未正确配置, 无法使用[-bark]!";
-                                if (isGroup)
+                                (var addMessage, isNoAt, isNoReply, var isLoop, var isBark) = message.ToCqCode(targetId);
+                                if (isBark && !BotExtensions.HasUserConfig(targetId, UserConfigType.BarkKey))
                                 {
-                                    await Api.SendGroupMessageAsync(groupId.GetValueOrDefault(),
-                                        $"{CQCode.At(targetId)}{barkKeyError}").ConfigureAwait(false);
-                                }
-                                else
-                                {
-                                    await Api.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
-                                }
-
-                                return true;
-                            }
-
-                            if (isTimeFormat && DateTime.TryParse(messageArraySpace[1], out var addDate))
-                            {
-                                AddCustomAlarm(addDate);
-                            }
-                            else
-                            {
-                                if (isTimeFormat && DateTime.TryParse($"{dateNow.ToYYYYMDD()} {messageArraySpace[1]}", out var addDate2))
-                                {
-                                    AddCustomAlarm(addDate2);
-                                }
-                                else
-                                {
-                                    if (int.TryParse(messageArraySpace[1], out var addMinute))
-                                        AddCustomAlarm(dateNow.AddMinutes(addMinute));
+                                    const string barkKeyError = "BarkKey未正确配置, 无法使用[-bark]!";
+                                    if (isGroup)
+                                    {
+                                        await Api.SendGroupMessageAsync(groupId.GetValueOrDefault(),
+                                            $"{CQCode.At(targetId)}{barkKeyError}").ConfigureAwait(false);
+                                    }
                                     else
-                                        sendMessage += ERROR_MESSAGE;
-                                }
-                            }
-                            break;
+                                    {
+                                        await Api.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
+                                    }
 
-                            void AddCustomAlarm(DateTime addDateTime)
-                            {
-                                var addDateString = addDateTime.ToYYYYMMDDHHMMSS();
-                                var customAlarm = customAlarmValues.FirstOrDefault(each => (each.AlarmDate - addDateTime).TotalSeconds == 0);
+                                    return true;
+                                }
+
+                                var addDateString = addAlarmDateTime.ToYYYYMMDDHHMMSS();
+                                var customAlarm = customAlarmValues.FirstOrDefault(each => (each.AlarmDate - addAlarmDateTime).TotalSeconds == 0);
                                 if (customAlarm != null)
                                 {
                                     // 有记录, 则提示
                                     sendMessage += $"{ENTER}已存在 {addDateString} 的提醒记录!" +
-                                                   $"{ENTER}提醒内容: {customAlarm.AlarmMessage}";
+                                        $"{ENTER}提醒内容: {customAlarm.AlarmMessage}";
                                 }
                                 else
                                 {
                                     // 无记录, 则添加并发送反馈
                                     var newId = Guid.NewGuid();
                                     customAlarms.Add(newId, new CustomAlarm(
-                                        newId, isGroup, groupId, targetId, addDateTime, addMessage, !isNoAt, isLoop, isBark));
+                                        newId, isGroup, groupId, targetId, addAlarmDateTime, addMessage, !isNoAt, isLoop, isBark));
                                     sendMessage += $"{ENTER}已添加时间为 {addDateString} 的提醒记录!";
                                     ConfigExtensions.SaveConfig();
                                 }
                             }
+                            else
+                            {
+                                sendMessage += ERROR_MESSAGE;
+                            }
+
+                            break;
                         case 'D':
-                            var deleteInfo = messageArraySpace[0][2..];
-                            if (Guid.TryParse(deleteInfo, out var deleteId))
+                            if (Guid.TryParse(message, out var deleteId))
                             {
                                 DeleteUserAlarmCustomById(deleteId);
                             }
-                            else if (DateTime.TryParse(deleteInfo, out var deleteDate))
-                            {
-                                DeleteUserAlarmCustomByDate(deleteDate);
-                            }
                             else
                             {
-                                if (DateTime.TryParse($"{dateNow.ToYYYYMDD()} {deleteInfo}", out var deleteDate2))
-                                    DeleteUserAlarmCustomByDate(deleteDate2);
+                                message = $"${message}$";
+                                if (GetAddCustomAlarmDate(out var deleteDateTime))
+                                    DeleteUserAlarmCustomByDate(deleteDateTime);
                                 else
                                     sendMessage += ERROR_MESSAGE;
                             }
+
                             break;
                         case 'L':
-                            var listArray = changedMessageSpace.Split(COMMA);
-                            var isShowId = listArray.Length == 2 && listArray[1].Trim() == "1";
                             if (isGroup)
                             {
                                 customAlarmValues
@@ -178,11 +170,12 @@ public static partial class ProcessMessage
                                     .ForEach(customGroupAlarm =>
                                     {
                                         var alarmMessage = customGroupAlarm.AlarmMessage
-                                            .ToNormalText().ByteSubstring(isShowId ? 10 * 3 + 38 : 10 * 3);
+                                            .ToNormalText().ByteSubstring(68);
                                         sendMessage += $"{ENTER}" +
+                                            $"({customGroupAlarm.Id})" +
                                             $"{(customGroupAlarm.IsBark ? "[推]" : string.Empty)}" +
                                             $"{(customGroupAlarm.IsLoop ? "[loop]" : string.Empty)}" +
-                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]" + $"{(isShowId ? $"({customGroupAlarm.Id})" : string.Empty)}{alarmMessage}";
+                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]{alarmMessage}";
                                     });
                             }
                             else
@@ -193,12 +186,13 @@ public static partial class ProcessMessage
                                     .ForEach(customGroupAlarm =>
                                     {
                                         var alarmMessage = customGroupAlarm.AlarmMessage
-                                            .ToNormalText().ByteSubstring(isShowId ? 10 * 3 + 38 : 10 * 3);
+                                            .ToNormalText().ByteSubstring(68);
                                         sendMessage += ENTER +
+                                            $"({customGroupAlarm.Id})" +
                                             $"{(customGroupAlarm.IsGroup ? $"[群{customGroupAlarm.GroupId}]" : "[私]")}" +
                                             $"{(customGroupAlarm.IsBark ? "[推]" : string.Empty)}" +
                                             $"{(customGroupAlarm.IsLoop ? "[loop]" : string.Empty)}" +
-                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]" + $"{(isShowId ? $"({customGroupAlarm.Id})" : string.Empty)}{alarmMessage}";
+                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]{alarmMessage}";
                                     });
                             }
 
@@ -207,7 +201,7 @@ public static partial class ProcessMessage
 
                             break;
                         case 'T':
-                            sendMessage += $"{ENTER}{messageArraySpace[0][2..].ToCqCode(targetId).Result}";
+                            sendMessage += $"{ENTER}{message.ToCqCode(targetId).Result}";
                             break;
                         default:
                             sendMessage += ERROR_MESSAGE;
@@ -239,7 +233,6 @@ public static partial class ProcessMessage
                             ? $"{ENTER}已删除提醒记录! ({deleteId})"
                             : $"{ENTER}不存在ID为 ({deleteId}) 的提醒记录!";
                     }
-
                 default:
                     // 不支持提示
                     sendMessage += $"不支持的命令内容!";
@@ -260,6 +253,34 @@ public static partial class ProcessMessage
                 {
                     await Api.SendPrivateMessageAsync(targetId, groupId, $"{sendMessage}").ConfigureAwait(false);
                 }
+            }
+
+            bool GetAddCustomAlarmDate(out DateTime alarmDateTime)
+            {
+                var match = regCustomAlarmDateTime.Match(message);
+                if (match.Success && DateTime.TryParse(match.Groups[1].Value, out alarmDateTime))
+                {
+                    message = message.Replace(match.Value, string.Empty);
+                    return true;
+                }
+
+                match = regCustomAlarmTime.Match(message);
+                if (match.Success && DateTime.TryParse($"{dateNow.ToYYYYMDD()} {match.Groups[1].Value}", out alarmDateTime))
+                {
+                    message = message.Replace(match.Value, string.Empty);
+                    return true;
+                }
+
+                match = regCustomAlarmMinutes.Match(message);
+                if (match.Success)
+                {
+                    alarmDateTime = dateNow.AddMinutes(int.Parse(match.Groups[1].Value));
+                    message = message.Replace(match.Value, string.Empty);
+                    return true;
+                }
+
+                alarmDateTime = default;
+                return false;
             }
         }
         catch (Exception)
