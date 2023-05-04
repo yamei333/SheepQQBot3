@@ -151,6 +151,9 @@ public static partial class ProcessGroupMessage
             await BotDb.AddAsync(setuDoushiInfo).ConfigureAwait(false);
         }
 
+        if ((dateNow - setuDoushiInfo.BlackListCD.ToDateTime()).TotalMicroseconds < 0)
+            return false;
+
         var setuDoushiLv = setuDoushiInfo.SetuDoushiLv;
         var setuCd = setuDoushiInfo.SetuCD.ToDateTime();
         if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
@@ -414,8 +417,14 @@ StartSetu:
                 .All(history => history.SearchKeyword == lastKeyword
                     && !history.IsGetSuccessed.ToBool()))
             {
-                setuDoushiInfo.SetuCD = dateNow.AddHours(120).ToTimeStamp();
+                setuDoushiInfo.BlackListCD = dateNow.AddHours(120).ToTimeStamp();
+                setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
+                var sendMessage = $"{CQCode.At(targetId)}" +
+                                  $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                  $"[斗士Lv{setuDoushiLv}]";
+                await Api.SendGroupMessageAsync(groupId, sendMessage)
+                    .ConfigureAwait(false);
                 return true;
             }
         }
@@ -425,13 +434,30 @@ StartSetu:
         {
             if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 20 + setuDoushiLv * 10)
             {
-                // MEMO : 20秒内不连续响应
-                //await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧").ConfigureAwait(false);
+                if (setuDoushiInfo.ToFastTimes >= 2)
+                {
+                    // MEMO : 连续刷则关小黑屋
+                    var sendMessage = $"{CQCode.At(targetId)}" +
+                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
+                                      $"[斗士Lv{setuDoushiLv}]";
+                    await Api.SendGroupMessageAsync(groupId, sendMessage)
+                        .ConfigureAwait(false);
+                    setuDoushiInfo.ToFastTimes = 0;
+                    setuDoushiInfo.BlackListCD = dateNow.AddHours(1).ToTimeStamp();
+                }
+                else
+                {
+                    // MEMO : 20秒内不连续响应
+                    await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧").ConfigureAwait(false);
+                    setuDoushiInfo.ToFastTimes += 1;
+                }
+                BotDb.Update(setuDoushiInfo);
                 return true;
             }
 
-            //botConfig.SetuSendLastRecords[targetId] = dateNow;
+            setuDoushiInfo.ToFastTimes = 0;
 
+            //botConfig.SetuSendLastRecords[targetId] = dateNow;
             var r18Bonus = false;
             var addSecond = 0;
             var addLevel = SetuAddLevel.Normal;
@@ -488,7 +514,7 @@ StartSetu:
                     if ((setuCd - dateNow).TotalSeconds >= 300 - (int)(setuDoushiLv * 150.0 / 15))
                     {
                         // MEMO : CD5分钟以上, 老实等着吧
-                        //await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}CD还早呢, 先歇着吧").ConfigureAwait(false);
+                        await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}CD还早呢, 先歇着吧").ConfigureAwait(false);
                         return true;
                     }
 
@@ -510,6 +536,25 @@ StartSetu:
                 if (randActions.TryGetRandomWeight(out var resultAction))
                 {
                     SetSetuValues(resultAction.Value);
+                    if (!canSendSetu)
+                    {
+                        var last9Historys = targetSetuSendHistorys
+                            .OrderByDescending(each => each.TimeStamp)
+                            .Take(9)
+                            .ToArray();
+                        // MEMO : 色图10连跪, 冷静24小时
+                        if (last9Historys.Length == 9 && last9Historys.All(each => !each.IsRequestSuccessed.ToBool()))
+                        {
+                            setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
+                            BotDb.Update(setuDoushiInfo);
+                            var sendMessage = $"{CQCode.At(targetId)}" +
+                                              $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                              $"[斗士Lv{setuDoushiLv}]";
+                            await Api.SendGroupMessageAsync(groupId, sendMessage)
+                                .ConfigureAwait(false);
+                            return true;
+                        }
+                    }
                 }
                 else
                 {
@@ -518,7 +563,17 @@ StartSetu:
 
                 // MEMO : 参数注入意图
                 if (tag!.Contains('&') || tag!.Contains("%26"))
-                    SetSetuValues(new SendSetuConfig(3600, SetuAddLevel.Death));
+                {
+                    setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
+                    setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
+                    BotDb.Update(setuDoushiInfo);
+                    var sendMessage = $"{CQCode.At(targetId)}" +
+                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                      $"[斗士Lv{setuDoushiLv}]";
+                    await Api.SendGroupMessageAsync(groupId, sendMessage)
+                        .ConfigureAwait(false);
+                    return true;
+                }
 
                 // MEMO : 色图Lv增加
                 if (canSendSetu)
@@ -546,11 +601,11 @@ StartSetu:
             if (PublicVar.IsDebug)
             {
                 await Api.SendGroupMessageAsync(groupId, "[DEBUG]" +
-                                                         $"{ENTER}目标对象: {targetId}" +
-                                                         $"{ENTER}色图Lv: {setuDoushiLv}" +
-                                                         $"{ENTER}是否发送: {canSendSetu}" +
-                                                         $"{ENTER}增加时间: {addSecond}s" +
-                                                         $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
+                                                        $"{ENTER}目标对象: {targetId}" +
+                                                        $"{ENTER}色图Lv: {setuDoushiLv}" +
+                                                        $"{ENTER}是否发送: {canSendSetu}" +
+                                                        $"{ENTER}增加时间: {addSecond}s" +
+                                                        $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
                     .ConfigureAwait(false);
             }
 

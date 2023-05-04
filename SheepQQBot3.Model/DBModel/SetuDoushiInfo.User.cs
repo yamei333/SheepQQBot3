@@ -33,7 +33,9 @@ namespace SheepQQBot3.DbModel
         {
             TargetId = targetId;
             SetuDoushiLv = 0;
+            ToFastTimes = 0;
             SetuCD = 0;
+            BlackListCD = 0;
         }
     }
 }

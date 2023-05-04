@@ -9,6 +9,8 @@ namespace SheepQQBot3.DbModel
     {
         public long TargetId { get; set; }
         public long SetuDoushiLv { get; set; }
+        public long ToFastTimes { get; set; }
         public long SetuCD { get; set; }
+        public long BlackListCD { get; set; }
     }
 }
