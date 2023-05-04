@@ -342,12 +342,35 @@ public static partial class ProcessGroupMessage
         var isSetuDebug = false;
         var tag = string.Empty;
         var setuKeywordCheck = false;
+        SetuType? targetSetuApiType = null;
         // MEMO : #st# (#st#支持关键字)
         if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
         {
             setuKeywordCheck = true;
             tag = message[COMMAND_CUSTOM_GROUP_SETU_LIBRARY.Length..];
             goto StartSetu;
+        }
+
+        // MEMO : 处理色图类型关键字
+        if (message.EndsWith("L", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^1];
+            targetSetuApiType = SetuType.Lolicon;
+        }
+        else if (message.EndsWith("Y", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^1];
+            targetSetuApiType = SetuType.Yuban;
+        }
+        else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^1];
+            targetSetuApiType = SetuType.NyanCatda;
+        }
+        else if (message.EndsWith("J", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^1];
+            targetSetuApiType = SetuType.Jitsu;
         }
 
         // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
@@ -378,7 +401,7 @@ StartSetu:
             .ToList();
         var lastHistory = Enumerable.MaxBy(targetSetuSendHistorys, each => each.TimeStamp);
         var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
-        if (!string.IsNullOrEmpty(lastKeyword))
+        if (lastKeyword == sourceTag && !string.IsNullOrEmpty(lastKeyword))
         {
             // MEMO : 最后2次色图都有关键字
             var last2Historys = targetSetuSendHistorys
@@ -583,18 +606,58 @@ StartSetu:
 SendSetu:
             try
             {
-                var randomSetuKeyword = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                var randomSetuKeyword = targetSetuApiType switch
                 {
-                    new(10, SetuExtensions.GetSetu_LoliconAsync),
-                    new(8, SetuExtensions.GetSetu_YubanAsync),
-                    new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    SetuType.Lolicon => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_LoliconAsync)
+                    },
+                    SetuType.Yuban => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_YubanAsync)
+                    },
+                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_LoliconAsync),
+                        new(8, SetuExtensions.GetSetu_YubanAsync),
+                        new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    },
+                    SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_JitsuAsync)
+                    },
+                    _ => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_LoliconAsync),
+                        new(8, SetuExtensions.GetSetu_YubanAsync),
+                        new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    }
                 };
-                var randomSetu = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                var randomSetu = targetSetuApiType switch
                 {
-                    new(10, SetuExtensions.GetSetu_LoliconAsync),
-                    new(8, SetuExtensions.GetSetu_YubanAsync),
-                    new(6, SetuExtensions.GetSetu_NyanCatdaAsync),
-                    new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    SetuType.Lolicon => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_LoliconAsync)
+                    },
+                    SetuType.Yuban => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_YubanAsync)
+                    },
+                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_NyanCatdaAsync),
+                    },
+                    SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_JitsuAsync)
+                    },
+                    _ => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_LoliconAsync),
+                        new(8, SetuExtensions.GetSetu_YubanAsync),
+                        new(6, SetuExtensions.GetSetu_NyanCatdaAsync),
+                        new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    }
                 };
                 Func<string, Task<SetuInfo>>[] randomSetuDefault =
                 {
@@ -605,7 +668,7 @@ SendSetu:
                 };
 
                 await Api.SendGroupMessageAsync(groupId,
-                        $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...")
+                    $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...")
                     .ConfigureAwait(false);
 
                 var (setuInfo, fileName) = await GetSetu(() => isSearchTag
