@@ -14,6 +14,11 @@ public static partial class ProcessGroupMessage
     private const string COMMAND_ROLL = "#R#";
 
     /// <summary>
+    /// Roll点命令(简化)
+    /// </summary>
+    private const string COMMAND_ROLL_SIMPLE = "R";
+
+    /// <summary>
     /// 图源搜索
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
@@ -24,6 +29,10 @@ public static partial class ProcessGroupMessage
         var targetId = groupMessage.Sender.UserId;
         var messageId = groupMessage.MessageId;
         var message = groupMessage.Message;
+        // MEMO : 简单命令r
+        if (message.Equals(COMMAND_ROLL_SIMPLE, StringComparison.CurrentCultureIgnoreCase))
+            message = COMMAND_ROLL;
+
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_ROLL, StringComparison.CurrentCultureIgnoreCase))
             return false;
