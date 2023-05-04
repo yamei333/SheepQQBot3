@@ -202,7 +202,7 @@ public static partial class TaskProcess
         #region 洞天宝钱
 
         var potCoin = dailyNote.CurrentHomeCoin;
-        if (genshinResinAlarm.PotCoin && _regGenshinPotCoin.IsMatch(dateNowStr) && potCoin >= 2100)
+        if (genshinResinAlarm.PotCoin && (potCoin >= 2320 || (_regGenshinPotCoin.IsMatch(dateNowStr) && potCoin >= 2100)))
             AddSendMessage($"当前洞天宝钱为[{potCoin}/{dailyNote.MaxHomeCoin}], 快满了!",
                 GenshinDailyNoteAlarmType.PotCoin);
 
