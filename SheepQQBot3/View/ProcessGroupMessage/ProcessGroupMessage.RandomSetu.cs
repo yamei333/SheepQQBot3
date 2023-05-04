@@ -500,7 +500,7 @@ StartSetu:
                 // MEMO : 色图Lv增加
                 if (canSendSetu)
                 {
-                    if (isSearchTag && !message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+                    if (isSearchTag)
                     {
                         changeLvTag = 1;
                         setuDoushiLv++;
