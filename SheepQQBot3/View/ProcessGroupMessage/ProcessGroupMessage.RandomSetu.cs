@@ -405,28 +405,50 @@ StartSetu:
             .ToList();
         var lastHistory = Enumerable.MaxBy(targetSetuSendHistorys, each => each.TimeStamp);
         var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
-        if (lastKeyword == sourceTag && !string.IsNullOrEmpty(lastKeyword))
+        if (!string.IsNullOrEmpty(lastKeyword))
         {
-            // MEMO : 最后2次色图都有关键字
-            var last2Historys = targetSetuSendHistorys
-                .OrderByDescending(history => history.TimeStamp)
-                .Where(history => !history.IsR18Bonus.ToBool()
-                    && history.IsRequestSuccessed.ToBool())
-                .Take(2)
-                .ToList();
-            if (last2Historys.Count == 2 && last2Historys
-                .All(history => history.SearchKeyword == lastKeyword
-                    && !history.IsGetSuccessed.ToBool()))
+            if (lastKeyword == sourceTag)
             {
-                setuDoushiInfo.BlackListCD = dateNow.AddHours(120).ToTimeStamp();
-                setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
-                BotDb.Update(setuDoushiInfo);
-                var sendMessage = $"{CQCode.At(targetId)}" +
-                                  $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
-                                  $"[斗士Lv{setuDoushiLv}]";
-                await Api.SendGroupMessageAsync(groupId, sendMessage)
-                    .ConfigureAwait(false);
-                return true;
+                // MEMO : 最后2次色图都有关键字
+                var last2Historys = targetSetuSendHistorys
+                    .OrderByDescending(history => history.TimeStamp)
+                    .Where(history => !history.IsR18Bonus.ToBool()
+                                      && history.IsRequestSuccessed.ToBool())
+                    .Take(2)
+                    .ToList();
+                if (last2Historys.Count == 2 && last2Historys
+                        .All(history => history.SearchKeyword == lastKeyword
+                                        && !history.IsGetSuccessed.ToBool()))
+                {
+                    setuDoushiInfo.BlackListCD = dateNow.AddHours(120).ToTimeStamp();
+                    setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
+                    BotDb.Update(setuDoushiInfo);
+                    var sendMessage = $"{CQCode.At(targetId)}" +
+                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                      $"[斗士Lv{setuDoushiLv}]";
+                    await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    return true;
+                }
+            }
+            else
+            {
+                // MEMO : 最后5次有关键字的色图检索
+                var last5Historys = targetSetuSendHistorys
+                    .OrderByDescending(history => history.TimeStamp)
+                    .Where(history => history.IsSearchTag && history.IsRequestSuccessed.ToBool())
+                    .Take(5)
+                    .ToList();
+                if (last5Historys.Count == 5 && last5Historys.All(history => !history.IsGetSuccessed.ToBool()))
+                {
+                    setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
+                    setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
+                    BotDb.Update(setuDoushiInfo);
+                    var sendMessage = $"{CQCode.At(targetId)}" +
+                        $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}" +
+                        $"[斗士Lv{setuDoushiLv}]";
+                    await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    return true;
+                }
             }
         }
 
