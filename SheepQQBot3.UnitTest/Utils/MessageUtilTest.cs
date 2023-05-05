@@ -45,20 +45,6 @@ public class MessageUtilTest
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
 
         #endregion Test
-
-        //var zap = PushExtensions.PushBarkMessageAsync(message: "测试");
-        //var api = new OpenAI_API.OpenAIAPI("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");
-        //IAsyncEnumerable<CompletionResult> StreamCompletionEnumerableAsync(CompletionRequest request);
-
-        //// for example
-        //foreach (var token in api.Completions.StreamCompletionEnumerableAsync(new CompletionRequest(
-        //    "测试测试",
-        //    OpenAI_API.Models.Model.DavinciText, 200, 0.5, presencePenalty: 0.1, frequencyPenalty: 0.1)))
-        //{
-        //    Console.Write(token);
-        //}
-        // should print something starting with "Three"
-        ;
     }
 
     [TestMethod]

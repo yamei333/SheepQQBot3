@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
@@ -20,6 +19,8 @@ namespace SheepQQBot3.View;
 public static partial class ProcessGroupMessage
 {
     private static readonly object _syncKeyword = new();
+
+    private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
 
     /// <summary>
     /// 色图命令的开头
@@ -548,7 +549,7 @@ StartSetu:
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                             BotDb.Update(setuDoushiInfo);
                             var sendMessage = $"{CQCode.At(targetId)}" +
-                                              $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                              $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}" +
                                               $"[斗士Lv{setuDoushiLv}]";
                             await Api.SendGroupMessageAsync(groupId, sendMessage)
                                 .ConfigureAwait(false);
@@ -568,7 +569,7 @@ StartSetu:
                     setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                     BotDb.Update(setuDoushiInfo);
                     var sendMessage = $"{CQCode.At(targetId)}" +
-                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
+                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}" +
                                       $"[斗士Lv{setuDoushiLv}]";
                     await Api.SendGroupMessageAsync(groupId, sendMessage)
                         .ConfigureAwait(false);
@@ -771,9 +772,10 @@ SendSetu:
                 {
                     new(messageId),
                     new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
-                    new($"{setuInfo.SetuType}", BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
-                    new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
-                                                       $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
+                    new(BOT_NAME, BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
+                    new(BOT_NAME, BotId, $"{setuInfo.SourceText}"),
+                    new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
+                        setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
                 };
 
                 if (r18Bonus)
@@ -806,24 +808,28 @@ SendSetu:
                     switch (setuInfoR18.Result)
                     {
                         case SetuResult.Successed:
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                                 $"[这是一张额外的金色传说{sourceTag}色图, 不可预览]"));
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
-                                $"{setuInfoR18.SourceText}" +
-                                $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, $"{setuInfoR18.SourceText}"));
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
+                                setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)));
                             break;
                         case SetuResult.NoSearchResult:
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                                 $"{_setuKexiStart.Random()}" +
                                 $"色图库中没找到金色传说色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
                             break;
                         case SetuResult.ApiError:
                         case SetuResult.Timeout:
                         case SetuResult.OtherError:
-                            await Api.SendGroupMessageAsync(groupId,
-                                $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
-                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
-                                .ConfigureAwait(false);
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                $"{_setuKexiStart.Random()}" +
+                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
+                            //await Api.SendGroupMessageAsync(groupId,
+                            //    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                            //    $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
+                            //    .ConfigureAwait(false);
                             await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, true))
                                 .ConfigureAwait(false);
                             break;
@@ -929,7 +935,7 @@ SendSetu:
                     var isFileExists = false;
                     while (!isFileExists)
                     {
-                        isFileExists = File.Exists($"{CACHE_DIRECTORY_NAME}/{fileName}");
+                        isFileExists = System.IO.File.Exists($"{CACHE_DIRECTORY_NAME}/{fileName}");
                         CommonUtil.Sleep(100);
                     }
 

@@ -91,18 +91,24 @@ public static partial class TaskProcess
         if ((DateTime.Now - startTime).TotalSeconds > 90)
             return;
 
-        var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
-                          $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
+        //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
+        //                  $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
+        var sendMessage = await CQCode.JsonCard_StructMsg(
+            liveRoomResponseData.RoomInfo.Title,
+            $"主播ID: {liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}{ENTER}房间号: {liveRoomId}",
+            $"https://live.bilibili.com/{liveRoomId}",
+            liveRoomResponseData.AnchorInfo.UserBaseInfo.Face)
+            .ConfigureAwait(false);
 
         var targetId = setConfig.TargetId;
         switch (setConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs);
+                await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await Api.SendPrivateMessageAsync(targetId, sendMessage);
+                await Api.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
                 break;
             case BotConfigTargetType.Common:

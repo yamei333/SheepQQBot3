@@ -42,6 +42,22 @@ public partial class MainWindowFunctionTest : UserControl
             Vm.CqApi.SendPrivateMessageAsync(targetId, TxtTestSendGroupMessage_Content.Text);
     }
 
+    /// <summary>
+    /// 测试发送Json消息1
+    /// </summary>
+    private async void TestSendJsonMessage1(object sender, RoutedEventArgs e)
+    {
+        if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
+        {
+            await Vm.CqApi.SendGroupMessageAsync(groupId, await CQCode.JsonCard_StructMsg(
+                TxtTestSendJsonMessage1_Title.Text,
+                TxtTestSendJsonMessage1_Content.Text,
+                TxtTestSendJsonMessage1_Url.Text,
+                string.Empty).ConfigureAwait(false),
+                Vm.SetConfigs).ConfigureAwait(false);
+        }
+    }
+
     //Vm.CqApi.SendGroupForwardMessage(15873217, new GroupForwardMessage[]
     //{
     //    new ("SDPM", 173629299, "我太弱了"),
