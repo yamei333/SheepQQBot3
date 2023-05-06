@@ -22,17 +22,22 @@ public static class HttpExtensions
     /// <summary>
     /// HttpGet返回json对应类类<see cref="T"/>, 不需要使用<see cref="Task.ConfigureAwait"/>
     /// </summary>
-    public static async Task<T> GetFromJsonAsync<T>(string url)
+    public static async Task<HttpResponse<T>> GetFromJsonAsync<T>(string url)
         where T : class
     {
         try
         {
-            return await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.JsonOption).ConfigureAwait(false);
+            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.JsonOption).ConfigureAwait(false);
+            return new HttpResponse<T>(HttpResponseResult.Successed, data);
+        }
+        catch (TaskCanceledException)
+        {
+            return new HttpResponse<T>(HttpResponseResult.TimeOut, null);
         }
         catch (Exception e)
         {
             YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
-            return null;
+            return new HttpResponse<T>(HttpResponseResult.UnknownError, null, e.Message, e.Source);
         }
     }
 
@@ -54,6 +59,10 @@ public static class HttpExtensions
         {
             return HttpClient.Send(httpRequestMessage);
         }
+        catch (TaskCanceledException)
+        {
+            throw;
+        }
         catch (Exception e)
         {
             YameiLogExtensions.WriteLog(e);
@@ -66,6 +75,10 @@ public static class HttpExtensions
         try
         {
             return await HttpClient.GetAsync(url).ConfigureAwait(false);
+        }
+        catch (TaskCanceledException)
+        {
+            throw;
         }
         catch (Exception e)
         {

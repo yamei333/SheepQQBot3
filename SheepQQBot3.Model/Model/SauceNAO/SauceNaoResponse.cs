@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model;
 
-public class SauceNaoRequest
+public class SauceNaoResponse
 {
     [JsonPropertyName("header")]
     public SauceNaoHeader Header { get; set; }

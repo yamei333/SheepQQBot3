@@ -29,32 +29,34 @@ public static class SetuExtensions
 
     private static async Task<SetuInfo> GetSetu_Lolicon_CoreAsync(string tag, bool r18 = false)
     {
-        SetuData_Lolicon setuData;
+        SetuData_Lolicon setuData = null;
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
-        try
-        {
-            var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
-                      $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
-            var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
-            if (setuResponse == null)
-                return new SetuInfo(SetuType.Lolicon, SetuResult.ApiError);
 
-            if (!setuResponse.Data.Any())
-                return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
+        var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReTarget}" +
+                  $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
+        switch (httpResponse.Result)
+        {
+            case HttpResponseResult.Successed:
+                var setuResponse = httpResponse.Data;
+                if (setuResponse == null)
+                    return new SetuInfo(SetuType.Lolicon, SetuResult.ApiError);
 
-            setuData = setuResponse.Data.First();
-        }
-        catch (TaskCanceledException)
-        {
-            setuData = new SetuData_Lolicon();
-            setuResult = SetuResult.Timeout;
-        }
-        catch (Exception e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{e.Message}\r\n{setuJsonText}");
-            setuData = new SetuData_Lolicon();
-            setuResult = SetuResult.OtherError;
+                if (!setuResponse.Data.Any())
+                    return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
+
+                setuData = setuResponse.Data.First();
+                break;
+            case HttpResponseResult.TimeOut:
+                setuData = new SetuData_Lolicon();
+                setuResult = SetuResult.Timeout;
+                break;
+            case HttpResponseResult.UnknownError:
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{setuJsonText}-{httpResponse.ErrorMessage}");
+                setuData = new SetuData_Lolicon();
+                setuResult = SetuResult.OtherError;
+                break;
         }
 
         return new SetuInfo(
@@ -128,27 +130,28 @@ public static class SetuExtensions
 
     private static async Task<SetuInfo> GetSetu_NyanCatda_CoreAsync(string tag, bool r18 = false)
     {
-        SetuData_NyanCatda setuData;
+        SetuData_NyanCatda setuData = null;
         var setuResult = SetuResult.Successed;
-        try
+        var url = @$"https://api.nyan.xyz/httpapi/sexphoto?num=1&r18={(r18 ? "true" : "false")}";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
+        switch (httpResponse.Result)
         {
-            var url = @$"https://api.nyan.xyz/httpapi/sexphoto?num=1&r18={(r18 ? "true" : "false")}";
-            var setuResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
-            if (setuResponse == null)
-                return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
+            case HttpResponseResult.Successed:
+                var setuResponse = httpResponse.Data;
+                if (setuResponse == null)
+                    return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
 
-            setuData = setuResponse.Data;
-        }
-        catch (TaskCanceledException)
-        {
-            setuData = new SetuData_NyanCatda();
-            setuResult = SetuResult.Timeout;
-        }
-        catch (Exception e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_NyanCatda_Core-{e.Message}");
-            setuData = new SetuData_NyanCatda();
-            setuResult = SetuResult.OtherError;
+                setuData = setuResponse.Data;
+                break;
+            case HttpResponseResult.TimeOut:
+                setuData = new SetuData_NyanCatda();
+                setuResult = SetuResult.Timeout;
+                break;
+            case HttpResponseResult.UnknownError:
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_NyanCatda_Core-{httpResponse.ErrorMessage}");
+                setuData = new SetuData_NyanCatda();
+                setuResult = SetuResult.OtherError;
+                break;
         }
 
         var imageUrl = setuData.Url.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivReTarget);
@@ -168,30 +171,31 @@ public static class SetuExtensions
 
     private static async Task<SetuInfo> GetSetu_Jitsu_CoreAsync(string tag, bool r18 = false)
     {
-        SetuData_Jitsu setuData;
+        SetuData_Jitsu setuData = null;
         var setuResult = SetuResult.Successed;
-        try
+        var url = @$"https://image.anosu.top/pixiv/json?proxy=i.pixiv.re{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? 1 : 0)}";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuData_Jitsu[]>(url).ConfigureAwait(false);
+        switch (httpResponse.Result)
         {
-            var url = @$"https://image.anosu.top/pixiv/json?proxy=i.pixiv.re{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? 1 : 0)}";
-            var setuDatas = await HttpExtensions.GetFromJsonAsync<SetuData_Jitsu[]>(url);
-            if (setuDatas == null)
-                return new SetuInfo(SetuType.Jitsu, SetuResult.ApiError);
+            case HttpResponseResult.Successed:
+                var setuDatas = httpResponse.Data;
+                if (setuDatas == null)
+                    return new SetuInfo(SetuType.Jitsu, SetuResult.ApiError);
 
-            if (!setuDatas.Any())
-                return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
+                if (!setuDatas.Any())
+                    return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
 
-            setuData = setuDatas.First();
-        }
-        catch (TaskCanceledException)
-        {
-            setuData = new SetuData_Jitsu();
-            setuResult = SetuResult.Timeout;
-        }
-        catch (Exception e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Jitsu_Core-{e.Message}");
-            setuData = new SetuData_Jitsu();
-            setuResult = SetuResult.OtherError;
+                setuData = setuDatas.First();
+                break;
+            case HttpResponseResult.TimeOut:
+                setuData = new SetuData_Jitsu();
+                setuResult = SetuResult.Timeout;
+                break;
+            case HttpResponseResult.UnknownError:
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Jitsu_Core-{httpResponse.ErrorMessage}");
+                setuData = new SetuData_Jitsu();
+                setuResult = SetuResult.OtherError;
+                break;
         }
 
         var imageUrl = setuData.Url;

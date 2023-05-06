@@ -148,9 +148,13 @@ public static partial class TaskProcess
 
         if (_regGenshinWbAlarm.IsMatch(dateNowStr))
         {
-            var genshinGachaInfoRequest = await HttpExtensions.GetFromJsonAsync<GenshinGachaInfoRequest>(
+            var httpResponse = await HttpExtensions.GetFromJsonAsync<GenshinGachaInfoResponse>(
                 "https://webstatic.mihoyo.com/hk4e/gacha_info/cn_gf01/gacha/list.json").ConfigureAwait(false);
-            var gachaInfo = genshinGachaInfoRequest?.Data.List.FirstOrDefault(each => each.GachaName == "角色活动");
+            if (httpResponse.Result != HttpResponseResult.Successed)
+                return;
+
+            var genshinGachaInfoResponse = httpResponse.Data;
+            var gachaInfo = genshinGachaInfoResponse?.Data.List.FirstOrDefault(each => each.GachaName == "角色活动");
             if (gachaInfo != null)
             {
                 var diffDays = (int)(now - gachaInfo.BeginTime).TotalDays;
