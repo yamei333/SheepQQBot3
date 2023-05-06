@@ -3,6 +3,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
@@ -69,19 +70,15 @@ public static partial class TaskProcess
             return;
 
         var liveRoomId = liveAlarmConfig.LiveRoomId;
-        LiveRoomResponse liveRoomResponse;
-        try
-        {
-            liveRoomResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
                 $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
-                .ConfigureAwait(false);
-            if (liveRoomResponse == null)
-                return;
-        }
-        catch (TaskCanceledException)
-        {
+            .ConfigureAwait(false);
+        if (httpResponse.Result != HttpResponseResult.Successed)
             return;
-        }
+
+        var liveRoomResponse = httpResponse.Data;
+        if (liveRoomResponse == null)
+            return;
 
         var liveRoomResponseData = liveRoomResponse.Data;
         if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)

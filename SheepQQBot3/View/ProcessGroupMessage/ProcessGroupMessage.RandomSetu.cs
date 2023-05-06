@@ -71,7 +71,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 最大色图斗士Lv
     /// </summary>
-    private const int MaxSenderLv = 15;
+    private const int MaxSenderLv = 9;
 
     private static HashSet<string> _setuKeyWords;
 
@@ -518,13 +518,13 @@ StartSetu:
                         new(3000 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             SetuAddLevel.Normal, true)),
-                        new(200 + (int)(150 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)),
                             new SendSetuConfig(Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
-                        new(200 + (int)(150 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)),
                             new SendSetuConfig(Rand.Next(3 + (int)(2 * Math.Pow(setuDoushiLv, 2)), 30 + (int)(10 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
-                        new(100 + (int)(75 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                        new(100 + (int)(75 * Math.Pow(setuDoushiLv, 2)),
                             new SendSetuConfig(Rand.Next(5 + (int)(3 * Math.Pow(setuDoushiLv, 2)), 45 + (int)(15 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Double)),
-                        new(50 + (int)(40 * (setuDoushiLv < 10 ? Math.Pow(setuDoushiLv, 2) : Math.Pow(setuDoushiLv, 2.5))),
+                        new(50 + (int)(40 * Math.Pow(setuDoushiLv, 2)),
                             new SendSetuConfig(Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.SuperDouble)),
                         new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0, SetuAddLevel.Free, true)),
                         new(30 - (int)(setuDoushiLv * 27.0 / MaxSenderLv), new SendSetuConfig(

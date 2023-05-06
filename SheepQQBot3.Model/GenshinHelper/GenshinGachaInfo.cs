@@ -3,7 +3,7 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.GenshinHelper;
 
-public class GenshinGachaInfoRequest
+public class GenshinGachaInfoResponse
 {
     [JsonPropertyName("data")]
     public GenshinGachaInfoData Data { get; set; }
