@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
@@ -20,7 +21,7 @@ public static partial class ProcessGroupMessage
 {
     private static readonly object _syncKeyword = new();
 
-    private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
+    //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
 
     /// <summary>
     /// 色图命令的开头
@@ -792,12 +793,17 @@ SendSetu:
 
                 var sendMessages = new List<GroupForwardMessage>
                 {
+                    //new(messageId),
+                    //new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
+                    //new(BOT_NAME, BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
+                    //new(BOT_NAME, BotId, $"{setuInfo.SourceText}"),
+                    //new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
+                    //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
                     new(messageId),
                     new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
-                    new(BOT_NAME, BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
-                    new(BOT_NAME, BotId, $"{setuInfo.SourceText}"),
-                    new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
-                        setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
+                    new($"{setuInfo.SetuType}", BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
+                    new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
+                                                       $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
                 };
 
                 if (r18Bonus)
@@ -830,15 +836,20 @@ SendSetu:
                     switch (setuInfoR18.Result)
                     {
                         case SetuResult.Successed:
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                            //sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                            //    $"[这是一张额外的金色传说{sourceTag}色图, 不可预览]"));
+                            //sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, $"{setuInfoR18.SourceText}"));
+                            //sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                            //    await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
+                            //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)));
+                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
                                 $"[这是一张额外的金色传说{sourceTag}色图, 不可预览]"));
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, $"{setuInfoR18.SourceText}"));
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
-                                await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
-                                setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)));
+                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
+                                $"{setuInfoR18.SourceText}" +
+                                $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
                             break;
                         case SetuResult.NoSearchResult:
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
                                 $"{_setuKexiStart.Random()}" +
                                 $"色图库中没找到金色传说色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
                             break;
@@ -957,7 +968,7 @@ SendSetu:
                     var isFileExists = false;
                     while (!isFileExists)
                     {
-                        isFileExists = System.IO.File.Exists($"{CACHE_DIRECTORY_NAME}/{fileName}");
+                        isFileExists = File.Exists($"{CACHE_DIRECTORY_NAME}/{fileName}");
                         CommonUtil.Sleep(100);
                     }
 
