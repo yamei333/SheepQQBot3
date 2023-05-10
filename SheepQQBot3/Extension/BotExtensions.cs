@@ -66,10 +66,4 @@ public static class BotExtensions
             && userConfig != null
             && userConfig.ContainsKey(userConfigType);
     }
-
-    public static string GetQQImageUrl(long? targetId = null)
-        => $"https://q.qlogo.cn/headimg_dl?dst_uin={targetId ?? PublicVar.BotId}&spec=40";
-
-    public static string GetQQGroupImageUrl(long targetId)
-        => $"https://p.qlogo.cn/gh/{targetId}/{targetId}/40/";
 }

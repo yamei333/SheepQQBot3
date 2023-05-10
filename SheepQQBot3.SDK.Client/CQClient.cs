@@ -147,7 +147,7 @@ public partial class CQAPI : IDisposable
         if (_connection?.IsAvailable != true)
             return false;
 
-        var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), CommonExtensions.JsonOption);
+        var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), CommonExtensions.DefaultJsonOptions);
         await _connection.Send(jsonText).ConfigureAwait(false);
         return true;
     }
@@ -158,7 +158,7 @@ public partial class CQAPI : IDisposable
             return false;
 
         var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData, echo == default ? null : echo.ToString()),
-            CommonExtensions.JsonOption);
+            CommonExtensions.DefaultJsonOptions);
         await _connection.Send(jsonText).ConfigureAwait(false);
         return true;
     }

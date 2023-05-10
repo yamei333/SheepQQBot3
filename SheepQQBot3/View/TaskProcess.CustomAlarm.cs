@@ -16,7 +16,7 @@ public static partial class TaskProcess
     /// </summary>
     public static void CustomAlarm()
     {
-        AddRunLog(new RunLog_SystemInfo("自定义提醒 模块已运行"));
+        AddTaskRunLog("自定义提醒");
         // MEMO : 清理过期提醒
         ClearHistoryData();
 

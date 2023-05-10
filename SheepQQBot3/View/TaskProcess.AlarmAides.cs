@@ -20,7 +20,7 @@ public static partial class TaskProcess
     /// </summary>
     public static void AlarmAides()
     {
-        AddRunLog(new RunLog_SystemInfo("闹钟助手 模块已运行"));
+        AddTaskRunLog("闹钟助手");
         while (true)
         {
             try

@@ -21,7 +21,7 @@ public static partial class TaskProcess
     /// </summary>
     public static void LiveAlarm()
     {
-        AddRunLog(new RunLog_SystemInfo("直播提醒 模块已运行"));
+        AddTaskRunLog("直播提醒");
         while (true)
         {
             try
@@ -88,14 +88,14 @@ public static partial class TaskProcess
         if ((DateTime.Now - startTime).TotalSeconds > 90)
             return;
 
-        //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
-        //                  $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
-        var sendMessage = await CQCode.JsonCard_StructMsg(
-            liveRoomResponseData.RoomInfo.Title,
-            $"主播ID: {liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}{ENTER}房间号: {liveRoomId}",
-            $"https://live.bilibili.com/{liveRoomId}",
-            liveRoomResponseData.AnchorInfo.UserBaseInfo.Face)
-            .ConfigureAwait(false);
+        var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
+                          $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
+        //var sendMessage = await CQCode.JsonCard_StructMsg(
+        //    liveRoomResponseData.RoomInfo.Title,
+        //    $"主播ID: {liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}{ENTER}房间号: {liveRoomId}",
+        //    $"https://live.bilibili.com/{liveRoomId}",
+        //    liveRoomResponseData.AnchorInfo.UserBaseInfo.Face)
+        //    .ConfigureAwait(false);
 
         var targetId = setConfig.TargetId;
         switch (setConfig.TargetType)

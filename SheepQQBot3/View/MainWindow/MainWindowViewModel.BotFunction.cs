@@ -21,6 +21,7 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
         StartTask(TaskProcess.GenshinResinAlarm);
+        StartTask(TaskProcess.GenshinWbAlarmAsync);
     }
 
     /// <summary>
@@ -28,6 +29,13 @@ partial class MainWindowViewModel
     /// </summary>
     /// <param name="method"></param>
     private void StartTask(Action method)
+        => Task.Factory.StartNew(method, CancelToken.Token);
+
+    /// <summary>
+    /// 开始一个Bot的Task
+    /// </summary>
+    /// <param name="method"></param>
+    private void StartTask(Func<Task> method)
         => Task.Factory.StartNew(method, CancelToken.Token);
 
     /// <summary>

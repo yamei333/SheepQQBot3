@@ -27,7 +27,7 @@ public static class HttpExtensions
     {
         try
         {
-            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.JsonOption).ConfigureAwait(false);
+            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.DefaultJsonOptions).ConfigureAwait(false);
             return new HttpResponse<T>(HttpResponseResult.Successed, data);
         }
         catch (TaskCanceledException)

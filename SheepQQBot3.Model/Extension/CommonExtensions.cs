@@ -12,11 +12,20 @@ namespace System;
 
 public static class CommonExtensions
 {
-    public static readonly JsonSerializerOptions JsonOption = new JsonSerializerOptions
+    public static readonly JsonSerializerOptions DefaultJsonOptions = new JsonSerializerOptions
     {
         DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
     };
+
+    public static JsonSerializerOptions GetJsonOptions(bool ignoreNull)
+    {
+        return new JsonSerializerOptions
+        {
+            DefaultIgnoreCondition = ignoreNull ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Always,
+            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
+        };
+    }
 
     private const string KH_LEFT = @"&#91;";
     private const string KH_RIGHT = @"&#93;";
@@ -141,6 +150,9 @@ public static class CommonExtensions
 
     public static void SleepMinutes(int timeout, Func<bool> condition = null)
         => SpinWait.SpinUntil(condition ?? (() => false), timeout * 60000);
+
+    public static void SleepHours(int timeout, Func<bool> condition = null)
+        => SpinWait.SpinUntil(condition ?? (() => false), timeout * 3600000);
 
     public static bool IsMatch(this string regString, string targetString)
         => new Regex(regString, RegexOptions.Multiline).IsMatch(targetString);
