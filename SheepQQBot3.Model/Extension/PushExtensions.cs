@@ -53,10 +53,7 @@ public static class PushExtensions
                 IsAutoCopy = isAutoCopy ? 1 : 0
             };
             var stringContent = new StringContent(
-                JsonSerializer.Serialize(pushBarkData, new JsonSerializerOptions
-                {
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                }),
+                JsonSerializer.Serialize(pushBarkData, CommonExtensions.GetJsonOptions(false)),
                 Encoding.UTF8, "application/json");
             var request = await HttpExtensions.HttpClient
                 .PostAsync($"http://yamimi.moe:30008/{key}", stringContent)

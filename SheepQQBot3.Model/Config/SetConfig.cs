@@ -1,16 +1,18 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Configuration;
-using System.IO;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
+using CommonLibrary;
 using MessagePack;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Config;
 
+/// <summary>
+/// 配置类
+/// </summary>
 [MessagePackObject]
 public class SetConfig
 {
@@ -36,16 +38,17 @@ public class SetConfig
 
     /// <summary>
     /// 配置显示的图标
+    /// 头像大图链接 https://q1.qlogo.cn/g?b=qq&nk={QQ号}252961222}&s=640
     /// </summary>
     [JsonIgnore]
     [IgnoreMember]
-    public BitmapImage Icon =>
-        TargetType switch
-        {
-            BotConfigTargetType.Common => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={ConfigurationManager.AppSettings["selfId"]}&spec=40"),
-            BotConfigTargetType.Group => GetHttpIcon($"https://p.qlogo.cn/gh/{TargetId}/{TargetId}/40/"),
-            BotConfigTargetType.Private => GetHttpIcon($"https://q.qlogo.cn/headimg_dl?dst_uin={TargetId}&spec=40"),
-        };
+    public BitmapFrame Icon => TargetType switch
+    {
+        BotConfigTargetType.Common => QQExtensions.GetQQImage(int.Parse(ConfigurationManager.AppSettings["selfId"])),
+        BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
+        BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
+        _ => QQExtensions.GetQQImage(10000)
+    };
 
     /// <summary>
     /// 对象类型
@@ -174,21 +177,6 @@ public class SetConfig
         set => _liveAlarmedList = value;
     }
 
-    [JsonIgnore]
-    [IgnoreMember]
-    private Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> _genshinResinAlarmedList;
-
-    /// <summary>
-    /// 保存已执行原神每日提醒任务 (不缓存)
-    /// </summary>
-    [JsonIgnore]
-    [IgnoreMember]
-    public Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime> GenshinResinAlarmedList
-    {
-        get => _genshinResinAlarmedList ??= new Dictionary<(Guid Id, GenshinDailyNoteAlarmType AlarmType), DateTime>();
-        set => _genshinResinAlarmedList = value;
-    }
-
     #endregion 已执行内容的保存
 
     /// <summary>
@@ -270,33 +258,33 @@ public class SetConfig
         BotFunctions.ForEach(each => each.IsEnabled = allowFunctions.Contains(each.BotFunctionType));
     }
 
-    /// <summary>
-    /// 通过URL取得图标
-    /// </summary>
-    /// <param name="url">URL地址</param>
-    /// <returns><see cref="BitmapImage"/></returns>
-    private static BitmapImage GetHttpIcon(string url)
-    {
-        var image = new BitmapImage();
-        const int bytesToRead = 100;
+    ///// <summary>
+    ///// 通过URL取得图标
+    ///// </summary>
+    ///// <param name="url">URL地址</param>
+    ///// <returns><see cref="BitmapImage"/></returns>
+    //private static BitmapImage GetHttpIcon(string url)
+    //{
+    //    var image = new BitmapImage();
+    //    const int bytesToRead = 100;
 
-        var response = HttpExtensions.SendHttpResponse(url);
-        var responseStream = response.Content.ReadAsStream();
+    //    var response = HttpExtensions.SendHttpResponse(url);
+    //    var responseStream = response.Content.ReadAsStream();
 
-        var reader = new BinaryReader(responseStream);
-        var memoryStream = new MemoryStream();
-        var bytebuffer = new byte[bytesToRead];
-        var bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
-        while (bytesRead > 0)
-        {
-            memoryStream.Write(bytebuffer, 0, bytesRead);
-            bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
-        }
+    //    var reader = new BinaryReader(responseStream);
+    //    var memoryStream = new MemoryStream();
+    //    var bytebuffer = new byte[bytesToRead];
+    //    var bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
+    //    while (bytesRead > 0)
+    //    {
+    //        memoryStream.Write(bytebuffer, 0, bytesRead);
+    //        bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
+    //    }
 
-        image.BeginInit();
-        memoryStream.Seek(0, SeekOrigin.Begin);
-        image.StreamSource = memoryStream;
-        image.EndInit();
-        return image;
-    }
+    //    image.BeginInit();
+    //    memoryStream.Seek(0, SeekOrigin.Begin);
+    //    image.StreamSource = memoryStream;
+    //    image.EndInit();
+    //    return image;
+    //}
 }

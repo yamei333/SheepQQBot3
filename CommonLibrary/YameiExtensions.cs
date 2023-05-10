@@ -1,4 +1,7 @@
-﻿using NAudio.Wave;
+﻿using System;
+using System.Threading;
+using System.Threading.Tasks;
+using NAudio.Wave;
 
 namespace Yamei.Common;
 

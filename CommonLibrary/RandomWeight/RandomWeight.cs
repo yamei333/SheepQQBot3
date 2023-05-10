@@ -1,4 +1,8 @@
-﻿namespace CommonLibrary;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+
+namespace CommonLibrary;
 
 /// <summary>
 /// 带权重的随机数

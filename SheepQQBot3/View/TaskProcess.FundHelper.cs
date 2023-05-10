@@ -23,7 +23,7 @@ public static partial class TaskProcess
     /// </summary>
     public static void FundHelper()
     {
-        AddRunLog(new RunLog_SystemInfo("基金助手 模块已运行"));
+        AddTaskRunLog("基金助手");
         while (true)
         {
             try

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.11.1.1</Version>
+    <Version>0.11.2.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net7.0-windows</TargetFramework>
     <Nullable>disable</Nullable>
@@ -69,7 +69,6 @@
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj" />
-    <ProjectReference Include="..\Xunkong.Hoyolab\Xunkong.Hoyolab.csproj" />
   </ItemGroup>
 
   <ItemGroup>
@@ -95,6 +94,15 @@
   <ItemGroup>
     <ProjectCapability Include="ConfigurableFileNesting" />
     <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Reference Include="Xunkong.Core">
+      <HintPath>..\Dll\Xunkong.Core.dll</HintPath>
+    </Reference>
+    <Reference Include="Xunkong.Hoyolab">
+      <HintPath>..\Dll\Xunkong.Hoyolab.dll</HintPath>
+    </Reference>
   </ItemGroup>
 
   <ItemGroup>
