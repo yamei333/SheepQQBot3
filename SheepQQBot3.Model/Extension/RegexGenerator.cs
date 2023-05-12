@@ -58,12 +58,12 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"""echo"":""(.+?)""")]
     public static partial Regex CQAPI_GetEcho();
 
-    [GeneratedRegex(@"\$(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2})\$")]
+    [GeneratedRegex(@"#(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2})#")]
     public static partial Regex CustomAlarm_DateTime();
 
-    [GeneratedRegex(@"\$(\d{1,2}:\d{1,2}:\d{1,2}|\d{1,2}:\d{1,2})\$")]
+    [GeneratedRegex(@"#(\d{1,2}:\d{1,2}:\d{1,2}|\d{1,2}:\d{1,2})#")]
     public static partial Regex CustomAlarm_Time();
 
-    [GeneratedRegex(@"\$(\d+)\$")]
+    [GeneratedRegex(@"#(\d+)#")]
     public static partial Regex CustomAlarm_Minutes();
 }
