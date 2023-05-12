@@ -48,6 +48,10 @@ public static class SetuExtensions
 
                 setuData = setuResponse.Data.First();
                 break;
+            case HttpResponseResult.UnknownHost:
+                setuData = new SetuData_Lolicon();
+                setuResult = SetuResult.ApiError;
+                break;
             case HttpResponseResult.TimeOut:
                 setuData = new SetuData_Lolicon();
                 setuResult = SetuResult.Timeout;
@@ -143,6 +147,10 @@ public static class SetuExtensions
 
                 setuData = setuResponse.Data;
                 break;
+            case HttpResponseResult.UnknownHost:
+                setuData = new SetuData_NyanCatda();
+                setuResult = SetuResult.ApiError;
+                break;
             case HttpResponseResult.TimeOut:
                 setuData = new SetuData_NyanCatda();
                 setuResult = SetuResult.Timeout;
@@ -186,6 +194,10 @@ public static class SetuExtensions
                     return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
 
                 setuData = setuDatas.First();
+                break;
+            case HttpResponseResult.UnknownHost:
+                setuData = new SetuData_Jitsu();
+                setuResult = SetuResult.ApiError;
                 break;
             case HttpResponseResult.TimeOut:
                 setuData = new SetuData_Jitsu();

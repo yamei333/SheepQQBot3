@@ -34,13 +34,13 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\$.+\$")]
     public static partial Regex ConditionJsonText();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:\d{2}:\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
     public static partial Regex GenshinResin();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 23:\d{2}:\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
     public static partial Regex GenshinDailyMission();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (19|23):\d{2}:\d{2}")]
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
     public static partial Regex GenshinTransformer();
 
     [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):0\d:\d{2}")]
