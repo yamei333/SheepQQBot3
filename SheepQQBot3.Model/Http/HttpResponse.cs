@@ -30,6 +30,7 @@
     {
         Successed,
         TimeOut,
+        UnknownHost,
         UnknownError,
     }
 }

@@ -14,6 +14,8 @@ public static class HttpExtensions
 {
     public static readonly HttpClient HttpClient = new();
 
+    private const string UNKNOWN_HOST_EXCEPTION = "不知道这样的主机";
+
     static HttpExtensions()
     {
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
@@ -36,6 +38,9 @@ public static class HttpExtensions
         }
         catch (Exception e)
         {
+            if (e.Message.Contains(UNKNOWN_HOST_EXCEPTION))
+                return new HttpResponse<T>(HttpResponseResult.UnknownHost, null);
+
             YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
             return new HttpResponse<T>(HttpResponseResult.UnknownError, null, e.Message, e.Source);
         }

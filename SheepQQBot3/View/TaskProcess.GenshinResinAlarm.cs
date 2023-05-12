@@ -47,7 +47,7 @@ public static partial class TaskProcess
                 if (Api?.IsConnected == true)
                 {
                     var dateNow = DateTime.Now;
-                    if (dateNow.Hour is not (>= 3 and <= 7))
+                    if (dateNow.Hour is >= 10 and <= 19 or 0)
                     {
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
@@ -94,6 +94,9 @@ public static partial class TaskProcess
         var client = new HoyolabClient();
         DailyNoteInfo dailyNote;
         GenshinRoleInfo role;
+        var alarmTargetId = genshinResinAlarm.TargetId;
+        var targetId = setConfig.TargetId;
+
         try
         {
             var roles = await client.GetGenshinRoleInfosAsync(cookie).ConfigureAwait(false);
@@ -102,6 +105,7 @@ public static partial class TaskProcess
         catch (TaskCanceledException)
         {
             AddRunLog(new RunLog_SystemError($"取得Mys信息超时! [{genshinResinAlarm.ConfigName}]"));
+            await SendGetErrorMessageAsync().ConfigureAwait(false);
             return;
         }
         catch (HoyolabException e)
@@ -110,6 +114,7 @@ public static partial class TaskProcess
                 $"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}");
             AddRunLog(new RunLog_SystemError(
                 $"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}"));
+            await SendGetErrorMessageAsync().ConfigureAwait(false);
             return;
         }
         catch (Exception e)
@@ -118,6 +123,7 @@ public static partial class TaskProcess
                 $"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
             AddRunLog(new RunLog_SystemError(
                 $"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}"));
+            await SendGetErrorMessageAsync().ConfigureAwait(false);
             return;
         }
 
@@ -128,6 +134,7 @@ public static partial class TaskProcess
         catch (TaskCanceledException)
         {
             AddRunLog(new RunLog_SystemError($"取得原神便笺超时! [{genshinResinAlarm.ConfigName}]"));
+            await SendGetErrorMessageAsync().ConfigureAwait(false);
             return;
         }
         catch (Exception e)
@@ -136,18 +143,18 @@ public static partial class TaskProcess
             if (errorMessage == RISK_ACCOUNT)
             {
                 AddRunLog(new RunLog_SystemWarning($"米游社风控账户({genshinResinAlarm.ConfigName})"));
+                await SendGetErrorMessageAsync().ConfigureAwait(false);
                 return;
             }
 
             YameiLogExtensions.WriteLog(LogType.Error,
                 $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
             AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.HResult}({e.Message})"));
+            await SendGetErrorMessageAsync().ConfigureAwait(false);
             return;
         }
 
         var currentResin = dailyNote.CurrentResin;
-        var alarmTargetId = genshinResinAlarm.TargetId;
-        var targetId = setConfig.TargetId;
         var targetType = setConfig.TargetType;
         var dateNowStr = now.ToConditionString(HolidayInfo);
         var sendMessage = string.Empty;
@@ -161,7 +168,7 @@ public static partial class TaskProcess
                 case >= 140:
                     AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], {_resinMessage.Random()}");
                     break;
-                case >= 85 when _regGenshinResin.IsMatch(dateNowStr):
+                case >= 90 when _regGenshinResin.IsMatch(dateNowStr):
                     AddSendMessage($"当前树脂为[{currentResin}/{dailyNote.MaxResin}], " +
                                    $"体力会在明天10点前爆炸, 你怎么睡得着!");
                     break;
@@ -173,7 +180,7 @@ public static partial class TaskProcess
         #region 每日任务
 
         if (genshinResinAlarm.DailyMission && !dailyNote.IsExtraTaskRewardReceived && _regGenshinDailyMission.IsMatch(dateNowStr))
-            AddSendMessage($"今天每日任务还没做, 要血亏了!");
+            AddSendMessage("今天每日任务还没做, 要血亏了!");
 
         #endregion 每日任务
 
@@ -238,5 +245,7 @@ public static partial class TaskProcess
                     PushExtensions.TITLE).ConfigureAwait(false);
             }
         }
+
+        Task SendGetErrorMessageAsync() => Api.SendGroupMessageAsync(targetId, $"{CQCode.At(alarmTargetId)}原神便笺取得失败!", Vm.SetConfigs);
     }
 }
