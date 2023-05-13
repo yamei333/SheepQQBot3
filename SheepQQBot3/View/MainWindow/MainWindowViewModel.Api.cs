@@ -157,8 +157,7 @@ partial class MainWindowViewModel
             .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
         ConfigExtensions.SaveConfig();
         var isBlackList = false;
-        if (!GetSelectedGroupConfig(
-            groupId,
+        if (!GetSelectedCommonConfig(
             BotFunctionType.Common_BlackList,
             config =>
             {

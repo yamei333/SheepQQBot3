@@ -745,13 +745,13 @@ SendSetu:
                     case SetuResult.NoSearchResult:
                         await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, r18Bonus))
                             .ConfigureAwait(false);
-                        // MEMO : 最后5次有关键字的色图检索都失败了, 6连败了
+                        // MEMO : 最后3次有关键字的色图检索都失败了, 加本次4连败了
                         var last5Historys = targetSetuSendHistorys
                             .OrderByDescending(history => history.TimeStamp)
                             .Where(history => history.IsSearchTag && history.IsRequestSuccessed.ToBool())
-                            .Take(5)
+                            .Take(3)
                             .ToList();
-                        if (last5Historys.Count == 5 && last5Historys.All(history => !history.IsGetSuccessed.ToBool()))
+                        if (last5Historys.Count == 3 && last5Historys.All(history => !history.IsGetSuccessed.ToBool()))
                         {
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
