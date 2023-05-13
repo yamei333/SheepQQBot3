@@ -51,7 +51,6 @@ public static class TargetTypeExtensions
             {
                 BotFunctionType.Common_AlarmAide,
                 BotFunctionType.Common_AlarmAideSubmit,
-                BotFunctionType.Common_BlackList,
                 BotFunctionType.Common_CustomAlarm,
                 BotFunctionType.Group_RepeatRevokeMessage,
                 BotFunctionType.Group_FundHelper,
