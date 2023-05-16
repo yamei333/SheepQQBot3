@@ -9,11 +9,11 @@ public class AddNumberDialogViewModel : NotifyPropertyChangedBase
         AddNumber = null;
     }
 
-    private int? _addNumber;
+    private long? _addNumber;
     /// <summary>
     /// 新增的数字
     /// </summary>
-    public int? AddNumber
+    public long? AddNumber
     {
         get => _addNumber;
         set

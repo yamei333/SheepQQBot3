@@ -12,7 +12,7 @@ namespace SheepQQBot3.DbModel
                 return setuDoushiLv;
 
             var setuCd = SetuCD.ToDateTime();
-            if (setuCd != DateTime.MinValue)
+            if (setuCd == DateTime.MinValue)
                 return setuDoushiLv;
 
             var changeLvTimePoint = (long)((dateNow - setuCd).TotalMinutes / 90);

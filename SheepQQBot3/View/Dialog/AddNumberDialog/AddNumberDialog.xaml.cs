@@ -19,7 +19,7 @@ public partial class AddNumberDialog
     /// <summary>
     /// 增加的数字内容
     /// </summary>
-    public int? AddNumber { get; set; }
+    public long? AddNumber { get; set; }
 
     public AddNumberDialog(Window owner, object menuItem, DialogMode mode, string title)
         : base(owner, menuItem, mode, title)
