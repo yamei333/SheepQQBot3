@@ -22,6 +22,7 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.LiveAlarm);
         StartTask(TaskProcess.GenshinResinAlarm);
         StartTask(TaskProcess.GenshinWbAlarmAsync);
+        StartTask(TaskProcess.GenshinEventAlarmAsync);
     }
 
     /// <summary>
