@@ -46,6 +46,9 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (18|21):0\d:\d{2}")]
     public static partial Regex GenshinWbAlarm();
 
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (13|21):0\d:\d{2}")]
+    public static partial Regex GenshinEventAlarm();
+
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
     public static partial Regex CmdStart();
 
