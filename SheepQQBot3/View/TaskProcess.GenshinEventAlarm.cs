@@ -29,12 +29,12 @@ public static partial class TaskProcess
 
         var ignoreEventKeywords = new[]
         {
-            "纪行", "传说任务说明", "移涌"
+            "纪行", "传说任务说明", "移涌", "限时上架", "限时折扣"
         };
 
         var ignoreAnnouncementKeywords = new[]
         {
-            "先行展示页", "周边", "米游社原神区"
+            "展示页", "周边", "米游社原神区", "调研问卷"
         };
 
         while (true)
