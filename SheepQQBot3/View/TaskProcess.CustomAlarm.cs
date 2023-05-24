@@ -1,4 +1,6 @@
 ﻿using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using CommonLibrary;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -32,7 +34,14 @@ public static partial class TaskProcess
                     if (customAlarms == null)
                         return;
 
-                    customAlarms.Values.ForEach(ToAction);
+                    var taskList = new List<Task>();
+                    customAlarms.Values.ForEach(each =>
+                    {
+                        var task = new Task(() => ToAction(each));
+                        taskList.Add(task);
+                        task.Start();
+                    });
+                    Task.WaitAll(taskList.ToArray());
 
                     async void ToAction(CustomAlarm customAlarm)
                     {
@@ -45,18 +54,21 @@ public static partial class TaskProcess
                         if (customAlarm.IsBark)
                         {
                             await PushExtensions.PushBarkMessageAsync(
-                                userConfigs[targetId][UserConfigType.BarkKey], alarmMessage, PushExtensions.TITLE).ConfigureAwait(false);
+                                userConfigs[targetId][UserConfigType.BarkKey], alarmMessage, PushExtensions.TITLE)
+                                .ConfigureAwait(false);
                         }
                         else
                         {
                             if (customAlarm.IsGroup)
                             {
-                                await Api.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(), $"{(customAlarm.IsAtTarget ? $"{CQCode.At(customAlarm.TargetId)}{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
+                                await Api.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
+                                    $"{(customAlarm.IsAtTarget ? $"{CQCode.At(customAlarm.TargetId)}{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
                             else
                             {
-                                await Api.SendPrivateMessageAsync(targetId, customAlarm.GroupId, $"{(customAlarm.IsAtTarget ? $"{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
+                                await Api.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
+                                    $"{(customAlarm.IsAtTarget ? $"{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
                         }

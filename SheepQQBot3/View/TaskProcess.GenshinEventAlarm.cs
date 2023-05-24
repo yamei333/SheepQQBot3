@@ -34,7 +34,7 @@ public static partial class TaskProcess
 
         var ignoreAnnouncementKeywords = new[]
         {
-            "展示页", "周边", "米游社原神区", "调研问卷"
+            "展示页", "周边", "米游社原神区", "调研问卷", "游戏常用FAQ"
         };
 
         while (true)
@@ -46,11 +46,14 @@ public static partial class TaskProcess
                     var dateNow = DateTime.Now;
                     var isAlarm = false;
                     var (alarmEvents, alarmAnns) = await GetNeedAlarmEventAsync().ConfigureAwait(false);
-                    if (alarmEvents.Any() && _regGenshinEventAlarm.IsMatch(dateNow.ToConditionString(HolidayInfo)))
+
+                    if ((dateNow.Hour >= 17 || dateNow.Hour < 17 && dateNow.IsHoliday(HolidayInfo))
+                        && alarmEvents.Any() && _regGenshinEventAlarm.IsMatch(dateNow.ToConditionString(HolidayInfo)))
                     {
                         isAlarm = true;
                         var sendMessage = string.Empty;
                         alarmEvents.ForEach(each => sendMessage += $"\r\n{each.SubTitle}, 只剩 {each.GetDaysRemain(dateNow)} 天不到了!");
+                        sendMessage = $"{CQCode.AtAll()}[原神活动提醒]{sendMessage}";
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                             .ForEach(ToAction);
@@ -58,7 +61,6 @@ public static partial class TaskProcess
                         async void ToAction(SetConfig setConfig)
                         {
                             var targetId = setConfig.TargetId;
-                            sendMessage = $"{CQCode.AtAll()}[原神活动提醒]{sendMessage}";
                             await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                             AddRunLog(new RunLog_GenshinDailyNoteAlarm(BotConfigTargetType.Group, targetId, sendMessage));
                         }
@@ -69,6 +71,7 @@ public static partial class TaskProcess
                         isAlarm = true;
                         var sendMessage = string.Empty;
                         alarmAnns.ForEach(each => sendMessage += $"\r\n{each.SubTitle}");
+                        sendMessage = $"{CQCode.AtAll()}[原神辣鸡页游提醒]{sendMessage}";
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                             .ForEach(ToAction);
@@ -76,7 +79,6 @@ public static partial class TaskProcess
                         async void ToAction(SetConfig setConfig)
                         {
                             var targetId = setConfig.TargetId;
-                            sendMessage = $"{CQCode.AtAll()}[原神辣鸡页游提醒]{sendMessage}";
                             await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                             AddRunLog(new RunLog_GenshinDailyNoteAlarm(BotConfigTargetType.Group, targetId, sendMessage));
                         }

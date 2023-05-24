@@ -19,13 +19,16 @@ public static class CommonExtensions
     };
 
     public static JsonSerializerOptions GetJsonOptions(bool ignoreNull)
-    {
-        return new JsonSerializerOptions
-        {
-            DefaultIgnoreCondition = ignoreNull ? JsonIgnoreCondition.WhenWritingNull : JsonIgnoreCondition.Always,
-            Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-        };
-    }
+        => ignoreNull
+            ? new JsonSerializerOptions
+            {
+                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            }
+            : new JsonSerializerOptions
+            {
+                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+            };
 
     private const string KH_LEFT = @"&#91;";
     private const string KH_RIGHT = @"&#93;";
