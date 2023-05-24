@@ -462,6 +462,7 @@ StartSetu:
             var r18Bonus = false;
             var addSecond = 0;
             var addLevel = SetuAddLevel.Normal;
+            var addCDReason = AddCDReason.RequestSuccessed;
             var canSendSetu = false;
 
             var oldSetuSenderLv = setuDoushiLv;
@@ -494,20 +495,26 @@ StartSetu:
                     {
                         new(3000 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
-                            SetuAddLevel.Normal, true)),
-                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
-                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(3 + (int)(2 * Math.Pow(setuDoushiLv, 2)), 30 + (int)(10 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Normal)),
-                        new(100 + (int)(75 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(5 + (int)(3 * Math.Pow(setuDoushiLv, 2)), 45 + (int)(15 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.Double)),
-                        new(50 + (int)(40 * Math.Pow(setuDoushiLv, 2)),
-                            new SendSetuConfig(Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))), SetuAddLevel.SuperDouble)),
-                        new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0, SetuAddLevel.Free, true)),
+                            AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true)),
+                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
+                            Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))),
+                            AddCDReason.RequestFailed, SetuAddLevel.Normal)),
+                        new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
+                            Rand.Next(3 + (int)(2 * Math.Pow(setuDoushiLv, 2)), 30 + (int)(10 * Math.Pow(setuDoushiLv, 2))),
+                            AddCDReason.RequestFailed, SetuAddLevel.Normal)),
+                        new(100 + (int)(75 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
+                            Rand.Next(5 + (int)(3 * Math.Pow(setuDoushiLv, 2)), 45 + (int)(15 * Math.Pow(setuDoushiLv, 2))),
+                            AddCDReason.RequestFailed, SetuAddLevel.Double)),
+                        new(50 + (int)(40 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
+                            Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))),
+                            AddCDReason.RequestFailed, SetuAddLevel.SuperDouble)),
+                        new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
+                            AddCDReason.RequestSuccessed, SetuAddLevel.Free, true)),
                         new(30 - (int)(setuDoushiLv * 27.0 / MaxSenderLv), new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
-                            SetuAddLevel.Normal, true, true)),
-                        new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0, SetuAddLevel.Free, true, true)),
+                            AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true, true)),
+                        new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
+                            AddCDReason.RequestSuccessed, SetuAddLevel.Free, true, true)),
                     };
                 }
                 else
@@ -521,16 +528,16 @@ StartSetu:
 
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(10000, new SendSetuConfig((int)(Rand.Next(10, 60) * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Normal)),
-                        new(3500, new SendSetuConfig((int)(Rand.Next(10, 60) * 2 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Double)),
-                        new(1500, new SendSetuConfig((int)(Rand.Next(10, 60) * 4 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.SuperDouble)),
-                        new(750, new SendSetuConfig((int)(Rand.Next(10, 60) * 8 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Golden)),
-                        new(300, new SendSetuConfig((int)(Rand.Next(10, 60) * 16 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Platinum)),
-                        new(150, new SendSetuConfig((int)(Rand.Next(10, 60) * 32 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Diamond)),
-                        new(10, new SendSetuConfig((int)(Rand.Next(10, 60) * 256 * Math.Pow(1.1, setuDoushiLv)), SetuAddLevel.Death)),
-                        new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, SetuAddLevel.Luck)),
-                        new(600, new SendSetuConfig(Rand.Next(5, 60) * -4, SetuAddLevel.LuckSuper)),
-                        new(200, new SendSetuConfig(Rand.Next(5, 60) * -16, SetuAddLevel.LuckGolden)),
+                        new(10000, new SendSetuConfig((int)(Rand.Next(10, 60) * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Normal)),
+                        new(3500, new SendSetuConfig((int)(Rand.Next(10, 60) * 2 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Double)),
+                        new(1500, new SendSetuConfig((int)(Rand.Next(10, 60) * 4 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.SuperDouble)),
+                        new(750, new SendSetuConfig((int)(Rand.Next(10, 60) * 8 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Golden)),
+                        new(300, new SendSetuConfig((int)(Rand.Next(10, 60) * 16 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Platinum)),
+                        new(150, new SendSetuConfig((int)(Rand.Next(10, 60) * 32 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Diamond)),
+                        new(10, new SendSetuConfig((int)(Rand.Next(10, 60) * 256 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Death)),
+                        new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, AddCDReason.NotReady, SetuAddLevel.Luck)),
+                        new(600, new SendSetuConfig(Rand.Next(5, 60) * -4, AddCDReason.NotReady, SetuAddLevel.LuckSuper)),
+                        new(200, new SendSetuConfig(Rand.Next(5, 60) * -16, AddCDReason.NotReady, SetuAddLevel.LuckGolden)),
                     };
                 }
 
@@ -620,11 +627,31 @@ StartSetu:
                 if (addSecond > 0)
                 {
                     // MEMO : CD增加
-                    sendMessage = $"{CQCode.At(targetId)}" +
-                                  $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}" +
-                                  $"的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
-                                  GetSetuLvInfo() +
-                                  (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                    switch (addCDReason)
+                    {
+                        case AddCDReason.RequestFailed:
+                            sendMessage = $"{CQCode.At(targetId)}" +
+                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuGetting.Random()[..2]}失败了!" +
+                                          $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
+                                          GetSetuLvInfo() +
+                                          (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            break;
+                        case AddCDReason.NotReady:
+                            sendMessage = $"{CQCode.At(targetId)}" +
+                                          $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}CD还没到呢!" +
+                                          $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
+                                          GetSetuLvInfo() +
+                                          (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            break;
+                        default:
+                            // MEMO : 应该不会有此Case
+                            sendMessage = $"{CQCode.At(targetId)}" +
+                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuGetting.Random()[..2]}失败了!" +
+                                          $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
+                                          GetSetuLvInfo() +
+                                          (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            break;
+                    }
                 }
                 else
                 {
@@ -887,6 +914,7 @@ SendSetu:
             void SetSetuValues(SendSetuConfig sendSetuConfig)
             {
                 addLevel = sendSetuConfig.SetuAddLevel;
+                addCDReason = sendSetuConfig.AddCDReason;
                 addSecond = sendSetuConfig.AddSecond > 0
                     ? (int)(sendSetuConfig.AddSecond * (setuDoushiLv + 3.0) / 3)
                     : sendSetuConfig.AddSecond;
@@ -1048,25 +1076,23 @@ SendSetu:
 /// </summary>
 public class SendSetuConfig
 {
+    public int AddSecond { get; set; }
+    public AddCDReason AddCDReason { get; set; }
+    public SetuAddLevel SetuAddLevel { get; set; }
+    public bool CanSend { get; set; }
+    public bool R18 { get; set; }
+
     /// <summary>
-    ///
+    /// 默认构造函数
     /// </summary>
-    /// <param name="addSecond"></param>
-    /// <param name="setuAddLevel"></param>
-    /// <param name="canSend"></param>
-    /// <param name="r18"></param>
-    public SendSetuConfig(int addSecond, SetuAddLevel setuAddLevel, bool canSend = false, bool r18 = false)
+    public SendSetuConfig(int addSecond, AddCDReason addCDReason, SetuAddLevel setuAddLevel, bool canSend = false, bool r18 = false)
     {
         AddSecond = addSecond;
+        AddCDReason = addCDReason;
         SetuAddLevel = setuAddLevel;
         CanSend = canSend;
         R18 = r18;
     }
-
-    public int AddSecond { get; set; }
-    public SetuAddLevel SetuAddLevel { get; set; }
-    public bool CanSend { get; set; }
-    public bool R18 { get; set; }
 }
 
 /// <summary>
@@ -1093,6 +1119,27 @@ public static class SetuAddLevelUtil
             SetuAddLevel.Free => "白嫖",
             _ => throw new ArgumentOutOfRangeException(nameof(setuAddLevel), setuAddLevel, null)
         };
+}
+
+/// <summary>
+/// 增加CD原因
+/// </summary>
+public enum AddCDReason
+{
+    /// <summary>
+    /// 请求成功(正常加CD)
+    /// </summary>
+    RequestSuccessed,
+
+    /// <summary>
+    /// 请求失败(脸黑)
+    /// </summary>
+    RequestFailed,
+
+    /// <summary>
+    /// CD没准备好
+    /// </summary>
+    NotReady,
 }
 
 /// <summary>

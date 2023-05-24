@@ -45,7 +45,7 @@ public partial class CQEvent : IDisposable
             {
                 try
                 {
-                     ProcessReceiveData(GetReceiveData(jsonInfo));
+                    ProcessReceiveData(GetReceiveData(jsonInfo));
                 }
                 catch (Exception e)
                 {
@@ -116,6 +116,9 @@ public partial class CQEvent : IDisposable
                 break;
             case NoticeType.Group_Increase:
                 // TODO : 群成员增加
+                break;
+            case NoticeType.Group_Decrease:
+                // TODO : 群成员减少
                 break;
             case NoticeType.Group_Card:
                 // TODO : 群名片变更

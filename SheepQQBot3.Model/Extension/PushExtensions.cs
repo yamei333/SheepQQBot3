@@ -2,7 +2,6 @@
 using System.Configuration;
 using System.Net.Http;
 using System.Text;
-using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Threading.Tasks;
 using SheepQQBot3.Model.Enums;
@@ -57,7 +56,6 @@ public static class PushExtensions
                 Encoding.UTF8, "application/json");
             var request = await HttpExtensions.HttpClient
                 .PostAsync($"http://yamimi.moe:30008/{key}", stringContent)
-                //.PostAsJsonAsync($"http://yamimi.moe:30008/{key}", pushBarkData, CancellationToken.None)
                 .ConfigureAwait(false);
             return request.IsSuccessStatusCode
                 ? PushBarkResultType.Success

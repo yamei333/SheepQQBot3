@@ -71,7 +71,7 @@ public enum NoticeType
     Group_Increase,
 
     /// <summary>
-    ///
+    /// 群员减少事件(退群)
     /// </summary>
     Group_Decrease,
 
