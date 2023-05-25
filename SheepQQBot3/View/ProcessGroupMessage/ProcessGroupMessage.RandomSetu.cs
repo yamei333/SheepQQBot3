@@ -100,6 +100,10 @@ public static partial class ProcessGroupMessage
         "发了", "要了", "整了", "冲了", "弄了"
     };
 
+    private static readonly string[] _setuRequest = {
+        "获取"
+    };
+
     private static readonly string[] _setuGetting = {
         "下载中", "传送中", "获取中", "取得中", "载入中"
     };
@@ -631,7 +635,7 @@ StartSetu:
                     {
                         case AddCDReason.RequestFailed:
                             sendMessage = $"{CQCode.At(targetId)}" +
-                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuGetting.Random()[..2]}失败了!" +
+                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
                                           $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                           GetSetuLvInfo() +
                                           (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
@@ -646,7 +650,7 @@ StartSetu:
                         default:
                             // MEMO : 应该不会有此Case
                             sendMessage = $"{CQCode.At(targetId)}" +
-                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuGetting.Random()[..2]}失败了!" +
+                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
                                           $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                           GetSetuLvInfo() +
                                           (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
