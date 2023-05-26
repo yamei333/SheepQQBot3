@@ -139,4 +139,16 @@ public static class HttpExtensions
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
     }
+
+    /// <summary>
+    /// 取得外网IP
+    /// </summary>
+    public static async Task<string> GetIPAddressAsync()
+    {
+        var response = await HttpGetAsync("https://ifconfig.me/ip").ConfigureAwait(false);
+        if (response.StatusCode != HttpStatusCode.OK)
+            return null;
+
+        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+    }
 }

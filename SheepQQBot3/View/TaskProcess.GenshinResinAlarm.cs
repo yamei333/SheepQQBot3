@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Data;
+using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -49,24 +50,34 @@ public static partial class TaskProcess
                     var dateNow = DateTime.Now;
                     if (dateNow.Hour is >= 10 and <= 19 or 0)
                     {
-                        Vm.SetConfigs?.Values
+                        var setConfigs = Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
-                            .ForEach(setConfig =>
+                            .ToList();
+                        if (setConfigs is { Count: > 0 })
+                        {
+                            DailyRefreshNoteDGP();
+                            setConfigs.ForEach(setConfig =>
                             {
                                 setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
                                     .ForEach(SendGenshinDailyNoteAlarmMessageAction);
 
-                                async void SendGenshinDailyNoteAlarmMessageAction(GenshinResinAlarm genshinResinAlarm)
+                                async void SendGenshinDailyNoteAlarmMessageAction(
+                                    GenshinResinAlarm genshinResinAlarm)
                                 {
                                     if (!genshinResinAlarm.IsActive)
                                         return;
 
-                                    await SendGenshinDailyNoteAlarmMessageAsync(setConfig, genshinResinAlarm, dateNow).ConfigureAwait(false);
+                                    await SendGenshinDailyNoteAlarmMessageAsync(setConfig, genshinResinAlarm,
+                                        dateNow).ConfigureAwait(false);
                                 }
                             });
-
-                        AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务完成"));
-                        CommonExtensions.SleepHours(1);
+                            AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务完成"));
+                            CommonExtensions.SleepHours(1);
+                        }
+                        else
+                        {
+                            CommonExtensions.SleepMinutes(1);
+                        }
                     }
                     else
                     {
@@ -247,5 +258,24 @@ public static partial class TaskProcess
         }
 
         Task SendGetErrorMessageAsync() => Api.SendGroupMessageAsync(targetId, $"{CQCode.At(alarmTargetId)}原神便笺取得失败!", Vm.SetConfigs);
+    }
+
+    /// <summary>
+    /// 刷新DGP的原神便笺
+    /// </summary>
+    private static void DailyRefreshNoteDGP()
+    {
+        var processInfo = new ProcessStartInfo("cmd.exe", "/c start hutao://DailyNote/Refresh")
+        {
+            CreateNoWindow = true,
+            UseShellExecute = false,
+            WindowStyle = ProcessWindowStyle.Hidden,
+            RedirectStandardOutput = true
+        };
+
+        var process = new Process { StartInfo = processInfo };
+        process.Start();
+        process.WaitForExit();
+        AddRunLog(new RunLog_SystemInfo("刷新DGP原神便笺完成"));
     }
 }
