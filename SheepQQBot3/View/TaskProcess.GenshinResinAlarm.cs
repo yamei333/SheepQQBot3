@@ -55,7 +55,7 @@ public static partial class TaskProcess
                             .ToList();
                         if (setConfigs is { Count: > 0 })
                         {
-                            DailyRefreshNoteDGP();
+                            //DailyRefreshNoteDGP();
                             setConfigs.ForEach(setConfig =>
                             {
                                 setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
