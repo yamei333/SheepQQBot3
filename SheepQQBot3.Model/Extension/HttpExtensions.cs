@@ -15,6 +15,8 @@ public static class HttpExtensions
     public static readonly HttpClient HttpClient = new();
 
     private const string UNKNOWN_HOST_EXCEPTION = "不知道这样的主机";
+    private const string SOCKET_FORCE_CLOSE_EXCEPTION = "远程主机强迫关闭了一个现有的连接";
+    private const string ESTABLISHED_CONNECTION_EXCEPTION = "你的主机中的软件中止了一个已建立的连接";
 
     static HttpExtensions()
     {
@@ -29,19 +31,32 @@ public static class HttpExtensions
     {
         try
         {
-            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.DefaultJsonOptions).ConfigureAwait(false);
+            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.DefaultJsonOptions)
+                .ConfigureAwait(false);
             return new HttpResponse<T>(HttpResponseResult.Successed, data);
         }
         catch (TaskCanceledException)
         {
             return new HttpResponse<T>(HttpResponseResult.TimeOut, null);
         }
+        catch (HttpRequestException e)
+        {
+            var eMessage = e.Message;
+            if (eMessage.Contains(UNKNOWN_HOST_EXCEPTION))
+                return new HttpResponse<T>(HttpResponseResult.UnknownHost, null);
+            if (eMessage.Contains(ESTABLISHED_CONNECTION_EXCEPTION))
+                return new HttpResponse<T>(HttpResponseResult.ForceClosed, null);
+            if (e.InnerException?.Message.Contains(SOCKET_FORCE_CLOSE_EXCEPTION) == true)
+                return new HttpResponse<T>(HttpResponseResult.ForceClosed, null);
+
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"{nameof(GetFromJsonAsync)}-{e.Message}-{e.InnerException?.Message}-{url}");
+            return new HttpResponse<T>(HttpResponseResult.UnknownError, null, e.Message, e.Source);
+        }
         catch (Exception e)
         {
-            if (e.Message.Contains(UNKNOWN_HOST_EXCEPTION))
-                return new HttpResponse<T>(HttpResponseResult.UnknownHost, null);
-
-            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(GetFromJsonAsync)}-{e.Message}-{url}");
+            YameiLogExtensions.WriteLog(LogType.Error,
+                $"{nameof(GetFromJsonAsync)}-{e.Message}-{e.InnerException?.Message}-{url}");
             return new HttpResponse<T>(HttpResponseResult.UnknownError, null, e.Message, e.Source);
         }
     }

@@ -34,7 +34,7 @@ public static partial class TaskProcess
 
         var ignoreAnnouncementKeywords = new[]
         {
-            "展示页", "周边", "米游社原神区", "调研问卷", "游戏常用FAQ"
+            "展示页", "周边", "米游社原神区", "调研问卷", "游戏常用FAQ", "交流平台"
         };
 
         while (true)

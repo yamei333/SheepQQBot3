@@ -416,19 +416,19 @@ StartSetu:
             var last2Historys = targetSetuSendHistorys
                 .OrderByDescending(history => history.TimeStamp)
                 .Where(history => !history.IsR18Bonus.ToBool()
-                                  && history.IsRequestSuccessed.ToBool())
+                    && history.IsRequestSuccessed.ToBool())
                 .Take(2)
                 .ToList();
-            if (last2Historys.Count == 2 && last2Historys
-                    .All(history => history.SearchKeyword == lastKeyword
-                                    && !history.IsGetSuccessed.ToBool()))
+            if (last2Historys.Count == 2
+                && last2Historys.All(history => history.SearchKeyword == lastKeyword
+                && !history.IsGetSuccessed.ToBool()))
             {
                 setuDoushiInfo.BlackListCD = dateNow.AddHours(120).ToTimeStamp();
                 setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
-                var sendMessage = $"{CQCode.At(targetId)}" +
-                                  $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}" +
-                                  $"[斗士Lv{setuDoushiLv}]";
+                var sendMessage = $"{CQCode.At(targetId)}"
+                    + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
+                    + $"[斗士Lv{setuDoushiLv}]";
                 await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return true;
             }
@@ -442,9 +442,9 @@ StartSetu:
                 if (setuDoushiInfo.ToFastTimes >= 2)
                 {
                     // MEMO : 连续刷则关小黑屋
-                    var sendMessage = $"{CQCode.At(targetId)}" +
-                                      $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
-                                      $"[斗士Lv{setuDoushiLv}]";
+                    var sendMessage = $"{CQCode.At(targetId)}"
+                        + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}"
+                        + $"[斗士Lv{setuDoushiLv}]";
                     await Api.SendGroupMessageAsync(groupId, sendMessage)
                         .ConfigureAwait(false);
                     setuDoushiInfo.ToFastTimes = 0;
