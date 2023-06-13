@@ -137,7 +137,12 @@ public static partial class TaskProcess
 
         // MEMO : 追加到已发送列表
         if (!forceSend)
-            setConfig.FundAlarmedList.Add(configId, now);
+        {
+            setConfig.FundAlarmedList.AddOrUpdate(
+                configId,
+                now,
+                (_, __) => now);
+        }
     }
 
     /// <summary>
@@ -194,6 +199,11 @@ public static partial class TaskProcess
 
         // MEMO : 追加到已发送列表
         if (!forceSend)
-            setConfig.FundLimitObservedList.Add(configId, now);
+        {
+            setConfig.FundLimitObservedList.AddOrUpdate(
+                configId,
+                now,
+                (_, __) => now);
+        }
     }
 }
