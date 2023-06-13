@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
@@ -136,29 +137,29 @@ public class SetConfig
 
     [JsonIgnore]
     [IgnoreMember]
-    private Dictionary<Guid, DateTime> _fundAlarmedList;
+    private ConcurrentDictionary<Guid, DateTime> _fundAlarmedList;
 
     /// <summary>
     /// 保存已执行基金播报任务
     /// </summary>
     [Key(nameof(FundAlarmedList))]
-    public Dictionary<Guid, DateTime> FundAlarmedList
+    public ConcurrentDictionary<Guid, DateTime> FundAlarmedList
     {
-        get => _fundAlarmedList ??= new Dictionary<Guid, DateTime>();
+        get => _fundAlarmedList ??= new ConcurrentDictionary<Guid, DateTime>();
         set => _fundAlarmedList = value;
     }
 
     [JsonIgnore]
     [IgnoreMember]
-    private Dictionary<Guid, DateTime> _fundLimitObservedList;
+    private ConcurrentDictionary<Guid, DateTime> _fundLimitObservedList;
 
     /// <summary>
     /// 保存已执行基金观测任务
     /// </summary>
     [Key(nameof(FundLimitObservedList))]
-    public Dictionary<Guid, DateTime> FundLimitObservedList
+    public ConcurrentDictionary<Guid, DateTime> FundLimitObservedList
     {
-        get => _fundLimitObservedList ??= new Dictionary<Guid, DateTime>();
+        get => _fundLimitObservedList ??= new ConcurrentDictionary<Guid, DateTime>();
         set => _fundLimitObservedList = value;
     }
 
@@ -217,8 +218,8 @@ public class SetConfig
         AlarmAideAlarmedList = new Dictionary<Guid, DateTime>();
         FundAlarmConfigs = new Dictionary<Guid, FundAlarmConfig>();
         FundLimitObserveConfigs = new Dictionary<Guid, FundLimitObserveConfig>();
-        FundAlarmedList = new Dictionary<Guid, DateTime>();
-        FundLimitObservedList = new Dictionary<Guid, DateTime>();
+        FundAlarmedList = new ConcurrentDictionary<Guid, DateTime>();
+        FundLimitObservedList = new ConcurrentDictionary<Guid, DateTime>();
         LiveAlarmedList = new Dictionary<Guid, DateTime>();
         RepeaterKillerConfigs = new Dictionary<Guid, RepeaterKillerConfig>();
         LiveAlarmConfigs = new Dictionary<Guid, LiveAlarmConfig>();
