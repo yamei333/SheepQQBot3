@@ -27,9 +27,11 @@ public static partial class TaskProcess
     {
         AddTaskRunLog("原神活动提醒");
 
+        const string KEYWORD_EVENT_DOUBLE = "移涌";
+
         var ignoreEventKeywords = new[]
         {
-            "纪行", "传说任务说明", "移涌", "限时上架", "限时折扣"
+            "纪行", "传说任务说明", "限时上架", "限时折扣"
         };
 
         var ignoreAnnouncementKeywords = new[]
@@ -52,7 +54,13 @@ public static partial class TaskProcess
                     {
                         isAlarm = true;
                         var sendMessage = string.Empty;
-                        alarmEvents.ForEach(each => sendMessage += $"\r\n{each.SubTitle}, 只剩 {each.GetDaysRemain(dateNow)} 天不到了!");
+                        alarmEvents.ForEach(each =>
+                        {
+                            if (each.Title.Contains(KEYWORD_EVENT_DOUBLE))
+                                sendMessage += $"\r\n注意今天有 {each.SubTitle}, 小便宜必须占!";
+                            else
+                                sendMessage += $"\r\n{each.SubTitle}, 只剩 {each.GetDaysRemain(dateNow)} 天不到了!";
+                        });
                         sendMessage = $"{CQCode.AtAll()}[原神活动提醒]{sendMessage}";
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
@@ -105,7 +113,7 @@ public static partial class TaskProcess
                         genshinGameEvents
                             .Where(each => each.TagLabel == "活动"
                                 && !each.Title.ContainsAny(ignoreEventKeywords)
-                                && (each.EndTime - dateNow).TotalHours is >= 0 and <= 72)
+                                && ((each.EndTime - dateNow).TotalHours is >= 0 and <= 72 || each.Title.Contains(KEYWORD_EVENT_DOUBLE)))
                             .ForEach(needAlarmEvents.Add);
                         genshinGameAnnouncements
                             .Where(each => each.TagLabel == "活动"
