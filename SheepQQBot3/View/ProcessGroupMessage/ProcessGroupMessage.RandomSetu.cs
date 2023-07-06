@@ -412,18 +412,19 @@ StartSetu:
         var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
         if (!string.IsNullOrEmpty(lastKeyword) && lastKeyword == sourceTag)
         {
+            const int CHECK_TIMES = 2;
             // MEMO : 最后2次色图都有关键字
             var last2Historys = targetSetuSendHistorys
                 .OrderByDescending(history => history.TimeStamp)
                 .Where(history => !history.IsR18Bonus.ToBool()
                     && history.IsRequestSuccessed.ToBool())
-                .Take(2)
+                .Take(CHECK_TIMES)
                 .ToList();
-            if (last2Historys.Count == 2
+            if (last2Historys.Count == CHECK_TIMES
                 && last2Historys.All(history => history.SearchKeyword == lastKeyword
                 && !history.IsGetSuccessed.ToBool()))
             {
-                setuDoushiInfo.BlackListCD = dateNow.AddHours(120).ToTimeStamp();
+                setuDoushiInfo.BlackListCD = dateNow.AddHours(360).ToTimeStamp();
                 setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
                 var sendMessage = $"{CQCode.At(targetId)}"
@@ -635,7 +636,7 @@ StartSetu:
                     {
                         case AddCDReason.RequestFailed:
                             sendMessage = $"{CQCode.At(targetId)}" +
-                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
+                                          $"{_setuKexiStart.Random()} {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
                                           $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                           GetSetuLvInfo() +
                                           (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
@@ -650,7 +651,7 @@ StartSetu:
                         default:
                             // MEMO : 应该不会有此Case
                             sendMessage = $"{CQCode.At(targetId)}" +
-                                          $"{_setuKexiStart.Random()}, {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
+                                          $"{_setuKexiStart.Random()} {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
                                           $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}" +
                                           GetSetuLvInfo() +
                                           (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
@@ -754,10 +755,6 @@ SendSetu:
                     SetuExtensions.GetSetu_JitsuAsync,
                 };
 
-                await Api.SendGroupMessageAsync(groupId,
-                    $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...")
-                    .ConfigureAwait(false);
-
                 var (setuInfo, fileName) = await GetSetu(() => isSearchTag
                     ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
                         ? funcResult.Value(tag)
@@ -765,7 +762,7 @@ SendSetu:
                     : randomSetu.TryGetRandomWeight(out var funcResult2)
                         ? funcResult2.Value(tag)
                         : randomSetuDefault.Random()(tag),
-                    false).ConfigureAwait(false);
+                    true, false).ConfigureAwait(false);
                 if (setuInfo == null)
                     return false;
 
@@ -777,12 +774,13 @@ SendSetu:
                         await BotDb.AddAsync(new SetuSendHistory(targetId, dateNow, sourceTag, true, false, isFree, r18Bonus))
                             .ConfigureAwait(false);
                         // MEMO : 最后3次有关键字的色图检索都失败了, 加本次4连败了
+                        const int CHECK_TIMES = 3;
                         var last5Historys = targetSetuSendHistorys
                             .OrderByDescending(history => history.TimeStamp)
                             .Where(history => history.IsSearchTag && history.IsRequestSuccessed.ToBool())
-                            .Take(3)
+                            .Take(CHECK_TIMES)
                             .ToList();
-                        if (last5Historys.Count == 3 && last5Historys.All(history => !history.IsGetSuccessed.ToBool()))
+                        if (last5Historys.Count == CHECK_TIMES && last5Historys.All(history => !history.IsGetSuccessed.ToBool()))
                         {
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
@@ -795,7 +793,7 @@ SendSetu:
                         }
 
                         await Api.SendGroupMessageAsync(groupId,
-                            $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
+                            $"{CQCode.At(targetId)}{_setuKexiStart.Random()} " +
                             $"色图库中没找到色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             .ConfigureAwait(false);
                         //setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
@@ -855,7 +853,7 @@ SendSetu:
                         : randomSetuR18.TryGetRandomWeight(out var funcResult2)
                             ? funcResult2.Value(tag)
                             : randomSetuDefault.Random()(tag),
-                        true).ConfigureAwait(false);
+                        false, true).ConfigureAwait(false);
                     if (setuInfoR18 == null)
                         return false;
 
@@ -876,14 +874,14 @@ SendSetu:
                             break;
                         case SetuResult.NoSearchResult:
                             sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
-                                $"{_setuKexiStart.Random()}" +
+                                $"{_setuKexiStart.Random()} " +
                                 $"色图库中没找到金色传说色图~,{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
                             break;
                         case SetuResult.ApiError:
                         case SetuResult.Timeout:
                         case SetuResult.OtherError:
                             sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
-                                $"{_setuKexiStart.Random()}" +
+                                $"{_setuKexiStart.Random()} " +
                                 $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
                             //await Api.SendGroupMessageAsync(groupId,
                             //    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
@@ -952,9 +950,16 @@ SendSetu:
                 return $"[斗士Lv{oldSetuSenderLv}] {addLvString}";
             }
 
-            async Task<(SetuInfo, string)> GetSetu(Func<Task<SetuInfo>> getSetuInfoFunc, bool checkImageOnly)
+            async Task<(SetuInfo, string)> GetSetu(Func<Task<SetuInfo>> getSetuInfoFunc, bool sendDownloadingMessage, bool checkImageOnly)
             {
                 var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
+                if (sendDownloadingMessage)
+                {
+                    await Api.SendGroupMessageAsync(groupId,
+                        $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...(API提供: {setuInfo.SetuType})")
+                        .ConfigureAwait(false);
+                }
+
                 DebugSendSetuInfo(setuInfo);
 
                 var fileName = string.Empty;
