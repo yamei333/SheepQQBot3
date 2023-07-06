@@ -28,6 +28,7 @@ public static partial class TaskProcess
         AddTaskRunLog("原神活动提醒");
 
         const string KEYWORD_EVENT_DOUBLE = "移涌";
+        const string KEYWORD_VERSIONUPDATE = "版本更新说明";
 
         var ignoreEventKeywords = new[]
         {
@@ -57,7 +58,7 @@ public static partial class TaskProcess
                         alarmEvents.ForEach(each =>
                         {
                             if (each.Title.Contains(KEYWORD_EVENT_DOUBLE))
-                                sendMessage += $"\r\n注意今天有 {each.SubTitle}, 小便宜必须占!";
+                                sendMessage += $"\r\n注意今天有{each.SubTitle}, 小便宜必须占!";
                             else
                                 sendMessage += $"\r\n{each.SubTitle}, 只剩 {each.GetDaysRemain(dateNow)} 天不到了!";
                         });
@@ -78,8 +79,15 @@ public static partial class TaskProcess
                     {
                         isAlarm = true;
                         var sendMessage = string.Empty;
-                        alarmAnns.ForEach(each => sendMessage += $"\r\n{each.SubTitle}");
-                        sendMessage = $"{CQCode.AtAll()}[原神辣鸡页游提醒]{sendMessage}";
+                        if (alarmAnns.Any(each => each.SubTitle.Contains(KEYWORD_VERSIONUPDATE)))
+                        {
+                            sendMessage = $"{CQCode.AtAll()}[原神mys兑换提醒]\r\n今天更新, 晚上第一波双兑换, 有jo本的记得开着";
+                        }
+                        else
+                        {
+                            alarmAnns.ForEach(each => sendMessage += $"\r\n{each.SubTitle}");
+                            sendMessage = $"{CQCode.AtAll()}[原神辣鸡页游提醒]{sendMessage}";
+                        }
                         Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                             .ForEach(ToAction);
@@ -92,7 +100,7 @@ public static partial class TaskProcess
                         }
                     }
 
-                    CommonExtensions.SleepMinutes(isAlarm ? 10 : 1);
+                    CommonExtensions.SleepSeconds(isAlarm ? 210 : 60);
 
                     async Task<(List<GenshinEvent>, List<GenshinEvent>)> GetNeedAlarmEventAsync()
                     {
@@ -116,9 +124,15 @@ public static partial class TaskProcess
                                 && ((each.EndTime - dateNow).TotalHours is >= 0 and <= 72 || each.Title.Contains(KEYWORD_EVENT_DOUBLE)))
                             .ForEach(needAlarmEvents.Add);
                         genshinGameAnnouncements
-                            .Where(each => each.TagLabel == "活动"
-                                && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
-                                && (dateNow - each.BeginTime).TotalMinutes <= 5)
+                            .Where(each =>
+                            {
+                                var elapsedMinutes = (dateNow - each.BeginTime).TotalMinutes;
+                                return (each.SubTitle.Contains(KEYWORD_VERSIONUPDATE)
+                                    && elapsedMinutes is >= 60 * 11 + 30 and <= 60 * 11 + 33)
+                                    || (each.TagLabel == "活动"
+                                        && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
+                                        && elapsedMinutes <= 3);
+                            })
                             .ForEach(needAlarmAnnouncements.Add);
 
                         return (needAlarmEvents, needAlarmAnnouncements);
