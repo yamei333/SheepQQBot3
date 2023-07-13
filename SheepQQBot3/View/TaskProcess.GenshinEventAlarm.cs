@@ -37,7 +37,7 @@ public static partial class TaskProcess
 
         var ignoreAnnouncementKeywords = new[]
         {
-            "展示页", "周边", "米游社原神区", "调研问卷", "游戏常用FAQ", "交流平台", "手办", "印象服饰"
+            "展示页", "周边", "米游社原神区", "调研问卷", "游戏常用FAQ", "交流平台", "手办", "印象服饰", "专属工具更新"
         };
 
         while (true)
@@ -128,10 +128,10 @@ public static partial class TaskProcess
                             {
                                 var elapsedMinutes = (dateNow - each.BeginTime).TotalMinutes;
                                 return (each.SubTitle.Contains(KEYWORD_VERSIONUPDATE)
-                                    && elapsedMinutes is >= 60 * 11 + 30 and <= 60 * 11 + 33)
-                                    || (each.TagLabel == "活动"
-                                        && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
-                                        && elapsedMinutes <= 3);
+                                    && elapsedMinutes is >= 60 * 11 + 30 and <= 60 * 11 + 33);
+                                //|| (each.TagLabel == "活动"
+                                //    && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
+                                //    && elapsedMinutes <= 3);
                             })
                             .ForEach(needAlarmAnnouncements.Add);
 
