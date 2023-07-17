@@ -371,11 +371,11 @@ public static partial class ProcessGroupMessage
             message = message[..^1];
             targetSetuApiType = SetuType.Yuban;
         }
-        //else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
-        //{
-        //    message = message[..^1];
-        //    targetSetuApiType = SetuType.NyanCatda;
-        //}
+        else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^1];
+            targetSetuApiType = SetuType.NyanCatda;
+        }
         else if (message.EndsWith("J", StringComparison.CurrentCultureIgnoreCase))
         {
             message = message[..^1];
@@ -704,12 +704,12 @@ SendSetu:
                     {
                         new(1, SetuExtensions.GetSetu_YubanAsync)
                     },
-                    //SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    //{
-                    //    new(10, SetuExtensions.GetSetu_LoliconAsync),
-                    //    new(8, SetuExtensions.GetSetu_YubanAsync),
-                    //    new(3, SetuExtensions.GetSetu_JitsuAsync),
-                    //},
+                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(10, SetuExtensions.GetSetu_LoliconAsync),
+                        new(8, SetuExtensions.GetSetu_YubanAsync),
+                        new(3, SetuExtensions.GetSetu_JitsuAsync),
+                    },
                     SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
                     {
                         new(1, SetuExtensions.GetSetu_JitsuAsync)
@@ -731,10 +731,10 @@ SendSetu:
                     {
                         new(1, SetuExtensions.GetSetu_YubanAsync)
                     },
-                    //SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    //{
-                    //    new(1, SetuExtensions.GetSetu_NyanCatdaAsync),
-                    //},
+                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
+                    {
+                        new(1, SetuExtensions.GetSetu_NyanCatdaAsync),
+                    },
                     SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
                     {
                         new(1, SetuExtensions.GetSetu_JitsuAsync)
@@ -743,7 +743,7 @@ SendSetu:
                     {
                         new(10, SetuExtensions.GetSetu_LoliconAsync),
                         new(8, SetuExtensions.GetSetu_YubanAsync),
-                        //new(6, SetuExtensions.GetSetu_NyanCatdaAsync),
+                        new(6, SetuExtensions.GetSetu_NyanCatdaAsync),
                         new(3, SetuExtensions.GetSetu_JitsuAsync),
                     }
                 };
@@ -751,7 +751,7 @@ SendSetu:
                 {
                     SetuExtensions.GetSetu_LoliconAsync,
                     SetuExtensions.GetSetu_YubanAsync,
-                    //SetuExtensions.GetSetu_NyanCatdaAsync,
+                    SetuExtensions.GetSetu_NyanCatdaAsync,
                     SetuExtensions.GetSetu_JitsuAsync,
                 };
 
@@ -842,7 +842,7 @@ SendSetu:
                     {
                         new(10, SetuExtensions.GetSetu_Lolicon_R18Async),
                         new(8, SetuExtensions.GetSetu_Yuban_R18Async),
-                        //new(6, SetuExtensions.GetSetu_NyanCatda_R18Async),
+                        new(6, SetuExtensions.GetSetu_NyanCatda_R18Async),
                         new(3, SetuExtensions.GetSetu_Jitsu_R18Async),
                     };
 
