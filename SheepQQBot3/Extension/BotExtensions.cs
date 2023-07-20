@@ -52,7 +52,7 @@ public static class BotExtensions
             + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
             + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
             + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
-        return $"色图成功率 {(3190 + timeAdd) / (3190.0 + timeAdd + failedSum):0.00%}";
+        return $"色图成功率 {(5880 + timeAdd) / (5880.0 + timeAdd + failedSum):0.00%}";
     }
 
     /// <summary>
