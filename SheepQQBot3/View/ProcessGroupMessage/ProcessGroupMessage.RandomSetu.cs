@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools;
 using Masuit.Tools.Systems;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Extensions;
@@ -66,12 +67,20 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 色图的基础CD, 不能发得太频繁
     /// </summary>
-    private const int SendBaseDelay = 180;
+    private const int SendBaseDelay = 120;
 
     /// <summary>
     /// 最大色图斗士Lv
     /// </summary>
     private const int MaxSenderLv = 9;
+
+    private static Dictionary<SetuType, int> _setuWeight = new Dictionary<SetuType, int>
+    {
+        { SetuType.Lolicon, 15 },
+        { SetuType.Yuban, 10 },
+        { SetuType.NyanCatda, 7 },
+        { SetuType.Jitsu, 3 },
+    };
 
     private static HashSet<string> _setuKeyWords;
 
@@ -298,16 +307,15 @@ public static partial class ProcessGroupMessage
 
             var sendMessage = "=====色图斗士Lv排行=====";
             var rankIndex = 1;
-            BotDb.SetuDoushiInfos
-                .AsEnumerable()
-                .Select(info => new
-                {
-                    info.TargetId,
-                    SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
-                })
-                .OrderByDescending(info => info.SetuDoushiLv)
-                .Take(5)
-                .ForEach(info =>
+            EnumerableExtensions.ForEach(BotDb.SetuDoushiInfos
+                    .AsEnumerable()
+                    .Select(info => new
+                    {
+                        info.TargetId,
+                        SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
+                    })
+                    .OrderByDescending(info => info.SetuDoushiLv)
+                    .Take(5), info =>
                 {
                     sendMessage += $"\r\n{rankIndex++}. " +
                                    $"{GetSetuSenderName(info.TargetId)} [Lv{info.SetuDoushiLv}]";
@@ -498,7 +506,7 @@ StartSetu:
                 {
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(3000 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
+                        new(5500 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true)),
                         new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
@@ -513,12 +521,12 @@ StartSetu:
                         new(50 + (int)(40 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
                             Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.SuperDouble)),
-                        new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(300 - (int)(setuDoushiLv * 270.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true)),
-                        new(30 - (int)(setuDoushiLv * 27.0 / MaxSenderLv), new SendSetuConfig(
+                        new(60 - (int)(setuDoushiLv * 54.0 / MaxSenderLv), new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true, true)),
-                        new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(20 - (int)(setuDoushiLv * 18.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true, true)),
                     };
                 }
@@ -533,16 +541,16 @@ StartSetu:
 
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(10000, new SendSetuConfig((int)(Rand.Next(10, 60) * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Normal)),
-                        new(3500, new SendSetuConfig((int)(Rand.Next(10, 60) * 2 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Double)),
-                        new(1500, new SendSetuConfig((int)(Rand.Next(10, 60) * 4 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.SuperDouble)),
-                        new(750, new SendSetuConfig((int)(Rand.Next(10, 60) * 8 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Golden)),
-                        new(300, new SendSetuConfig((int)(Rand.Next(10, 60) * 16 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Platinum)),
-                        new(150, new SendSetuConfig((int)(Rand.Next(10, 60) * 32 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Diamond)),
-                        new(10, new SendSetuConfig((int)(Rand.Next(10, 60) * 256 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Death)),
-                        new(1500, new SendSetuConfig(Rand.Next(5, 60) * -1, AddCDReason.NotReady, SetuAddLevel.Luck)),
-                        new(600, new SendSetuConfig(Rand.Next(5, 60) * -4, AddCDReason.NotReady, SetuAddLevel.LuckSuper)),
-                        new(200, new SendSetuConfig(Rand.Next(5, 60) * -16, AddCDReason.NotReady, SetuAddLevel.LuckGolden)),
+                        new(10000, new SendSetuConfig((int)(Rand.Next(5, 45) * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Normal)),
+                        new(3500, new SendSetuConfig((int)(Rand.Next(5, 45) * 2 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Double)),
+                        new(1500, new SendSetuConfig((int)(Rand.Next(5, 45) * 4 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.SuperDouble)),
+                        new(750, new SendSetuConfig((int)(Rand.Next(5, 45) * 8 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Golden)),
+                        new(300, new SendSetuConfig((int)(Rand.Next(5, 45) * 16 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Platinum)),
+                        new(150, new SendSetuConfig((int)(Rand.Next(5, 45) * 32 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Diamond)),
+                        new(10, new SendSetuConfig((int)(Rand.Next(5, 45) * 256 * Math.Pow(1.1, setuDoushiLv)), AddCDReason.NotReady, SetuAddLevel.Death)),
+                        new(1500, new SendSetuConfig(Rand.Next(10, 90) * -1, AddCDReason.NotReady, SetuAddLevel.Luck)),
+                        new(600, new SendSetuConfig(Rand.Next(10, 90) * -4, AddCDReason.NotReady, SetuAddLevel.LuckSuper)),
+                        new(200, new SendSetuConfig(Rand.Next(10, 90) * -16, AddCDReason.NotReady, SetuAddLevel.LuckGolden)),
                     };
                 }
 
@@ -591,13 +599,13 @@ StartSetu:
                 // MEMO : 色图Lv增加
                 if (canSendSetu)
                 {
-                    if (isSearchTag)
+                    if (isSearchTag && Rand.CheckPercent(60))
                     {
                         changeLvTag = 1;
                         setuDoushiLv++;
                     }
 
-                    if ((dateNow - setuCd).TotalSeconds <= 180)
+                    if ((dateNow - setuCd).TotalSeconds <= 90)
                     {
                         changeLvFast = 1;
                         setuDoushiLv++;
@@ -694,58 +702,24 @@ StartSetu:
 SendSetu:
             try
             {
+                var isR18 = false;
                 var randomSetuKeyword = targetSetuApiType switch
                 {
-                    SetuType.Lolicon => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_LoliconAsync)
-                    },
-                    SetuType.Yuban => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_YubanAsync)
-                    },
-                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(10, SetuExtensions.GetSetu_LoliconAsync),
-                        new(8, SetuExtensions.GetSetu_YubanAsync),
-                        new(3, SetuExtensions.GetSetu_JitsuAsync),
-                    },
-                    SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_JitsuAsync)
-                    },
-                    _ => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(10, SetuExtensions.GetSetu_LoliconAsync),
-                        new(8, SetuExtensions.GetSetu_YubanAsync),
-                        new(3, SetuExtensions.GetSetu_JitsuAsync),
-                    }
+                    SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
+                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18,
+                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu),
+                    SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
+                    _ => GetRandomWeightSetuInfo(isR18,
+                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu)
                 };
                 var randomSetu = targetSetuApiType switch
                 {
-                    SetuType.Lolicon => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_LoliconAsync)
-                    },
-                    SetuType.Yuban => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_YubanAsync)
-                    },
-                    SetuType.NyanCatda => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_NyanCatdaAsync),
-                    },
-                    SetuType.Jitsu => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(1, SetuExtensions.GetSetu_JitsuAsync)
-                    },
-                    _ => new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(10, SetuExtensions.GetSetu_LoliconAsync),
-                        new(8, SetuExtensions.GetSetu_YubanAsync),
-                        new(6, SetuExtensions.GetSetu_NyanCatdaAsync),
-                        new(3, SetuExtensions.GetSetu_JitsuAsync),
-                    }
+                    SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
+                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
+                    SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
+                    _ => GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>())
                 };
                 Func<string, Task<SetuInfo>>[] randomSetuDefault =
                 {
@@ -832,19 +806,10 @@ SendSetu:
 
                 if (r18Bonus)
                 {
-                    var randomSetuR18Keyword = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(10, SetuExtensions.GetSetu_Lolicon_R18Async),
-                        new(8, SetuExtensions.GetSetu_Yuban_R18Async),
-                        new(3, SetuExtensions.GetSetu_Jitsu_R18Async),
-                    };
-                    var randomSetuR18 = new List<RandomWeight<Func<string, Task<SetuInfo>>>>
-                    {
-                        new(10, SetuExtensions.GetSetu_Lolicon_R18Async),
-                        new(8, SetuExtensions.GetSetu_Yuban_R18Async),
-                        new(6, SetuExtensions.GetSetu_NyanCatda_R18Async),
-                        new(3, SetuExtensions.GetSetu_Jitsu_R18Async),
-                    };
+                    isR18 = true;
+                    var randomSetuR18Keyword = GetRandomWeightSetuInfo(isR18,
+                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu);
+                    var randomSetuR18 = GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>());
 
                     var (setuInfoR18, _) = await GetSetu(() => isSearchTag
                         ? randomSetuR18Keyword.TryGetRandomWeight(out var funcResult)
@@ -937,7 +902,7 @@ SendSetu:
                 var addString = string.Empty;
                 if (changeLvTime < 0)
                     addString += $",冷却{changeLvTime.ToSignString()}";
-                if (changeLvTag > 0)
+                if (isSearchTag)
                     addString += $",搜索{changeLvTag.ToSignString()}";
                 if (changeLvFast > 0)
                     addString += $",频率快{changeLvFast.ToSignString()}";
@@ -1063,7 +1028,7 @@ SendSetu:
                                   $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
                                   $"[斗士Lv{setuDoushiLv}] {addLvString}";
                 BotDb.Update(setuDoushiInfo);
-                await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                //await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return true;
             }
 
@@ -1077,6 +1042,28 @@ SendSetu:
             var cd = (stdsInfo?.SetuCD ?? 0).ToDateTime();
             return dateNow >= cd ? "可使用" : cd.ToString("HH:mm:ss");
         }
+    }
+
+    private static List<RandomWeight<Func<string, Task<SetuInfo>>>> GetRandomWeightSetuInfo(
+        bool isR18, params SetuType[] setuTypes)
+    {
+        var list = new List<RandomWeight<Func<string, Task<SetuInfo>>>>();
+        setuTypes.ForEach(setuType => list.Add(GetRandomWeight(setuType)));
+        return list;
+
+        RandomWeight<Func<string, Task<SetuInfo>>> GetRandomWeight(SetuType setuType)
+            => setuType switch
+            {
+                SetuType.Lolicon => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_Lolicon_R18Async : SetuExtensions.GetSetu_LoliconAsync),
+                SetuType.Yuban => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_Yuban_R18Async : SetuExtensions.GetSetu_YubanAsync),
+                SetuType.NyanCatda => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_NyanCatda_R18Async : SetuExtensions.GetSetu_NyanCatdaAsync),
+                SetuType.Jitsu => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_Jitsu_R18Async : SetuExtensions.GetSetu_JitsuAsync),
+                _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null)
+            };
     }
 }
 

@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using System.Net;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -67,7 +68,7 @@ public static class SetuExtensions
             SetuType.Lolicon,
             setuData.SetuInfo,
             setuData.Urls.Original,
-            ToSmallImageUrl(setuData.Urls.Original),
+            setuData.Urls.Original.ToSmallImageUrl(),
             setuResult);
 
         string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}";
@@ -95,13 +96,16 @@ public static class SetuExtensions
         var setuResult = SetuResult.Successed;
         try
         {
-            var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}&replace_url=https://{PixivReTarget}";
+            var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}";
             var request = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
             if (request == null)
                 return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
+            
+            if (request.StatusCode == HttpStatusCode.NotFound)
+                return new SetuInfo(SetuType.Yuban, SetuResult.NoSearchResult);
 
             if (!request.IsSuccessStatusCode)
-                return new SetuInfo(SetuType.Yuban, SetuResult.NoSearchResult);
+                return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
 
             var setuResponse = await request.Content.ReadFromJsonAsync<SetuResponse_Yuban>().ConfigureAwait(false);
             setuData = setuResponse.Data.First();
@@ -122,7 +126,7 @@ public static class SetuExtensions
             SetuType.Yuban,
             setuData.SetuInfo,
             setuData.Urls.Original,
-            ToSmallImageUrl(setuData.Urls.Original),
+            setuData.Urls.Original.ToSmallImageUrl(),
             setuResult);
     }
 
@@ -221,7 +225,7 @@ public static class SetuExtensions
 
     private static string ToSmallImageUrl(this string url)
     {
-        var temp = url.Replace("img-original", "c/540x540_70/img-master");
+        var temp = url.Replace(Pximg, PixivReTarget).Replace("img-original", "c/540x540_70/img-master");
         var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
         return reg.Replace(temp, "_master1200.jpg");
     }

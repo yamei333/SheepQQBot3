@@ -33,6 +33,9 @@ public static class CommonExtensions
     private const string KH_LEFT = @"&#91;";
     private const string KH_RIGHT = @"&#93;";
 
+    public static bool CheckPercent(this Random rand, int percent)
+        => rand.Next(100) + 1 <= percent;
+
     //[Obsolete("为了适配所有对象深拷贝, 使用BinaryFormatter")]
     //public static T Clone<T>(T realObject)
     //{
