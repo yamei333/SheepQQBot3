@@ -20,7 +20,7 @@ public static class HttpExtensions
 
     static HttpExtensions()
     {
-        HttpClient.Timeout = TimeSpan.FromSeconds(15);
+        HttpClient.Timeout = TimeSpan.FromSeconds(5);
     }
 
     /// <summary>
@@ -98,7 +98,7 @@ public static class HttpExtensions
         }
         catch (TaskCanceledException)
         {
-            throw;
+            return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
         }
         catch (Exception e)
         {

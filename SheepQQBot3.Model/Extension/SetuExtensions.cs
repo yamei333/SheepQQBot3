@@ -20,7 +20,7 @@ public static class SetuExtensions
     /// <summary>
     /// Pixiv反代目标地址
     /// </summary>
-    private const string PixivReTarget = "i.pixiv.re";
+    private const string PixivReTarget = "i.pixiv.cat";
 
     public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
         => GetSetu_Lolicon_CoreAsync(tag);
@@ -67,7 +67,7 @@ public static class SetuExtensions
         return new SetuInfo(
             SetuType.Lolicon,
             setuData.SetuInfo,
-            setuData.Urls.Original,
+            setuData.Urls.Original.ToImageUrl(),
             setuData.Urls.Original.ToSmallImageUrl(),
             setuResult);
 
@@ -100,7 +100,7 @@ public static class SetuExtensions
             var request = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
             if (request == null)
                 return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
-            
+
             if (request.StatusCode == HttpStatusCode.NotFound)
                 return new SetuInfo(SetuType.Yuban, SetuResult.NoSearchResult);
 
@@ -125,7 +125,7 @@ public static class SetuExtensions
         return new SetuInfo(
             SetuType.Yuban,
             setuData.SetuInfo,
-            setuData.Urls.Original,
+            setuData.Urls.Original.ToImageUrl(),
             setuData.Urls.Original.ToSmallImageUrl(),
             setuResult);
     }
@@ -170,7 +170,7 @@ public static class SetuExtensions
         return new SetuInfo(
             SetuType.NyanCatda,
             setuData.SetuInfo,
-            imageUrl,
+            imageUrl.ToImageUrl(),
             imageUrl.ToSmallImageUrl(),
             setuResult);
     }
@@ -218,9 +218,14 @@ public static class SetuExtensions
         return new SetuInfo(
             SetuType.Jitsu,
             "来源:PIXIV",
-            imageUrl,
+            imageUrl.ToImageUrl(),
             imageUrl.ToSmallImageUrl(),
             setuResult);
+    }
+
+    private static string ToImageUrl(this string url)
+    {
+        return url.Replace(Pximg, PixivReTarget);
     }
 
     private static string ToSmallImageUrl(this string url)

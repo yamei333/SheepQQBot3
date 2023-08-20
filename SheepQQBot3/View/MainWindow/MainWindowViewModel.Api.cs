@@ -130,6 +130,22 @@ partial class MainWindowViewModel
     private void OnPrivateMessage(PrivateMessage privateMessage)
     {
         var userId = privateMessage.UserId;
+        //if (userId == 252961222)
+        //{
+        //    var regGetImage = new Regex(@"(?<=\[CQ:image.+url=).+(?=[,\]])");
+        //    regGetImage.Matches(privateMessage.Message).ForEach(match =>
+        //    {
+        //        var nsfwResult = NSFWExtensions.CheckWebImage(match.Value);
+        //        CqApi.SendPrivateMessageAsync(userId,
+        //            $"NSFW Result:\r\n" +
+        //            $"IsNsfw: {nsfwResult.IsNsfw}\r\n" +
+        //            $"Pornography: {nsfwResult.PornographyPercent}\r\n" +
+        //            $"Sexy: {nsfwResult.SexyPercent}\r\n" +
+        //            $"Hentai: {nsfwResult.HentaiPercent}\r\n" +
+        //            $"PredictedLabel: {nsfwResult.PredictedLabel}");
+        //    });
+        //}
+
         var taskList = new List<Task>();
         GetSelectedCommonConfig(BotFunctionType.Common_KeyConfig, config =>
         {
@@ -162,6 +178,22 @@ partial class MainWindowViewModel
         setConfig.ProcessedMessageIds = setConfig.ProcessedMessageIds
             .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
         ConfigExtensions.SaveConfig();
+
+        //if (groupMessage.GroupId == 15873217)
+        //{
+        //    var regGetImage = new Regex(@"(?<=\[CQ:image.+url=).+(?=[,\]])");
+        //    regGetImage.Matches(groupMessage.Message).ForEach(match =>
+        //    {
+        //        var nsfwResult = NSFWExtensions.CheckWebImage(match.Value);
+        //        CqApi.SendGroupMessageAsync(groupMessage.GroupId,
+        //            $"NSFW Result:\r\n" +
+        //            $"IsNsfw: {nsfwResult.IsNsfw}\r\n" +
+        //            $"Pornography: {nsfwResult.PornographyPercent}\r\n" +
+        //            $"Sexy: {nsfwResult.SexyPercent}\r\n" +
+        //            $"Hentai: {nsfwResult.HentaiPercent}");
+        //    });
+        //}
+
         var isBlackList = false;
         if (!GetSelectedCommonConfig(
             BotFunctionType.Common_BlackList,
