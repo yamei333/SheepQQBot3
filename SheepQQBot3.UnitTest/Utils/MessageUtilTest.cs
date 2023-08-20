@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.Model;
+﻿using CommonLibrary;
+using SheepQQBot3.Model;
 using static SheepQQBot3.Model.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
@@ -45,6 +46,10 @@ public class MessageUtilTest
         //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
 
         #endregion Test
+
+        var result = NSFWExtensions.CheckWebImage(
+            "https://gchat.qpic.cn/gchatpic_new/252961222/484873217-2405041752-ED5B3C62736EB2ABB48CFA37443635B0/0?term=2&amp;is_origin=0");
+        ;
     }
 
     [TestMethod]

@@ -873,7 +873,7 @@ SendSetu:
                     await Api.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
                 }
             }
-            catch (Exception)
+            catch
             {
                 return false;
             }
@@ -902,7 +902,7 @@ SendSetu:
                 var addString = string.Empty;
                 if (changeLvTime < 0)
                     addString += $",冷却{changeLvTime.ToSignString()}";
-                if (isSearchTag)
+                if (isSearchTag && changeLvTag > 0)
                     addString += $",搜索{changeLvTag.ToSignString()}";
                 if (changeLvFast > 0)
                     addString += $",频率快{changeLvFast.ToSignString()}";
@@ -982,17 +982,17 @@ SendSetu:
                     if (stInfo.Result == SetuResult.Successed)
                     {
                         await Api.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
-                                                                 $"{ENTER}SetuType: {stInfo.SetuType}" +
-                                                                 $"{ENTER}SetuResult: {stInfo.Result}" +
-                                                                 $"{ENTER}SmallUrl: {stInfo.ImageUrl}" +
-                                                                 $"{ENTER}SourceUrl: {stInfo.SourceUrl}")
+                            $"{ENTER}SetuType: {stInfo.SetuType}" +
+                            $"{ENTER}SetuResult: {stInfo.Result}" +
+                            $"{ENTER}SmallUrl: {stInfo.ImageUrl}" +
+                            $"{ENTER}SourceUrl: {stInfo.SourceUrl}")
                             .ConfigureAwait(false);
                     }
                     else
                     {
                         await Api.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
-                                                                 $"{ENTER}SetuType: {stInfo.SetuType}" +
-                                                                 $"{ENTER}SetuResult: {stInfo.Result}")
+                            $"{ENTER}SetuType: {stInfo.SetuType}" +
+                            $"{ENTER}SetuResult: {stInfo.Result}")
                             .ConfigureAwait(false);
                     }
                 }
@@ -1014,19 +1014,19 @@ SendSetu:
                 if (randActions.TryGetRandomWeight(out var item))
                     addSetuSenderLv = item.Value;
 
-                var addString = string.Empty;
-                if (addSetuSenderLv > 0)
-                    addString += $"神秘{addSetuSenderLv.ToSignString()}";
+                //var addString = string.Empty;
+                //if (addSetuSenderLv > 0)
+                //    addString += $"神秘{addSetuSenderLv.ToSignString()}";
 
-                var addLvString = (string.IsNullOrEmpty(addString)
-                    ? string.Empty
-                    : $"本次{addSetuSenderLv.ToSignString()}({addString})");
+                //var addLvString = (string.IsNullOrEmpty(addString)
+                //    ? string.Empty
+                //    : $"本次{addSetuSenderLv.ToSignString()}({addString})");
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
                 setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
                     .AddSeconds(addSecond).ToTimeStamp();
-                var sendMessage = $"{CQCode.At(targetId)}" +
-                                  $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
-                                  $"[斗士Lv{setuDoushiLv}] {addLvString}";
+                //var sendMessage = $"{CQCode.At(targetId)}" +
+                //    $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
+                //    $"[斗士Lv{setuDoushiLv}] {addLvString}";
                 BotDb.Update(setuDoushiInfo);
                 //await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return true;
