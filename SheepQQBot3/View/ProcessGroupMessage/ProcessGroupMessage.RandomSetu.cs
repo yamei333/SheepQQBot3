@@ -76,10 +76,10 @@ public static partial class ProcessGroupMessage
 
     private static Dictionary<SetuType, int> _setuWeight = new Dictionary<SetuType, int>
     {
-        { SetuType.Lolicon, 15 },
-        { SetuType.Yuban, 10 },
-        { SetuType.NyanCatda, 7 },
-        { SetuType.Jitsu, 3 },
+        { SetuType.Lolicon, 30 },
+        { SetuType.Yuban, 15 },
+        { SetuType.NyanCatda, 6 },
+        { SetuType.Jitsu, 2 },
     };
 
     private static HashSet<string> _setuKeyWords;

@@ -34,8 +34,11 @@ public static partial class TaskProcess
                     {
                         var wbSignDay = await GetWbSignDayAsync().ConfigureAwait(false);
                         // MEMO : 值为-1时取得失败
-                        if (wbSignDay is >= 0 and <= 2)
+                        if (wbSignDay is >= 0 and <= 2 or >= 20 and <= 22)
                         {
+                            if (wbSignDay >= 20)
+                                wbSignDay = wbSignDay - 20;
+
                             Vm.SetConfigs?.Values
                                 .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                                 .ForEach(ToAction);

@@ -32,7 +32,7 @@ public static partial class TaskProcess
 
         var ignoreEventKeywords = new[]
         {
-            "纪行", "传说任务说明", "限时上架", "限时折扣"
+            "纪行", "传说任务说明", "限时上架", "限时折扣", "「七圣召唤」铸境研炼", "「七圣召唤」热斗模式"
         };
 
         var ignoreAnnouncementKeywords = new[]
