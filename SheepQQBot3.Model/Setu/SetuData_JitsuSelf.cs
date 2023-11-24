@@ -3,15 +3,12 @@ using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Setu;
 
-public class SetuResponse_NyanCatda
+public class SetuData_JitsuSelf
 {
-    [JsonPropertyName("data")]
-    public SetuData_NyanCatda Data { get; set; }
-}
+    [JsonPropertyName("code")]
+    public int Code { get; set; }
 
-public class SetuData_NyanCatda
-{
-    [JsonPropertyName("url")]
+    [JsonPropertyName("pics")]
     public string[] Urls { get; set; }
 
     /// <summary>

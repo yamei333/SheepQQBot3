@@ -91,13 +91,13 @@ public static class CommonExtensions
             case DayOfWeek.Thursday:
             case DayOfWeek.Friday:
                 return holidayInfo != null
-                       && holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday1)
-                       && isHoliday1;
+                    && holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday1)
+                    && isHoliday1;
             case DayOfWeek.Saturday:
             case DayOfWeek.Sunday:
                 return holidayInfo == null
-                       || !holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday2)
-                       || isHoliday2;
+                    || !holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday2)
+                    || isHoliday2;
             default:
                 return false;
         }

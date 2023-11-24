@@ -144,8 +144,9 @@ public static class FundExtensions
                 {
                     "半吃半吐, 等于没吃",
                     "开始了, 都演起来了",
-                    "ruojiji2的剧团",
-                    "今天就是奥斯卡金像奖诞生之时",
+                    "演了一天, 你们不累吗",
+                    "过了一天±0, 稳中向好",
+                    "今日+0, 又是超越87%的人的一天",
                 }.Random());
                 break;
             case true when avgGrowth < 0:
@@ -169,7 +170,6 @@ public static class FundExtensions
                     "又度过了虚无的一天",
                     "都可以演",
                     "演了一天就这???",
-                    "今天就是奥斯卡金像奖诞生之时",
                 }.Random());
                 break;
         }
