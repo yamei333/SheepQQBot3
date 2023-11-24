@@ -20,7 +20,7 @@ public static class HttpExtensions
 
     static HttpExtensions()
     {
-        HttpClient.Timeout = TimeSpan.FromSeconds(5);
+        HttpClient.Timeout = TimeSpan.FromSeconds(15);
     }
 
     /// <summary>

@@ -32,7 +32,7 @@ public static partial class TaskProcess
 
         var ignoreEventKeywords = new[]
         {
-            "纪行", "传说任务说明", "限时上架", "限时折扣", "「七圣召唤」铸境研炼", "「七圣召唤」热斗模式"
+            "纪行", "传说任务说明", "限时上架", "限时折扣", "「七圣召唤」铸境研炼", "「七圣召唤」热斗模式", "首充重置"
         };
 
         var ignoreAnnouncementKeywords = new[]
@@ -119,24 +119,33 @@ public static partial class TaskProcess
                         var genshinGameEvents = genshinEventInfoList.First(each => each.TypeId == 1).List;
                         var genshinGameAnnouncements = genshinEventInfoList.First(each => each.TypeId == 2).List;
                         genshinGameEvents
-                            .Where(each => each.TagLabel == "活动"
-                                && !each.Title.ContainsAny(ignoreEventKeywords)
-                                && ((each.EndTime - dateNow).TotalHours is >= 0 and <= 72
-                                    || (each.Title.Contains(KEYWORD_EVENT_DOUBLE) && dateNow > each.BeginTime && dateNow < each.EndTime)))
-                            .ForEach(needAlarmEvents.Add);
-                        genshinGameAnnouncements
                             .Where(each =>
                             {
-                                return false;
-                                //var elapsedMinutes = (dateNow - each.BeginTime).TotalMinutes;
-                                //return (each.SubTitle.Contains(KEYWORD_VERSIONUPDATE)
-                                //    && elapsedMinutes is >= 60 * 11 + 30 and <= 60 * 11 + 33);
+                                if (each.TagLabel != "活动" || each.Title.ContainsAny(ignoreEventKeywords))
+                                    return false;
 
-                                //|| (each.TagLabel == "活动"
-                                //    && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
-                                //    && elapsedMinutes <= 3);
+                                if (each.Title.Contains(KEYWORD_EVENT_DOUBLE))
+                                {
+                                    return dateNow > each.EndTime.AddDays(-7)
+                                        && dateNow < each.EndTime;
+                                }
+
+                                return (each.EndTime - dateNow).TotalHours is >= 0 and <= 48;
                             })
-                            .ForEach(needAlarmAnnouncements.Add);
+                            .ForEach(needAlarmEvents.Add);
+                        //genshinGameAnnouncements
+                        //    .Where(each =>
+                        //    {
+                        //        return false;
+                        //        //var elapsedMinutes = (dateNow - each.BeginTime).TotalMinutes;
+                        //        //return (each.SubTitle.Contains(KEYWORD_VERSIONUPDATE)
+                        //        //    && elapsedMinutes is >= 60 * 11 + 30 and <= 60 * 11 + 33);
+
+                        //        //|| (each.TagLabel == "活动"
+                        //        //    && !each.Title.ContainsAny(ignoreAnnouncementKeywords)
+                        //        //    && elapsedMinutes <= 3);
+                        //    })
+                        //    .ForEach(needAlarmAnnouncements.Add);
 
                         return (needAlarmEvents, needAlarmAnnouncements);
                     }

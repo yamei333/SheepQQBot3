@@ -60,6 +60,8 @@ public static partial class TaskProcess
                                 await SendFundLimitMessageAsync(setConfig, fundLimitObserveConfig, dateNow).ConfigureAwait(false);
                             }
                         });
+
+                    CommonExtensions.SleepSeconds(30);
                 }
             }
             catch (Exception e)

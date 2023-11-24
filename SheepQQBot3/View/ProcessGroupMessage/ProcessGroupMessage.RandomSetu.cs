@@ -74,19 +74,20 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private const int MaxSenderLv = 9;
 
-    private static Dictionary<SetuType, int> _setuWeight = new Dictionary<SetuType, int>
+    private static readonly Dictionary<SetuType, int> _setuWeight = new()
     {
         { SetuType.Lolicon, 30 },
-        { SetuType.Yuban, 15 },
+        { SetuType.Yuban, 0 },      // 会出现R18, 办了
         { SetuType.NyanCatda, 6 },
         { SetuType.Jitsu, 2 },
+        { SetuType.JitsuSelf, 12 },
     };
 
     private static HashSet<string> _setuKeyWords;
 
     private static readonly string[] _setuBuman =
     {
-        "不够", "这也", "一般", "不色", "就这", "太小"
+        "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜"
     };
 
     private static readonly string[] _setuYouwant = {
@@ -308,14 +309,15 @@ public static partial class ProcessGroupMessage
             var sendMessage = "=====色图斗士Lv排行=====";
             var rankIndex = 1;
             EnumerableExtensions.ForEach(BotDb.SetuDoushiInfos
-                    .AsEnumerable()
-                    .Select(info => new
-                    {
-                        info.TargetId,
-                        SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
-                    })
-                    .OrderByDescending(info => info.SetuDoushiLv)
-                    .Take(5), info =>
+                .AsEnumerable()
+                .Select(info => new
+                {
+                    info.TargetId,
+                    SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
+                })
+                .OrderByDescending(info => info.SetuDoushiLv)
+                .Take(5),
+                info =>
                 {
                     sendMessage += $"\r\n{rankIndex++}. " +
                                    $"{GetSetuSenderName(info.TargetId)} [Lv{info.SetuDoushiLv}]";
@@ -388,6 +390,11 @@ public static partial class ProcessGroupMessage
         {
             message = message[..^1];
             targetSetuApiType = SetuType.Jitsu;
+        }
+        else if (message.EndsWith("JS", StringComparison.CurrentCultureIgnoreCase))
+        {
+            message = message[..^2];
+            targetSetuApiType = SetuType.JitsuSelf;
         }
 
         // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
@@ -506,9 +513,12 @@ StartSetu:
                 {
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(5500 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
+                        new(4400 + (oldSetuSenderLv == 0 ? (int)(dateNow - setuCd).TotalMinutes : 0), new SendSetuConfig(
                             SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true)),
+                        new(350, new SendSetuConfig(
+                            SendBaseDelay + (int) (60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
+                            AddCDReason.RequestSuccessed, SetuAddLevel.ExtraDouble, true)),
                         new(200 + (int)(150 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
                             Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.Normal)),
@@ -521,13 +531,20 @@ StartSetu:
                         new(50 + (int)(40 * Math.Pow(setuDoushiLv, 2)), new SendSetuConfig(
                             Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.SuperDouble)),
-                        new(300 - (int)(setuDoushiLv * 270.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true)),
-                        new(60 - (int)(setuDoushiLv * 54.0 / MaxSenderLv), new SendSetuConfig(
+                        new(90 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
+                            AddCDReason.RequestSuccessed, SetuAddLevel.FreeExtraDouble, true)),
+                        new(30 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true, true)),
-                        new(20 - (int)(setuDoushiLv * 18.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(20 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
+                            SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
+                            AddCDReason.RequestSuccessed, SetuAddLevel.ExtraDouble, true, true)),
+                        new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true, true)),
+                        new(6 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
+                            AddCDReason.RequestSuccessed, SetuAddLevel.FreeExtraDouble, true, true)),
                     };
                 }
                 else
@@ -635,7 +652,7 @@ StartSetu:
             if (!canSendSetu)
             {
                 AddCD();
-                var isShowDate = Rand.Next(0, 100) <= 3;
+                var isShowDate = Rand.CheckPercent(3);
                 string sendMessage;
                 if (addSecond > 0)
                 {
@@ -685,7 +702,7 @@ StartSetu:
             else
             {
                 AddCD();
-                var isShowDate = Rand.Next(0, 100) <= 3;
+                var isShowDate = Rand.CheckPercent(3);
                 if (targetId != PublicVar.AdminId && addSecond == 0)
                 {
                     // MEMO : 白嫖
@@ -711,7 +728,7 @@ SendSetu:
                         SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
                     _ => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu)
+                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu, SetuType.JitsuSelf)
                 };
                 var randomSetu = targetSetuApiType switch
                 {
@@ -719,6 +736,7 @@ SendSetu:
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
+                    SetuType.JitsuSelf => GetRandomWeightSetuInfo(isR18, SetuType.JitsuSelf),
                     _ => GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>())
                 };
                 Func<string, Task<SetuInfo>>[] randomSetuDefault =
@@ -727,8 +745,8 @@ SendSetu:
                     SetuExtensions.GetSetu_YubanAsync,
                     SetuExtensions.GetSetu_NyanCatdaAsync,
                     SetuExtensions.GetSetu_JitsuAsync,
+                    SetuExtensions.GetSetu_JitsuSelfAsync,
                 };
-
                 var (setuInfo, fileName) = await GetSetu(() => isSearchTag
                     ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
                         ? funcResult.Value(tag)
@@ -803,6 +821,54 @@ SendSetu:
                     new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
                                                        $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
                 };
+
+                if (addLevel is SetuAddLevel.ExtraDouble or SetuAddLevel.FreeExtraDouble)
+                {
+                    var bonusTimes = 1;
+                    while (Rand.CheckPercent(GetExtraPercent()))
+                    {
+                        var (bonusSetuInfo, bonusFileName) = await GetSetu(() => isSearchTag
+                            ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
+                                ? funcResult.Value(tag)
+                                : randomSetuDefault.Random()(tag)
+                            : randomSetu.TryGetRandomWeight(out var funcResult2)
+                                ? funcResult2.Value(tag)
+                                : randomSetuDefault.Random()(tag),
+                            false, false).ConfigureAwait(false);
+                        if (bonusSetuInfo is { Result: SetuResult.Successed })
+                        {
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                $"你获得了额外的色图+{bonusTimes}{new string('!', bonusTimes)}"));
+                            sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
+                                CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, bonusFileName))));
+                            sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
+                                $"{bonusSetuInfo.SourceText}" +
+                                $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
+                        }
+                        else
+                        {
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                $"你获得了额外的色图+{bonusTimes}{new string('!', bonusTimes)}" +
+                                $"{ENTER}但是获取失败了!"));
+                        }
+
+                        bonusTimes++;
+                    }
+
+                    int GetExtraPercent()
+                    {
+                        return bonusTimes switch
+                        {
+                            1 => 100,
+                            2 => 60,
+                            3 => 45,
+                            4 => 35,
+                            5 => 30,
+                            6 => 25,
+                            _ => 20
+                        };
+                    }
+                }
 
                 if (r18Bonus)
                 {
@@ -915,7 +981,10 @@ SendSetu:
                 return $"[斗士Lv{oldSetuSenderLv}] {addLvString}";
             }
 
-            async Task<(SetuInfo, string)> GetSetu(Func<Task<SetuInfo>> getSetuInfoFunc, bool sendDownloadingMessage, bool checkImageOnly)
+            async Task<(SetuInfo, string)> GetSetu(
+                Func<Task<SetuInfo>> getSetuInfoFunc,
+                bool sendDownloadingMessage,
+                bool checkImageOnly)
             {
                 var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
                 if (sendDownloadingMessage)
@@ -957,6 +1026,7 @@ SendSetu:
                 if (retryTimes > maxRetryTimes)
                 {
                     await Api.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
+                    setuInfo.Result = SetuResult.ApiError;
                     return (setuInfo, string.Empty);
                 }
 
@@ -1028,6 +1098,7 @@ SendSetu:
                 //    $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
                 //    $"[斗士Lv{setuDoushiLv}] {addLvString}";
                 BotDb.Update(setuDoushiInfo);
+
                 //await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return true;
             }
@@ -1062,6 +1133,8 @@ SendSetu:
                     isR18 ? SetuExtensions.GetSetu_NyanCatda_R18Async : SetuExtensions.GetSetu_NyanCatdaAsync),
                 SetuType.Jitsu => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Jitsu_R18Async : SetuExtensions.GetSetu_JitsuAsync),
+                SetuType.JitsuSelf => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_JitsuSelf_R18Async : SetuExtensions.GetSetu_JitsuSelfAsync),
                 _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null)
             };
     }
@@ -1113,6 +1186,7 @@ public static class SetuAddLevelUtil
             SetuAddLevel.LuckSuper => "超级幸运",
             SetuAddLevel.LuckGolden => "黄金幸运",
             SetuAddLevel.Free => "白嫖",
+            SetuAddLevel.ExtraDouble => "双倍色图",
             _ => throw new ArgumentOutOfRangeException(nameof(setuAddLevel), setuAddLevel, null)
         };
 }
@@ -1197,4 +1271,14 @@ public enum SetuAddLevel
     /// 白嫖
     /// </summary>
     Free,
+
+    /// <summary>
+    /// 双倍色图
+    /// </summary>
+    ExtraDouble,
+
+    /// <summary>
+    /// 白嫖双倍色图
+    /// </summary>
+    FreeExtraDouble,
 }

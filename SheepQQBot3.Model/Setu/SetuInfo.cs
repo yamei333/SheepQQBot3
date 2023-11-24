@@ -65,11 +65,13 @@ public enum SetuType
     Yuban,
     NyanCatda,
     Jitsu,
+    JitsuSelf,
 }
 
 public enum SetuResult
 {
     Successed,
+
     [Display(Name = "Api炸了")]
     ApiError,
 
