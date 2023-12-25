@@ -86,7 +86,7 @@ public enum NoticeType
     Group_Admin,
 
     /// <summary>
-    ///
+    /// 群禁言
     /// </summary>
     Group_Ban,
 }

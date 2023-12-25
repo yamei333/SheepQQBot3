@@ -7,6 +7,7 @@ using System.Threading.Tasks;
 using CommonLibrary;
 using Masuit.Tools.Media;
 using SixLabors.ImageSharp;
+using Yamei.Common;
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -135,7 +136,7 @@ public static class HttpExtensions
             var image = await Image.LoadAsync(stream);
             if (needResize)
             {
-                await image.ResizeImage(image.Width, image.Height - 1)
+                await image.ResizeImage(image.Width + GetRandom(), image.Height + GetRandom())
                     .SaveAsPngAsync($"{path}/{tempFileName}.png");
             }
             else
@@ -150,6 +151,8 @@ public static class HttpExtensions
                         break;
                 }
             }
+
+            int GetRandom() => new[] { -1, -2, -3, 0, 1, 2, 3 }.Random();
         }
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");

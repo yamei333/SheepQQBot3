@@ -60,6 +60,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         InitApiAsync().ConfigureAwait(false);
         InitEvent();
         //InitWcfService();
+        InitWebApi();
         InitBotFunctions();
 #endif
     }

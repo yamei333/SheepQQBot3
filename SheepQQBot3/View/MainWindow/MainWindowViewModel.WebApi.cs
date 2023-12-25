@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.View;
+﻿using SheepQQBot3.WebApi;
+
+namespace SheepQQBot3.View;
 
 partial class MainWindowViewModel
 {
@@ -20,4 +22,11 @@ partial class MainWindowViewModel
     //        _serviceHost.Open();
     //    }
     //}
+
+    private static void InitWebApi()
+    {
+        var httpService = new HttpService(8301);
+        PublicVar.HttpService = httpService;
+        httpService.StartHttpServerAsync();
+    }
 }
