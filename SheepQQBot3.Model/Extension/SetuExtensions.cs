@@ -30,7 +30,7 @@ public static partial class SetuExtensions
     /// <summary>
     /// Pixiv反代目标地址(国内可用)
     /// </summary>
-    private const string PixivDirect = "pixiv.yuki.sh";
+    private const string PixivDirect = "i.pixiv.re";
 
     public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
         => GetSetu_Lolicon_CoreAsync(tag);
@@ -66,7 +66,8 @@ public static partial class SetuExtensions
                 setuResult = SetuResult.Timeout;
                 break;
             case HttpResponseResult.UnknownError:
-                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_Lolicon_Core-{setuJsonText}-{httpResponse.ErrorMessage}");
+                YameiLogExtensions.WriteLog(LogType.Error,
+                    $"GetSetu_Lolicon_Core-{setuJsonText}-{httpResponse.ErrorMessage}");
                 setuResult = SetuResult.OtherError;
                 break;
         }
@@ -236,7 +237,8 @@ public static partial class SetuExtensions
         var setuData = new SetuData_JitsuSelf();
         var setuResult = SetuResult.Successed;
         var sorts = new[] { "pixiv", "jitsu" };
-        var url = @$"https://moe.jitsu.top/api?proxy=i.pixiv.re&type=json&size=original{$"&sort={(r18 ? "r18" : sorts.Random())}"}";
+        var url =
+            @$"https://moe.jitsu.top/api?proxy=i.pixiv.re&type=json&size=original{$"&sort={(r18 ? "r18" : sorts.Random())}"}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuData_JitsuSelf>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {

@@ -129,6 +129,9 @@ public partial class CQEvent : IDisposable
             case NoticeType.Essence:
                 // TODO : 设置精华消息
                 break;
+            case NoticeType.Group_Ban:
+                // TODO : 群禁言
+                break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(receiveData.NoticeType), receiveData.NoticeType, "值不在正确范围内");
         }

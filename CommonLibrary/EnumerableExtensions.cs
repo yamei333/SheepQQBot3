@@ -1061,7 +1061,7 @@ public static class EnumerableExtensions
     /// <param name="enumerable">对象数组</param>
     [DebuggerStepThrough]
     public static T Random<T>(this IEnumerable<T> enumerable)
-        => enumerable.OrderBy(each => Guid.NewGuid()).First();
+        => enumerable.OrderBy(_ => Guid.NewGuid()).First();
 
     /// <summary>
     /// 取得枚举中的随机项目, 如果无项目则返回null
@@ -1070,7 +1070,17 @@ public static class EnumerableExtensions
     /// <param name="enumerable">对象数组</param>
     [DebuggerStepThrough]
     public static T RandomOrDefault<T>(this IEnumerable<T> enumerable)
-        => enumerable.OrderBy(each => Guid.NewGuid()).FirstOrDefault();
+        => enumerable.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+
+    /// <summary>
+    /// 取得枚举中的随机项目(复数)
+    /// </summary>
+    /// <typeparam name="T">类型</typeparam>
+    /// <param name="enumerable">对象数组</param>
+    /// <param name="count">取得数量</param>
+    [DebuggerStepThrough]
+    public static IEnumerable<T> Randoms<T>(this IEnumerable<T> enumerable, int count)
+        => enumerable.OrderBy(_ => Guid.NewGuid()).Take(count);
 
     /// <summary>
     /// 取得数组中的随机项目
