@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Data;
-using System.Diagnostics;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -9,9 +8,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using Xunkong.Hoyolab;
-using Xunkong.Hoyolab.Account;
-using Xunkong.Hoyolab.DailyNote;
+using SheepQQBot3.SDK.Api;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.View.PublicVar;
@@ -38,7 +35,7 @@ public static partial class TaskProcess
     /// <summary>
     /// 原神每日提醒
     /// </summary>
-    public static void GenshinResinAlarm()
+    public static async Task GenshinResinAlarmAsync()
     {
         AddTaskRunLog("原神每日提醒");
         while (true)
@@ -48,31 +45,51 @@ public static partial class TaskProcess
                 if (Api?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
-                    if (dateNow.Hour is >= 10 and <= 19 or 0)
+                    if (dateNow.Hour is <= 2 or >= 8)
                     {
                         var setConfigs = Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
                             .ToList();
                         if (setConfigs is { Count: > 0 })
                         {
-                            //DailyRefreshNoteDGP();
-                            setConfigs.ForEach(setConfig =>
+                            DGPProcessOK = false;
+                            DGPExtensions.DailyRefreshNoteDGP();
+                            var isSuccessed = await 10.TryTimesAsync(async () =>
                             {
-                                setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
-                                    .ForEach(SendGenshinDailyNoteAlarmMessageAction);
+                                if (DGPProcessOK)
+                                    return true;
 
-                                async void SendGenshinDailyNoteAlarmMessageAction(
-                                    GenshinResinAlarm genshinResinAlarm)
+                                CommonUtil.Sleep(1000);
+                                return false;
+                            }).ConfigureAwait(false);
+
+                            if (isSuccessed)
+                            {
+                                setConfigs.ForEach(setConfig =>
                                 {
-                                    if (!genshinResinAlarm.IsActive)
-                                        return;
+                                    setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()
+                                        .ForEach(SendGenshinDailyNoteAlarmMessageAction);
+                                    return;
 
-                                    await SendGenshinDailyNoteAlarmMessageAsync(setConfig, genshinResinAlarm,
-                                        dateNow).ConfigureAwait(false);
-                                }
-                            });
-                            AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务完成"));
-                            CommonExtensions.SleepHours(1);
+                                    async void SendGenshinDailyNoteAlarmMessageAction(
+                                        GenshinResinAlarm genshinResinAlarm)
+                                    {
+                                        if (!genshinResinAlarm.IsActive)
+                                            return;
+
+                                        await SendGenshinDailyNoteAlarmMessageAsync(setConfig, genshinResinAlarm,
+                                            dateNow).ConfigureAwait(false);
+                                    }
+                                });
+
+                                AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务完成"));
+                                CommonExtensions.SleepMinutes(30);
+                            }
+                            else
+                            {
+                                AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务失败!"));
+                                CommonExtensions.SleepMinutes(5);
+                            }
                         }
                         else
                         {
@@ -101,70 +118,9 @@ public static partial class TaskProcess
         GenshinResinAlarm genshinResinAlarm,
         DateTime now)
     {
-        var cookie = genshinResinAlarm.Cookies;
-        var client = new HoyolabClient();
-        DailyNoteInfo dailyNote;
-        GenshinRoleInfo role;
-        var alarmTargetId = genshinResinAlarm.TargetId;
-        var targetId = setConfig.TargetId;
-
-        try
-        {
-            var roles = await client.GetGenshinRoleInfosAsync(cookie).ConfigureAwait(false);
-            role = roles[0];
-        }
-        catch (TaskCanceledException)
-        {
-            AddRunLog(new RunLog_SystemError($"取得Mys信息超时! [{genshinResinAlarm.ConfigName}]"));
-            await SendGetErrorMessageAsync().ConfigureAwait(false);
-            return;
-        }
-        catch (HoyolabException e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error,
-                $"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}");
-            AddRunLog(new RunLog_SystemError(
-                $"GenshinResinAlarm.GetGenshinRoleInfosAsync HoyolabException:{genshinResinAlarm.ConfigName}{e.ReturnCode}-{e.Message}"));
-            await SendGetErrorMessageAsync().ConfigureAwait(false);
-            return;
-        }
-        catch (Exception e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error,
-                $"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
-            AddRunLog(new RunLog_SystemError(
-                $"GenshinResinAlarm.GetGenshinRoleInfosAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}"));
-            await SendGetErrorMessageAsync().ConfigureAwait(false);
-            return;
-        }
-
-        try
-        {
-            dailyNote = await client.GetDailyNoteAsync(role).ConfigureAwait(false);
-        }
-        catch (TaskCanceledException)
-        {
-            AddRunLog(new RunLog_SystemError($"取得原神便笺超时! [{genshinResinAlarm.ConfigName}]"));
-            await SendGetErrorMessageAsync().ConfigureAwait(false);
-            return;
-        }
-        catch (Exception e)
-        {
-            var errorMessage = e.Message;
-            if (errorMessage == RISK_ACCOUNT)
-            {
-                AddRunLog(new RunLog_SystemWarning($"米游社风控账户({genshinResinAlarm.ConfigName})"));
-                await SendGetErrorMessageAsync().ConfigureAwait(false);
-                return;
-            }
-
-            YameiLogExtensions.WriteLog(LogType.Error,
-                $"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.Message}");
-            AddRunLog(new RunLog_SystemError($"GenshinResinAlarm.GetDailyNoteAsync Exception:{genshinResinAlarm.ConfigName}{e.HResult}({e.Message})"));
-            await SendGetErrorMessageAsync().ConfigureAwait(false);
-            return;
-        }
-
+        var targetId = genshinResinAlarm.TargetId;
+        var groupId = setConfig.TargetId;
+        var dailyNote = GenshinDailyNote[targetId];
         var currentResin = dailyNote.CurrentResin;
         var targetType = setConfig.TargetType;
         var dateNowStr = now.ToConditionString(HolidayInfo);
@@ -190,7 +146,7 @@ public static partial class TaskProcess
 
         #region 每日任务
 
-        if (genshinResinAlarm.DailyMission && !dailyNote.IsExtraTaskRewardReceived && _regGenshinDailyMission.IsMatch(dateNowStr))
+        if (genshinResinAlarm.DailyMission && !dailyNote.DailyTask.IsExtraTaskRewardReceived && _regGenshinDailyMission.IsMatch(dateNowStr))
             AddSendMessage("今天每日任务还没做, 要血亏了!");
 
         #endregion 每日任务
@@ -220,14 +176,14 @@ public static partial class TaskProcess
         switch (targetType)
         {
             case BotConfigTargetType.Group:
-                await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                await Api.SendGroupMessageAsync(groupId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 AddRunLog(new RunLog_GenshinDailyNoteAlarm(
-                    BotConfigTargetType.Group, targetId, sendMessage));
+                    BotConfigTargetType.Group, groupId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await Api.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                await Api.SendPrivateMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 AddRunLog(new RunLog_GenshinDailyNoteAlarm(
-                    BotConfigTargetType.Private, targetId, sendMessage));
+                    BotConfigTargetType.Private, groupId, sendMessage));
                 break;
             case BotConfigTargetType.Common:
             default:
@@ -240,7 +196,7 @@ public static partial class TaskProcess
                 sendMessage += ENTER;
 
             if (!sendMessage!.Contains("CQ:at"))
-                sendMessage += CQCode.At(alarmTargetId);
+                sendMessage += $"{CQCode.At(targetId)}{ENTER}";
 
             sendMessage += msg;
         }
@@ -257,25 +213,6 @@ public static partial class TaskProcess
             }
         }
 
-        Task SendGetErrorMessageAsync() => Api.SendGroupMessageAsync(targetId, $"{CQCode.At(alarmTargetId)}原神便笺取得失败!", Vm.SetConfigs);
-    }
-
-    /// <summary>
-    /// 刷新DGP的原神便笺
-    /// </summary>
-    private static void DailyRefreshNoteDGP()
-    {
-        var processInfo = new ProcessStartInfo("cmd.exe", "/c start hutao://DailyNote/Refresh")
-        {
-            CreateNoWindow = true,
-            UseShellExecute = false,
-            WindowStyle = ProcessWindowStyle.Hidden,
-            RedirectStandardOutput = true,
-        };
-
-        var process = new Process { StartInfo = processInfo };
-        process.Start();
-        process.WaitForExit();
-        AddRunLog(new RunLog_SystemInfo("刷新DGP原神便笺完成"));
+        Task SendGetErrorMessageAsync() => Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}原神便笺取得失败!", Vm.SetConfigs);
     }
 }

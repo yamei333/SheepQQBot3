@@ -1,32 +1,26 @@
-﻿using SheepQQBot3.WebApi;
+﻿using System.Text.Json;
+using SheepQQBot3.Model;
+using SheepQQBot3.SDK.WebApi;
+using WatsonWebserver.Core;
 
 namespace SheepQQBot3.View;
 
 partial class MainWindowViewModel
 {
-    //private ServiceHost _serviceHost;
-
-    //private void InitWcfService()
-    //{
-    //    _serviceHost = new ServiceHost(typeof(QQBotService));
-    //    _serviceHost.Opened += (_, __) => AddRunLog(new RunLog_SystemInfo("WcfServer 开始监听"));
-    //    _serviceHost.AddServiceEndpoint(typeof(IQQBotService), new BasicHttpBinding(), "http://333.yamei.moe:8301/");
-    //    var behaviors = _serviceHost.Description.Behaviors;
-    //    if (behaviors.Find<ServiceMetadataBehavior>() == null)
-    //    {
-    //        behaviors.Add(new ServiceMetadataBehavior
-    //        {
-    //            HttpGetEnabled = true,
-    //            HttpGetUrl = new Uri("http://yamimi.moe:8301/QQBotService")
-    //        });
-    //        _serviceHost.Open();
-    //    }
-    //}
+    private static int _postNum = 0;
 
     private static void InitWebApi()
     {
-        var httpService = new HttpService(8301);
-        PublicVar.HttpService = httpService;
-        httpService.StartHttpServerAsync();
+        var webServer = new WebServer();
+        webServer.AddStaticRoute(HttpMethod.POST, "/DGPDailyNote/", async context =>
+        {
+            var jsonText = context.Request.DataAsString;
+            var dgpDailyNote = JsonSerializer.Deserialize<DGPDailyNote>(jsonText);
+            PublicVar.GenshinDailyNote[_postNum == 0 ? 252961222 : 173629299] = dgpDailyNote;
+            _postNum = _postNum == 0 ? 1 : 0;
+            if (_postNum == 0)
+                PublicVar.DGPProcessOK = true;
+        });
+        webServer.Start();
     }
 }

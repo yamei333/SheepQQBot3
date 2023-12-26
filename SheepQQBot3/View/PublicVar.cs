@@ -1,8 +1,10 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using SheepQQBot3.DbModel;
+using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Api;
 
@@ -92,7 +94,9 @@ public static class PublicVar
     public static GocqWindow GocqWindow;
     public static Process Bark;
     public static BarkWindow BarkWindow;
-    //public static HttpService HttpService { get; set; }
+
+    public static ConcurrentDictionary<long, DGPDailyNote> GenshinDailyNote = new();
+    public static bool DGPProcessOK = false;
 
     /// <summary>
     /// Bot数据库
