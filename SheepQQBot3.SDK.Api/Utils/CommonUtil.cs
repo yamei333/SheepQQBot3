@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace SheepQQBot3.SDK.Client;
+namespace SheepQQBot3.SDK.Api;
 
 public static class CommonUtil
 {

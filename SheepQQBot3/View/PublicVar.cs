@@ -4,8 +4,7 @@ using System.Configuration;
 using System.Diagnostics;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Client;
-using SheepQQBot3.WebApi;
+using SheepQQBot3.SDK.Api;
 
 namespace SheepQQBot3.View;
 
@@ -93,7 +92,7 @@ public static class PublicVar
     public static GocqWindow GocqWindow;
     public static Process Bark;
     public static BarkWindow BarkWindow;
-    public static HttpService HttpService { get; set; }
+    //public static HttpService HttpService { get; set; }
 
     /// <summary>
     /// Bot数据库

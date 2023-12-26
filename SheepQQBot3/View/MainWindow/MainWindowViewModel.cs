@@ -7,7 +7,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.SDK.Client;
+using SheepQQBot3.SDK.Api;
 using SheepQQBot3.SDK.Event;
 
 namespace SheepQQBot3.View;

@@ -14,7 +14,9 @@ using Yamei.Common;
 using static System.Threading.Tasks.Task;
 using StringExtensions = Masuit.Tools.StringExtensions;
 
-namespace SheepQQBot3.SDK.Client;
+// ReSharper disable AsyncApostle.AsyncAwaitMayBeElidedHighlighting
+
+namespace SheepQQBot3.SDK.Api;
 
 partial class CQAPI
 {
@@ -311,7 +313,7 @@ partial class CQAPI
         var echo = Guid.NewGuid();
         await SendDataAsync("get_msg", new ParamData
         {
-            MessageId = messageId.ToString()
+            MessageId = messageId.ToString(),
         }, echo).ConfigureAwait(false);
 
         var groupMessage = GetReply(echo, jsonInfo =>
@@ -332,7 +334,7 @@ partial class CQAPI
         var echo = Guid.NewGuid();
         await SendDataAsync("get_group_msg_history", new ParamData
         {
-            GroupId = groupId.ToString()
+            GroupId = groupId.ToString(),
         }, echo).ConfigureAwait(false);
 
         return GetReply(echo, jsonInfo =>
@@ -351,8 +353,8 @@ partial class CQAPI
         => await SendDataAsync("send_like", new ParamData
         {
             UserId = userId.ToString(),
-            Times = times.ToString()
-        });
+            Times = times.ToString(),
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 踢出群
@@ -366,7 +368,7 @@ partial class CQAPI
             GroupId = groupId.ToString(),
             UserId = userId.ToString(),
             Reject_Add_Request = isReject.ToString()
-        });
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 群禁言
@@ -379,8 +381,8 @@ partial class CQAPI
         {
             GroupId = groupId.ToString(),
             UserId = userId.ToString(),
-            Duration = duration.ToString()
-        });
+            Duration = duration.ToString(),
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 群全体禁言
@@ -391,8 +393,8 @@ partial class CQAPI
         => await SendDataAsync("set_group_whole_ban", new ParamData
         {
             GroupId = groupId.ToString(),
-            Enable = enable.ToString()
-        });
+            Enable = enable.ToString(),
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 设置群名片
@@ -405,8 +407,8 @@ partial class CQAPI
         {
             GroupId = groupId.ToString(),
             Enable = userId.ToString(),
-            Card = card
-        });
+            Card = card,
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 设置群名称
@@ -417,8 +419,8 @@ partial class CQAPI
         => await SendDataAsync("set_group_name", new ParamData
         {
             GroupId = groupId.ToString(),
-            GroupName = groupName
-        });
+            GroupName = groupName,
+        }).ConfigureAwait(false);
 
     /// <summary>
     /// 获得群成员名单
@@ -431,7 +433,7 @@ partial class CQAPI
         await SendDataAsync("get_group_member_list", new ParamData
         {
             GroupId = groupId.ToString(),
-            NoCache = false
+            NoCache = false,
         }, echo).ConfigureAwait(false);
 
         return GetReply(echo, jsonText =>
@@ -453,14 +455,14 @@ partial class CQAPI
     }
 }
 
-public class SetuCountInfo
-{
-    public long TargetId { get; set; }
-    public long IsRequestCount { get; set; }
-    public long IsRequestSuccessedCount { get; set; }
-    public string IsRequestSuccessedPercent { get; set; }
-    public long IsGetSuccessedCount { get; set; }
-    public string IsGetSuccessedPercent { get; set; }
-    public long IsSearchTagCount { get; set; }
-    public long IsR18BonusCount { get; set; }
-}
+//public class SetuCountInfo
+//{
+//    public long TargetId { get; set; }
+//    public long IsRequestCount { get; set; }
+//    public long IsRequestSuccessedCount { get; set; }
+//    public string IsRequestSuccessedPercent { get; set; }
+//    public long IsGetSuccessedCount { get; set; }
+//    public string IsGetSuccessedPercent { get; set; }
+//    public long IsSearchTagCount { get; set; }
+//    public long IsR18BonusCount { get; set; }
+//}

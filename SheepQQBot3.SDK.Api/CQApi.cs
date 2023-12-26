@@ -1,24 +1,26 @@
 ﻿using System;
 using System.Configuration;
+using System.Linq;
+using System.Net.WebSockets;
+using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommonLibrary;
-using Fleck;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
+using WatsonWebsocket;
 
-namespace SheepQQBot3.SDK.Client;
+namespace SheepQQBot3.SDK.Api;
 
 /// <inheritdoc />
 public partial class CQAPI : IDisposable
 {
-    private readonly WebSocketServer _client;
-    private IWebSocketConnection _connection;
+    private readonly WatsonWsServer _api;
 
     /// <summary>
-    /// 是否连接状态
+    /// 是否连接中
     /// </summary>
-    public bool IsConnected => _connection?.IsAvailable ?? false;
+    public bool Connected => _api.ListClients().Any();
 
     /// <summary>
     /// 收到群消息事件
@@ -33,29 +35,33 @@ public partial class CQAPI : IDisposable
     /// <summary>
     /// 连接时事件
     /// </summary>
-    public event EventHandler OnOpen;
+    public event EventHandler<ConnectionEventArgs> ClientConnected;
 
     /// <summary>
     /// 断开时事件
     /// </summary>
-    public event EventHandler OnClose;
+    public event EventHandler<DisconnectionEventArgs> ClientDisconnected;
+
+    private Guid _clientGuid;
 
     /// <summary>
     /// 默认构造函数
     /// </summary>
     public CQAPI(BotDbContext botDb)
     {
-        var url = ConfigurationManager.AppSettings["api"];
-        var wsUrl = string.IsNullOrEmpty(url) ? "ws://127.0.0.1:6700/" : url;
-        _client = new WebSocketServer(wsUrl);
+        var configAddress = ConfigurationManager.AppSettings["apiAddress"];
+        var configPort = ConfigurationManager.AppSettings["apiPort"];
+        _api = string.IsNullOrEmpty(configAddress)
+            ? new WatsonWsServer("127.0.0.1", 6700)
+            : new WatsonWsServer(configAddress,
+                string.IsNullOrEmpty(configPort) ? 6700 : int.Parse(configPort));
         _botDb = botDb;
     }
 
     /// <inheritdoc />
     public void Dispose()
     {
-        _connection?.Close();
-        _client.ListenerSocket?.Close();
+        _api.Dispose();
         GC.SuppressFinalize(this);
     }
 
@@ -64,35 +70,51 @@ public partial class CQAPI : IDisposable
     /// </summary>
     public void Start()
     {
-        _client.Start(socket =>
+        _api.ClientConnected += (sender, args) =>
         {
-            _connection = socket;
-            socket.OnOpen = () => OnOpen?.Invoke(null, EventArgs.Empty);
-            socket.OnClose = () => OnClose?.Invoke(null, EventArgs.Empty);
-            socket.OnMessage = jsonInfo =>
+            _clientGuid = args.Client.Guid;
+            ClientConnected?.Invoke(sender, args);
+        };
+
+        _api.ClientDisconnected += (sender, args) =>
+        {
+            ClientDisconnected?.Invoke(sender, args);
+        };
+
+        _api.MessageReceived += (sender, args) =>
+        {
+            if (args.MessageType == WebSocketMessageType.Text)
             {
+                var jsonText = Encoding.Default.GetString(args.Data);
                 try
                 {
-                    if (_regGetEcho.IsMatch(jsonInfo))
+                    if (_regGetEcho.IsMatch(jsonText))
                     {
-                        var match = _regGetEcho.Match(jsonInfo);
+                        var match = _regGetEcho.Match(jsonText);
                         var echo = Guid.Parse(match.Groups[1].Value);
                         if (echo == Guid.Empty)
-                            ProcessClientReceiveData(GetReceiveData(jsonInfo));
+                            ProcessClientReceiveData(GetReceiveData(jsonText));
                         else
-                            _interaciveJsons.Add(echo, jsonInfo);
+                            _interaciveJsons.Add(echo, jsonText);
                     }
                     else
                     {
-                        ProcessClientReceiveData(GetReceiveData(jsonInfo));
+                        ProcessClientReceiveData(GetReceiveData(jsonText));
                     }
                 }
                 catch (Exception e)
                 {
-                    YameiLogExtensions.WriteLog(LogType.Error, $"ProcessClientReceiveData-{e.Message}\r\n{jsonInfo}");
+                    YameiLogExtensions.WriteLog(LogType.Error, $"ProcessClientReceiveData-{e.Message}\r\n{jsonText}");
                 }
-            };
-        });
+            }
+            else
+            {
+                YameiLogExtensions.WriteLog(LogType.Error, $"_client.MessageReceived-Not Text Type{args.Data}");
+            }
+        };
+
+        _api.Start();
+        return;
 
         ClientReceiveData GetReceiveData(string jsonInfo)
             => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
@@ -144,22 +166,22 @@ public partial class CQAPI : IDisposable
 
     private async Task<bool> SendDataAsync(string actionType, ParamData paramData, Guid echo = default)
     {
-        if (_connection?.IsAvailable != true)
+        if (!Connected)
             return false;
 
         var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), CommonExtensions.DefaultJsonOptions);
-        await _connection.Send(jsonText).ConfigureAwait(false);
+        await _api.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
         return true;
     }
 
     private async Task<bool> SendDataAsync(string actionType, GroupForwardMessageParamData paramData, Guid echo = default)
     {
-        if (_connection?.IsAvailable != true)
+        if (!Connected)
             return false;
 
         var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData, echo == default ? null : echo.ToString()),
             CommonExtensions.DefaultJsonOptions);
-        await _connection.Send(jsonText).ConfigureAwait(false);
+        await _api.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
         return true;
     }
 }
