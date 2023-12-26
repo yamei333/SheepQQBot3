@@ -10,7 +10,7 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Setu;
-using SheepQQBot3.SDK.Client;
+using SheepQQBot3.SDK.Api;
 using Yamei.Common;
 using static Masuit.Tools.Systems.EnumExt;
 using static SheepQQBot3.View.PublicVar;

@@ -44,7 +44,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api?.IsConnected == true)
+                if (Api.Connected)
                 {
                     var dateNow = DateTime.Now;
                     var isAlarm = false;

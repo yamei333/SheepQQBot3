@@ -8,7 +8,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.SDK.Client;
+using SheepQQBot3.SDK.Api;
 using SheepQQBot3.SDK.Event;
 using Yamei.Common;
 
@@ -27,7 +27,7 @@ partial class MainWindowViewModel
         CqApi = new CQAPI(PublicVar.BotDb);
         var cqApi = CqApi;
         AddRunLog(new RunLog_SystemInfo("API 开始监听"));
-        cqApi.OnOpen += async (o, args) =>
+        cqApi.ClientConnected += async (o, args) =>
         {
             AddRunLog(new RunLog_SystemInfo("API 连接成功"));
             if (PublicVar.IsDebug)
@@ -56,7 +56,7 @@ partial class MainWindowViewModel
                     });
             }
         };
-        cqApi.OnClose += (o, data) =>
+        cqApi.ClientDisconnected += (o, data) =>
         {
             AddRunLog(new RunLog_SystemWarning("API 连接断开!!"));
         };
@@ -98,11 +98,11 @@ partial class MainWindowViewModel
         CqEvent = new CQEvent();
         var cqEvent = CqEvent;
         AddRunLog(new RunLog_SystemInfo("EVENT 开始监听"));
-        cqEvent.OnOpen += (o, args) =>
+        cqEvent.ClientConnected += (o, args) =>
         {
             AddRunLog(new RunLog_SystemInfo("EVENT 连接成功"));
         };
-        cqEvent.OnClose += (o, data) =>
+        cqEvent.ClientDisconnected += (o, data) =>
         {
             AddRunLog(new RunLog_SystemWarning("EVENT 连接断开!!"));
         };

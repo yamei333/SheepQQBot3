@@ -1,5 +1,6 @@
 ﻿using System;
 using SheepQQBot3.Model;
+using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Event;
 
@@ -8,9 +9,12 @@ public partial class CQEvent
     /// <summary>
     ///
     /// </summary>
-    public event EventHandler OnOpen;
+    public event EventHandler<ConnectionEventArgs> ClientConnected;
 
-    public event EventHandler OnClose;
+    /// <summary>
+    ///
+    /// </summary>
+    public event EventHandler<DisconnectionEventArgs> ClientDisconnected;
 
     public event EventHandler<GroupMessage> OnGroupMessage;
 

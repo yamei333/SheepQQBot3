@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Client;
+using SheepQQBot3.SDK.Api;
 
 namespace SheepQQBot3.View;
 

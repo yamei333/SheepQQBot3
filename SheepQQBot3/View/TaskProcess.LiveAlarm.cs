@@ -26,7 +26,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api?.IsConnected == true)
+                if (Api.Connected)
                 {
                     var dateNow = DateTime.Now;
                     Vm.SetConfigs?.Values
@@ -34,6 +34,8 @@ public static partial class TaskProcess
                         .ForEach(setConfig =>
                         {
                             setConfig.LiveAlarmConfigs?.ToValueList().ForEach(DeleteExpiredDataAction);
+                            return;
+
                             async void DeleteExpiredDataAction(LiveAlarmConfig liveAlarmConfig)
                             {
                                 if (!liveAlarmConfig.IsActive)

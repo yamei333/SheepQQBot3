@@ -45,7 +45,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api?.IsConnected == true)
+                if (Api?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     if (dateNow.Hour is >= 10 and <= 19 or 0)
@@ -270,7 +270,7 @@ public static partial class TaskProcess
             CreateNoWindow = true,
             UseShellExecute = false,
             WindowStyle = ProcessWindowStyle.Hidden,
-            RedirectStandardOutput = true
+            RedirectStandardOutput = true,
         };
 
         var process = new Process { StartInfo = processInfo };
