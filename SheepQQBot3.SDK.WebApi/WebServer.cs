@@ -16,6 +16,8 @@ public class WebServer
     public WebServer()
     {
         var webServerSetting = new WebserverSettings("127.0.0.1", 9000);
+        //webServerSetting.Headers.DefaultHeaders.Add("Content-Security-Policy", "default-src 'self' data: gap: https://ssl.gstatic.com 'unsafe-eval'; style-src 'self' 'unsafe-inline'; media-src *");
+        webServerSetting.AccessControl.Permit("127.0.0.1");
         _webServer = new Webserver(webServerSetting, context => context.Response.Send("ZipZap!"));
     }
 

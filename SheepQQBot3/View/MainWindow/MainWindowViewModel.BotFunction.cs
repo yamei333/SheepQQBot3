@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using SheepQQBot3.BotTask;
 
 namespace SheepQQBot3.View;
 
@@ -20,9 +21,10 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
-        StartTask(TaskProcess.GenshinResinAlarmAsync);
+        //StartTask(TaskProcess.GenshinResinAlarmAsync);
         StartTask(TaskProcess.GenshinWbAlarmAsync);
         StartTask(TaskProcess.GenshinEventAlarmAsync);
+        StartTask(TaskProcess.SteamMarketWatchAsync);
     }
 
     /// <summary>
