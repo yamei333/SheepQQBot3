@@ -17,10 +17,11 @@ public partial class App : Application
 
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
+        var args = Environment.GetCommandLineArgs();
+
         BotExtensions.KillGocqexe();
         BotExtensions.KillBarkexe();
 
-        var args = Environment.GetCommandLineArgs();
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接
         PublicVar.BotDb.SetuDoushiInfos.Find(0L);

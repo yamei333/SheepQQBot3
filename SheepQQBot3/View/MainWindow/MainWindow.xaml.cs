@@ -15,7 +15,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using Yamei.Common;
-using static SheepQQBot3.View.PublicVar;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 

@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.11.7.0</Version>
+    <Version>0.11.8.1</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>disable</Nullable>
@@ -18,12 +18,12 @@
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>None</DebugType>
+    <DebugType>none</DebugType>
     <DebugSymbols>False</DebugSymbols>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|AnyCPU'">
-    <DebugType>none</DebugType>
+    <DebugType>full</DebugType>
   </PropertyGroup>
 
   <ItemGroup>
@@ -77,11 +77,10 @@
     <ProjectReference Include="..\SheepQQBot3.SDK.Api\SheepQQBot3.SDK.Api.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.WebApi\SheepQQBot3.SDK.WebApi.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.WebApi\SheepQQBot3.SDK.WebApi.csproj" />
   </ItemGroup>
 
   <ItemGroup>
-    <Folder Include="BotService\" />
+    <Folder Include="ProcessMessage\" />
     <Folder Include="View\BarkWindow\" />
   </ItemGroup>
 

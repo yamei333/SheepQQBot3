@@ -12,7 +12,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using Yamei.Common;
-using static SheepQQBot3.View.PublicVar;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 

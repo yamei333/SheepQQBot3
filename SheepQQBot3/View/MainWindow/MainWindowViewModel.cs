@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
 using System.Reflection;
+using SheepQQBot3.BotService;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -60,7 +61,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         InitApiAsync().ConfigureAwait(false);
         InitEvent();
         //InitWcfService();
-        InitWebApi();
+        WebApiProcess.InitWebApi();
         InitBotFunctions();
 #endif
     }

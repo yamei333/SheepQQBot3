@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using Yamei.Common;
 
 namespace SheepQQBot3.Model
 {
@@ -23,7 +22,7 @@ namespace SheepQQBot3.Model
         /// 壶币剩余恢复时间(Date)
         /// </summary>
         [JsonIgnore]
-        public DateTime HomeCoinRecoveryDateTime => HomeCoinRecoveryTime.ToDateTime();
+        public DateTime HomeCoinRecoveryDateTime => DateTime.Now.AddMilliseconds(HomeCoinRecoveryTime);
 
         /// <summary>
         /// 参量质变仪
@@ -71,7 +70,7 @@ namespace SheepQQBot3.Model
         /// 体力恢复所需时间(Date)
         /// </summary>
         [JsonIgnore]
-        public DateTime ResinRecoveryDateTime => ResinRecoveryTime.ToDateTime();
+        public DateTime ResinRecoveryDateTime => DateTime.Now.AddMilliseconds(ResinRecoveryTime);
     }
 
     [Serializable]

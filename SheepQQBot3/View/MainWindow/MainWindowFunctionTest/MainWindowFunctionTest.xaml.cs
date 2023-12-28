@@ -1,6 +1,7 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
-using static SheepQQBot3.View.PublicVar;
+using SheepQQBot3.Extensions;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 
