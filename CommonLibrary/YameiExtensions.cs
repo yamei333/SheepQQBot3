@@ -59,6 +59,12 @@ public static class YameiExtensions
     }
 
     /// <summary>
+    /// 取得当天起始时间(00:00:00)
+    /// </summary>
+    public static DateTime GetTodayStart(this DateTime dateTime)
+        => new(dateTime.Year, dateTime.Month, dateTime.Day, 0, 0, 0);
+
+    /// <summary>
     /// 播放声音
     /// </summary>
     /// <param name="filePath">音频文件路径</param>

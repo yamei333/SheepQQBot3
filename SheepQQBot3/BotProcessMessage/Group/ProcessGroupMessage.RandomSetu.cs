@@ -4,6 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -24,8 +25,6 @@ public static partial class ProcessGroupMessage
         internal long TargetId { get; set; }
         internal long SetuDoushiLv { get; set; }
     }
-
-    private static readonly object _syncKeyword = new();
 
     //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
 
@@ -75,6 +74,11 @@ public static partial class ProcessGroupMessage
     private const int SendBaseDelay = 120;
 
     /// <summary>
+    /// 色图关键字
+    /// </summary>
+    private const string SETU_KEYWORD = "色图";
+
+    /// <summary>
     /// 最大色图斗士Lv
     /// </summary>
     private const int MaxSenderLv = 9;
@@ -87,8 +91,6 @@ public static partial class ProcessGroupMessage
         {SetuType.Jitsu, 2},
         {SetuType.JitsuSelf, 12},
     };
-
-    private static HashSet<string> _setuKeyWords;
 
     private static readonly string[] _setuBuman =
     {
@@ -206,7 +208,10 @@ public static partial class ProcessGroupMessage
         var message = groupMessage.Message;
         var dateNow = DateTime.Now;
 
-        var setuDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(targetId).ConfigureAwait(false);
+        SetuDoushiInfo setuDoushiInfo;
+        lock (BotDb.SyncLock)
+            setuDoushiInfo = BotDb.SetuDoushiInfos.FindAsync(targetId).Result;
+
         if (setuDoushiInfo == null)
         {
             setuDoushiInfo = new SetuDoushiInfo(targetId);
@@ -245,8 +250,7 @@ public static partial class ProcessGroupMessage
                     }
                     else
                     {
-                        var searchSetuDoushiInfo = await BotDb.SetuDoushiInfos
-                                .FindAsync(searchTargetId).ConfigureAwait(false)
+                        var searchSetuDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId)
                             ?? new SetuDoushiInfo(searchTargetId);
                         // MEMO : 显CD
                         var sendMessage = $"目标色图斗士Lv{searchSetuDoushiInfo.CalcSetuDoushiLv(dateNow)} " +
@@ -271,7 +275,7 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空CD
-                    var targetDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
+                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
                     if (targetDoushiInfo != null)
                     {
                         targetDoushiInfo.SetuCD = 0;
@@ -297,7 +301,7 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空Lv
-                    var targetDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
+                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
                     if (targetDoushiInfo != null)
                     {
                         targetDoushiInfo.SetuDoushiLv = 0;
@@ -323,7 +327,7 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空CD
-                    var targetDoushiInfo = await BotDb.SetuDoushiInfos.FindAsync(searchTargetId).ConfigureAwait(false);
+                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
                     if (targetDoushiInfo != null)
                     {
                         targetDoushiInfo.SetuDoushiLv = 0;
@@ -386,23 +390,23 @@ public static partial class ProcessGroupMessage
             }
         }
 
-        lock (_syncKeyword)
-        {
-            if (_setuKeyWords == null)
-            {
-                _setuKeyWords = new HashSet<string>();
-                var startText = new[]
-                {
-                    "涩", "色", "瑟", "铯"
-                };
-                var endText = new[]
-                {
-                    "图", "囤", "圖", "図", "屯"
-                };
+        //lock (_syncKeyword)
+        //{
+        //    if (_setuKeyWords == null)
+        //    {
+        //        _setuKeyWords = new HashSet<string>();
+        //        var startText = new[]
+        //        {
+        //            "涩", "色", "瑟", "铯"
+        //        };
+        //        var endText = new[]
+        //        {
+        //            "图", "囤", "圖", "図", "屯"
+        //        };
 
-                startText.ForEach(eachStart => endText.ForEach(eachEnd => _setuKeyWords.Add(eachStart + eachEnd)));
-            }
-        }
+        //        startText.ForEach(eachStart => endText.ForEach(eachEnd => _setuKeyWords.Add(eachStart + eachEnd)));
+        //    }
+        //}
 
         var isSetuDebug = false;
         var tag = string.Empty;
@@ -444,7 +448,7 @@ public static partial class ProcessGroupMessage
         }
 
         // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
-        if (message.GetByteCount() <= 45 && message.EndsWithAny(_setuKeyWords))
+        if (message.GetByteCount() <= 45 && message.EndsWith(SETU_KEYWORD))
         {
             setuKeywordCheck = true;
             tag = message[..^2];
@@ -466,7 +470,7 @@ StartSetu:
             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
             BotDb.Update(setuDoushiInfo);
             var sendMessage = $"{CQCode.At(targetId)}"
-                + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
+                + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
                 + $"[斗士Lv{setuDoushiLv}]";
             await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
             return true;
@@ -478,21 +482,31 @@ StartSetu:
             tag = changeTag;
 
         var isSearchTag = !string.IsNullOrEmpty(tag);
-        var targetSetuSendHistorys = BotDb.SetuSendHistorys
-            .Where(each => each.TargetId == targetId)
-            .ToList();
+        List<SetuSendHistory> targetSetuSendHistorys;
+        lock (BotDb.SyncLock)
+        {
+            targetSetuSendHistorys = BotDb.SetuSendHistorys
+                .Where(each => each.TargetId == targetId)
+                .ToList();
+        }
+
         var lastHistory = Enumerable.MaxBy(targetSetuSendHistorys, each => each.TimeStamp);
         var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
         if (!string.IsNullOrEmpty(lastKeyword) && lastKeyword == sourceTag)
         {
             const int CHECK_TIMES = 2;
             // MEMO : 最后2次色图都有关键字
-            var last2Historys = targetSetuSendHistorys
-                .OrderByDescending(history => history.TimeStamp)
-                .Where(history => !history.IsR18Bonus.ToBool()
-                    && history.IsRequestSuccessed.ToBool())
-                .Take(CHECK_TIMES)
-                .ToList();
+            List<SetuSendHistory> last2Historys;
+            lock (BotDb.SyncLock)
+            {
+                last2Historys = targetSetuSendHistorys
+                    .OrderByDescending(history => history.TimeStamp)
+                    .Where(history => !history.IsR18Bonus.ToBool()
+                        && history.IsRequestSuccessed.ToBool())
+                    .Take(CHECK_TIMES)
+                    .ToList();
+            }
+
             if (last2Historys.Count == CHECK_TIMES
                 && last2Historys.All(history => history.SearchKeyword == lastKeyword
                     && !history.IsGetSuccessed.ToBool()))
@@ -501,7 +515,7 @@ StartSetu:
                 setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
                 var sendMessage = $"{CQCode.At(targetId)}"
-                    + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
+                    + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
                     + $"[斗士Lv{setuDoushiLv}]";
                 await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return true;
@@ -517,7 +531,7 @@ StartSetu:
                 {
                     // MEMO : 连续刷则关小黑屋
                     var sendMessage = $"{CQCode.At(targetId)}"
-                        + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}"
+                        + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}"
                         + $"[斗士Lv{setuDoushiLv}]";
                     await Api.SendGroupMessageAsync(groupId, sendMessage)
                         .ConfigureAwait(false);
@@ -654,7 +668,7 @@ StartSetu:
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                             BotDb.Update(setuDoushiInfo);
                             var sendMessage = $"{CQCode.At(targetId)}"
-                                + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
+                                + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
                                 + $"[斗士Lv{setuDoushiLv}]";
                             await Api.SendGroupMessageAsync(groupId, sendMessage)
                                 .ConfigureAwait(false);
@@ -674,7 +688,7 @@ StartSetu:
                     setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                     BotDb.Update(setuDoushiInfo);
                     var sendMessage = $"{CQCode.At(targetId)}"
-                        + $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
+                        + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
                         + $"[斗士Lv{setuDoushiLv}]";
                     await Api.SendGroupMessageAsync(groupId, sendMessage)
                         .ConfigureAwait(false);
@@ -728,29 +742,26 @@ StartSetu:
                     switch (addCDReason)
                     {
                         case AddCDReason.RequestFailed:
-                            sendMessage = $"{CQCode.At(targetId)}" +
-                                $"{_setuKexiStart.Random()} {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
-                                $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                +
-                                GetSetuLvInfo() +
-                                (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            sendMessage = $"{CQCode.At(targetId)}"
+                                + $"{_setuKexiStart.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
+                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                                + GetSetuLvInfo()
+                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
                             break;
                         case AddCDReason.NotReady:
-                            sendMessage = $"{CQCode.At(targetId)}" +
-                                $"{_setuNo.Random()}{_setuSendLe.Random()}, {_setuKeyWords.Random()}CD还没到呢!" +
-                                $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                +
-                                GetSetuLvInfo() +
-                                (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            sendMessage = $"{CQCode.At(targetId)}"
+                                + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
+                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                                + GetSetuLvInfo()
+                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
                             break;
                         default:
                             // MEMO : 应该不会有此Case
-                            sendMessage = $"{CQCode.At(targetId)}" +
-                                $"{_setuKexiStart.Random()} {_setuKeyWords.Random()}{_setuRequest.Random()[..2]}失败!" +
-                                $"{_setuKeyWords.Random()}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                +
-                                GetSetuLvInfo() +
-                                (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                            sendMessage = $"{CQCode.At(targetId)}"
+                                + $"{_setuKexiStart.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
+                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                                + GetSetuLvInfo()
+                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
                             break;
                     }
                 }
@@ -779,7 +790,7 @@ StartSetu:
                     // MEMO : 白嫖
                     isFree = true;
                     var sendMessage = $"{CQCode.At(targetId)}"
-                        + $"什么!? 你成功白嫖了一张{sourceTag}{_setuKeyWords.Random()}!"
+                        + $"什么!? 你成功白嫖了一张{sourceTag}{SETU_KEYWORD}!"
                         + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
                     await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                     goto SendSetu;
@@ -851,7 +862,7 @@ SendSetu:
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                             BotDb.Update(setuDoushiInfo);
                             var sendMessage = $"{CQCode.At(targetId)}" +
-                                $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
+                                $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
                                 +
                                 $"[斗士Lv{setuDoushiLv}]";
                             await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
@@ -1067,7 +1078,7 @@ SendSetu:
                 if (sendDownloadingMessage)
                 {
                     await Api.SendGroupMessageAsync(groupId,
-                            $"{CQCode.Reply(targetId, messageId)}{_setuKeyWords.Random()}正在{_setuGetting.Random()}...(API提供: {setuInfo.SetuType})")
+                            $"{CQCode.Reply(targetId, messageId)}{SETU_KEYWORD}正在{_setuGetting.Random()}...(API提供: {setuInfo.SetuType})")
                         .ConfigureAwait(false);
                 }
 

@@ -34,6 +34,9 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\$.+\$")]
     public static partial Regex ConditionJsonText();
 
+    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (11|14|15|23):00:\d{2}")]
+    public static partial Regex GenshinDailyNoteRefresh();
+
     [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
     public static partial Regex GenshinResin();
 

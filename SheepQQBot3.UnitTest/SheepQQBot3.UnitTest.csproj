@@ -6,6 +6,9 @@
     <Nullable>disable</Nullable>
 
     <IsPackable>false</IsPackable>
+    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+    <SelfContained>false</SelfContained>
+    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
   </PropertyGroup>
   
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">

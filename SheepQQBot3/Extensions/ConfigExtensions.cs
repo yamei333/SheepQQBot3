@@ -7,6 +7,7 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
+using Masuit.Tools;
 using Microsoft.VisualBasic.FileIO;
 using SheepQQBot3.Model.Config;
 using Yamei.Common;

@@ -30,6 +30,7 @@ public class BotFunction
     /// <summary>
     /// 是否允许使用
     /// </summary>
+    [JsonIgnore]
     [IgnoreMember]
     public bool IsEnabled { get; set; }
 

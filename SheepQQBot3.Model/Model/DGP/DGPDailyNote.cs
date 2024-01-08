@@ -13,16 +13,16 @@ namespace SheepQQBot3.Model
         public int WeekDiscountCount { get; set; }
 
         /// <summary>
-        /// 壶币剩余恢复时间
+        /// 壶币剩余恢复时间(秒数)
         /// </summary>
         [JsonPropertyName("home_coin_recovery_time")]
         public int HomeCoinRecoveryTime { get; set; }
 
         /// <summary>
-        /// 壶币剩余恢复时间(Date)
+        /// 壶币恢复时间(日期)
         /// </summary>
         [JsonIgnore]
-        public DateTime HomeCoinRecoveryDateTime => DateTime.Now.AddMilliseconds(HomeCoinRecoveryTime);
+        public DateTime HomeCoinRecoveryDateTime => DateTime.Now.AddSeconds(HomeCoinRecoveryTime);
 
         /// <summary>
         /// 参量质变仪
@@ -61,16 +61,16 @@ namespace SheepQQBot3.Model
         public int MaxResin { get; set; }
 
         /// <summary>
-        /// 体力恢复所需时间
+        /// 体力恢复所需时间(秒数)
         /// </summary>
         [JsonPropertyName("resin_recovery_time")]
         public int ResinRecoveryTime { get; set; }
 
         /// <summary>
-        /// 体力恢复所需时间(Date)
+        /// 体力恢复时间(日期)
         /// </summary>
         [JsonIgnore]
-        public DateTime ResinRecoveryDateTime => DateTime.Now.AddMilliseconds(ResinRecoveryTime);
+        public DateTime ResinRecoveryDateTime => DateTime.Now.AddSeconds(ResinRecoveryTime);
     }
 
     [Serializable]

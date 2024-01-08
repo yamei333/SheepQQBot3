@@ -3,45 +3,45 @@
 using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace SheepQQBot3.DbModel
+namespace SheepQQBot3.DbModel;
+
+public partial class BotDbContext : DbContext
 {
-    public partial class BotDbContext : DbContext
+    public BotDbContext(DbContextOptions<BotDbContext> options)
+        : base(options)
     {
-        public BotDbContext()
-        {
-        }
-
-        public BotDbContext(DbContextOptions<BotDbContext> options)
-            : base(options)
-        {
-        }
-
-        protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
-            modelBuilder.Entity<SetuDoushiInfo>(entity =>
-            {
-                entity.HasKey(e => e.TargetId);
-
-                entity.HasIndex(e => e.TargetId, "KEY_TargetId")
-                    .IsUnique();
-
-                entity.Property(e => e.TargetId).ValueGeneratedNever();
-            });
-
-            modelBuilder.Entity<SetuSendHistory>(entity =>
-            {
-                entity.HasKey(e => new { e.TargetId, e.TimeStamp });
-
-                entity.Property(e => e.SearchKeyword)
-                    .IsRequired()
-                    .HasDefaultValueSql("搜索");
-            });
-
-            OnModelCreatingPartial(modelBuilder);
-        }
-
-        partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
     }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<BotGroupMessage>(entity =>
+        {
+            entity.HasKey(e => new { e.GroupId, e.TargetId, e.MessageId, e.TimeStamp });
+
+            entity.ToTable("BotGroupMessage");
+        });
+
+        modelBuilder.Entity<SetuDoushiInfo>(entity =>
+        {
+            entity.HasKey(e => e.TargetId);
+
+            entity.HasIndex(e => e.TargetId, "KEY_TargetId").IsUnique();
+
+            entity.Property(e => e.TargetId).ValueGeneratedNever();
+        });
+
+        modelBuilder.Entity<SetuSendHistory>(entity =>
+        {
+            entity.HasKey(e => new { e.TargetId, e.TimeStamp });
+
+            entity.Property(e => e.SearchKeyword)
+                .IsRequired()
+                .HasDefaultValueSql("搜索");
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
 }

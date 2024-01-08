@@ -1,24 +1,27 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Infrastructure;
 
 namespace SheepQQBot3.DbModel;
 
 public static class BotDbContextExtensions
 {
-    private static readonly object _syncLock = new();
-
-    public static T Find<T>(this DbSet<T> dbSet, params object[] keyValues)
+    public static T FindLock<T>(this DbSet<T> dbSet, params object[] keyValues)
         where T : class
     {
-        lock (_syncLock)
+        var context = (BotDbContext)dbSet.GetService<ICurrentDbContext>().Context;
+        T result;
+        lock (context.SyncLock)
         {
-            return dbSet.Find(keyValues);
+            result = dbSet.Find(keyValues);
         }
+
+        return result;
     }
 
     public static void AddLock<T>(this BotDbContext botDbContext, T obj)
         where T : class
     {
-        lock (_syncLock)
+        lock (botDbContext.SyncLock)
         {
             botDbContext.Add(obj);
             botDbContext.SaveChanges();

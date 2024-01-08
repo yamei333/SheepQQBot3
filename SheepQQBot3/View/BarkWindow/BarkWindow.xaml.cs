@@ -9,10 +9,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using System.Windows.Threading;
+using Masuit.Tools;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;

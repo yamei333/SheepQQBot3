@@ -20,7 +20,7 @@ public static partial class ProcessGroupMessage
     private const string COMMAND_ROLL_SIMPLE = "R";
 
     /// <summary>
-    /// 图源搜索
+    /// Roll点
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>

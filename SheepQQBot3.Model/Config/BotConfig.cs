@@ -2,9 +2,9 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
+using Masuit.Tools;
 using MessagePack;
 using SheepQQBot3.Model.Enums;
-using Yamei.Common;
 
 namespace SheepQQBot3.Model.Config;
 
