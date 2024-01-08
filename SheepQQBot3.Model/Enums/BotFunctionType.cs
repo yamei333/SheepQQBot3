@@ -46,6 +46,9 @@ public enum BotFunctionType
     [Display(Name = "ROLL点")]
     Group_Roll = 2007,
 
+    [Display(Name = "群聊总结")]
+    Group_ChatSummary = 2008,
+
     [Display(Name = "原神助手")]
     Group_GenshinHelper = 2200,
 }

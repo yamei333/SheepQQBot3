@@ -31,6 +31,9 @@ public static partial class ProcessGroupMessage
     {
         // MEMO : 非管理员/投稿者
         var targetId = groupMessage.Sender.UserId;
+        if (targetId != 252961222)
+            return true;
+
         if (genshinResinAlarms?.Keys.Contains(targetId) != true)
             return false;
 
@@ -42,7 +45,6 @@ public static partial class ProcessGroupMessage
             return false;
 
         upperMessage = upperMessage.Replace(COMMAND_GENSHIN_HELPER, string.Empty);
-        var dateNow = DateTime.Now;
         if (string.IsNullOrEmpty(upperMessage))
         {
             DGPProcessOK = false;

@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -102,7 +103,7 @@ public static class PublicVar
     /// <summary>
     /// Bot数据库
     /// </summary>
-    public static BotDbContext BotDb = new();
+    public static BotDbContext BotDb = new(new DbContextOptions<BotDbContext>());
 
     /// <summary>
     /// Bot配置

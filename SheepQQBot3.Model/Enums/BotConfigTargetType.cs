@@ -59,11 +59,12 @@ public static class TargetTypeExtensions
                 BotFunctionType.Group_LiveAlarm,
                 BotFunctionType.Group_SearchImageSource,
                 BotFunctionType.Group_Roll,
+                BotFunctionType.Group_ChatSummary,
                 BotFunctionType.Group_GenshinHelper,
             },
             BotConfigTargetType.Private => new HashSet<BotFunctionType>
             {
-                BotFunctionType.Private_AdminConfig
+                BotFunctionType.Private_AdminConfig,
             },
             _ => null
         };

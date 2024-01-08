@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace Yamei.Common;
 
@@ -361,38 +360,38 @@ public static class EnumerableExtensions
             : source.ThenByDescending(keySelector, comparer);
     }
 
-    /// <summary>
-    /// イテレートメソッドです。各要素に対して<paramref name="toAction"/>を実行します。
-    /// </summary>
-    /// <typeparam name="T">各要素の型</typeparam>
-    /// <param name="enumerable">対象の<see cref="IEnumerable{T}"/></param>
-    /// <param name="toAction">要素に対して実行するアクション</param>
-    [DebuggerStepThrough]
-    public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> toAction)
-    {
-        foreach (var each in enumerable)
-            toAction(each);
-    }
+    ///// <summary>
+    ///// イテレートメソッドです。各要素に対して<paramref name="toAction"/>を実行します。
+    ///// </summary>
+    ///// <typeparam name="T">各要素の型</typeparam>
+    ///// <param name="enumerable">対象の<see cref="IEnumerable{T}"/></param>
+    ///// <param name="toAction">要素に対して実行するアクション</param>
+    //[DebuggerStepThrough]
+    //public static void ForEach<T>(this IEnumerable<T> enumerable, Action<T> toAction)
+    //{
+    //    foreach (var each in enumerable)
+    //        toAction(each);
+    //}
 
-    /// <summary>
-    /// 数组的ForEach方法, 和linq的ForEach统一化。
-    /// </summary>
-    [DebuggerStepThrough]
-    public static void ForEach<T>(this T[] array, Action<T> action)
-    {
-        foreach (var each in array)
-            action(each);
-    }
+    ///// <summary>
+    ///// 数组的ForEach方法, 和linq的ForEach统一化。
+    ///// </summary>
+    //[DebuggerStepThrough]
+    //public static void ForEach<T>(this T[] array, Action<T> action)
+    //{
+    //    foreach (var each in array)
+    //        action(each);
+    //}
 
-    /// <summary>
-    /// ForEach方法<see cref="MatchCollection"/>的扩展。
-    /// </summary>
-    [DebuggerStepThrough]
-    public static void ForEach(this MatchCollection enumerable, Action<Match> toAction)
-    {
-        foreach (var each in enumerable)
-            toAction((Match)each);
-    }
+    ///// <summary>
+    ///// ForEach方法<see cref="MatchCollection"/>的扩展。
+    ///// </summary>
+    //[DebuggerStepThrough]
+    //public static void ForEach(this MatchCollection enumerable, Action<Match> toAction)
+    //{
+    //    foreach (var each in enumerable)
+    //        toAction((Match)each);
+    //}
 
     /// <summary>
     /// インデックス付イテレートメソッドです。各要素に対して<paramref name="toAction"/>を実行します。
@@ -856,19 +855,19 @@ public static class EnumerableExtensions
         return new HashSet<T>(enumerable, comparer);
     }
 
-    /// <summary>
-    /// 要素の指定項目を射影した<see cref="HashSet{T2}"/>を作成します。
-    /// このメソッドが呼び出された段階で<see cref="IEnumerable{T}"/>に対する評価が行われます。
-    /// </summary>
-    /// <typeparam name="T">各要素の型</typeparam>
-    /// <typeparam name="T2">ハッシュセットの要素の型</typeparam>
-    /// <param name="enumerable">処理を適用する<see cref="IEnumerable{T}"/>インスタンス</param>
-    /// <param name="selectFunction">射影を行うファンクション</param>
-    /// <returns>作成されたハッシュセットを返却します。</returns>
-    public static HashSet<T2> ToHashSet<T, T2>(this IEnumerable<T> enumerable, Func<T, T2> selectFunction)
-    {
-        return enumerable.Select(selectFunction).ToHashSet();
-    }
+    ///// <summary>
+    ///// 要素の指定項目を射影した<see cref="HashSet{T2}"/>を作成します。
+    ///// このメソッドが呼び出された段階で<see cref="IEnumerable{T}"/>に対する評価が行われます。
+    ///// </summary>
+    ///// <typeparam name="T">各要素の型</typeparam>
+    ///// <typeparam name="T2">ハッシュセットの要素の型</typeparam>
+    ///// <param name="enumerable">処理を適用する<see cref="IEnumerable{T}"/>インスタンス</param>
+    ///// <param name="selectFunction">射影を行うファンクション</param>
+    ///// <returns>作成されたハッシュセットを返却します。</returns>
+    //public static HashSet<T2> ToHashSet<T, T2>(this IEnumerable<T> enumerable, Func<T, T2> selectFunction)
+    //{
+    //    return enumerable.Select(selectFunction).ToHashSet();
+    //}
 
     /// <summary>
     /// 指定されたサイズにしたがって、<see cref=" IEnumerable{TSource} "/>から

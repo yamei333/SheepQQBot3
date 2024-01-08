@@ -12,7 +12,21 @@ namespace SheepQQBot3.DbModel
     /// </summary>
     public partial class BotDbContext
     {
-        private static readonly object _syncLock = new();
+        public readonly object SyncLock = new();
+
+        private DbSet<BotGroupMessage> _botGroupMessages;
+
+        public virtual DbSet<BotGroupMessage> BotGroupMessages
+        {
+            get
+            {
+                lock (SyncLock)
+                {
+                    return _botGroupMessages;
+                }
+            }
+            set => _botGroupMessages = value;
+        }
 
         private DbSet<SetuDoushiInfo> _setuDoushiInfos;
 
@@ -20,7 +34,7 @@ namespace SheepQQBot3.DbModel
         {
             get
             {
-                lock (_syncLock)
+                lock (SyncLock)
                 {
                     return _setuDoushiInfos;
                 }
@@ -34,7 +48,7 @@ namespace SheepQQBot3.DbModel
         {
             get
             {
-                lock (_syncLock)
+                lock (SyncLock)
                 {
                     return _setuSendHistorys;
                 }
@@ -49,29 +63,56 @@ namespace SheepQQBot3.DbModel
         }
 
         /// <inheritdoc />
-        public override ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(TEntity entity, CancellationToken cancellationToken = new CancellationToken())
+        public override ValueTask<object> FindAsync(Type entityType, params object[] keyValues)
         {
-            lock (_syncLock)
-            {
-                var result = base.AddAsync(entity, cancellationToken);
-                this.SaveChanges();
-                return result;
-            }
+            lock (SyncLock) return base.FindAsync(entityType, keyValues);
         }
 
         /// <inheritdoc />
-        public override ValueTask<TEntity> FindAsync<TEntity>(params object[] keyValues) where TEntity : class
+        public override ValueTask<EntityEntry<TEntity>> AddAsync<TEntity>(
+            TEntity entity,
+            CancellationToken cancellationToken = default)
+            where TEntity : class
         {
-            lock (_syncLock)
+            ValueTask<EntityEntry<TEntity>> result;
+            lock (SyncLock)
             {
-                return base.FindAsync<TEntity>(keyValues); ;
+                result = base.AddAsync(entity, cancellationToken);
+                SaveChanges();
             }
+
+            return result;
         }
 
         /// <inheritdoc />
-        public override EntityEntry<TEntity> Update<TEntity>(TEntity entity)
+        public override ValueTask<TEntity> FindAsync<TEntity>(
+            object[] keyValues,
+            CancellationToken cancellationToken)
+            where TEntity : class
         {
-            lock (_syncLock)
+            lock (SyncLock) return base.FindAsync<TEntity>(keyValues, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public override ValueTask<TEntity> FindAsync<TEntity>(params object[] keyValues)
+            where TEntity : class
+        {
+            lock (SyncLock) return base.FindAsync<TEntity>(keyValues);
+        }
+
+        /// <inheritdoc />
+        public override ValueTask<object> FindAsync(
+            Type entityType,
+            object[] keyValues,
+            CancellationToken cancellationToken)
+        {
+            lock (SyncLock) return base.FindAsync(entityType, keyValues, cancellationToken);
+        }
+
+        /// <inheritdoc />
+        public override EntityEntry Update(object entity)
+        {
+            lock (SyncLock)
             {
                 var result = base.Update(entity);
                 this.SaveChanges();

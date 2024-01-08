@@ -3,6 +3,7 @@ using System.Data;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;

@@ -4,6 +4,7 @@ using CommonLibrary;
 using Masuit.Tools.DateTimeExt;
 using SheepQQBot3.BotService;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
 
@@ -25,10 +26,11 @@ public static partial class TaskProcess
                 {
                     var dateNowSeconds = DateTime.Now.GetTotalSeconds();
                     var lastUpdateSteamMarketStatusSeconds = WebApiProcess.LastUpdateSteamMarketStatusDate.GetTotalSeconds();
-                    if (dateNowSeconds - lastUpdateSteamMarketStatusSeconds > 300)
+                    if (dateNowSeconds - lastUpdateSteamMarketStatusSeconds > 600)
                     {
                         const string errorMessage = "[Steam市场监控]出现问题!请检查!";
-                        await Api.SendPrivateMessageAsync(AdminId, errorMessage).ConfigureAwait(false);
+                        //await Api.SendPrivateMessageAsync(AdminId, errorMessage).ConfigureAwait(false);
+                        await PushExtensions.PushBarkMessageAsync(errorMessage, "系统问题").ConfigureAwait(false);
                         AddRunLog(new RunLog_SystemWarning(errorMessage));
                         CommonExtensions.SleepMinutes(60);
                     }

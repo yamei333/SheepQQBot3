@@ -5,8 +5,8 @@ using System.Text.Json;
 using System.Text.Json.Serialization;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Masuit.Tools;
 using MessagePack;
-using Yamei.Common;
 
 namespace System;
 
@@ -187,7 +187,8 @@ public static class CommonExtensions
     public static string GetPath(string directoryName, string fileName)
     {
         var appPath = Environment.CurrentDirectory;
-        return $"file:///{appPath.Replace(@"\", "/")}/{directoryName}/{fileName}";
+        return $"file:///{appPath.Replace(@"\", "/")}"
+            + $"{(string.IsNullOrEmpty(directoryName) ? string.Empty : $"/{directoryName}")}/{fileName}";
     }
 
     public static void CreatePath(string pathName)

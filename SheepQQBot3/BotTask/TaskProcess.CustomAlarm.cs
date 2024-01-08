@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;

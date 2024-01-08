@@ -13,10 +13,8 @@ public static partial class WebApiProcess
         {
             var jsonText = context.Request.DataAsString;
             var dgpDailyNote = JsonSerializer.Deserialize<DGPDailyNote>(jsonText);
-            PublicVar.GenshinDailyNote[_postNum == 0 ? 252961222 : 173629299] = dgpDailyNote;
-            _postNum = _postNum == 0 ? 1 : 0;
-            if (_postNum == 0)
-                PublicVar.DGPProcessOK = true;
+            PublicVar.GenshinDailyNote[252961222] = dgpDailyNote;
+            PublicVar.DGPProcessOK = true;
         });
     }
 }

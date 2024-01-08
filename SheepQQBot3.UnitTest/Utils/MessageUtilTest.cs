@@ -1,4 +1,7 @@
-﻿using SheepQQBot3.Model;
+﻿using CommonLibrary;
+using JiebaNet.Analyser;
+using JiebaNet.Segmenter.PosSeg;
+using SheepQQBot3.Model;
 using static SheepQQBot3.Model.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
@@ -46,6 +49,18 @@ public class MessageUtilTest
 
         #endregion Test
 
+        var posSeg = new PosSegmenter();
+        var s = "一团硕大无朋的高能离子云，在遥远而神秘的太空中迅疾地飘移";
+        var tfidfExtractor = new TfidfExtractor();
+        var result = tfidfExtractor.ExtractTagsWithWeight(s)
+            .OrderByDescending(each => each.Weight)
+            .ToDictionary(each => each.Word, each => (int)(each.Weight * 10000));
+        result.GenerateWordCloud();
+
+        //var tokens = posSeg.Cut(s);
+
+        //var result = "pm今天玩原神了吗".SegmenterCut();
+        ;
         //WordCloudExtensions.GenerateWordCloud();
 
         //var result = NSFWExtensions.CheckWebImage(

@@ -8,13 +8,13 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
+using Masuit.Tools;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;

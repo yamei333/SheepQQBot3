@@ -4,6 +4,7 @@ using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.BotProcessMessage;
 using SheepQQBot3.BotProcessMessage.Group;
 using SheepQQBot3.BotProcessMessage.Private;
@@ -265,6 +266,12 @@ partial class MainWindowViewModel
         {
             StartTaskList(taskList, Roll);
             async void Roll() => await ProcessGroupMessage.RollAsync(groupMessage).ConfigureAwait(false);
+        });
+
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_Roll, config =>
+        {
+            StartTaskList(taskList, ChatSummary);
+            async void ChatSummary() => await ProcessGroupMessage.ChatSummaryAsync(groupMessage).ConfigureAwait(false);
         });
 
         Task.WaitAll(taskList.ToArray());

@@ -19,6 +19,7 @@ public static partial class TaskProcess
 {
     private static readonly Regex _regRemoveCQAt = RegexGenerator.CQCodeRemoveCQAt();
     private static readonly Regex _regGenshinWbAlarm = RegexGenerator.GenshinWbAlarm();
+    private static readonly Regex _regGenshinDailyNoteRefresh = RegexGenerator.GenshinDailyNoteRefresh();
     private static readonly Regex _regGenshinResin = RegexGenerator.GenshinResin();
     private static readonly Regex _regGenshinDailyMission = RegexGenerator.GenshinDailyMission();
     private static readonly Regex _regGenshinTransformer = RegexGenerator.GenshinTransformer();
@@ -38,6 +39,7 @@ public static partial class TaskProcess
     public static async Task GenshinResinAlarmAsync()
     {
         AddTaskRunLog("原神每日提醒");
+        CommonExtensions.SleepMinutes(5);
         while (true)
         {
             try
@@ -45,7 +47,8 @@ public static partial class TaskProcess
                 if (Api?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
-                    if (dateNow.Hour is <= 2 or >= 8)
+                    var dateNowStr = dateNow.ToConditionString(HolidayInfo);
+                    if (_regGenshinDailyNoteRefresh.IsMatch(dateNowStr))
                     {
                         var setConfigs = Vm.SetConfigs?.Values
                             .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_GenshinHelper))
@@ -54,7 +57,7 @@ public static partial class TaskProcess
                         {
                             DGPProcessOK = false;
                             DGPExtensions.DailyRefreshNoteDGP();
-                            var isSuccessed = await 10.TryTimesAsync(async () =>
+                            var isSuccessed = await 5.TryTimesAsync(async () =>
                             {
                                 if (DGPProcessOK)
                                     return true;
@@ -83,17 +86,17 @@ public static partial class TaskProcess
                                 });
 
                                 AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务完成"));
-                                CommonExtensions.SleepMinutes(30);
+                                CommonExtensions.SleepMinutes(45);
                             }
                             else
                             {
                                 AddRunLog(new RunLog_SystemInfo("刷新原神便笺任务失败!"));
-                                CommonExtensions.SleepMinutes(5);
+                                CommonExtensions.SleepMinutes(45);
                             }
                         }
                         else
                         {
-                            CommonExtensions.SleepMinutes(1);
+                            CommonExtensions.SleepMinutes(45);
                         }
                     }
                     else

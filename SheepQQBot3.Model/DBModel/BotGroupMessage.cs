@@ -5,15 +5,17 @@ using System.Collections.Generic;
 
 namespace SheepQQBot3.DbModel;
 
-public partial class SetuDoushiInfo
+public partial class BotGroupMessage
 {
+    public long GroupId { get; set; }
+
     public long TargetId { get; set; }
 
-    public long SetuDoushiLv { get; set; }
+    public int MessageId { get; set; }
 
-    public long ToFastTimes { get; set; }
+    public long TimeStamp { get; set; }
 
-    public long SetuCD { get; set; }
+    public string MessageText { get; set; }
 
-    public long BlackListCD { get; set; }
+    public string MessageImage { get; set; }
 }
