@@ -217,10 +217,10 @@ public static partial class SetuExtensions
                 break;
         }
 
-        var imageUrl = setuData.Url;
+        var imageUrl = setuData!.Url;
         return new SetuInfo(
             SetuType.Jitsu,
-            "来源:PIXIV",
+            setuData.SetuInfo,
             imageUrl.ToImageUrl(),
             imageUrl.ToSmallImageUrl(),
             setuResult);
@@ -237,8 +237,7 @@ public static partial class SetuExtensions
         var setuData = new SetuData_JitsuSelf();
         var setuResult = SetuResult.Successed;
         var sorts = new[] { "pixiv", "jitsu" };
-        var url =
-            @$"https://moe.jitsu.top/api?proxy=i.pixiv.re&type=json&size=original{$"&sort={(r18 ? "r18" : sorts.Random())}"}";
+        var url = @$"https://moe.jitsu.top/api?proxy=i.pixiv.re&type=json&size=original{$"&sort={(r18 ? "r18" : sorts.Random())}"}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuData_JitsuSelf>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
@@ -272,10 +271,7 @@ public static partial class SetuExtensions
             setuResult);
     }
 
-    private static string ToImageUrl(this string url)
-    {
-        return url.Replace(Pximg, PixivDirect);
-    }
+    private static string ToImageUrl(this string url) => url.Replace(Pximg, PixivDirect);
 
     private static string ToSmallImageUrl(this string url)
     {
