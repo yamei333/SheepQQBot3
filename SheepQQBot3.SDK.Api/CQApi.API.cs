@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
@@ -22,7 +23,7 @@ partial class CQAPI
 {
     private static BotDbContext _botDb;
 
-    private readonly Dictionary<Guid, string> _interaciveJsons = new();
+    private readonly ConcurrentDictionary<Guid, string> _interaciveJsons = new();
 
     private readonly Regex _regGetEcho = RegexGenerator.CQAPI_GetEcho();
 
@@ -450,7 +451,7 @@ partial class CQAPI
         if (!_interaciveJsons.TryGetValue(echo, out var jsonText))
             return null;
 
-        _interaciveJsons.Remove(echo);
+        _interaciveJsons.Remove(echo, out _);
         return getFunc(jsonText);
     }
 }

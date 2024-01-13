@@ -6,6 +6,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
 using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using WatsonWebsocket;
@@ -86,26 +87,26 @@ public partial class CQAPI : IDisposable
             if (args.MessageType == WebSocketMessageType.Text)
             {
                 var jsonText = Encoding.Default.GetString(args.Data);
-                try
+                //try
+                //{
+                if (_regGetEcho.IsMatch(jsonText))
                 {
-                    if (_regGetEcho.IsMatch(jsonText))
-                    {
-                        var match = _regGetEcho.Match(jsonText);
-                        var echo = Guid.Parse(match.Groups[1].Value);
-                        if (echo == Guid.Empty)
-                            ProcessClientReceiveData(GetReceiveData(jsonText));
-                        else
-                            _interaciveJsons.Add(echo, jsonText);
-                    }
-                    else
-                    {
+                    var match = _regGetEcho.Match(jsonText);
+                    var echo = Guid.Parse(match.Groups[1].Value);
+                    if (echo == Guid.Empty)
                         ProcessClientReceiveData(GetReceiveData(jsonText));
-                    }
+                    else
+                        _interaciveJsons.AddOrUpdate(echo, jsonText, (_, __) => jsonText);
                 }
-                catch (Exception e)
+                else
                 {
-                    YameiLogExtensions.WriteLog(LogType.Error, $"ProcessClientReceiveData-{e.Message}\r\n{jsonText}");
+                    ProcessClientReceiveData(GetReceiveData(jsonText));
                 }
+                //}
+                //catch (Exception e)
+                //{
+                //    YameiLogExtensions.WriteLog(LogType.Error, $"ProcessClientReceiveData-{e.Message}\r\n{jsonText}");
+                //}
             }
             else
             {
