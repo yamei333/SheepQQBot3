@@ -75,8 +75,8 @@ public static partial class SetuExtensions
         return new SetuInfo(
             SetuType.Lolicon,
             setuData.SetuInfo,
-            setuData.Urls.Original.ToImageUrl(),
-            setuData.Urls.Original.ToSmallImageUrl(),
+            setuData.Urls?.Original?.ToImageUrl(),
+            setuData.Urls?.Original?.ToSmallImageUrl(),
             setuResult);
 
         string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}";
@@ -131,8 +131,8 @@ public static partial class SetuExtensions
         return new SetuInfo(
             SetuType.Yuban,
             setuData.SetuInfo,
-            setuData.Urls.Original.ToImageUrl(),
-            setuData.Urls.Original.ToSmallImageUrl(),
+            setuData?.Urls?.Original.ToImageUrl(),
+            setuData?.Urls?.Original.ToSmallImageUrl(),
             setuResult);
     }
 
@@ -169,12 +169,12 @@ public static partial class SetuExtensions
                 break;
         }
 
-        var imageUrl = setuData.Urls.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivRe);
+        var imageUrl = setuData.Urls?.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivRe);
         return new SetuInfo(
             SetuType.NyanCatda,
             setuData.SetuInfo,
-            imageUrl.ToImageUrl(),
-            imageUrl.ToSmallImageUrl(),
+            imageUrl?.ToImageUrl(),
+            imageUrl?.ToSmallImageUrl(),
             setuResult);
     }
 
@@ -221,8 +221,8 @@ public static partial class SetuExtensions
         return new SetuInfo(
             SetuType.Jitsu,
             setuData.SetuInfo,
-            imageUrl.ToImageUrl(),
-            imageUrl.ToSmallImageUrl(),
+            imageUrl?.ToImageUrl(),
+            imageUrl?.ToSmallImageUrl(),
             setuResult);
     }
 
@@ -262,12 +262,12 @@ public static partial class SetuExtensions
                 break;
         }
 
-        var imageUrl = setuData.Urls[0];
+        var imageUrl = setuData.Urls?[0];
         return new SetuInfo(
             SetuType.JitsuSelf,
             setuData.SetuInfo,
-            imageUrl.ToImageUrl(),
-            imageUrl.ToSmallImageUrl(),
+            imageUrl?.ToImageUrl(),
+            imageUrl?.ToSmallImageUrl(),
             setuResult);
     }
 
