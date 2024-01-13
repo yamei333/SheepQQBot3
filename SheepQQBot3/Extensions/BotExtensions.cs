@@ -46,13 +46,11 @@ public static class BotExtensions
     public static string GetSetuSuccessPercent(SetuDoushiInfo setuDoushiInfo, DateTime dateNow)
     {
         var setuDoushiLv = setuDoushiInfo?.CalcSetuDoushiLv(dateNow) ?? 0;
-        var setuCd = setuDoushiInfo?.SetuCD ?? 0;
-        var timeAdd = setuDoushiLv == 0 && setuCd != 0 ? (int)(dateNow - setuCd.ToDateTime()).TotalMinutes : 0;
-        var failedSum = 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
-            + 200 + (int)(150 * Math.Pow(setuDoushiLv, 2))
-            + 100 + (int)(75 * Math.Pow(setuDoushiLv, 2))
-            + 50 + (int)(40 * Math.Pow(setuDoushiLv, 2));
-        return $"色图成功率 {(5880 + timeAdd) / (5880.0 + timeAdd + failedSum):0.00%}";
+        var failedSum = (int)(150 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(150 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(75 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(40 * Math.Pow(setuDoushiLv, 2.5));
+        return $"色图成功率 {(21480) / (21480.0 + failedSum):0.00%}";
     }
 
     /// <summary>

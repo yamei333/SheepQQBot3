@@ -14,6 +14,14 @@ namespace SheepQQBot3.Model.Config;
 [MessagePackObject]
 public class BotConfig
 {
+    /// <summary>
+    ///
+    /// </summary>
+    [JsonIgnore]
+    [IgnoreMember]
+    public SetConfig this[BotConfigTargetType targetType, long targetId]
+        => SetConfigs.Values.FirstOrDefault(each => each.TargetType == targetType && each.TargetId == targetId);
+
     [JsonIgnore]
     [IgnoreMember]
     private Dictionary<Guid, SetConfig> _setConfigs;
