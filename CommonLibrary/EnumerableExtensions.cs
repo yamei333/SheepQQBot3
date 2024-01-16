@@ -11,6 +11,8 @@ namespace Yamei.Common;
 /// </summary>
 public static class EnumerableExtensions
 {
+    private static readonly Random _rand = new();
+
     #region Inner Classes
 
     /// <summary>
@@ -1054,25 +1056,27 @@ public static class EnumerableExtensions
     }
 
     /// <summary>
-    /// 取得枚举中的随机项目
+    /// 取得集合中的随机项目
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="enumerable">对象数组</param>
     [DebuggerStepThrough]
     public static T Random<T>(this IEnumerable<T> enumerable)
-        => enumerable.OrderBy(_ => Guid.NewGuid()).First();
+        => _rand.GetItems(enumerable.ToArray(), 1)[0]; // .OrderBy(_ => Guid.NewGuid()).First();
+
+    ///// <summary>
+    ///// 取得集合中的随机项目, 如果无项目则返回null
+    ///// </summary>
+    ///// <typeparam name="T">类型</typeparam>
+    ///// <param name="enumerable">对象数组</param>
+    //[DebuggerStepThrough]
+    //public static T RandomOrDefault<T>(this IEnumerable<T> enumerable)
+    //{
+    //    return enumerable.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
+    //}
 
     /// <summary>
-    /// 取得枚举中的随机项目, 如果无项目则返回null
-    /// </summary>
-    /// <typeparam name="T">类型</typeparam>
-    /// <param name="enumerable">对象数组</param>
-    [DebuggerStepThrough]
-    public static T RandomOrDefault<T>(this IEnumerable<T> enumerable)
-        => enumerable.OrderBy(_ => Guid.NewGuid()).FirstOrDefault();
-
-    /// <summary>
-    /// 取得枚举中的随机项目(复数)
+    /// 取得集合中的随机项目(复数)
     /// </summary>
     /// <typeparam name="T">类型</typeparam>
     /// <param name="enumerable">对象数组</param>
@@ -1088,16 +1092,16 @@ public static class EnumerableExtensions
     /// <param name="enumerable">对象数组</param>
     [DebuggerStepThrough]
     public static T Random<T>(this T[] enumerable)
-        => enumerable.OrderBy(each => Guid.NewGuid()).First();
+        => _rand.GetItems(enumerable, 1)[0];
 
-    /// <summary>
-    /// 取得数组中的随机项目, 如果无项目则返回null
-    /// </summary>
-    /// <typeparam name="T">类型</typeparam>
-    /// <param name="enumerable">对象数组</param>
-    [DebuggerStepThrough]
-    public static T RandomOrDefault<T>(this T[] enumerable)
-        => enumerable.OrderBy(each => Guid.NewGuid()).FirstOrDefault();
+    ///// <summary>
+    ///// 取得数组中的随机项目, 如果无项目则返回null
+    ///// </summary>
+    ///// <typeparam name="T">类型</typeparam>
+    ///// <param name="enumerable">对象数组</param>
+    //[DebuggerStepThrough]
+    //public static T RandomOrDefault<T>(this T[] enumerable)
+    //    => enumerable.OrderBy(each => Guid.NewGuid()).FirstOrDefault();
 
     /// <summary>
     /// 指定次数循环处理
