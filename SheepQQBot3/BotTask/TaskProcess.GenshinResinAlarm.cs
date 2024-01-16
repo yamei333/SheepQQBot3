@@ -29,11 +29,6 @@ public static partial class TaskProcess
     };
 
     /// <summary>
-    /// 风控账户
-    /// </summary>
-    private const string RISK_ACCOUNT = " (1034)";
-
-    /// <summary>
     /// 原神每日提醒
     /// </summary>
     public static async Task GenshinResinAlarmAsync()
