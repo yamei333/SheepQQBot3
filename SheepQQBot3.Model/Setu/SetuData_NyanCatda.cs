@@ -1,24 +1,30 @@
 ﻿using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model.Setu;
 
 public class SetuResponse_NyanCatda
 {
     [JsonPropertyName("data")]
-    public SetuData_NyanCatda Data { get; set; }
+    public SetuData_NyanCatda[] Data { get; set; }
 }
 
 public class SetuData_NyanCatda
 {
     [JsonPropertyName("url")]
-    public string[] Urls { get; set; }
+    public string Url { get; set; }
+
+    /// <summary>
+    /// 画师
+    /// </summary>
+    [JsonPropertyName("author")]
+    public string Author { get; set; }
 
     /// <summary>
     /// pixiv 图片ID
     /// </summary>
-    public string Pid => SetuExtensions.RegGetPixivPid.Match(Urls[0]).Value;
+    [JsonPropertyName("pid")]
+    public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"来源:PIXIV PID:{Pid}";
+    public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";
 }

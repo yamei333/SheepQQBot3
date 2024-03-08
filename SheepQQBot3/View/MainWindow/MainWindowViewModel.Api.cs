@@ -162,7 +162,7 @@ partial class MainWindowViewModel
             void CustomGroupAlarm() => ProcessMessage.CustomPrivateAlarmAsync(privateMessage);
         });
 
-        if (userId == PublicVar.AdminId)
+        if (PublicVar.AdminIds.Contains(userId))
         {
             StartTaskList(taskList, AdminCommand);
             void AdminCommand() => ProcessPrivateMessage.AdminCommandAsync(privateMessage);

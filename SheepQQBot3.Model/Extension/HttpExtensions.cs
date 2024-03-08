@@ -13,7 +13,7 @@ namespace SheepQQBot3.Model.Extension;
 
 public static class HttpExtensions
 {
-    public static readonly HttpClient HttpClient = new();
+    public static readonly HttpClient HttpClient;
 
     private const string UNKNOWN_HOST_EXCEPTION = "不知道这样的主机";
     private const string SOCKET_FORCE_CLOSE_EXCEPTION = "远程主机强迫关闭了一个现有的连接";
@@ -21,6 +21,9 @@ public static class HttpExtensions
 
     static HttpExtensions()
     {
+        var httpclientHandler = new HttpClientHandler();
+        httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
+        HttpClient = new HttpClient(httpclientHandler);
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
     }
 

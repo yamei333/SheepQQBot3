@@ -87,7 +87,7 @@ public static partial class ProcessGroupMessage
     {
         {SetuType.Lolicon, 30},
         {SetuType.Yuban, 0}, // 会出现R18, 办了
-        {SetuType.NyanCatda, 6},
+        {SetuType.NyanCatda, 8},
         {SetuType.Jitsu, 2},
         {SetuType.JitsuSelf, 12},
     };
@@ -231,6 +231,7 @@ public static partial class ProcessGroupMessage
 
         var setuDoushiLv = setuDoushiInfo.SetuDoushiLv;
         var setuCd = setuDoushiInfo.SetuCD.ToDateTime();
+        var isAdmin = AdminIds.Contains(targetId);
         if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
         {
             if (message.Equals(COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
@@ -240,7 +241,7 @@ public static partial class ProcessGroupMessage
                     $"{BotExtensions.GetSetuSuccessPercent(setuDoushiInfo, dateNow)}";
                 await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
             }
-            else if (targetId == PublicVar.AdminId)
+            else if (isAdmin)
             {
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUCD_LIBRARY.Length..], out var searchTargetId))
                 {
@@ -276,7 +277,7 @@ public static partial class ProcessGroupMessage
             return true;
         }
 
-        if (targetId == PublicVar.AdminId)
+        if (isAdmin)
         {
             if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
@@ -533,7 +534,7 @@ StartSetu:
         var setuSendHistory = lastHistory?.TimeStamp.ToDateTime() ?? DateTime.MinValue;
         if (setuKeywordCheck)
         {
-            if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 10 + setuDoushiLv * 10)
+            if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 5 + setuDoushiLv * 5)
             {
                 if (setuDoushiInfo.ToFastTimes >= 2)
                 {
@@ -548,7 +549,7 @@ StartSetu:
                 }
                 else
                 {
-                    // MEMO : 20秒内不连续响应
+                    // MEMO : 一定时间内不连续响应
                     await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}太快了, 休息一下吧")
                         .ConfigureAwait(false);
                     setuDoushiInfo.ToFastTimes += 1;
@@ -571,7 +572,7 @@ StartSetu:
             var changeLvTime = 0;
             var changeLvTag = 0;
             var changeLvFast = 0;
-            if ((!PublicVar.IsDebug || isSetuDebug) && targetId == PublicVar.AdminId)
+            if ((!IsDebug || isSetuDebug) && isAdmin)
             {
                 // MEMO : ADMIN无限制要色图
                 canSendSetu = true;
@@ -728,11 +729,11 @@ StartSetu:
             if (PublicVar.IsDebug)
             {
                 await Api.SendGroupMessageAsync(groupId, "[DEBUG]"
-                        + $"{ENTER}目标对象: {targetId}"
-                        + $"{ENTER}色图Lv: {setuDoushiLv}"
-                        + $"{ENTER}是否发送: {canSendSetu}"
-                        + $"{ENTER}增加时间: {addSecond}s"
-                        + $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
+                    + $"{ENTER}目标对象: {targetId}"
+                    + $"{ENTER}色图Lv: {setuDoushiLv}"
+                    + $"{ENTER}是否发送: {canSendSetu}"
+                    + $"{ENTER}增加时间: {addSecond}s"
+                    + $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
                     .ConfigureAwait(false);
             }
 
@@ -792,7 +793,7 @@ StartSetu:
             {
                 AddCD();
                 var isShowDate = Rand.CheckPercent(3);
-                if (targetId != PublicVar.AdminId && addSecond == 0)
+                if (!isAdmin && addSecond == 0)
                 {
                     // MEMO : 白嫖
                     isFree = true;
