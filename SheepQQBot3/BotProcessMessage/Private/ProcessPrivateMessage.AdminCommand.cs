@@ -53,14 +53,26 @@ public static partial class ProcessPrivateMessage
             case COMMAND_ADMIN_HAS:
                 var hasMessage = string.Empty;
                 var url = ConfigurationManager.AppSettings["has_hk"];
+                var today = DateTime.Today;
                 if (!string.IsNullOrEmpty(url))
                 {
+                    if (!string.IsNullOrEmpty(hasMessage))
+                        hasMessage += ENTER;
+
                     var httpResponse = await HttpExtensions.GetFromJsonAsync<JMS_Hongkong>(url).ConfigureAwait(false);
                     hasMessage += "JMS(HK): ";
                     if (httpResponse.Result == HttpResponseResult.Successed)
                     {
                         var jmsHongkong = httpResponse.Data;
-                        hasMessage += $"剩余-{(jmsHongkong.MonthLimit - jmsHongkong.Counter) / 1024.0 / 1024.0 / 1024.0:0.0}G, 更新日-{jmsHongkong.ResetDayOfMonth}";
+                        var resetDayOfMonth = jmsHongkong.ResetDayOfMonth;
+                        var nextMonth = today.AddMonths(1);
+                        var nextResetDate = today.Day >= resetDayOfMonth
+                            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
+                            : new DateTime(today.Year, today.Month, resetDayOfMonth);
+                        var avgEveryday = (nextResetDate - today).TotalDays + 1;
+                        var remainBand = (jmsHongkong.MonthLimit - jmsHongkong.Counter) / 1024.0 / 1024.0 / 1024.0;
+                        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}"
+                            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
                     }
                     else
                     {
@@ -73,12 +85,23 @@ public static partial class ProcessPrivateMessage
                 url = ConfigurationManager.AppSettings["has_los"];
                 if (!string.IsNullOrEmpty(url))
                 {
-                    var httpResponse = await HttpExtensions.GetFromJsonAsync<BMW_LosAngeles>(url).ConfigureAwait(false);
-                    hasMessage += "BMW(LOS): ";
+                    if (!string.IsNullOrEmpty(hasMessage))
+                        hasMessage += ENTER;
+
+                    var httpResponse = await HttpExtensions.GetFromJsonAsync<BWH_LosAngeles>(url).ConfigureAwait(false);
+                    hasMessage += "BWH(LOS): ";
                     if (httpResponse.Result == HttpResponseResult.Successed)
                     {
-                        var bmwLosAngeles = httpResponse.Data;
-                        hasMessage += $"剩余-{(bmwLosAngeles.MonthLimit - bmwLosAngeles.Counter) / 1024.0 / 1024.0 / 1024.0:0.0}G, 更新日-{bmwLosAngeles.ResetDayOfMonth}, 地址-{bmwLosAngeles.HostName}({bmwLosAngeles.IPAddresses.First()})";
+                        var bwhLosAngeles = httpResponse.Data;
+                        var resetDayOfMonth = bwhLosAngeles.ResetDayOfMonth;
+                        var nextMonth = today.AddMonths(1);
+                        var nextResetDate = today.Day >= resetDayOfMonth
+                            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
+                            : new DateTime(today.Year, today.Month, resetDayOfMonth);
+                        var avgEveryday = (nextResetDate - today).TotalDays + 1;
+                        var remainBand = (bwhLosAngeles.MonthLimit - bwhLosAngeles.Counter) / 1024.0 / 1024.0 / 1024.0;
+                        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}, 地址-{bwhLosAngeles.HostName}({bwhLosAngeles.IPAddresses.First()})"
+                            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
                     }
                     else
                     {

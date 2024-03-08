@@ -23,14 +23,14 @@ public static partial class SetuExtensions
     private const string Pximg = "i.pximg.net";
 
     /// <summary>
-    /// PixivRe反代目标地址
+    /// Pixiv反代目标地址(Re)
     /// </summary>
-    private const string PixivRe = "i.pixiv.re";
+    private const string PximgRe = "i.pixiv.re";
 
     /// <summary>
     /// Pixiv反代目标地址(国内可用)
     /// </summary>
-    private const string PixivDirect = "i.pixiv.re";
+    private const string PixivDirect = "sex.nyan.xyz";
 
     public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
         => GetSetu_Lolicon_CoreAsync(tag);
@@ -44,7 +44,7 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivRe}" +
+        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivDirect}" +
                   $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
@@ -146,16 +146,16 @@ public static partial class SetuExtensions
     {
         var setuData = new SetuData_NyanCatda();
         var setuResult = SetuResult.Successed;
-        var url = @$"https://api.nyan.xyz/httpapi/sexphoto?num=1&r18={(r18 ? "true" : "false")}";
+        var url = @$"https://sex.nyan.xyz/api/v2/?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? "true" : "false")}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
             case HttpResponseResult.Successed:
                 var setuResponse = httpResponse.Data;
-                if (setuResponse == null)
+                if (setuResponse == null || !setuResponse.Data.Any())
                     return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
 
-                setuData = setuResponse.Data;
+                setuData = setuResponse.Data.First();
                 break;
             case HttpResponseResult.UnknownHost:
                 setuResult = SetuResult.ApiError;
@@ -169,12 +169,12 @@ public static partial class SetuExtensions
                 break;
         }
 
-        var imageUrl = setuData.Urls?.First().Replace("floral-disk-7293.nyancatda.workers.dev", PixivRe);
+        var imageUrl = setuData.Url;
         return new SetuInfo(
             SetuType.NyanCatda,
             setuData.SetuInfo,
-            imageUrl?.ToImageUrl(),
-            imageUrl?.ToSmallImageUrl(),
+            imageUrl.ToImageUrl(),
+            imageUrl.ToSmallImageUrl(),
             setuResult);
     }
 
@@ -277,7 +277,7 @@ public static partial class SetuExtensions
     {
         var temp = url
             .Replace(Pximg, PixivDirect)
-            .Replace(PixivRe, PixivDirect)
+            .Replace(PximgRe, PixivDirect)
             .Replace("img-original", "c/540x540_70/img-master");
         //.Replace("img-original", "img-master");
         var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);

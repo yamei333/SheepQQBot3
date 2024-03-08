@@ -3,7 +3,7 @@ using Yamei.Common;
 
 namespace SheepQQBot3.Model;
 
-public class BMW_LosAngeles
+public class BWH_LosAngeles
 {
     [JsonPropertyName("plan_monthly_data")]
     public long MonthLimit { get; set; }

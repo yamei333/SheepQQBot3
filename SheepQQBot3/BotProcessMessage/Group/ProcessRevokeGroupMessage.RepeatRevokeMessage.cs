@@ -32,7 +32,7 @@ public static partial class ProcessRevokeGroupMessage
     /// <returns></returns>
     public static async Task<bool> RepeatRevokeMessageAsync(GroupRevokeMessage groupRevokeMessage)
     {
-        if (!IsDebug && groupRevokeMessage.OperatorId == AdminId)
+        if (!IsDebug && AdminIds.Contains(groupRevokeMessage.OperatorId))
         {
             // MEMO : ADMIN不复读撤回消息
             return true;

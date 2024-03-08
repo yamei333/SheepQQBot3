@@ -45,7 +45,7 @@ public static partial class ProcessGroupMessage
     {
         // MEMO : 非管理员/投稿者
         var targetId = groupMessage.Sender.UserId;
-        if (targetId != AdminId && !alarmAideSubmitMembers.Contains(targetId))
+        if (!AdminIds.Contains(targetId) && !alarmAideSubmitMembers.Contains(targetId))
             return false;
 
         var groupId = groupMessage.GroupId;

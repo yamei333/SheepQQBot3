@@ -3,6 +3,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
@@ -40,7 +41,7 @@ public static class PublicVar
     /// <summary>
     /// 管理员ID
     /// </summary>
-    public static readonly long AdminId = long.Parse(ConfigurationManager.AppSettings["adminId"]!);
+    public static readonly HashSet<long> AdminIds = ConfigurationManager.AppSettings["adminId"]!.Split(',').ToHashSet(long.Parse);
 
     /// <summary>
     /// BotID
