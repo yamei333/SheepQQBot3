@@ -28,7 +28,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api.Connected)
+                if (BotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     if (_regGenshinWbAlarm.IsMatch(dateNow.ToConditionString(HolidayInfo)))
@@ -48,7 +48,7 @@ public static partial class TaskProcess
                             {
                                 var targetId = setConfig.TargetId;
                                 var sendMessage = $"{CQCode.AtAll()}[原神WB签到提醒]-WB签到第{wbSignDay + 1}天!";
-                                await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                                await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                                 AddRunLog(new RunLog_GenshinDailyNoteAlarm(BotConfigTargetType.Group, targetId, sendMessage));
 
                                 setConfig.GenshinHelperConfig?.GenshinResinAlarms?.ToValueList()

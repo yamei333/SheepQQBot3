@@ -47,8 +47,12 @@ public class HistoryMessage
     [JsonPropertyName("message")]
     public string Message { get; set; }
 
-    [JsonPropertyName("raw_message")]
-    public string RawMessage { get; set; }
+    /// <summary>
+    /// 原始消息
+    /// 0.13.0.0 起弃用
+    /// </summary>
+    //[JsonPropertyName("raw_message")]
+    //public string RawMessage { get; set; }
 
     [JsonPropertyName("message_id")]
     public int MessageId { get; set; }

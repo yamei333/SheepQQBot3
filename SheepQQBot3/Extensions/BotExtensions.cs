@@ -23,15 +23,6 @@ public static class BotExtensions
         => botFunctions.FirstOrDefault(each => each.BotFunctionType == botFunctionType)?.IsUsed ?? false;
 
     /// <summary>
-    /// 关闭gocq进程
-    /// </summary>
-    public static void KillGocqexe()
-    {
-        var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["gocqexe"]?.Replace(".exe", string.Empty));
-        processes.ForEach(each => each.Kill());
-    }
-
-    /// <summary>
     /// 关闭Bark进程
     /// </summary>
     public static void KillBarkexe()
@@ -64,4 +55,6 @@ public static class BotExtensions
             && userConfig != null
             && userConfig.ContainsKey(userConfigType);
     }
+
+    public static bool IsAdmin(long targetId) => PublicVar.AdminIds.Contains(targetId);
 }

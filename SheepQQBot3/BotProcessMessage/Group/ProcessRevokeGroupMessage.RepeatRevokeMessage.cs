@@ -1,5 +1,7 @@
 ﻿using System.Collections.Generic;
 using System.Threading.Tasks;
+using Microsoft.VisualBasic.ApplicationServices;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
@@ -32,7 +34,7 @@ public static partial class ProcessRevokeGroupMessage
     /// <returns></returns>
     public static async Task<bool> RepeatRevokeMessageAsync(GroupRevokeMessage groupRevokeMessage)
     {
-        if (!IsDebug && AdminIds.Contains(groupRevokeMessage.OperatorId))
+        if (!IsDebug && BotExtensions.IsAdmin(groupRevokeMessage.OperatorId))
         {
             // MEMO : ADMIN不复读撤回消息
             return true;
@@ -49,7 +51,7 @@ public static partial class ProcessRevokeGroupMessage
             new(groupRevokeMessage.MessageId),
             new(BOT_NAME, BotId, _repeatSllhh.Random()),
         };
-        await Api.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages);
+        await BotServer.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages);
         return true;
     }
 }

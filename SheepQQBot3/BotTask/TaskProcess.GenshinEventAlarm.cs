@@ -44,7 +44,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api.Connected)
+                if (BotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     var isAlarm = false;
@@ -70,7 +70,7 @@ public static partial class TaskProcess
                         async void ToAction(SetConfig setConfig)
                         {
                             var targetId = setConfig.TargetId;
-                            await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                            await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                             AddRunLog(new RunLog_GenshinDailyNoteAlarm(BotConfigTargetType.Group, targetId, sendMessage));
                         }
                     }
@@ -95,7 +95,7 @@ public static partial class TaskProcess
                         async void ToAction(SetConfig setConfig)
                         {
                             var targetId = setConfig.TargetId;
-                            await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                            await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                             AddRunLog(new RunLog_GenshinDailyNoteAlarm(BotConfigTargetType.Group, targetId, sendMessage));
                         }
                     }

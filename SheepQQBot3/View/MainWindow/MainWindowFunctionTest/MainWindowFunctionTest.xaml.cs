@@ -21,7 +21,7 @@ public partial class MainWindowFunctionTest : UserControl
     private async void TestSendGroupMessage(object sender, RoutedEventArgs e)
     {
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
-            await Vm.CqApi.SendGroupMessageAsync(groupId, TxtTestSendGroupMessage_Content.Text, Vm.SetConfigs).ConfigureAwait(false);
+            await Vm.BotServer.SendGroupMessageAsync(groupId, TxtTestSendGroupMessage_Content.Text, Vm.SetConfigs).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -34,13 +34,13 @@ public partial class MainWindowFunctionTest : UserControl
                       "serviceID=\"1\" Url=\"http://pcro.jp/\"><item layout=\"2\"><picture cover=\"\"/>" +
                       "<Title>ぷちっとくろにくる</Title><summary>カワイイ</summary></item><source/></msg>,resid=1]";
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
-            await Vm.CqApi.SendGroupMessageAsync(groupId, message, Vm.SetConfigs).ConfigureAwait(false);
+            await Vm.BotServer.SendGroupMessageAsync(groupId, message, Vm.SetConfigs).ConfigureAwait(false);
     }
 
     private void TestSendPrivateMessage(object sender, RoutedEventArgs e)
     {
         if (long.TryParse(TxtTestSendPrivateMessage_TargetId.Text, out var targetId))
-            Vm.CqApi.SendPrivateMessageAsync(targetId, TxtTestSendGroupMessage_Content.Text);
+            Vm.BotServer.SendPrivateMessageAsync(targetId, TxtTestSendGroupMessage_Content.Text);
     }
 
     /// <summary>
@@ -50,7 +50,7 @@ public partial class MainWindowFunctionTest : UserControl
     {
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
         {
-            await Vm.CqApi.SendGroupMessageAsync(groupId, await CQCode.JsonCard_StructMsgAsync(
+            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQCode.JsonCard_StructMsgAsync(
                 TxtTestSendJsonMessage1_Title.Text,
                 TxtTestSendJsonMessage1_Content.Text,
                 TxtTestSendJsonMessage1_Url.Text,

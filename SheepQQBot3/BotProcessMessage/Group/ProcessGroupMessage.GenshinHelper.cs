@@ -6,7 +6,6 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
-using SheepQQBot3.SDK.Api;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
@@ -54,7 +53,7 @@ public static partial class ProcessGroupMessage
                 if (DGPProcessOK)
                     return true;
 
-                CommonUtil.Sleep(1000);
+                CommonExtensions.Sleep(1000);
                 return false;
             }).ConfigureAwait(false);
 
@@ -104,12 +103,12 @@ public static partial class ProcessGroupMessage
                     //            .AddSeconds(transformer.RecoveryTime.Second):yyyy/M/d HH:mm})"
                     sendMessage = sendMessage + oneHint +
                                   resin + dailyQuest + potCoin + transformerStr;
-                    await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 }
                 catch (Exception e)
                 {
                     YameiLogExtensions.WriteLog(e);
-                    await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}数据获取失败, 可能是cookie已失效!").ConfigureAwait(false);
+                    await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}数据获取失败, 可能是cookie已失效!").ConfigureAwait(false);
                     return false;
                 }
             }

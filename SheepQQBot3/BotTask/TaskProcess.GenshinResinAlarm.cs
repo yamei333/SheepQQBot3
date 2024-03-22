@@ -8,7 +8,6 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using SheepQQBot3.SDK.Api;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
@@ -39,7 +38,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api?.Connected == true)
+                if (BotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     var dateNowStr = dateNow.ToConditionString(HolidayInfo);
@@ -57,7 +56,7 @@ public static partial class TaskProcess
                                 if (DGPProcessOK)
                                     return true;
 
-                                CommonUtil.Sleep(1000);
+                                CommonExtensions.Sleep(1000);
                                 return false;
                             }).ConfigureAwait(false);
 
@@ -174,12 +173,12 @@ public static partial class TaskProcess
         switch (targetType)
         {
             case BotConfigTargetType.Group:
-                await Api.SendGroupMessageAsync(groupId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                await BotServer.SendGroupMessageAsync(groupId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 AddRunLog(new RunLog_GenshinDailyNoteAlarm(
                     BotConfigTargetType.Group, groupId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await Api.SendPrivateMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 AddRunLog(new RunLog_GenshinDailyNoteAlarm(
                     BotConfigTargetType.Private, groupId, sendMessage));
                 break;
@@ -211,6 +210,6 @@ public static partial class TaskProcess
             }
         }
 
-        Task SendGetErrorMessageAsync() => Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}原神便笺取得失败!", Vm.SetConfigs);
+        Task SendGetErrorMessageAsync() => BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}原神便笺取得失败!", Vm.SetConfigs);
     }
 }

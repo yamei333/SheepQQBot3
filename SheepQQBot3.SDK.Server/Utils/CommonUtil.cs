@@ -5,7 +5,7 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Threading;
 
-namespace SheepQQBot3.SDK.Api;
+namespace SheepQQBot3.SDK.Event;
 
 public static class CommonUtil
 {
@@ -51,15 +51,5 @@ public static class CommonUtil
             throw new Exception(GetLastError().ToString());
 
         return lastUserAction.DwTime;
-    }
-
-    public static void Sleep(Func<bool> condition, int time)
-    {
-        SpinWait.SpinUntil(condition, time);
-    }
-
-    public static void Sleep(int time)
-    {
-        SpinWait.SpinUntil(() => false, time);
     }
 }

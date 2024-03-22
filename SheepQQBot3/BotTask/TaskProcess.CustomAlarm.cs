@@ -28,7 +28,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api.Connected)
+                if (BotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     var userConfigs = PublicVar.BotConfig.UserConfigs;
@@ -63,13 +63,13 @@ public static partial class TaskProcess
                         {
                             if (customAlarm.IsGroup)
                             {
-                                await Api.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
+                                await BotServer.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
                                     $"{(customAlarm.IsAtTarget ? $"{CQCode.At(customAlarm.TargetId)}{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
                             else
                             {
-                                await Api.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
+                                await BotServer.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
                                     $"{(customAlarm.IsAtTarget ? $"{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }

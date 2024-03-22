@@ -3,7 +3,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using SheepQQBot3.DbModel;
@@ -17,15 +16,13 @@ using StringExtensions = Masuit.Tools.StringExtensions;
 
 // ReSharper disable AsyncApostle.AsyncAwaitMayBeElidedHighlighting
 
-namespace SheepQQBot3.SDK.Api;
+namespace SheepQQBot3.SDK.Event;
 
-partial class CQAPI
+partial class BotServer
 {
     private static BotDbContext _botDb;
 
     private readonly ConcurrentDictionary<Guid, string> _interaciveJsons = new();
-
-    private readonly Regex _regGetEcho = RegexGenerator.CQAPI_GetEcho();
 
     /// <summary>
     /// 发送群消息
@@ -75,10 +72,10 @@ partial class CQAPI
         await SendDataAsync("send_group_msg", new ParamData
         {
             GroupId = groupId.ToString(),
-            Message = messageList
+            Message = messageList,
         }, echo).ConfigureAwait(false);
 
-        callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
+        //callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
 
         void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
         {

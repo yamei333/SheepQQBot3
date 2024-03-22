@@ -12,7 +12,6 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.SDK.Api;
 using SheepQQBot3.SDK.Event;
 using Yamei.Common;
 
@@ -23,54 +22,55 @@ partial class MainWindowViewModel
     private const int MaxLogCount = 1000;
     private const int MaxStoreProcessedMessageCount = 20;
 
-    private readonly object _messageLock = new();
+    /// <summary>
+    /// 处理历史记录消息用
+    /// </summary>
+    //private readonly object _messageLock = new();
     private DateTime _lastBlockedTime = DateTime.MinValue;
 
-    private Task InitApiAsync()
+    private void InitServer()
     {
-        CqApi = new CQAPI(PublicVar.BotDb);
-        var cqApi = CqApi;
-        AddRunLog(new RunLog_SystemInfo("API 开始监听"));
-        cqApi.ClientConnected += async (o, args) =>
+        BotServer = new BotServer(PublicVar.BotDb);
+        var botServer = BotServer;
+        AddRunLog(new RunLog_SystemInfo("SERVER 开始监听"));
+        botServer.ClientConnected += (o, args) =>
         {
-            AddRunLog(new RunLog_SystemInfo("API 连接成功"));
+            AddRunLog(new RunLog_SystemInfo("SERVER 连接成功"));
             if (PublicVar.IsDebug)
-                await cqApi.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
+                botServer.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
 
-            SetConfigs.Values.ForEach(RunAction);
+            #region 处理历史记录
 
-            // MEMO : 处理历史消息记录
-            async void RunAction(SetConfig config)
-            {
-                if (config.TargetType != BotConfigTargetType.Group)
-                    return;
+            //SetConfigs.Values.ForEach(RunAction);
 
-                var historyMessages = await cqApi.GetHistoryGroupMessagesAsync(config.TargetId).ConfigureAwait(false);
-                if (historyMessages == null)
-                    return;
+            //// MEMO : 处理历史消息记录
+            //async void RunAction(SetConfig config)
+            //{
+            //    if (config.TargetType != BotConfigTargetType.Group)
+            //        return;
 
-                var processedMessageIds = config.ProcessedMessageIds;
-                historyMessages.Where(historyMessage => historyMessage.Sender.UserId != PublicVar.BotId && historyMessage.SubType == SubType.Normal && !processedMessageIds.Contains(historyMessage.MessageId))
-                    .ForEach(historyMessage =>
-                    {
-                        lock (_messageLock)
-                        {
-                            OnGroupMessage(new GroupMessage(historyMessage));
-                        }
-                    });
-            }
+            //    var historyMessages = await cqApi.GetHistoryGroupMessagesAsync(config.TargetId).ConfigureAwait(false);
+            //    if (historyMessages == null)
+            //        return;
+
+            //    var processedMessageIds = config.ProcessedMessageIds;
+            //    historyMessages.Where(historyMessage => historyMessage.Sender.UserId != PublicVar.BotId && historyMessage.SubType == SubType.Normal && !processedMessageIds.Contains(historyMessage.MessageId))
+            //        .ForEach(historyMessage =>
+            //        {
+            //            lock (_messageLock)
+            //            {
+            //                OnGroupMessage(new GroupMessage(historyMessage));
+            //            }
+            //        });
+            //}
+
+            #endregion 处理历史记录
         };
-        cqApi.ClientDisconnected += (o, data) =>
+        botServer.ClientDisconnected += (o, data) =>
         {
-            AddRunLog(new RunLog_SystemWarning("API 连接断开!!"));
+            AddRunLog(new RunLog_SystemWarning("SERVER 连接断开!!"));
         };
-        cqApi.OnGetGroupMessage += (o, groupMessage) =>
-        {
-            YameiLogExtensions.WriteLog(
-                LogType.Quest,
-                $"不应该发生的分支-{groupMessage.Message}");
-        };
-        cqApi.OnSendMessageError += (o, clientReceiveData) =>
+        botServer.OnSendMessageError += (o, clientReceiveData) =>
         {
             var dateNow = DateTime.Now;
             if (clientReceiveData.Wording == "send group message failed: blocked by server")
@@ -93,28 +93,11 @@ partial class MainWindowViewModel
             }
         };
 
-        cqApi.Start();
-        return Task.CompletedTask;
-    }
-
-    private void InitEvent()
-    {
-        CqEvent = new CQEvent();
-        var cqEvent = CqEvent;
-        AddRunLog(new RunLog_SystemInfo("EVENT 开始监听"));
-        cqEvent.ClientConnected += (o, args) =>
-        {
-            AddRunLog(new RunLog_SystemInfo("EVENT 连接成功"));
-        };
-        cqEvent.ClientDisconnected += (o, data) =>
-        {
-            AddRunLog(new RunLog_SystemWarning("EVENT 连接断开!!"));
-        };
-        cqEvent.OnGroupPoke += (o, groupPoke) =>
+        botServer.OnGroupPoke += (o, groupPoke) =>
         {
             AddRunLog(new RunLog_GroupPoke(groupPoke));
         };
-        cqEvent.OnGroupRevoke += (o, groupRevokeMessage) =>
+        botServer.OnGroupRevoke += (o, groupRevokeMessage) =>
         {
             AddRunLog(new RunLog_GroupRevokeMessage(groupRevokeMessage));
 
@@ -126,9 +109,9 @@ partial class MainWindowViewModel
                 void RunAction(SetConfig config) => ProcessRevokeGroupMessage.RepeatRevokeMessageAsync(groupRevokeMessage);
             }
         };
-        cqEvent.OnGroupMessage += (o, message) => OnGroupMessage(message);
-        cqEvent.OnPrivateMessage += (o, message) => OnPrivateMessage(message);
-        cqEvent.Start();
+        botServer.OnGroupMessage += (o, message) => OnGroupMessage(message);
+        botServer.OnPrivateMessage += (o, message) => OnPrivateMessage(message);
+        botServer.Start();
     }
 
     private void OnPrivateMessage(PrivateMessage privateMessage)
@@ -162,7 +145,7 @@ partial class MainWindowViewModel
             void CustomGroupAlarm() => ProcessMessage.CustomPrivateAlarmAsync(privateMessage);
         });
 
-        if (PublicVar.AdminIds.Contains(userId))
+        if (BotExtensions.IsAdmin(userId))
         {
             StartTaskList(taskList, AdminCommand);
             void AdminCommand() => ProcessPrivateMessage.AdminCommandAsync(privateMessage);

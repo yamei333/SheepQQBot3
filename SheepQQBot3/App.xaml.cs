@@ -4,7 +4,6 @@ using System.Windows;
 using System.Windows.Threading;
 using CommonLibrary;
 using SheepQQBot3.Extensions;
-using SheepQQBot3.View;
 
 namespace SheepQQBot3;
 
@@ -19,7 +18,6 @@ public partial class App : Application
     {
         var args = Environment.GetCommandLineArgs();
 
-        BotExtensions.KillGocqexe();
         BotExtensions.KillBarkexe();
 
         PublicVar.IsDebug = args.Contains("-debug");
