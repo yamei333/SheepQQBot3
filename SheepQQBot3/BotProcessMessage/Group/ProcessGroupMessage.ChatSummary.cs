@@ -41,8 +41,9 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 群聊总结最后一次执行时间
     /// </summary>
-    private static DateTime chatSummaryRequestLastTime = DateTime.MinValue;
+    private static DateTime _chatSummaryRequestLastTime = DateTime.MinValue;
 
+    private static string _lastMessage;
     //private class ChatSummaryMessage
     //{
     //    public ChatSummaryMessage(long timeStamp, string message)
@@ -75,6 +76,11 @@ public static partial class ProcessGroupMessage
             if (message.StartsWith("#") || message.EndsWith("色图"))
                 return true;
 
+            // MEMO : 直接衔接的复读消息不添加
+            if (_lastMessage == message)
+                return true;
+
+            _lastMessage = message;
             // MEMO : 将群聊录入数据库
             lock (BotDb.SyncLock)
             {
@@ -95,13 +101,13 @@ public static partial class ProcessGroupMessage
                 return false;
 
             var dateNow = DateTime.Now;
-            if (!BotExtensions.IsAdmin(senderId) && (dateNow - chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
+            if (!BotExtensions.IsAdmin(senderId) && (dateNow - _chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
             {
                 await BotServer.SendGroupMessageAsync(groupId, "请求统计CD中, 过一会再试吧!..").ConfigureAwait(false);
                 return true;
             }
 
-            chatSummaryRequestLastTime = dateNow;
+            _chatSummaryRequestLastTime = dateNow;
             var summaryType = message.ToUpper()[4..];
             var summaryWords = new Dictionary<string, int>();
             var wordCloudWidth = 1000;
