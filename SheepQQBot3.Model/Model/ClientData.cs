@@ -6,9 +6,6 @@ namespace SheepQQBot3.Model;
 
 public class ClientData
 {
-    [JsonPropertyName("group")]
-    public bool Group { get; set; }
-
     [JsonPropertyName("group_id")]
     public long GroupId { get; set; }
 
@@ -27,8 +24,8 @@ public class ClientData
     [JsonPropertyName("raw_message")]
     public string RawMessage { get; set; }
 
-    [JsonPropertyName("read_id")]
-    public int ReadId { get; set; }
+    [JsonPropertyName("real_id")]
+    public string RealId { get; set; }
 
     [JsonIgnore]
     public DateTime DateTime => Time.ToDateTime();

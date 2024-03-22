@@ -5,8 +5,6 @@ namespace SheepQQBot3.BotService;
 
 public static partial class WebApiProcess
 {
-    private static int _postNum = 0;
-
     private static WebServer _webServer;
 
     static WebApiProcess()
@@ -18,7 +16,7 @@ public static partial class WebApiProcess
     {
         _webServer = new WebServer();
 
-        AddRoute_DGPDailyNote();
+        //AddRoute_DGPDailyNote();
         AddRoute_UpdateSteamMarketStatus();
 
         _webServer.Start();

@@ -18,7 +18,7 @@ namespace SheepQQBot3.Extensions;
 public static class ConfigExtensions
 {
     public static readonly string ConfigPath = "config.json";
-    private static object _syncLock = new object();
+    private static readonly object _syncLock = new();
 
     /// <summary>
     /// 读取配置
@@ -59,7 +59,7 @@ public static class ConfigExtensions
 
             var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText, new JsonSerializerOptions
             {
-                IncludeFields = true
+                IncludeFields = true,
             });
             var defaultBotFunctions = SetConfig.DefaultBotFunctions;
             botConfig.SetConfigs.Values.ForEach(each =>

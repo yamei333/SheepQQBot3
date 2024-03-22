@@ -1,4 +1,5 @@
-﻿using CommonLibrary;
+﻿using System.Text.Json;
+using CommonLibrary;
 using JiebaNet.Analyser;
 using JiebaNet.Segmenter.PosSeg;
 using SheepQQBot3.Model;
@@ -19,6 +20,9 @@ public class MessageUtilTest
     [TestMethod]
     public void NormalTest()
     {
+        var jsonInfo = "{\"self_id\":205552607,\"user_id\":381559116,\"time\":1709883310,\"message_id\":-2147483512,\"real_id\":\"7343892892256555542\",\"message_type\":\"group\",\"sender\":{\"user_id\":381559116,\"nickname\":\"凡\",\"card\":\"ruojiji2\",\"role\":\"owner\"},\"raw_message\":\"女的走了你工作量翻倍吗\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"女的走了你工作量翻倍吗\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":414774779}";
+        var zap = JsonSerializer.Deserialize<ClientData>(jsonInfo);
+
         #region Test
 
         //var jsonData = JsonSerializer.Serialize(new SendData("send_group_msg", new ParamData

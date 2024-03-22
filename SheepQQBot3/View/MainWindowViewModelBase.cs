@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Api;
 
 namespace SheepQQBot3.View;
 
@@ -15,7 +14,8 @@ public abstract class MainWindowViewModelBase : NotifyPropertyChangedBase
     /// </summary>
     public SetConfig SelectedSetConfig => _mainVm.SelectedSetConfig;
 
+    /// <summary>
+    /// Bot配置
+    /// </summary>
     public Dictionary<Guid, SetConfig> SetConfigs => _mainVm.SetConfigs;
-
-    public CQAPI Api => _mainVm.CqApi;
 }

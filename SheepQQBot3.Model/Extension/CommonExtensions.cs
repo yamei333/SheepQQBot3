@@ -7,6 +7,7 @@ using System.Text.RegularExpressions;
 using System.Threading;
 using Masuit.Tools;
 using MessagePack;
+using SheepQQBot3.Enums;
 
 namespace System;
 
@@ -184,11 +185,19 @@ public static class CommonExtensions
     //    }
     //}
 
-    public static string GetPath(string directoryName, string fileName)
+    public static string GetPath(string directoryName, string fileName, GetPathType pathType)
     {
         var appPath = Environment.CurrentDirectory;
-        return $"file:///{appPath.Replace(@"\", "/")}"
-            + $"{(string.IsNullOrEmpty(directoryName) ? string.Empty : $"/{directoryName}")}/{fileName}";
+        switch (pathType)
+        {
+            case GetPathType.Normal:
+                return Path.Combine(appPath, directoryName, fileName);
+            case GetPathType.CQCodePath:
+                return $"file:///{appPath.Replace(@"\", "/")}"
+                    + $"{(string.IsNullOrEmpty(directoryName) ? string.Empty : $"/{directoryName}")}/{fileName}";
+            default:
+                throw new ArgumentOutOfRangeException(nameof(pathType), pathType, null);
+        }
     }
 
     public static void CreatePath(string pathName)

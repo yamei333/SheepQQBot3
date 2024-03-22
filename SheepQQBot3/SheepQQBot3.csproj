@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.12.1.1</Version>
+    <Version>0.13.2.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>disable</Nullable>
@@ -68,14 +68,13 @@
 
   <ItemGroup>
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="1.1.0" />
-    <PackageReference Include="Masuit.Tools.Net" Version="2.6.8.4" />
+    <PackageReference Include="Masuit.Tools.Net" Version="2.6.9.7" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.Api\SheepQQBot3.SDK.Api.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Event.csproj" />
+    <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.WebApi\SheepQQBot3.SDK.WebApi.csproj" />
   </ItemGroup>
 

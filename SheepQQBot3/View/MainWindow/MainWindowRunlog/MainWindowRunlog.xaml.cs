@@ -32,7 +32,7 @@ public partial class MainWindowRunlog : UserControl
     private void RunLog_OnRepeat(object sender, RoutedEventArgs e)
     {
         var selectedRunLog = _vm.SelectedRunLog;
-        _vm.Api.SendGroupMessageAsync(long.Parse(selectedRunLog.GroupId), selectedRunLog.Content, _vm.SetConfigs);
+        PublicVar.BotServer.SendGroupMessageAsync(long.Parse(selectedRunLog.GroupId), selectedRunLog.Content, _vm.SetConfigs);
     }
 
     private void RunLogMessageText_OnGotFocus(object sender, RoutedEventArgs e)

@@ -48,7 +48,7 @@ public class SetConfig
         BotConfigTargetType.Common => QQExtensions.GetQQImage(int.Parse(ConfigurationManager.AppSettings["selfId"])),
         BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
         BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
-        _ => QQExtensions.GetQQImage(10000)
+        _ => QQExtensions.GetQQImage(10000),
     };
 
     /// <summary>

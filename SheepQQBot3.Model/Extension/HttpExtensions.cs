@@ -5,9 +5,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
 using CommonLibrary;
-using Masuit.Tools.Media;
 using SixLabors.ImageSharp;
-using Yamei.Common;
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -115,7 +113,7 @@ public static class HttpExtensions
     /// http下载
     /// </summary>
     public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
-        string url, string path, bool needResize, bool checkOnly = false)
+        string url, string path, bool checkOnly = false)
     {
         if (string.IsNullOrEmpty(url))
             return (false, string.Empty);
@@ -129,7 +127,7 @@ public static class HttpExtensions
         {
             "image/jpeg" => "jpg",
             "image/gif" => "gif",
-            _ => "png"
+            _ => "png",
         };
 
         CommonExtensions.CreatePath(path);
@@ -137,25 +135,15 @@ public static class HttpExtensions
         {
             var stream = await response.Content.ReadAsStreamAsync();
             var image = await Image.LoadAsync(stream);
-            if (needResize)
+            switch (fileExtend)
             {
-                await image.ResizeImage(image.Width + GetRandom(), image.Height + GetRandom())
-                    .SaveAsPngAsync($"{path}/{tempFileName}.png");
+                case "gif":
+                    await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
+                    break;
+                default:
+                    await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                    break;
             }
-            else
-            {
-                switch (fileExtend)
-                {
-                    case "gif":
-                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
-                        break;
-                    default:
-                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
-                        break;
-                }
-            }
-
-            int GetRandom() => new[] { -1, -2, -3, 0, 1, 2, 3 }.Random();
         }
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");

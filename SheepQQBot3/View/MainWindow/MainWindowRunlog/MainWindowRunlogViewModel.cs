@@ -99,14 +99,13 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
                 result.Add(new RunLogMessage($"　　-目标: {runLog.TargetId}"));
                 break;
             case LogMessageType.BlockedByServer:
-                result.Add(new RunLogMessage("来源: gocq"));
+                result.Add(new RunLogMessage("来源: QQBotService"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();
         }
 
         result.Add(new RunLogMessage($"内容: {runLog.Content}"));
-
         return result;
     }
 }

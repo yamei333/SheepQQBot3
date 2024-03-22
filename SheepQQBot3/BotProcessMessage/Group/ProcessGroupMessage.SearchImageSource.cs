@@ -38,7 +38,7 @@ public static partial class ProcessGroupMessage
         if (string.IsNullOrEmpty(url))
             return false;
 
-        await Api.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);
+        await BotServer.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SauceNaoResponse>(
             $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
             $"&db=999&output_type=2&url={url}").ConfigureAwait(false);
@@ -52,7 +52,7 @@ public static partial class ProcessGroupMessage
             var result = results.FirstOrDefault(each => each.Data.ExtUrls != null);
             if (result == null)
             {
-                await Api.SendGroupMessageAsync(groupId, "没有包含链接信息的图源!").ConfigureAwait(false);
+                await BotServer.SendGroupMessageAsync(groupId, "没有包含链接信息的图源!").ConfigureAwait(false);
                 return false;
             }
 
@@ -63,7 +63,7 @@ public static partial class ProcessGroupMessage
             {
                 if (header.Hidden == 1)
                 {
-                    await Api.SendGroupMessageAsync(groupId,
+                    await BotServer.SendGroupMessageAsync(groupId,
                         "[缩略图比较和谐,不发送了]" +
                         //$"{ENTER}相似度: {similarity:0.00}%" +
                         $"{ENTER}来源: {result.Data.ExtUrls.First()}")
@@ -72,7 +72,7 @@ public static partial class ProcessGroupMessage
                 }
                 else
                 {
-                    await Api.SendGroupMessageAsync(groupId,
+                    await BotServer.SendGroupMessageAsync(groupId,
                         CQCode.Image(header.SmallImageUrl) +
                         //$"{ENTER}相似度: {similarity:0.00}%" +
                         $"{ENTER}来源: {result.Data.ExtUrls.First()}")
@@ -83,7 +83,7 @@ public static partial class ProcessGroupMessage
             else
             {
                 // MEMO : 相似度<70
-                await Api.SendGroupMessageAsync(groupId, "找不到相似的图片!").ConfigureAwait(false);
+                await BotServer.SendGroupMessageAsync(groupId, "找不到相似的图片!").ConfigureAwait(false);
                 //$"{ENTER}查看全部结果: https://saucenao.com/search.php?url={url}");
             }
 

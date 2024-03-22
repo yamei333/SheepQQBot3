@@ -112,12 +112,12 @@ public static partial class ProcessMessage
                                     const string barkKeyError = "BarkKey未正确配置, 无法使用[-bark]!";
                                     if (isGroup)
                                     {
-                                        await Api.SendGroupMessageAsync(groupId.GetValueOrDefault(),
+                                        await BotServer.SendGroupMessageAsync(groupId.GetValueOrDefault(),
                                             $"{CQCode.At(targetId)}{barkKeyError}").ConfigureAwait(false);
                                     }
                                     else
                                     {
-                                        await Api.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
+                                        await BotServer.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
                                     }
 
                                     return true;
@@ -247,12 +247,12 @@ public static partial class ProcessMessage
 
                 if (isGroup)
                 {
-                    await Api.SendGroupMessageAsync(groupId.GetValueOrDefault(),
+                    await BotServer.SendGroupMessageAsync(groupId.GetValueOrDefault(),
                         $"{(isNoAt ? string.Empty : $"{CQCode.At(targetId)}{ENTER}")}{sendMessage}").ConfigureAwait(false);
                 }
                 else
                 {
-                    await Api.SendPrivateMessageAsync(targetId, groupId, $"{sendMessage}").ConfigureAwait(false);
+                    await BotServer.SendPrivateMessageAsync(targetId, groupId, $"{sendMessage}").ConfigureAwait(false);
                 }
             }
 

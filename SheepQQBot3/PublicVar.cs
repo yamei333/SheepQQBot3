@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Api;
+using SheepQQBot3.SDK.Event;
 using SheepQQBot3.View;
 
 namespace SheepQQBot3;
@@ -89,12 +89,10 @@ public static class PublicVar
     public static MainWindowViewModel Vm { get; set; }
 
     /// <summary>
-    /// <see cref="CQAPI"/>
+    /// <see cref="SDK.Event.BotServer"/>
     /// </summary>
-    public static CQAPI Api => Vm.CqApi;
+    public static BotServer BotServer => Vm.BotServer;
 
-    public static Process Gocq;
-    public static GocqWindow GocqWindow;
     public static Process Bark;
     public static BarkWindow BarkWindow;
 

@@ -12,6 +12,10 @@ namespace CommonLibrary
 
         private static readonly TextRankExtractor _textRankExtractor = new();
 
+        static SegmenterExtensions()
+        {
+        }
+
         public static IEnumerable<string> SegmenterCut(this string cutText)
         {
             return _jiebaSegmenter.Cut(cutText);
