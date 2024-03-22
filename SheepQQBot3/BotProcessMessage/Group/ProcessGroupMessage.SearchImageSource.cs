@@ -39,6 +39,14 @@ public static partial class ProcessGroupMessage
             return false;
 
         await BotServer.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);
+        // MEMO : 调试代码
+        //var resp = await HttpExtensions.HttpGetAsync($"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
+        //    $"&db=999&output_type=2&url={url}").ConfigureAwait(false);
+
+        //var zap = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //var sazap = JsonSerializer.Deserialize<SauceNaoResponse>(zap);
+        //;
+
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SauceNaoResponse>(
             $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
             $"&db=999&output_type=2&url={url}").ConfigureAwait(false);
@@ -58,7 +66,7 @@ public static partial class ProcessGroupMessage
 
             //var result = sauceNaoRequest.Results.First();
             var header = result.Header;
-            var similarity = header.Similarity;
+            var similarity = double.Parse(header.Similarity);
             if (similarity >= 70)
             {
                 if (header.Hidden == 1)

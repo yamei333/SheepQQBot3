@@ -18,10 +18,10 @@ public class SauceNaoResponse
 public class SauceNaoHeader
 {
     [JsonPropertyName("user_id")]
-    public int UserId { get; set; }
+    public string UserId { get; set; }
 
     [JsonPropertyName("account_type")]
-    public int AccountType { get; set; }
+    public string AccountType { get; set; }
 
     [JsonPropertyName("short_limit")]
     public string ShortLimit { get; set; }
@@ -48,7 +48,7 @@ public class SauceNaoHeader
     public int Status { get; set; }
 
     [JsonPropertyName("results_requested")]
-    public int ResultsRequested { get; set; }
+    public string ResultsRequested { get; set; }
 
     [JsonPropertyName("search_depth")]
     public string SearchDepth { get; set; }
@@ -81,7 +81,7 @@ public class SauceNaoResult
 public class SauceNaoResultHeader
 {
     [JsonPropertyName("similarity")]
-    public double Similarity { get; set; }
+    public string Similarity { get; set; }
 
     [JsonPropertyName("thumbnail")]
     public string SmallImageUrl { get; set; }
