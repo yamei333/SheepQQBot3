@@ -22,7 +22,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api.Connected)
+                if (BotServer?.Connected == true)
                 {
                     var dateNowSeconds = DateTime.Now.GetTotalSeconds();
                     var lastUpdateSteamMarketStatusSeconds = WebApiProcess.LastUpdateSteamMarketStatusDate.GetTotalSeconds();

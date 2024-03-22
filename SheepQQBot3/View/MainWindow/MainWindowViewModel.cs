@@ -8,7 +8,6 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.SDK.Api;
 using SheepQQBot3.SDK.Event;
 
 namespace SheepQQBot3.View;
@@ -24,22 +23,16 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     public bool IsLoadComplete { get; set; }
 
     /// <summary>
-    /// 监听API用 <see cref="CQAPI"/>
+    /// 监听消息用 <see cref="SDK.Event.BotServer"/>
     /// </summary>
-    public CQAPI CqApi { get; set; }
-
-    /// <summary>
-    /// 监听Event用 <see cref="CQEvent"/>
-    /// </summary>
-    public CQEvent CqEvent { get; set; }
+    public BotServer BotServer { get; set; }
 
     /// <summary>
     /// 释放资源
     /// </summary>
     public void Dispose()
     {
-        CqApi?.Dispose();
-        CqEvent?.Dispose();
+        BotServer?.Dispose();
     }
 
     /// <summary>
@@ -58,8 +51,9 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
 
 #if (!debug)
-        InitApiAsync().ConfigureAwait(false);
-        InitEvent();
+        // MEMO : 0.13.0.0 弃用
+        //InitApiAsync().ConfigureAwait(false);
+        InitServer();
         //InitWcfService();
         WebApiProcess.InitWebApi();
         InitBotFunctions();

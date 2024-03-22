@@ -18,8 +18,6 @@ public class PrivateMessage
 
     public string Message { get; set; }
 
-    public string RawMessage { get; set; }
-
     public int MessageId { get; set; }
 
     public bool IsFriend { get; set; }
@@ -35,7 +33,6 @@ public class PrivateMessage
         UserId = receiveData.UserId;
         Font = receiveData.Font;
         Message = receiveData.Message;
-        RawMessage = receiveData.RawMessage;
         MessageId = receiveData.MessageId;
         IsFriend = receiveData.SubType == SubType.Friend;
         Sender = receiveData.Sender;
@@ -45,7 +42,6 @@ public class PrivateMessage
     {
         DateTime = clientData.DateTime;
         Message = clientData.Message;
-        RawMessage = clientData.RawMessage;
         MessageId = clientData.MessageId;
         Sender = clientData.Sender;
     }
@@ -59,7 +55,6 @@ public class PrivateMessage
         UserId = historyMessage.UserId;
         Font = historyMessage.Font;
         Message = historyMessage.Message;
-        RawMessage = historyMessage.RawMessage;
         MessageId = historyMessage.MessageId;
         Sender = historyMessage.Sender;
     }

@@ -18,7 +18,7 @@ public static class MessageUtil
     private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
 
     /// <summary>
-    /// 将消息处理为支持gocq发送的消息
+    /// 将消息处理为CQ码消息
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>

@@ -4,7 +4,7 @@ using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Event;
 
-public partial class CQEvent
+public partial class BotServer
 {
     /// <summary>
     ///
@@ -15,6 +15,11 @@ public partial class CQEvent
     ///
     /// </summary>
     public event EventHandler<DisconnectionEventArgs> ClientDisconnected;
+
+    /// <summary>
+    /// 收到发送消息失败事件
+    /// </summary>
+    public event EventHandler<ClientReceiveData> OnSendMessageError;
 
     public event EventHandler<GroupMessage> OnGroupMessage;
 

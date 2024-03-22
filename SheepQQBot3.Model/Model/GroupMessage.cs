@@ -19,8 +19,6 @@ public class GroupMessage
 
     public string Message { get; set; }
 
-    public string RawMessage { get; set; }
-
     public int MessageId { get; set; }
 
     public Sender Sender { get; set; }
@@ -36,7 +34,6 @@ public class GroupMessage
         Font = receiveData.Font;
         GroupId = receiveData.GroupId;
         Message = receiveData.Message;
-        RawMessage = receiveData.RawMessage;
         MessageId = receiveData.MessageId;
         Sender = receiveData.Sender;
     }
@@ -46,7 +43,6 @@ public class GroupMessage
         DateTime = clientData.DateTime;
         GroupId = clientData.GroupId;
         Message = clientData.Message;
-        RawMessage = clientData.RawMessage;
         MessageId = clientData.MessageId;
         Sender = clientData.Sender;
     }
@@ -62,7 +58,6 @@ public class GroupMessage
         Font = historyMessage.Font;
         GroupId = historyMessage.GroupId;
         Message = historyMessage.Message;
-        RawMessage = historyMessage.RawMessage;
         MessageId = historyMessage.MessageId;
         Sender = historyMessage.Sender;
     }

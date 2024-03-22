@@ -27,7 +27,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (Api.Connected)
+                if (BotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     Vm.SetConfigs?.Values
@@ -104,11 +104,11 @@ public static partial class TaskProcess
         switch (setConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await Api.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await Api.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
                 break;
             case BotConfigTargetType.Common:

@@ -5,6 +5,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonLibrary;
 using Masuit.Tools;
+using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -45,7 +46,7 @@ public static partial class ProcessGroupMessage
     {
         // MEMO : 非管理员/投稿者
         var targetId = groupMessage.Sender.UserId;
-        if (!AdminIds.Contains(targetId) && !alarmAideSubmitMembers.Contains(targetId))
+        if (!BotExtensions.IsAdmin(targetId) && !alarmAideSubmitMembers.Contains(targetId))
             return false;
 
         var groupId = groupMessage.GroupId;
@@ -59,7 +60,7 @@ public static partial class ProcessGroupMessage
         var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
         if (alarmAideConfig == null)
         {
-            await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
+            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
             return false;
         }
 
@@ -74,13 +75,13 @@ public static partial class ProcessGroupMessage
                 var picUrl = match.Groups[1].Value;
                 var replaceContent = match.Groups[0].Value;
                 var (isSuccessed, fileName) = HttpExtensions
-                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
+                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
                     .Result;
                 if (isSuccessed)
                 {
                     alarmMessage = alarmMessage.Replace(
                         replaceContent,
-                        CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName));
+                        CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName, GetPathType.CQCodePath));
                 }
                 else
                 {
@@ -99,7 +100,7 @@ public static partial class ProcessGroupMessage
             if (alarmTexts.Values.Any(each => each == alarmMessage))
             {
                 // MEMO : 已存在则不添加, 发送反馈
-                await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!");
+                await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!");
                 return false;
             }
             else
@@ -107,7 +108,7 @@ public static partial class ProcessGroupMessage
                 // MEMO : 添加闹钟助手内容
                 alarmTexts.TryAdd(alarmTexts.GetSequence(), alarmMessage);
                 // MEMO : 发送反馈
-                await Api.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
+                await BotServer.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
                 {
                     new(groupMessage.MessageId),
                     new(PublicVar.BOT_NAME, PublicVar.BotId, resendAlarmMessage),
@@ -119,7 +120,7 @@ public static partial class ProcessGroupMessage
         }
         catch (Exception)
         {
-            await Api.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!");
+            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!");
             YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
             return false;
         }

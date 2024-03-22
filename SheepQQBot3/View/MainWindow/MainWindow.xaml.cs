@@ -75,13 +75,6 @@ public partial class MainWindow : Window
     {
         this.Left -= int.MaxValue;
         this.Visibility = Visibility.Collapsed;
-        // MEMO : Gocq
-        PublicVar.GocqWindow = new GocqWindow
-        {
-            Visibility = Visibility.Collapsed,
-            WindowStyle = WindowStyle.None
-        };
-        PublicVar.GocqWindow.Show();
         // MEMO : Bark
         PublicVar.BarkWindow = new BarkWindow
         {
@@ -277,23 +270,12 @@ public partial class MainWindow : Window
 
     private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
     {
-        // MEMO : 结束时不再关闭Gocq, 以处理历史消息
-        // MEMO : debug时还是关闭(为了保持gocq进程关闭)
-        if (PublicVar.IsDebug)
-            BotExtensions.KillGocqexe();
-
         BotExtensions.KillBarkexe();
         Application.Current.Shutdown();
     }
 
     private void NotifyIcon_OnShowMainWindow(object sender, RoutedEventArgs e)
         => OnNotifyIconDoubleClick(sender, e);
-
-    private void NotifyIcon_OnShowGocqWindow(object sender, RoutedEventArgs e)
-    {
-        PublicVar.GocqWindow.Visibility = Visibility.Visible;
-        PublicVar.GocqWindow.Activate();
-    }
 
     private void NotifyIcon_OnShowBarkWindow(object sender, RoutedEventArgs e)
     {

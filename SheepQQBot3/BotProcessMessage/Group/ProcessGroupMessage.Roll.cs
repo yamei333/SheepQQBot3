@@ -1,7 +1,6 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using static SheepQQBot3.PublicVar;
 
@@ -52,7 +51,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(targetId, messageId)}命令格式有误!")
+            await BotServer.SendGroupMessageAsync(groupId, GetMessage_CommandTypeError(targetId, messageId))
                 .ConfigureAwait(false);
         }
 
@@ -62,7 +61,7 @@ public static partial class ProcessGroupMessage
 
         Task SendRollResult(int maxRollNumber)
         {
-            return Api.SendGroupMessageAsync(groupId,
+            return BotServer.SendGroupMessageAsync(groupId,
                 $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
         }
     }

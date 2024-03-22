@@ -44,11 +44,11 @@ public static partial class ProcessPrivateMessage
                 var ip = await HttpExtensions.GetIPAddressAsync().ConfigureAwait(false);
                 if (string.IsNullOrEmpty(ip))
                 {
-                    await Api.SendPrivateMessageAsync(targetId, groupId, "IP取得失败!").ConfigureAwait(false);
+                    await BotServer.SendPrivateMessageAsync(targetId, groupId, "IP取得失败!").ConfigureAwait(false);
                     return true;
                 }
 
-                await Api.SendPrivateMessageAsync(targetId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(targetId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
                 var hasMessage = string.Empty;
@@ -111,10 +111,10 @@ public static partial class ProcessPrivateMessage
                     hasMessage += ENTER;
                 }
 
-                await Api.SendPrivateMessageAsync(targetId, groupId, hasMessage).ConfigureAwait(true);
+                await BotServer.SendPrivateMessageAsync(targetId, groupId, hasMessage).ConfigureAwait(true);
                 break;
             default:
-                await Api.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!").ConfigureAwait(true);
+                await BotServer.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!").ConfigureAwait(true);
                 return false;
         }
 

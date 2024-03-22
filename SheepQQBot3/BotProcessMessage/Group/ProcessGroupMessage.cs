@@ -1,9 +1,19 @@
 ﻿using System.Globalization;
+using SheepQQBot3.Extensions;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
 
 public static partial class ProcessGroupMessage
 {
+    /// <summary>
+    /// 生成错误消息(命令格式错误)
+    /// </summary>
+    /// <param name="targetId"></param>
+    /// <param name="messageId"></param>
+    /// <returns></returns>
+    private static string GetMessage_CommandTypeError(long targetId, int messageId)
+        => $"{CQCode.Reply(targetId, messageId)}命令格式错误!";
+
     /// <summary>
     /// 取得字符串第1, 2个字符
     /// <para>失败时返回Z</para>

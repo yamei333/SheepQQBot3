@@ -41,13 +41,13 @@ public static partial class ProcessMessage
             var isUpdate = BotConfig.UserConfigs[targetId].ContainsKey(UserConfigType.BarkKey);
             BotConfig.UserConfigs[targetId][UserConfigType.BarkKey] = barkKey;
             ConfigExtensions.SaveConfig();
-            await Api.SendPrivateMessageAsync(targetId, groupId,
+            await BotServer.SendPrivateMessageAsync(targetId, groupId,
                 $"BarkKey已{(isUpdate ? "更新" : "配置")}")
                 .ConfigureAwait(false);
             return true;
         }
 
-        await Api.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!")
+        await BotServer.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!")
             .ConfigureAwait(false);
         // 暂不处理
         return true;
