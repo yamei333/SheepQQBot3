@@ -130,28 +130,28 @@ public static partial class ProcessGroupMessage
                 case "D":
                     // MEMO : 日统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行日聊天记录统计...").ConfigureAwait(false);
-                    CalcWordCloud(414774779, dateNow.AddDays(-1));
+                    CalcWordCloud(groupId, dateNow.AddDays(-1));
                     wordCloudWidth = 1200;
                     wordNums = 150;
                     break;
                 case "W":
                     // MEMO : 周统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行周聊天记录统计...").ConfigureAwait(false);
-                    CalcWordCloud(414774779, dateNow.AddDays(-7));
+                    CalcWordCloud(groupId, dateNow.AddDays(-7));
                     wordCloudWidth = 1500;
                     wordNums = 200;
                     break;
                 case "M":
                     // MEMO : 月统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行月聊天记录统计...(时间比较长)").ConfigureAwait(false);
-                    CalcWordCloud(414774779, dateNow.AddMonths(-1));
+                    CalcWordCloud(groupId, dateNow.AddMonths(-1));
                     wordCloudWidth = 2000;
                     wordNums = 250;
                     break;
                 case "Y":
                     // MEMO : 年统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行年聊天记录统计...(时间比较长)").ConfigureAwait(false);
-                    CalcWordCloud(414774779, dateNow.AddYears(-1));
+                    CalcWordCloud(groupId, dateNow.AddYears(-1));
                     wordCloudWidth = 3000;
                     wordNums = 300;
                     break;

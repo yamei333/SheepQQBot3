@@ -126,7 +126,7 @@ partial class BotServer
             var dateNowStartTimestamp = dateNowStart.ToTimeStamp();
             var dateNowEndTimestamp = dateNowStart.AddDays(1).ToTimeStamp();
             var setuSendHistorys = _botDb.SetuSendHistorys;
-            if (!setuSendHistorys.Any())
+            if (setuSendHistorys == null || !setuSendHistorys.Any())
                 return;
 
             var countInfos = _botDb.SetuSendHistorys
