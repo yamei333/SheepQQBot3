@@ -43,6 +43,7 @@ public partial class BotServer : IDisposable
     /// </summary>
     public BotServer(BotDbContext botDb)
     {
+        _botDb = botDb;
         var address = ConfigurationManager.AppSettings["serverAddress"];
         var port = ConfigurationManager.AppSettings["serverPort"];
         _server = string.IsNullOrEmpty(address)
