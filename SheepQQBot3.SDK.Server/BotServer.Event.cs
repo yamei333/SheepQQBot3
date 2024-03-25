@@ -2,7 +2,7 @@
 using SheepQQBot3.Model;
 using WatsonWebsocket;
 
-namespace SheepQQBot3.SDK.Event;
+namespace SheepQQBot3.SDK.Server;
 
 public partial class BotServer
 {

@@ -13,7 +13,7 @@ using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using WatsonWebsocket;
 
-namespace SheepQQBot3.SDK.Event;
+namespace SheepQQBot3.SDK.Server;
 
 public partial class BotServer : IDisposable
 {

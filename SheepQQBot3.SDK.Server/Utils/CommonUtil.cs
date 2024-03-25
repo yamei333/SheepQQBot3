@@ -3,9 +3,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Threading;
 
-namespace SheepQQBot3.SDK.Event;
+namespace SheepQQBot3.SDK.Server.Utils;
 
 public static class CommonUtil
 {

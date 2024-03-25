@@ -10,14 +10,18 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.SDK.Server.Utils;
 using Yamei.Common;
 using static System.Threading.Tasks.Task;
 using StringExtensions = Masuit.Tools.StringExtensions;
 
 // ReSharper disable AsyncApostle.AsyncAwaitMayBeElidedHighlighting
 
-namespace SheepQQBot3.SDK.Event;
+namespace SheepQQBot3.SDK.Server;
 
+/// <summary>
+/// BotServer 服务端SDK
+/// </summary>
 partial class BotServer
 {
     private static BotDbContext _botDb;

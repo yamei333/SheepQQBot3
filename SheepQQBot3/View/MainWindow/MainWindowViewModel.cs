@@ -8,7 +8,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.SDK.Event;
+using SheepQQBot3.SDK.Server;
 
 namespace SheepQQBot3.View;
 
@@ -23,7 +23,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     public bool IsLoadComplete { get; set; }
 
     /// <summary>
-    /// 监听消息用 <see cref="SDK.Event.BotServer"/>
+    /// 监听消息用 <see cref="SDK.Server.BotServer"/>
     /// </summary>
     public BotServer BotServer { get; set; }
 

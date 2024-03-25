@@ -8,7 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.SDK.Event;
+using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
 
 namespace SheepQQBot3;
@@ -89,7 +89,7 @@ public static class PublicVar
     public static MainWindowViewModel Vm { get; set; }
 
     /// <summary>
-    /// <see cref="SDK.Event.BotServer"/>
+    /// <see cref="SDK.Server.BotServer"/>
     /// </summary>
     public static BotServer BotServer => Vm.BotServer;
 
