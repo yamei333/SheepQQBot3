@@ -51,12 +51,9 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
 
 #if (!debug)
-        // MEMO : 0.13.0.0 弃用
-        //InitApiAsync().ConfigureAwait(false);
         InitServer();
         //InitWcfService();
         WebApiProcess.InitWebApi();
-        InitBotFunctions();
 #endif
     }
 

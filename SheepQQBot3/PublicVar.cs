@@ -26,7 +26,7 @@ public static class PublicVar
     /// <summary>
     /// 随机数产生器
     /// </summary>
-    public static Random Rand = new Random();
+    public static Random Rand = new();
 
     /// <summary>
     /// 是否Debug模式

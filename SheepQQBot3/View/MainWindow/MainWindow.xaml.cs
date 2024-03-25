@@ -36,6 +36,7 @@ public partial class MainWindow : Window
     {
         // MEMO : 界面初始化时读取配置
         ConfigExtensions.LoadConfig();
+        Vm.InitBotFunctions();
         MWindow = this;
 
         // MEMO : 获得节假日配置

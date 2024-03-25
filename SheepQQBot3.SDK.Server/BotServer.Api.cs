@@ -456,15 +456,3 @@ partial class BotServer
         return getFunc(jsonText);
     }
 }
-
-//public class SetuCountInfo
-//{
-//    public long TargetId { get; set; }
-//    public long IsRequestCount { get; set; }
-//    public long IsRequestSuccessedCount { get; set; }
-//    public string IsRequestSuccessedPercent { get; set; }
-//    public long IsGetSuccessedCount { get; set; }
-//    public string IsGetSuccessedPercent { get; set; }
-//    public long IsSearchTagCount { get; set; }
-//    public long IsR18BonusCount { get; set; }
-//}

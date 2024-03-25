@@ -13,7 +13,10 @@ partial class MainWindowViewModel
     /// </summary>
     public CancellationTokenSource CancelToken { get; set; }
 
-    private void InitBotFunctions()
+    /// <summary>
+    /// 初始化Bot任务
+    /// </summary>
+    public void InitBotFunctions()
     {
         var cancelToken = new CancellationTokenSource();
         CancelToken = cancelToken;
