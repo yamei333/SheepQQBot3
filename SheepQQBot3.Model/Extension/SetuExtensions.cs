@@ -271,7 +271,8 @@ public static partial class SetuExtensions
             setuResult);
     }
 
-    private static string ToImageUrl(this string url) => url.Replace(Pximg, PixivDirect);
+    private static string ToImageUrl(this string url)
+        => url.Replace(Pximg, PixivDirect).Replace(PximgRe, PixivDirect);
 
     private static string ToSmallImageUrl(this string url)
     {

@@ -813,30 +813,31 @@ SendSetu:
                 var randomSetuKeyword = targetSetuApiType switch
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
-                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
+                    SetuType.JitsuSelf => GetRandomWeightSetuInfo(isR18,
+                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
                     _ => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu)
+                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
                 };
                 var randomSetu = targetSetuApiType switch
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
-                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
+                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
                     SetuType.JitsuSelf => GetRandomWeightSetuInfo(isR18, SetuType.JitsuSelf),
-                    _ => GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>())
+                    _ => GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>()),
                 };
                 Func<string, Task<SetuInfo>>[] randomSetuDefault =
-                {
+                [
                     SetuExtensions.GetSetu_LoliconAsync,
-                    SetuExtensions.GetSetu_YubanAsync,
                     SetuExtensions.GetSetu_NyanCatdaAsync,
+                    SetuExtensions.GetSetu_YubanAsync,
                     SetuExtensions.GetSetu_JitsuAsync,
                     SetuExtensions.GetSetu_JitsuSelfAsync,
-                };
+                ];
                 var (setuInfo, fileName) = await GetSetu(() => isSearchTag
                         ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
                             ? funcResult.Value(tag)
@@ -909,8 +910,8 @@ SendSetu:
                     //new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
                     //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
 
-                    //new(messageId),
-                    new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
+                    new(messageId),
+                    //new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
                     new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
 
                     // MEMO : LLOneBot转发里面不能用Reply
@@ -973,7 +974,7 @@ SendSetu:
                 {
                     isR18 = true;
                     var randomSetuR18Keyword = GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu);
+                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
                     var randomSetuR18 = GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>());
 
                     var (setuInfoR18, _) = await GetSetu(() => isSearchTag

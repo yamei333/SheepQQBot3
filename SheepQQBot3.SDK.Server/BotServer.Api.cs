@@ -290,7 +290,7 @@ partial class BotServer
             GroupId = groupId.ToString(),
             Messages = messages
                 .Select(each => new GroupForwardMessageElement(each))
-                .ToList()
+                .ToList(),
         }, echo).ConfigureAwait(false);
         callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
     }
