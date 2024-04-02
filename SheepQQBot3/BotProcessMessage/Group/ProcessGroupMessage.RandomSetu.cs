@@ -10,6 +10,7 @@ using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.DbModel.BotDb;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Setu;
 using Yamei.Common;
@@ -910,8 +911,8 @@ SendSetu:
                     //new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
                     //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
 
-                    new(messageId),
-                    //new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
+                    //new(messageId),
+                    new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
                     new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
 
                     // MEMO : LLOneBot转发里面不能用Reply

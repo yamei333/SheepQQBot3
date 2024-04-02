@@ -6,6 +6,7 @@ using System.Diagnostics;
 using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
+using SheepQQBot3.DbModel.JiebaDb;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Server;
@@ -98,6 +99,11 @@ public static class PublicVar
 
     public static ConcurrentDictionary<long, DGPDailyNote> GenshinDailyNote = new();
     public static bool DGPProcessOK = false;
+
+    /// <summary>
+    /// Jieba数据库
+    /// </summary>
+    public static JiebaDbContext JiebaDb = new(new DbContextOptions<JiebaDbContext>());
 
     /// <summary>
     /// Bot数据库

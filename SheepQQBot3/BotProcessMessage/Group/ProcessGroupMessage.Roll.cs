@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using static SheepQQBot3.PublicVar;
 
@@ -51,7 +52,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            await BotServer.SendGroupMessageAsync(groupId, GetMessage_CommandTypeError(targetId, messageId))
+            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(targetId, messageId))
                 .ConfigureAwait(false);
         }
 

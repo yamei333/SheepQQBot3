@@ -1,13 +1,13 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "BotDbContext",
+   "ContextClassName": "JiebaDbContext",
    "ContextNamespace": null,
    "DefaultDacpacSchema": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
    "ModelNamespace": null,
    "OutputContextPath": null,
-   "OutputPath": "DbModel",
+   "OutputPath": "DbModel\/JiebaDb",
    "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "SheepQQBot3",
    "Schemas": null,
@@ -16,19 +16,15 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "BotGroupMessage",
+         "Name": "Idf",
          "ObjectType": 0
       },
       {
-         "Name": "SetuDoushiInfos",
-         "ObjectType": 0
-      },
-      {
-         "Name": "SetuSendHistorys",
+         "Name": "StopWords",
          "ObjectType": 0
       }
    ],
-   "UiHint": "D:\\Code\\C#\\WPF\\SheepSoft\\SheepQQBot3\\SheepQQBot3.db",
+   "UiHint": "D:\\Code\\C#\\WPF\\SheepSoft\\SheepQQBot3\\Jieba.db",
    "UncountableWords": null,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": true,
@@ -46,6 +42,7 @@
    "UseNoObjectFilter": false,
    "UseNodaTime": false,
    "UseNullableReferences": false,
+   "UsePrefixNavigationNaming": false,
    "UseSchemaFolders": false,
    "UseSchemaNamespaces": false,
    "UseSpatial": false,

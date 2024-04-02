@@ -12,7 +12,7 @@ using SheepQQBot3.DbModel;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
-using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
@@ -26,7 +26,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 复读忽略设置
     /// </summary>
-    private const int REPEAT_SKIP = 15;
+    private const int REPEAT_SKIP = 25;
 
     /// <summary>
     /// 群聊总结命令
@@ -108,18 +108,18 @@ public static partial class ProcessGroupMessage
             }
 
             _chatSummaryRequestLastTime = dateNow;
-            var summaryType = message.ToUpper()[4..];
+            var summaryType = message.ToUpper().Substring(4, 1);
             var summaryWords = new Dictionary<string, int>();
             var wordCloudWidth = 1000;
             var wordNums = 100;
 
-            var chatSummaryConfigFilePath = Path.Combine(PATH_WORDCLOUD_CONFIG, $"{groupId}.json");
-            var charSummaryConfig = (ChatSummaryConfig)null;
+            var chatSummaryGroupConfigFilePath = Path.Combine(PATH_WORDCLOUD_CONFIG, $"{groupId}.json");
+            var chatSummaryGroupConfig = (ChatSummaryGroupConfig)null;
             var regNumber = new Regex("[0-9]+");
-            if (File.Exists(chatSummaryConfigFilePath))
+            if (File.Exists(chatSummaryGroupConfigFilePath))
             {
-                var jsonText = await File.ReadAllTextAsync(chatSummaryConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-                charSummaryConfig = JsonSerializer.Deserialize<ChatSummaryConfig>(jsonText, new JsonSerializerOptions
+                var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
+                chatSummaryGroupConfig = JsonSerializer.Deserialize<ChatSummaryGroupConfig>(jsonText, new JsonSerializerOptions
                 {
                     IncludeFields = true,
                 });
@@ -127,6 +127,59 @@ public static partial class ProcessGroupMessage
 
             switch (summaryType)
             {
+                case "B":
+                    if (!BotExtensions.IsAdmin(senderId))
+                    {
+                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
+                        return false;
+                    }
+
+                    var dataMessage = message[5..];
+                    if (string.IsNullOrEmpty(dataMessage))
+                    {
+                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                        return false;
+                    }
+
+                    if (JiebaDb.StopWords.Find(dataMessage) != null)
+                    {
+                        await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
+                        return false;
+                    }
+
+                    if (!chatSummaryGroupConfig.ExcludeWords.Add(dataMessage))
+                    {
+                        await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于群配置").ConfigureAwait(false);
+                        return false;
+                    }
+
+                    File.WriteAllText(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, CommonExtensions.DefaultJsonOptions));
+                    await BotServer.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
+                    return true;
+                case "H":
+                    // MEMO : 小时统计
+                    var hourStr = message[5..];
+                    var hour = 12;
+                    if (!string.IsNullOrEmpty(hourStr))
+                    {
+                        if (!int.TryParse(hourStr, out hour))
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                            return false;
+                        }
+
+                        if (hour is <= 0 or >= 24)
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                            return false;
+                        }
+                    }
+
+                    await BotServer.SendGroupMessageAsync(groupId, $"正在进行{hour}小时聊天记录统计...").ConfigureAwait(false);
+                    CalcWordCloud(groupId, dateNow.AddHours(-hour));
+                    wordCloudWidth = 1200;
+                    wordNums = 150;
+                    break;
                 case "D":
                     // MEMO : 日统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行日聊天记录统计...").ConfigureAwait(false);
@@ -151,12 +204,12 @@ public static partial class ProcessGroupMessage
                 case "Y":
                     // MEMO : 年统计
                     await BotServer.SendGroupMessageAsync(groupId, "正在进行年聊天记录统计...(时间比较长)").ConfigureAwait(false);
-                    CalcWordCloud(groupId, dateNow.AddYears(-1));
+                    CalcWordCloud(414774779, dateNow.AddYears(-1));
                     wordCloudWidth = 3000;
                     wordNums = 300;
                     break;
                 default:
-                    await BotServer.SendGroupMessageAsync(groupId, GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                    await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                     return false;
             }
 
@@ -180,7 +233,7 @@ public static partial class ProcessGroupMessage
                 {
                     var fromDateTimeStamp = fromDate.ToTimeStamp();
                     var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
-                    var processedMessage = new List<string>();
+                    var repeatSkipQueue = new Queue<string>();
                     BotDb.BotGroupMessages
                         .Where(each => each.GroupId == targetGroupId
                             && each.TimeStamp >= fromDateTimeStamp
@@ -192,14 +245,16 @@ public static partial class ProcessGroupMessage
                             if (string.IsNullOrEmpty(historyMessage))
                                 return;
 
-                            var messageCount = processedMessage.Count;
-                            // MEMO : 15句以内复读则忽略
-                            if (processedMessage.Skip(messageCount - REPEAT_SKIP).Any(hisMessage => hisMessage == historyMessage))
+                            // MEMO : REPEAT_SKIP 句以内复读则忽略
+                            if (repeatSkipQueue.Contains(historyMessage))
                                 return;
 
-                            processedMessage.Add(historyMessage);
+                            repeatSkipQueue.Enqueue(historyMessage);
+                            if (repeatSkipQueue.Count > REPEAT_SKIP)
+                                repeatSkipQueue.Dequeue();
+
                             var segmenterResult = historyMessage.ExtractTagsWithWeight_Idf();
-                            var excludeWords = charSummaryConfig?.ExcludeWords;
+                            var excludeWords = chatSummaryGroupConfig?.ExcludeWords;
                             segmenterResult
                                 .Where(wordWeightPair =>
                                 {
@@ -215,26 +270,5 @@ public static partial class ProcessGroupMessage
                 }
             }
         }
-
-        //var regNumber = new Regex(@"\d+");
-        //if (regNumber.IsMatch(contentMessage))
-        //{
-        //    await SendRollResult(int.Parse(contentMessage)).ConfigureAwait(false);
-        //}
-        //else
-        //{
-        //    await Api.SendGroupMessageAsync(groupId, $"{CQCode.Reply(senderId, messageId)}命令格式有误!")
-        //        .ConfigureAwait(false);
-        //}
-
-        //// 无匹配结果,或API超过使用次数限制
-        //// 暂不处理
-        //return true;
-
-        //Task SendRollResult(int maxRollNumber)
-        //{
-        //    return Api.SendGroupMessageAsync(groupId,
-        //        $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
-        //}
     }
 }

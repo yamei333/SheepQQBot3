@@ -149,6 +149,9 @@ partial class MainWindowViewModel
         {
             StartTaskList(taskList, AdminCommand);
             void AdminCommand() => ProcessPrivateMessage.AdminCommandAsync(privateMessage);
+
+            StartTaskList(taskList, ChatSummaryConfig);
+            void ChatSummaryConfig() => ProcessPrivateMessage.ChatSummaryConfigAsync(privateMessage);
         }
 
         Task.WaitAll(taskList.ToArray());

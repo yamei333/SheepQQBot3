@@ -1,7 +1,8 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using SheepQQBot3.DbModel;
 
-namespace SheepQQBot3.DbModel;
+namespace SheepQQBot3.Model.DbModel.BotDb;
 
 public static class BotDbContextExtensions
 {

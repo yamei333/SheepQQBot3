@@ -30,7 +30,8 @@ public static partial class ProcessPrivateMessage
     /// </summary>
     public static async Task<bool> AdminCommandAsync(PrivateMessage privateMessage)
     {
-        var targetId = privateMessage.Sender.UserId;
+        var senderId = privateMessage.Sender.UserId;
+        // MEMO : 通过群进行临时私聊时会有此值
         var groupId = privateMessage.Sender.GroupId;
         var message = privateMessage.Message;
         // MEMO : 命令格式检查
@@ -44,11 +45,11 @@ public static partial class ProcessPrivateMessage
                 var ip = await HttpExtensions.GetIPAddressAsync().ConfigureAwait(false);
                 if (string.IsNullOrEmpty(ip))
                 {
-                    await BotServer.SendPrivateMessageAsync(targetId, groupId, "IP取得失败!").ConfigureAwait(false);
+                    await BotServer.SendPrivateMessageAsync(senderId, groupId, "IP取得失败!").ConfigureAwait(false);
                     return true;
                 }
 
-                await BotServer.SendPrivateMessageAsync(targetId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
                 var hasMessage = string.Empty;
@@ -111,10 +112,10 @@ public static partial class ProcessPrivateMessage
                     hasMessage += ENTER;
                 }
 
-                await BotServer.SendPrivateMessageAsync(targetId, groupId, hasMessage).ConfigureAwait(true);
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
                 break;
             default:
-                await BotServer.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!").ConfigureAwait(true);
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
                 return false;
         }
 

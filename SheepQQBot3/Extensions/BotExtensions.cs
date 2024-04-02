@@ -11,7 +11,7 @@ using Yamei.Common;
 
 namespace SheepQQBot3.Extensions;
 
-public static class BotExtensions
+public static partial class BotExtensions
 {
     /// <summary>
     /// 是否使用中的BotFunction
