@@ -85,11 +85,11 @@ public static partial class ProcessPrivateMessage
                 idfs.Add(new Idf(word, similarIdf.Weight));
                 JiebaDb.SaveChanges();
                 File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_IDF), [$"{word} {similarIdf.Weight}"]);
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"[{word} {similarIdf.Weight}] 已追加").ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Idf[{word} {similarIdf.Weight}]已追加").ConfigureAwait(false);
                 return true;
             case "B":
                 var stopWords = JiebaDb.StopWords;
-                if (string.IsNullOrEmpty(dataMessage) || stopWords.Find(dataMessage) == null)
+                if (string.IsNullOrEmpty(dataMessage))
                 {
                     await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                     return false;
@@ -109,10 +109,16 @@ public static partial class ProcessPrivateMessage
                     stopWord = stopWordDatas[0];
                 }
 
+                if (stopWords.Find(stopWord) != null)
+                {
+                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"已有相同的StopWord[{stopWord}]").ConfigureAwait(false);
+                    return false;
+                }
+
                 JiebaDb.StopWords.Add(new StopWord(stopWord));
                 JiebaDb.SaveChanges();
                 File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_STOPWORDS), [stopWord]);
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"[{stopWord}] 已追加").ConfigureAwait(false);
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"StopWord[{stopWord}]已追加").ConfigureAwait(false);
                 return true;
             default:
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式错误!").ConfigureAwait(false);

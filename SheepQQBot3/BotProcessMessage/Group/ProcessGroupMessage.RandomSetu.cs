@@ -814,13 +814,10 @@ SendSetu:
                 var randomSetuKeyword = targetSetuApiType switch
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
-                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
-                    SetuType.JitsuSelf => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
                     _ => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
+                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu),
                 };
                 var randomSetu = targetSetuApiType switch
                 {

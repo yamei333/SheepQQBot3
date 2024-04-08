@@ -152,8 +152,11 @@ public static partial class SetuExtensions
         {
             case HttpResponseResult.Successed:
                 var setuResponse = httpResponse.Data;
-                if (setuResponse == null || !setuResponse.Data.Any())
+                if (setuResponse == null)
                     return new SetuInfo(SetuType.NyanCatda, SetuResult.ApiError);
+
+                if (setuResponse.Data == null)
+                    return new SetuInfo(SetuType.NyanCatda, SetuResult.NoSearchResult);
 
                 setuData = setuResponse.Data.First();
                 break;

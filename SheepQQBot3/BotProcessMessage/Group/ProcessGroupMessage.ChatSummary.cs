@@ -177,8 +177,8 @@ public static partial class ProcessGroupMessage
 
                     await BotServer.SendGroupMessageAsync(groupId, $"正在进行{hour}小时聊天记录统计...").ConfigureAwait(false);
                     CalcWordCloud(groupId, dateNow.AddHours(-hour));
-                    wordCloudWidth = 1200;
-                    wordNums = 150;
+                    wordCloudWidth = 800;
+                    wordNums = 100;
                     break;
                 case "D":
                     // MEMO : 日统计
