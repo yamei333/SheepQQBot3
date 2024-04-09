@@ -34,13 +34,10 @@ partial class BotServer
     /// <param name="groupId">群号</param>
     /// <param name="message">消息内容</param>
     /// <param name="setConfigs">已设定的消息内容, 用于消息重定义</param>
-    /// <param name="timeout">超时时间</param>
-    /// <param name="callBack">回调</param>
     public async Task SendGroupMessageAsync(
-        long groupId, string message,
-        Dictionary<Guid, SetConfig> setConfigs = null,
-        double timeout = 5,
-        Action<ClientReceiveData> callBack = null)
+        long groupId,
+        string message,
+        Dictionary<Guid, SetConfig> setConfigs = null)
     {
         var messageList = MessageUtil.ProcessCQMessage(message);
 
@@ -78,8 +75,6 @@ partial class BotServer
             GroupId = groupId.ToString(),
             Message = messageList,
         }, echo).ConfigureAwait(false);
-
-        //callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
 
         void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
         {

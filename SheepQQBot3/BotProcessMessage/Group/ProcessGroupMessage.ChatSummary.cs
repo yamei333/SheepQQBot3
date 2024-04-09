@@ -215,11 +215,15 @@ public static partial class ProcessGroupMessage
 
             var wordCloudImage = $"{groupId}.png";
             var maskFilePath = CommonExtensions.GetPath(PATH_WORDCLOUD_CONFIG, wordCloudImage, GetPathType.Normal);
-            summaryWords.OrderByDescending(each => each.Value)
+            var wordCloudWords = summaryWords.OrderByDescending(each => each.Value)
                 .Take(wordNums)
-                .ToDictionary(each => each.Key, each => each.Value)
+                .ToDictionary(each => each.Key, each => each.Value);
+
+            wordCloudWords
                 .GenerateWordCloud(wordCloudWidth, wordCloudWidth,
                     CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
+            File.WriteAllText(Path.Combine(PATH_CACHE_WORDCLOUD, $"{groupId}.txt"), string.Join("\r\n", wordCloudWords.Keys));
+
             await BotServer.SendGroupMessageAsync(groupId,
                 CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.CQCodePath))).ConfigureAwait(false);
             if (IsDebug)
