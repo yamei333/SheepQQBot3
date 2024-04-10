@@ -3,11 +3,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace SheepQQBot3.DbModel.IdfDb;
+namespace SheepQQBot3.DbModel.JiebaDb;
 
-public partial class Idf
+public partial class Dict
 {
     public string Word { get; set; }
 
-    public decimal Weight { get; set; }
+    public int Freq { get; set; }
+
+    public string Tag { get; set; }
+
+    public int IsDefault { get; set; }
 }

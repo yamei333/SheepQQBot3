@@ -1,7 +1,8 @@
-﻿using System;
+﻿using Masuit.Tools;
+using NAudio.Wave;
+using System;
 using System.Threading;
 using System.Threading.Tasks;
-using NAudio.Wave;
 
 namespace Yamei.Common;
 
@@ -47,6 +48,8 @@ public static class YameiExtensions
     public static int ToInt(this bool boolValue) => boolValue ? 1 : 0;
 
     public static bool ToBool(this long value) => value != 0;
+
+    public static bool ToBool(this int value) => value != 0;
 
     /// <summary>
     /// 获取给定日期是本月的第几天和倒数第几天

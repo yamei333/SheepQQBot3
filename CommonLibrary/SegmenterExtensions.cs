@@ -1,16 +1,29 @@
-﻿using System.Collections.Generic;
-using JiebaNet.Analyser;
+﻿using JiebaNet.Analyser;
 using JiebaNet.Segmenter;
+using System.Collections.Generic;
 
 namespace CommonLibrary
 {
     public static class SegmenterExtensions
     {
-        private static readonly JiebaSegmenter _jiebaSegmenter = new();
+        private static readonly JiebaSegmenter _jiebaSegmenter;
 
-        private static readonly TfidfExtractor _tfidfExtractor = new();
+        private static readonly TfidfExtractor _tfidfExtractor;
 
-        private static readonly TextRankExtractor _textRankExtractor = new();
+        private static readonly TextRankExtractor _textRankExtractor;
+
+        static SegmenterExtensions()
+        {
+            _jiebaSegmenter = new JiebaSegmenter();
+            _tfidfExtractor = new TfidfExtractor(_jiebaSegmenter);
+            _textRankExtractor = new TextRankExtractor();
+        }
+
+        /// <summary>
+        /// 添加新词
+        /// </summary>
+        public static void AddWord(string word, int freq = 0, string tag = null)
+            => _jiebaSegmenter.AddWord(word, freq, tag);
 
         public static IEnumerable<string> SegmenterCut(this string cutText)
         {

@@ -1,4 +1,10 @@
-﻿using System;
+﻿using Masuit.Tools;
+using Microsoft.Win32;
+using SheepQQBot3.Enums;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Enums;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -6,12 +12,6 @@ using System.Linq;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Microsoft.Win32;
-using SheepQQBot3.Enums;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Enums;
-using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;

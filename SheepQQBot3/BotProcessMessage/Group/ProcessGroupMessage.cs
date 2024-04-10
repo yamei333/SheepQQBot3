@@ -1,8 +1,8 @@
-﻿using System.Globalization;
+﻿using SheepQQBot3.DbModel.JiebaDb;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Text;
-using SheepQQBot3.DbModel.JiebaDb;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
 
@@ -22,6 +22,11 @@ public static partial class ProcessGroupMessage
     /// stopwords文件名
     /// </summary>
     private const string FILE_STOPWORDS = "stopwords.txt";
+
+    /// <summary>
+    /// dict文件名
+    /// </summary>
+    private const string FILE_DICT = "dict.txt";
 
     static ProcessGroupMessage()
     {
@@ -51,6 +56,22 @@ public static partial class ProcessGroupMessage
                 var line = sr.ReadLine();
                 if (stopWords.Find(line) == null)
                     stopWords.Add(new StopWord(line));
+            }
+
+            jiebaDb.SaveChanges();
+        }
+
+        var dicts = jiebaDb.Dicts;
+        if (!dicts.Any())
+        {
+            var fs = File.OpenRead(Path.Combine(PATH_RESOURCES, FILE_DICT));
+            var sr = new StreamReader(fs, Encoding.UTF8);
+            while (!sr.EndOfStream)
+            {
+                var line = sr.ReadLine();
+                var dictConfig = line!.Split(PublicVar.SPACE);
+                if (dicts.Find(dictConfig[0]) == null)
+                    dicts.Add(new Dict(dictConfig[0], int.Parse(dictConfig[1]), dictConfig[2], true));
             }
 
             jiebaDb.SaveChanges();

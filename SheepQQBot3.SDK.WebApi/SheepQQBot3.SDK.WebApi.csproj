@@ -16,7 +16,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Watson" Version="6.1.6" />
+    <PackageReference Include="Watson" Version="6.1.8" />
   </ItemGroup>
 
 </Project>

@@ -4,7 +4,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 
-namespace Yamei.Common;
+namespace Masuit.Tools;
 
 /// <summary>
 /// <see cref="IEnumerable{T}"/>的扩充方法

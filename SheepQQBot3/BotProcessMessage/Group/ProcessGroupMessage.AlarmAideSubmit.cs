@@ -29,7 +29,7 @@ public static partial class ProcessGroupMessage
 
     private static readonly Regex _regReplaceImage = RegexGenerator.CQCodeReplaceImage();
     private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
-    private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveSubType();
+    private static readonly Regex _regRemoveFileSize = RegexGenerator.CQCodeRemoveFileSize();
 
     /// <summary>
     /// 闹钟助手投稿
@@ -72,8 +72,8 @@ public static partial class ProcessGroupMessage
             var matches = _regReplaceImage.Matches(alarmMessage);
             matches.ForEach(match =>
             {
-                var picUrl = match.Groups[1].Value;
-                var replaceContent = match.Groups[0].Value;
+                var picUrl = match.Groups[2].Value;
+                var replaceContent = match.Groups[1].Value;
                 var (isSuccessed, fileName) = HttpExtensions
                     .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
                     .Result;
@@ -83,14 +83,11 @@ public static partial class ProcessGroupMessage
                         replaceContent,
                         CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName, GetPathType.CQCodePath));
                 }
-                else
-                {
-                    alarmMessage = _regRemoveUrl.Replace(alarmMessage, string.Empty);
-                    alarmMessage = _regRemoveSubType.Replace(alarmMessage, string.Empty);
-                }
 
+                alarmMessage = _regRemoveUrl.Replace(alarmMessage, string.Empty);
+                alarmMessage = _regRemoveFileSize.Replace(alarmMessage, string.Empty);
                 resendAlarmMessage = _regRemoveUrl.Replace(resendAlarmMessage, string.Empty);
-                resendAlarmMessage = _regRemoveSubType.Replace(resendAlarmMessage, string.Empty);
+                resendAlarmMessage = _regRemoveFileSize.Replace(resendAlarmMessage, string.Empty);
             });
         }
 

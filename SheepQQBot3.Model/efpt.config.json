@@ -16,6 +16,10 @@
    "T4TemplatePath": null,
    "Tables": [
       {
+         "Name": "Dict",
+         "ObjectType": 0
+      },
+      {
          "Name": "Idf",
          "ObjectType": 0
       },

@@ -1,9 +1,8 @@
-﻿using System.Collections.Generic;
-using System.Threading.Tasks;
-using Microsoft.VisualBasic.ApplicationServices;
+﻿using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
-using Yamei.Common;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;

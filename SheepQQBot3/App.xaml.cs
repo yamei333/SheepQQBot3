@@ -1,9 +1,9 @@
-﻿using System;
+﻿using CommonLibrary;
+using SheepQQBot3.Extensions;
+using System;
 using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
-using CommonLibrary;
-using SheepQQBot3.Extensions;
 
 namespace SheepQQBot3;
 

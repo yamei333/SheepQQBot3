@@ -1,14 +1,16 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Linq;
-using System.Reflection;
+﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.BotService;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Server;
+using System;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Linq;
+using System.Reflection;
 
 namespace SheepQQBot3.View;
 
@@ -49,6 +51,9 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
 
         InitViewModel();
         AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
+
+        PublicVar.JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
+        AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
 
 #if (!debug)
         InitServer();

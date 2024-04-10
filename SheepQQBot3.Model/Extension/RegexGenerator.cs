@@ -19,14 +19,14 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
     public static partial Regex CQCodeRemoveCQAt();
 
-    [GeneratedRegex(@"(?<=file=).+?image,subType=\d,url=(.+?)(?=[,\]])")]
+    [GeneratedRegex(@"CQ:image,file=(.+?),url=(.+?)(?=[,\]])")]
     public static partial Regex CQCodeReplaceImage();
 
     [GeneratedRegex(@",url=.+?(?=[,\]])")]
     public static partial Regex CQCodeRemoveUrl();
 
-    [GeneratedRegex(@",subType=.+?(?=[,\]])")]
-    public static partial Regex CQCodeRemoveSubType();
+    [GeneratedRegex(@",file_size=\d+")]
+    public static partial Regex CQCodeRemoveFileSize();
 
     [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]
     public static partial Regex HolidayInfo();

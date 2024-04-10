@@ -13,12 +13,27 @@ public partial class JiebaDbContext : DbContext
     {
     }
 
+    public virtual DbSet<Dict> Dicts { get; set; }
+
     public virtual DbSet<Idf> Idfs { get; set; }
 
     public virtual DbSet<StopWord> StopWords { get; set; }
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Dict>(entity =>
+        {
+            entity.HasKey(e => e.Word);
+
+            entity.ToTable("Dict");
+
+            entity.Property(e => e.Word).HasDefaultValue("");
+            entity.Property(e => e.Freq).HasDefaultValue(1);
+            entity.Property(e => e.Tag)
+                .IsRequired()
+                .HasDefaultValue("");
+        });
+
         modelBuilder.Entity<Idf>(entity =>
         {
             entity.HasKey(e => e.Word);
