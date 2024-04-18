@@ -20,5 +20,5 @@ public class SetuData_Jitsu
     public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"来源:PIXIV 画师:{Author} PID:{Pid}";
+    public string SetuInfo => $"来源:[Jitsu]PIXIV 画师:{Author} PID:{Pid}";
 }

@@ -17,5 +17,5 @@ public class SetuData_Rainchan
     public string UserName { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"来源:PIXIV 画师:{UserName} PID:{Id}";
+    public string SetuInfo => $"来源:[Rainchan]PIXIV 画师:{UserName} PID:{Id}";
 }

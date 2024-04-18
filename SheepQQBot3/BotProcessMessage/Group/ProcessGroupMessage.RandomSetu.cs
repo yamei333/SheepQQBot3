@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Enums;
@@ -13,6 +8,11 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.DbModel.BotDb;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Setu;
+using System;
+using System.Collections.Generic;
+using System.IO;
+using System.Linq;
+using System.Threading.Tasks;
 using Yamei.Common;
 using static Masuit.Tools.Systems.EnumExt;
 using static SheepQQBot3.PublicVar;
@@ -473,7 +473,7 @@ public static partial class ProcessGroupMessage
             goto StartSetu;
         }
 
-StartSetu:
+    StartSetu:
         if (_banKeywordList.Contains(tag))
         {
             setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
@@ -807,7 +807,7 @@ StartSetu:
             }
 
             var revertCd = DateTime.MinValue;
-SendSetu:
+        SendSetu:
             try
             {
                 var isR18 = false;
@@ -909,6 +909,7 @@ SendSetu:
                     //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
 
                     //new(messageId),
+                    //new(groupMessage.Sender.NickName, senderId, $"{CQCode.Reply(senderId, messageId)}"),
                     new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
                     new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
 
