@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.BotProcessMessage;
 using SheepQQBot3.BotProcessMessage.Group;
@@ -13,7 +8,11 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Server;
-using Yamei.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SheepQQBot3.View;
 
@@ -37,7 +36,16 @@ partial class MainWindowViewModel
         {
             AddRunLog(new RunLog_SystemInfo("SERVER 连接成功"));
             if (PublicVar.IsDebug)
+            {
                 botServer.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
+
+                //var message = new List<GroupForwardMessage>
+                //{
+                //    new GroupForwardMessage("pm", 173629299, "我没有任何牌面!"),
+                //    new GroupForwardMessage("zstlpmdm", 173629299, "我太ruaji了!"),
+                //};
+                //botServer.SendGroupForwardMessageAsync(15873217, message).ConfigureAwait(false);
+            }
 
             #region 处理历史记录
 

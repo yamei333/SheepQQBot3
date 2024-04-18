@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Extension;
+﻿using SheepQQBot3.Model.Extension;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Setu;
 
