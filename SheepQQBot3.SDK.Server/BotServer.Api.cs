@@ -14,7 +14,6 @@ using System.Threading;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static System.Threading.Tasks.Task;
-using StringExtensions = Masuit.Tools.StringExtensions;
 
 // ReSharper disable AsyncApostle.AsyncAwaitMayBeElidedHighlighting
 
@@ -122,7 +121,7 @@ partial class BotServer
                 return;
 
             var dateNow = DateTime.Now;
-            var dateNowStart = StringExtensions.ToDateTime(dateNow.ToString("yyyy-MM-dd 00:00:00"));
+            var dateNowStart = dateNow.ToString("yyyy-MM-dd 00:00:00").ToDateTime();
             var dateNowStartTimestamp = dateNowStart.ToTimeStamp();
             var dateNowEndTimestamp = dateNowStart.AddDays(1).ToTimeStamp();
             var setuSendHistorys = _botDb.SetuSendHistorys;

@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.UnitTest.Extensions;
+﻿using Masuit.Tools;
+
+namespace SheepQQBot3.UnitTest.Extensions;
 
 [TestClass]
 public class LogExtensionTest

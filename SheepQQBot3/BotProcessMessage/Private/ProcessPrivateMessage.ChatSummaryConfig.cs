@@ -59,162 +59,195 @@ public static partial class ProcessPrivateMessage
         //}
         var summaryType = message.ToUpper().Substring(4, 1);
         var dataMessage = message[5..];
-        switch (summaryType)
+        var sendMessage = string.Empty;
+        var result = await GetResultAsync().ConfigureAwait(false);
+        await BotServer.SendPrivateMessageAsync(senderId, groupId, sendMessage.RemoveEnd(ENTER)).ConfigureAwait(false);
+        return result;
+
+        void AddMessage(string messageStr) => sendMessage += $"{messageStr}{ENTER}";
+
+        async Task<bool> GetResultAsync()
         {
-            // MEMO : 增加词典词(dict)
-            case "D":
-                return await AddDictAsync(dataMessage).ConfigureAwait(false);
-            // MEMO : 增加词权重(idf)
-            case "A":
-                if (!dataMessage.Contains(","))
-                {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-                    return false;
-                }
-
-                var datas = dataMessage.Split(",");
-                var word = datas[0];
-                var idfs = JiebaDb.Idfs;
-                if (idfs.Find(word) != null)
-                {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"已存在idf词[{word}]").ConfigureAwait(false);
-                    return false;
-                }
-
-                var similarWord = datas[1];
-                var similarIdf = idfs.Find(similarWord);
-                if (similarIdf == null)
-                {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"没找到可参考的近似词[{similarWord}]").ConfigureAwait(false);
-                    return false;
-                }
-
-                idfs.Add(new Idf(word, similarIdf.Weight));
-                JiebaDb.SaveChanges();
-                await AddDictAsync(word, false).ConfigureAwait(false);
-                File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_IDF), [$"{word} {similarIdf.Weight}"]);
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Idf[{word} {similarIdf.Weight}]已追加").ConfigureAwait(false);
-                return true;
-            // MEMO : 查询词库
-            case "F":
-                var dictSearchResult = JiebaDb.Dicts.Find(dataMessage);
-                var dictMessage = $"词典: {(dictSearchResult == null 
-                    ? "未找到" 
-                    : $"已包含[{(dictSearchResult.IsDefault.ToBool() ? "默认" : "用户")}]"
-                        + $"{(dictSearchResult.Freq > 0 && !string.IsNullOrEmpty(dictSearchResult.Tag)
-                            ? $"{dictSearchResult.Freq},{dictSearchResult.Tag}"
-                            : string.Empty)}")}";
-                var idfSearchResult = JiebaDb.Idfs.Find(dataMessage);
-                var idfMessage = $"权重: {(idfSearchResult == null ? "未找到" : $"{idfSearchResult.Weight}")}";
-                var stopWordResult = JiebaDb.StopWords.Find(dataMessage);
-                var stopwordMessage = $"停止词: {(stopWordResult == null ? "未找到" : "已包含")}";
-                var searchResultMessage = $"[{dataMessage}]查找结果{ENTER}{dictMessage}{ENTER}{idfMessage}{ENTER}{stopwordMessage}";
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, searchResultMessage).ConfigureAwait(false);
-                return true;
-            // MEMO : 增加停止词(stopwords)
-            case "S":
-                var stopWords = JiebaDb.StopWords;
-                if (string.IsNullOrEmpty(dataMessage))
-                {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-                    return false;
-                }
-
-                var stopWord = dataMessage;
-                if (dataMessage.Contains(","))
-                {
-                    var stopWordDatas = dataMessage.Split(",");
-                    var similarStopWord = stopWordDatas[1];
-                    if (stopWords.Find(similarStopWord) == null)
+            switch (summaryType)
+            {
+                // MEMO : 增加词典词(dict)
+                case "D":
+                    return await AddDictAsync(dataMessage, true, false).ConfigureAwait(false);
+                // MEMO : 增加词权重(idf)
+                case "I":
+                    return await AddIdfAsync(false).ConfigureAwait(false);
+                // MEMO : 增加词权重(idf)(使用近似词增加到Dict)
+                case "A":
+                    return await AddIdfAsync(true).ConfigureAwait(false);
+                // MEMO : 查询词库
+                case "F":
+                    var dictSearchResult = JiebaDb.Dicts.Find(dataMessage);
+                    var dictMessage = $"词典: {(dictSearchResult == null
+                        ? "未找到"
+                        : $"已包含[{(dictSearchResult.IsDefault.ToBool() ? "默认" : "用户")}]"
+                            + $"{(dictSearchResult.Freq > 0 && !string.IsNullOrEmpty(dictSearchResult.Tag)
+                                ? $"{dictSearchResult.Freq},{dictSearchResult.Tag}"
+                                : string.Empty)}")}";
+                    var idfSearchResult = JiebaDb.Idfs.Find(dataMessage);
+                    var idfMessage = $"权重: {(idfSearchResult == null ? "未找到" : $"{idfSearchResult.Weight}")}";
+                    var stopWordResult = JiebaDb.StopWords.Find(dataMessage);
+                    var stopwordMessage = $"停止词: {(stopWordResult == null ? "未找到" : "已包含")}";
+                    AddMessage($"[{dataMessage}]查找结果{ENTER}{dictMessage}{ENTER}{idfMessage}{ENTER}{stopwordMessage}");
+                    return true;
+                // MEMO : 增加停止词(stopwords)
+                case "S":
+                    var stopWords = JiebaDb.StopWords;
+                    if (string.IsNullOrEmpty(dataMessage))
                     {
-                        await BotServer.SendPrivateMessageAsync(senderId, groupId, $"没找到可参考的近似词[{similarStopWord}]").ConfigureAwait(false);
+                        AddMessage(BotExtensions.GetMessage_CommandTypeError(senderId, messageId));
                         return false;
                     }
 
-                    stopWord = stopWordDatas[0];
-                }
+                    var stopWord = dataMessage;
+                    if (dataMessage.Contains(","))
+                    {
+                        var stopWordDatas = dataMessage.Split(",");
+                        var similarStopWord = stopWordDatas[1];
+                        if (stopWords.Find(similarStopWord) == null)
+                        {
+                            AddMessage($"没找到可参考的近似词[{similarStopWord}]");
+                            return false;
+                        }
 
-                if (stopWords.Find(stopWord) != null)
-                {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"已有相同的StopWord[{stopWord}]").ConfigureAwait(false);
+                        stopWord = stopWordDatas[0];
+                    }
+
+                    if (stopWords.Find(stopWord) != null)
+                    {
+                        AddMessage($"已有相同的StopWord[{stopWord}]");
+                        return false;
+                    }
+
+                    JiebaDb.StopWords.Add(new StopWord(stopWord));
+                    JiebaDb.SaveChanges();
+                    File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_STOPWORDS), [stopWord]);
+                    AddMessage($"StopWord[{stopWord}]已追加");
+                    return true;
+                // MEMO : 测试用
+                case "T":
+                    var idfResult = dataMessage.ExtractTagsWithWeight_Idf();
+                    var idfWeightResult = string.Empty;
+                    idfResult.ForEach(each => idfWeightResult += $"{each.Word} {each.Weight}{ENTER}");
+                    AddMessage($"idf结果:{ENTER}{idfWeightResult}");
+                    return true;
+                default:
+                    AddMessage("命令格式错误!");
                     return false;
-                }
-
-                JiebaDb.StopWords.Add(new StopWord(stopWord));
-                JiebaDb.SaveChanges();
-                File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_STOPWORDS), [stopWord]);
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"StopWord[{stopWord}]已追加").ConfigureAwait(false);
-                return true;
-            // MEMO : 测试用
-            case "T":
-                var idfResult = dataMessage.ExtractTagsWithWeight_Idf();
-                var idfWeightResult = string.Empty;
-                idfResult.ForEach(each => idfWeightResult += $"{each.Word} {each.Weight}{ENTER}");
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"idf结果:{ENTER}{idfWeightResult}").ConfigureAwait(false);
-                return true;
-            default:
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式错误!").ConfigureAwait(false);
-                return false;
+            }
         }
 
-        return true;
-
-        async Task<bool> AddDictAsync(string processMessage, bool sendMessage = true)
+        async Task<bool> AddIdfAsync(bool addSimilarWordDict)
         {
-            var dictDatas = processMessage.Split(",");
-            var dicts = JiebaDb.Dicts;
-            if (dictDatas.Length == 1)
+            if (!dataMessage.Contains(","))
             {
-                var dictWord = dictDatas[0];
-                if (dicts.Find(dictWord) != null)
-                {
-                    if (sendMessage)
-                        await BotServer.SendPrivateMessageAsync(senderId, groupId, $"词典中已存在词[{dictWord}]").ConfigureAwait(false);
-
-                    return false;
-                }
-
-                dicts.Add(new Dict(dictWord));
-                JiebaDb.SaveChanges();
-                SegmenterExtensions.AddWord(dictWord);
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Dict[{dictWord}]已追加").ConfigureAwait(false);
-                return true;
+                AddMessage(BotExtensions.GetMessage_CommandTypeError(senderId, messageId));
+                return false;
             }
-            else
+
+            var datas = dataMessage.Split(",");
+            var word = datas[0];
+            var idfs = JiebaDb.Idfs;
+            if (idfs.Find(word) != null)
             {
-                if (dictDatas.Length != 3)
-                {
-                    if (sendMessage)
-                        await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                AddMessage($"已存在idf词[{word}]");
+                return false;
+            }
+
+            var similarWord = datas[1];
+            var similarIdf = idfs.Find(similarWord);
+            if (similarIdf == null)
+            {
+                AddMessage($"没找到可参考的近似词[{similarWord}]");
+                return false;
+            }
+
+            idfs.Add(new Idf(word, similarIdf.Weight));
+            JiebaDb.SaveChanges();
+
+            await AddDictAsync(addSimilarWordDict ? $"{word},{similarWord}" : word, false, true).ConfigureAwait(false);
+            File.AppendAllLines(Path.Combine(PATH_RESOURCES, FILE_IDF), [$"{word} {similarIdf.Weight}"]);
+            AddMessage($"Idf[{word} {similarIdf.Weight}]已追加");
+            return true;
+        }
+
+        async Task<bool> AddDictAsync(string processMessage, bool addMessage, bool isSkipSimilarFailed)
+        {
+            var dicts = JiebaDb.Dicts;
+            var dictDatas = processMessage.Split(",");
+            var dictWord = dictDatas[0];
+            switch (dictDatas.Length)
+            {
+                case 1:
+                    if (dicts.Find(dictWord) != null)
+                    {
+                        if (addMessage)
+                            AddMessage($"词典中已存在词[{dictWord}]");
+
+                        return false;
+                    }
+
+                    dicts.Add(new Dict(dictWord));
+                    JiebaDb.SaveChanges();
+                    SegmenterExtensions.AddWord(dictWord);
+                    AddMessage($"Dict[{dictWord}]已追加");
+                    return true;
+                case 2:
+                    // MEMO : 参数传了相似词
+                    var similarWord = dictDatas[1];
+                    var similarWordDict = dicts.Find(similarWord);
+                    if (similarWordDict == null)
+                    {
+                        if (isSkipSimilarFailed)
+                        {
+                            dicts.Add(new Dict(dictWord));
+                            JiebaDb.SaveChanges();
+                            AddMessage($"Dict[{dictWord}]已追加");
+                            return true;
+                        }
+
+                        if (addMessage)
+                            AddMessage($"词典中未找到近似词[{similarWord}]");
+
+                        return false;
+                    }
+
+                    dicts.Add(new Dict(dictWord, similarWordDict.Freq, similarWordDict.Tag));
+                    JiebaDb.SaveChanges();
+                    AddMessage($"Dict[{dictWord} {similarWordDict.Freq} {similarWordDict.Tag}]已追加");
+                    return true;
+                case 3:
+                    if (!int.TryParse(dictDatas[1], out var freq))
+                    {
+                        if (addMessage)
+                            AddMessage(BotExtensions.GetMessage_CommandTypeError(senderId, messageId));
+
+                        return false;
+                    }
+
+                    if (dicts.Find(dictWord) != null)
+                    {
+                        if (addMessage)
+                            AddMessage($"词典中已存在词[{dictWord}]");
+
+                        return false;
+                    }
+
+                    var tag = dictDatas[2];
+                    dicts.Add(new Dict(dictWord, freq, tag));
+                    JiebaDb.SaveChanges();
+                    SegmenterExtensions.AddWord(dictWord, freq, tag);
+                    AddMessage($"Dict[{dictWord} {freq} {tag}]已追加");
+                    return true;
+                default:
+                    if (addMessage)
+                        AddMessage(BotExtensions.GetMessage_CommandTypeError(senderId, messageId));
 
                     return false;
-                }
-
-                if (!int.TryParse(dictDatas[1], out var freq))
-                {
-                    if (sendMessage)
-                        await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-
-                    return false;
-                }
-
-                var dictWord = dictDatas[0];
-                if (dicts.Find(dictWord) != null)
-                {
-                    if (sendMessage)
-                        await BotServer.SendPrivateMessageAsync(senderId, groupId, $"词典中已存在词[{dictWord}]").ConfigureAwait(false);
-
-                    return false;
-                }
-
-                var tag = dictDatas[2];
-                dicts.Add(new Dict(dictWord, freq, tag));
-                JiebaDb.SaveChanges();
-                SegmenterExtensions.AddWord(dictWord, freq, tag);
-                if (sendMessage)
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Dict[{dictWord} {freq} {tag}]已追加").ConfigureAwait(false);
-
-                return true;
             }
         }
     }

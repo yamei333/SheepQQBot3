@@ -1,4 +1,11 @@
-﻿using System;
+﻿using CommonLibrary;
+using Masuit.Tools;
+using SheepQQBot3.DbModel;
+using SheepQQBot3.Enums;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
+using SheepQQBot3.Model.Model.ChatSummaryConfig;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -6,13 +13,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CommonLibrary;
-using Masuit.Tools;
-using SheepQQBot3.DbModel;
-using SheepQQBot3.Enums;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
@@ -27,6 +27,11 @@ public static partial class ProcessGroupMessage
     /// 复读忽略设置
     /// </summary>
     private const int REPEAT_SKIP = 25;
+
+    /// <summary>
+    /// 统计忽略词长
+    /// </summary>
+    private const int CHATSUMMARY_BYTELIMIT = 100;
 
     /// <summary>
     /// 群聊总结命令
@@ -73,11 +78,15 @@ public static partial class ProcessGroupMessage
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_CHATSUMMARY, StringComparison.CurrentCultureIgnoreCase))
         {
-            if (message.StartsWith("#") || message.EndsWith("色图"))
+            if (!NeedRecordMessage(message))
                 return true;
 
             // MEMO : 直接衔接的复读消息不添加
             if (_lastMessage == message)
+                return true;
+
+            var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
+            if (addBotGroupMessage.MessageText.GetByteCount() > CHATSUMMARY_BYTELIMIT)
                 return true;
 
             _lastMessage = message;
@@ -274,5 +283,16 @@ public static partial class ProcessGroupMessage
                 }
             }
         }
+    }
+
+    private static bool NeedRecordMessage(string message)
+    {
+        if (message.StartsWith("#") || message.EndsWith("色图"))
+            return false;
+
+        if (message.Contains("色图") && message.Length <= 5)
+            return false;
+
+        return true;
     }
 }

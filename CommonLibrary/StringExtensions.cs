@@ -3,9 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 
-namespace SheepQQBot3.Model.Extension;
+namespace Masuit.Tools;
 
-public static class StringExtensions
+public static class MyStringExtensions
 {
     /// <summary>
     /// 取得字符串字节数
@@ -202,4 +202,44 @@ public static class StringExtensions
         IEnumerable<string> conditionStr,
         StringComparison stringComparison = StringComparison.CurrentCulture)
         => conditionStr.Any(each => str.EndsWith(each, stringComparison));
+
+    /// <summary>
+    /// 移除末尾的指定字符串
+    /// </summary>
+    /// <param name="str">对象字符串</param>
+    /// <param name="endString">查找字符串组</param>
+    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <returns>结果</returns>
+    public static string RemoveEnd(
+        this string str,
+        string endString,
+        StringComparison stringComparison = StringComparison.CurrentCulture)
+    {
+        str.TryRemoveEnd(endString, out var resultStr, stringComparison);
+        return resultStr;
+    }
+
+    /// <summary>
+    /// 移除末尾的指定字符串(Try版本)
+    /// </summary>
+    /// <param name="str">对象字符串</param>
+    /// <param name="endString">查找字符串组</param>
+    /// <param name="resultStr">移除后的字符串</param>
+    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <returns>结果</returns>
+    public static bool TryRemoveEnd(
+        this string str,
+        string endString,
+        out string resultStr,
+        StringComparison stringComparison = StringComparison.CurrentCulture)
+    {
+        if (!str.EndsWith(endString, stringComparison))
+        {
+            resultStr = str;
+            return false;
+        }
+
+        resultStr = str[..^endString.Length];
+        return true;
+    }
 }

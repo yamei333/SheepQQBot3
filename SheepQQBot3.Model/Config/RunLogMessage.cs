@@ -1,5 +1,5 @@
-﻿using System;
-using SheepQQBot3.Model.Extension;
+﻿using Masuit.Tools;
+using System;
 
 namespace SheepQQBot3.Model.Config;
 
