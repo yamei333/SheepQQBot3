@@ -287,11 +287,17 @@ public static partial class ProcessGroupMessage
 
     private static bool NeedRecordMessage(string message)
     {
-        if (message.StartsWith("#") || message.EndsWith("色图"))
+        if (message.StartsWith("#"))
             return false;
 
-        if (message.Contains("色图") && message.Length <= 5)
+        var uMessage = message.ToUpper();
+        if (uMessage.EndsWith("色图L")
+            || uMessage.EndsWith("色图N")
+            || uMessage.EndsWith("色图J")
+            || uMessage.EndsWith("色图Y"))
+        {
             return false;
+        }
 
         return true;
     }
