@@ -48,19 +48,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private static DateTime _chatSummaryRequestLastTime = DateTime.MinValue;
 
-    private static string _lastMessage;
-    //private class ChatSummaryMessage
-    //{
-    //    public ChatSummaryMessage(long timeStamp, string message)
-    //    {
-    //        TimeStamp = timeStamp;
-    //        Message = message;
-    //    }
-
-    //    public long TimeStamp { get; set; }
-
-    //    public string Message { get; set; }
-    //}
+    private static Queue<string> _repeatSkipQueue = new();
 
     /// <summary>
     /// 群聊总结
@@ -81,15 +69,18 @@ public static partial class ProcessGroupMessage
             if (!NeedRecordMessage(message))
                 return true;
 
-            // MEMO : 直接衔接的复读消息不添加
-            if (_lastMessage == message)
+            // MEMO : 复读消息不添加
+            if (_repeatSkipQueue.Contains(message))
                 return true;
 
             var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
             if (addBotGroupMessage.MessageText.GetByteCount() > CHATSUMMARY_BYTELIMIT)
                 return true;
 
-            _lastMessage = message;
+            _repeatSkipQueue.Enqueue(message);
+            if (_repeatSkipQueue.Count > REPEAT_SKIP)
+                _repeatSkipQueue.Dequeue();
+
             // MEMO : 将群聊录入数据库
             lock (BotDb.SyncLock)
             {
