@@ -1,11 +1,12 @@
-﻿using System;
+﻿using CommonLibrary;
+using SheepQQBot3.Model.Model.GetIP;
+using SixLabors.ImageSharp;
+using System;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
 using System.Threading.Tasks;
-using CommonLibrary;
-using SixLabors.ImageSharp;
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -154,10 +155,10 @@ public static class HttpExtensions
     /// </summary>
     public static async Task<string> GetIPAddressAsync()
     {
-        var response = await HttpGetAsync("https://ifconfig.me/ip").ConfigureAwait(false);
-        if (response.StatusCode != HttpStatusCode.OK)
+        var response = await GetFromJsonAsync<Ipify>("https://api.ipify.org/?format=json").ConfigureAwait(false);
+        if (!string.IsNullOrEmpty(response.ErrorMessage))
             return null;
 
-        return await response.Content.ReadAsStringAsync().ConfigureAwait(false);
+        return response.Data.IP;
     }
 }

@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SheepQQBot3.Model;
+using SheepQQBot3.Model.Extension;
+using System;
 using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Private;
@@ -42,6 +42,7 @@ public static partial class ProcessPrivateMessage
         switch (contentMessage.ToUpper())
         {
             case COMMAND_ADMIN_IP:
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取IP...").ConfigureAwait(false);
                 var ip = await HttpExtensions.GetIPAddressAsync().ConfigureAwait(false);
                 if (string.IsNullOrEmpty(ip))
                 {
@@ -52,6 +53,7 @@ public static partial class ProcessPrivateMessage
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取has剩余流量...").ConfigureAwait(false);
                 var hasMessage = string.Empty;
                 var url = ConfigurationManager.AppSettings["has_hk"];
                 var today = DateTime.Today;
