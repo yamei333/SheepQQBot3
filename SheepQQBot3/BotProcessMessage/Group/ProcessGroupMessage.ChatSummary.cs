@@ -281,6 +281,9 @@ public static partial class ProcessGroupMessage
         if (message.StartsWith("#"))
             return false;
 
+        if (message.Contains("色图") && message.BytesCount() <= 10)
+            return false;
+
         var uMessage = message.ToUpper();
         if (uMessage.EndsWith("色图L")
             || uMessage.EndsWith("色图N")
