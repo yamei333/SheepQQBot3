@@ -29,6 +29,11 @@ public static partial class ProcessGroupMessage
     private const int REPEAT_SKIP = 25;
 
     /// <summary>
+    /// 复读忽略设置(统计时)
+    /// </summary>
+    private const int REPEAT_SKIP_SUMMARY = 5;
+
+    /// <summary>
     /// 统计忽略词长
     /// </summary>
     private const int CHATSUMMARY_BYTELIMIT = 100;
@@ -249,12 +254,12 @@ public static partial class ProcessGroupMessage
                             if (string.IsNullOrEmpty(historyMessage))
                                 return;
 
-                            // MEMO : REPEAT_SKIP 句以内复读则忽略
+                            // MEMO : REPEAT_SKIP_SUMMARY 句以内复读则忽略
                             if (repeatSkipQueue.Contains(historyMessage))
                                 return;
 
                             repeatSkipQueue.Enqueue(historyMessage);
-                            if (repeatSkipQueue.Count > REPEAT_SKIP)
+                            if (repeatSkipQueue.Count > REPEAT_SKIP_SUMMARY)
                                 repeatSkipQueue.Dequeue();
 
                             var segmenterResult = historyMessage.ExtractTagsWithWeight_Idf();
@@ -281,11 +286,12 @@ public static partial class ProcessGroupMessage
         if (message.StartsWith("#"))
             return false;
 
-        if (message.Contains("色图") && message.BytesCount() <= 10)
+        if (message.Contains("色图") && message.BytesCount() <= 20)
             return false;
 
         var uMessage = message.ToUpper();
-        if (uMessage.EndsWith("色图L")
+        if (uMessage.EndsWith("色图")
+            || uMessage.EndsWith("色图L")
             || uMessage.EndsWith("色图N")
             || uMessage.EndsWith("色图J")
             || uMessage.EndsWith("色图Y"))
