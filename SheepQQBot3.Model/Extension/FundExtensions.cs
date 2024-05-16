@@ -1,6 +1,5 @@
 ﻿using Masuit.Tools;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Fund;
 using System;
 using System.Collections.Concurrent;
@@ -8,7 +7,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
-using Yamei.Common;
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -25,18 +23,29 @@ public static class FundExtensions
         if (fundIdArray.Any() != true)
             return null;
 
-        var httpResponse = await HttpExtensions.GetFromJsonAsync<FundData>(
-            $"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIdArray)}")
-            .ConfigureAwait(false);
-
-        //var fundJsonText = HttpExtensions.GetString();
-        //if (string.IsNullOrEmpty(fundJsonText))
-        //    return null;
-        //var fundJsonText =
-        //    "{\"code\":200,\"message\":\"操作成功\",\"traceId\":\"991464084dbc4e22f12188d4d19c1a72\",\"data\":[{\"code\":\"004235\",\"name\":\"中欧价值智选混合C\",\"netWorth\":4.5556,\"expectWorth\":4.5106,\"totalWorth\":4.5556,\"expectGrowth\":\"-0.99\",\"dayGrowth\":\"-0.94\",\"lastWeekGrowth\":\"1.3459\",\"lastMonthGrowth\":\"3.31\",\"lastThreeMonthsGrowth\":\"24.72\",\"lastSixMonthsGrowth\":\"-6.85\",\"lastYearGrowth\":\"-3.87\",\"netWorthDate\":\"2022-07-22\",\"expectWorthDate\":\"2022-07-25 13:19:00\"},{\"code\":\"161725\",\"name\":\"招商中证白酒指数(LOF)A\",\"netWorth\":1.1816,\"expectWorth\":1.1861,\"totalWorth\":2.8977,\"expectGrowth\":\"0.38\",\"dayGrowth\":\"-0.2\",\"lastWeekGrowth\":\"-1.1875\",\"lastMonthGrowth\":\"-0.34\",\"lastThreeMonthsGrowth\":\"11.18\",\"lastSixMonthsGrowth\":\"-4.48\",\"lastYearGrowth\":\"-14.22\",\"netWorthDate\":\"2022-07-22\",\"expectWorthDate\":\"2022-07-25 13:18:00\"}]}";
-        //var fundData = JsonSerializer.Deserialize<FundData>(fundJsonText);
+        // MEMO : doctorxiong炸了, 暂时不可用
+        //var url = $"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIdArray)}"
+        var url = $"https://www.cnuseful.com/api/index/fund?code={string.Join(",", fundIdArray)}";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<FundData>(url).ConfigureAwait(false);
         return httpResponse.Result == HttpResponseResult.Successed
             ? httpResponse.Data : null;
+
+        #region 测试用代码
+
+        //var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
+        //var fundJsonText = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //try
+        //{
+        //    var fundData = JsonSerializer.Deserialize<FundData>(fundJsonText);
+        //}
+        //catch (Exception e)
+        //{
+        //    Console.WriteLine(e);
+        //    throw;
+        //}
+        //return null;
+
+        #endregion 测试用代码
     }
 
     /// <summary>
@@ -70,7 +79,7 @@ public static class FundExtensions
         var fundAlarmConfigs = fundAlarmConfigsDic.Values;
         fundSimpleData?.ForEach(each =>
         {
-            if (each.ExpectWorthDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
+            if (each.UpdateDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
             {
                 isDateError = true;
                 return;
@@ -185,100 +194,102 @@ public static class FundExtensions
         FundData fundData,
         LimitObserveFundConfig[] limitObserveFundConfigs)
     {
-        var sb = new StringBuilder();
-        sb.AppendLine("=====基金阈值观测=====");
-        var hasObserveMessage = false;
-        var isDateError = false;
-        fundData.Data.ForEach(each =>
-        {
-            if (each.ExpectWorthDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
-            {
-                isDateError = true;
-                return;
-            }
+        // TODO : 基金取历史数据坏了, 暂时禁用该功能
+        return string.Empty;
+        //var sb = new StringBuilder();
+        //sb.AppendLine("=====基金阈值观测=====");
+        //var hasObserveMessage = false;
+        //var isDateError = false;
+        //fundData.Data.ForEach(each =>
+        //{
+        //    if (each.ExpectWorthDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
+        //    {
+        //        isDateError = true;
+        //        return;
+        //    }
 
-            var fundLimitConfigs = limitObserveFundConfigs
-                .Where(fundLimit => fundLimit.FundId == each.Code)
-                .ToArray();
-            fundLimitConfigs.ForEach(fundLimitConfig =>
-            {
-                var isPositive = fundLimitConfig.AlertLimit > 0;
-                var alertLimit = fundLimitConfig.AlertLimit;
-                var fundObserveType = fundLimitConfig.FundObserveType;
-                // MEMO : 添加怪话
-                switch (fundObserveType)
-                {
-                    case FundObserveType.Week when isPositive
-                        ? each.LastWeekGrowth > alertLimit
-                        : each.LastWeekGrowth < alertLimit:
-                    case FundObserveType.Month when isPositive
-                        ? each.LastMonthGrowth > alertLimit
-                        : each.LastMonthGrowth < alertLimit:
-                    case FundObserveType.ThreeMonths when isPositive
-                        ? each.LastThreeMonthsGrowth > alertLimit
-                        : each.LastThreeMonthsGrowth < alertLimit:
-                    case FundObserveType.SixMonths when isPositive
-                        ? each.LastSixMonthsGrowth > alertLimit
-                        : each.LastSixMonthsGrowth < alertLimit:
-                    case FundObserveType.Year when isPositive
-                        ? each.LastYearGrowth > alertLimit
-                        : each.LastYearGrowth < alertLimit:
-                        sb.AppendLine($"{each.Name}({each.Code}) 在过去[{GetObserveTypeString(fundObserveType)}]波动超过{(alertLimit >= 0 ? "＋" : "－")}{Math.Abs(alertLimit)}, {GetMessage(isPositive)}");
-                        hasObserveMessage = true;
-                        break;
-                }
-            });
-        });
+        //    var fundLimitConfigs = limitObserveFundConfigs
+        //        .Where(fundLimit => fundLimit.FundId == each.Code)
+        //        .ToArray();
+        //    fundLimitConfigs.ForEach(fundLimitConfig =>
+        //    {
+        //        var isPositive = fundLimitConfig.AlertLimit > 0;
+        //        var alertLimit = fundLimitConfig.AlertLimit;
+        //        var fundObserveType = fundLimitConfig.FundObserveType;
+        //        // MEMO : 添加怪话
+        //        switch (fundObserveType)
+        //        {
+        //            case FundObserveType.Week when isPositive
+        //                ? each.LastWeekGrowth > alertLimit
+        //                : each.LastWeekGrowth < alertLimit:
+        //            case FundObserveType.Month when isPositive
+        //                ? each.LastMonthGrowth > alertLimit
+        //                : each.LastMonthGrowth < alertLimit:
+        //            case FundObserveType.ThreeMonths when isPositive
+        //                ? each.LastThreeMonthsGrowth > alertLimit
+        //                : each.LastThreeMonthsGrowth < alertLimit:
+        //            case FundObserveType.SixMonths when isPositive
+        //                ? each.LastSixMonthsGrowth > alertLimit
+        //                : each.LastSixMonthsGrowth < alertLimit:
+        //            case FundObserveType.Year when isPositive
+        //                ? each.LastYearGrowth > alertLimit
+        //                : each.LastYearGrowth < alertLimit:
+        //                sb.AppendLine($"{each.Name}({each.Code}) 在过去[{GetObserveTypeString(fundObserveType)}]波动超过{(alertLimit >= 0 ? "＋" : "－")}{Math.Abs(alertLimit)}, {GetMessage(isPositive)}");
+        //                hasObserveMessage = true;
+        //                break;
+        //        }
+        //    });
+        //});
 
-        // MEMO : 日期错误, 今日不观测
-        if (isDateError)
-            return string.Empty;
+        //// MEMO : 日期错误, 今日不观测
+        //if (isDateError)
+        //    return string.Empty;
 
-        if (hasObserveMessage)
-        {
-            sb.AppendLine("==================");
-            return sb.ToString();
-        }
-        else
-        {
-            return string.Empty;
-        }
+        //if (hasObserveMessage)
+        //{
+        //    sb.AppendLine("==================");
+        //    return sb.ToString();
+        //}
+        //else
+        //{
+        //    return string.Empty;
+        //}
 
-        string GetObserveTypeString(FundObserveType fundObserveType)
-            => fundObserveType switch
-            {
-                FundObserveType.Week => "1周",
-                FundObserveType.Month => "1个月",
-                FundObserveType.ThreeMonths => "3个月",
-                FundObserveType.SixMonths => "6个月",
-                FundObserveType.Year => "1年",
-                _ => "未知时间"
-            };
+        //string GetObserveTypeString(FundObserveType fundObserveType)
+        //    => fundObserveType switch
+        //    {
+        //        FundObserveType.Week => "1周",
+        //        FundObserveType.Month => "1个月",
+        //        FundObserveType.ThreeMonths => "3个月",
+        //        FundObserveType.SixMonths => "6个月",
+        //        FundObserveType.Year => "1年",
+        //        _ => "未知时间"
+        //    };
 
-        string GetMessage(bool isPositive) => isPositive ? GetPositiveMessage() : GetNegativeMessage();
+        //string GetMessage(bool isPositive) => isPositive ? GetPositiveMessage() : GetNegativeMessage();
 
-        string GetPositiveMessage()
-        {
-            return new[]
-            {
-                "该恐惧了?",
-                "现在我就是恐惧魔王?",
-                "我究极恐惧",
-                "恐惧魔王徐州芃",
-                "我觉得吃得差不多了",
-            }.Random();
-        }
+        //string GetPositiveMessage()
+        //{
+        //    return new[]
+        //    {
+        //        "该恐惧了?",
+        //        "现在我就是恐惧魔王?",
+        //        "我究极恐惧",
+        //        "恐惧魔王徐州芃",
+        //        "我觉得吃得差不多了",
+        //    }.Random();
+        //}
 
-        string GetNegativeMessage()
-        {
-            return new[]
-            {
-                "再不逃裤子都没了",
-                "现在就是抄底之时?",
-                "别人恐惧我加仓",
-                "我成功恐惧?",
-                "就是现在! 满仓, 满仓!",
-            }.Random();
-        }
+        //string GetNegativeMessage()
+        //{
+        //    return new[]
+        //    {
+        //        "再不逃裤子都没了",
+        //        "现在就是抄底之时?",
+        //        "别人恐惧我加仓",
+        //        "我成功恐惧?",
+        //        "就是现在! 满仓, 满仓!",
+        //    }.Random();
+        //}
     }
 }
