@@ -1,14 +1,14 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Fund;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
@@ -49,17 +49,18 @@ public static partial class TaskProcess
                                 await SendFundAlarmMessageAsync(setConfig, fundAlarmConfig, dateNow).ConfigureAwait(false);
                             }
 
-                            setConfig.FundLimitObserveConfigs.ToValueList().ForEach(SendFundLimitMessage);
-                            async void SendFundLimitMessage(FundLimitObserveConfig fundLimitObserveConfig)
-                            {
-                                if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr))
-                                    return;
+                            // MEMO : 0.13.3.15 禁用基金阈值观测(API不可用了)
+                            //setConfig.FundLimitObserveConfigs.ToValueList().ForEach(SendFundLimitMessage);
+                            //async void SendFundLimitMessage(FundLimitObserveConfig fundLimitObserveConfig)
+                            //{
+                            //    if (!fundLimitObserveConfig.IsActive || !fundLimitObserveConfig.Condition.IsMatch(dateNowStr))
+                            //        return;
 
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
-                                // 发送基金阈值观测消息
-                                await SendFundLimitMessageAsync(setConfig, fundLimitObserveConfig, dateNow).ConfigureAwait(false);
-                            }
+                            //    // 删除过期发送内容
+                            //    DeleteExpiredData(setConfig.FundLimitObservedList, dateNow);
+                            //    // 发送基金阈值观测消息
+                            //    await SendFundLimitMessageAsync(setConfig, fundLimitObserveConfig, dateNow).ConfigureAwait(false);
+                            //}
                         });
 
                     CommonExtensions.SleepSeconds(30);
