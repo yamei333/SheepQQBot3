@@ -13,7 +13,7 @@ public class ClientReceiveData_GroupMember
     [JsonPropertyName("status")]
     public string Status { get; set; }
 
-    [JsonPropertyName("msg")]
+    [JsonPropertyName("message")]
     public string Message { get; set; }
 
     [JsonPropertyName("wording")]

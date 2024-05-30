@@ -7,7 +7,6 @@ using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
 using System.Linq;
-using Yamei.Common;
 
 namespace SheepQQBot3.Extensions;
 
@@ -37,11 +36,11 @@ public static partial class BotExtensions
     public static string GetSetuSuccessPercent(SetuDoushiInfo setuDoushiInfo, DateTime dateNow)
     {
         var setuDoushiLv = setuDoushiInfo?.CalcSetuDoushiLv(dateNow) ?? 0;
-        var failedSum = (int)(150 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(150 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(75 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(40 * Math.Pow(setuDoushiLv, 2.5));
-        return $"色图成功率 {(21480) / (21480.0 + failedSum):0.00%}";
+        var failedSum = (int)(900 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(900 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(450 * Math.Pow(setuDoushiLv, 2.5))
+            + (int)(240 * Math.Pow(setuDoushiLv, 2.5));
+        return $"色图成功率 {(26426) / (26426.0 + failedSum):0.00%}";
     }
 
     /// <summary>

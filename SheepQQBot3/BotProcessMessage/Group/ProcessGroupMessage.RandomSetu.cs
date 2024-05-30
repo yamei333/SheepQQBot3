@@ -21,12 +21,6 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 
 public static partial class ProcessGroupMessage
 {
-    private class SetuDoushiInfoT
-    {
-        internal long SenderId { get; init; }
-        internal long SetuDoushiLv { get; init; }
-    }
-
     //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
 
     /// <summary>
@@ -47,17 +41,17 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 色图清空CD命令
     /// </summary>
-    private const string COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY = "#STQKCD#";
+    private const string COMMAND_CUSTOM_GROUP_SETU_RESETCD_LIBRARY = "#STRESETCD#";
 
     /// <summary>
     /// 色图清空LV命令
     /// </summary>
-    private const string COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY = "#STQKLV#";
+    private const string COMMAND_CUSTOM_GROUP_SETU_RESETLV_LIBRARY = "#STRESETLV#";
 
     /// <summary>
     /// 色图清空所有命令
     /// </summary>
-    private const string COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY = "#STQKALL#";
+    private const string COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY = "#STRESETALL#";
 
     /// <summary>
     /// 色图斗士排行命令
@@ -280,9 +274,9 @@ public static partial class ProcessGroupMessage
 
         if (isAdmin)
         {
-            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_RESETCD_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
-                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKCD_LIBRARY.Length..], out var searchUserId))
+                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETCD_LIBRARY.Length..], out var searchUserId))
                 {
                     // MEMO : 清空CD
                     var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchUserId);
@@ -306,9 +300,9 @@ public static partial class ProcessGroupMessage
                 return true;
             }
 
-            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_RESETLV_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
-                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKLV_LIBRARY.Length..], out var searchTargetId))
+                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETLV_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空Lv
                     var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
@@ -332,9 +326,9 @@ public static partial class ProcessGroupMessage
                 return true;
             }
 
-            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
-                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETUQKALL_LIBRARY.Length..], out var searchTargetId))
+                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空CD
                     var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
@@ -366,21 +360,19 @@ public static partial class ProcessGroupMessage
             if (groupMembers == null)
                 return false;
 
-            var sendMessage = "=====色图斗士Lv排行=====";
+            var sendMessage = "=====色图斗士排行=====";
             var rankIndex = 1;
-            BotDb.SetuDoushiInfos
+            BotDb.SetuSendHistorys
+                .Where(each => each.IsGetSuccessed == 1)
+                .GroupBy(each => each.TargetId)
                 .AsEnumerable()
-                .Select(info => new SetuDoushiInfoT
-                {
-                    SenderId = info.TargetId,
-                    SetuDoushiLv = info.CalcSetuDoushiLv(dateNow)
-                })
-                .OrderByDescending(info => info)
-                .Take(5)
+                .Select(each => (each.Key, each.Count()))
+                .OrderByDescending(each => each.Item2)
+                .Take(10)
                 .ForEach(info =>
                 {
                     sendMessage += $"\r\n{rankIndex++}. " +
-                        $"{GetSetuSenderName(info.SenderId)} [Lv{info.SetuDoushiLv}]";
+                        $"{GetSetuSenderName(info.Key)} [色图数 {info.Item2}]";
                 });
             await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
             return true;
@@ -595,38 +587,39 @@ public static partial class ProcessGroupMessage
                 List<RandomWeight<SendSetuConfig>> randActions;
                 if (dateNow > setuCd)
                 {
+                    // MEMO : 0.13.3.16 除了基数其他都x6, 以维持10%暴击率
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
                         new(20000, new SendSetuConfig(SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true)),
-                        new(350, new SendSetuConfig(
+                        new(2100, new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.ExtraDouble, true)),
-                        new((int)(150 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
+                        new((int)(900 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
                             Rand.Next(1 + (int)(1 * Math.Pow(setuDoushiLv, 2)), 15 + (int)(5 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.Normal)),
-                        new((int)(150 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
+                        new((int)(900 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
                             Rand.Next(3 + (int)(2 * Math.Pow(setuDoushiLv, 2)), 30 + (int)(10 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.Normal)),
-                        new((int)(75 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
+                        new((int)(450 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
                             Rand.Next(5 + (int)(3 * Math.Pow(setuDoushiLv, 2)), 45 + (int)(15 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.Double)),
-                        new((int)(40 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
+                        new((int)(240 * Math.Pow(setuDoushiLv, 2.5)), new SendSetuConfig(
                             Rand.Next(7 + (int)(4 * Math.Pow(setuDoushiLv, 2)), 60 + (int)(20 * Math.Pow(setuDoushiLv, 2))),
                             AddCDReason.RequestFailed, SetuAddLevel.SuperDouble)),
-                        new(150 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(900 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true)),
-                        new(90 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(540 - (int)(setuDoushiLv * 135.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.FreeExtraDouble, true)),
-                        new(30 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
+                        new(180 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true, true)),
-                        new(20 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
+                        new(120 - (int)(setuDoushiLv * 27 / MaxSenderLv), new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.ExtraDouble, true, true)),
-                        new(10 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(60 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.Free, true, true)),
-                        new(6 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
+                        new(36 - (int)(setuDoushiLv * 9.0 / MaxSenderLv), new SendSetuConfig(0,
                             AddCDReason.RequestSuccessed, SetuAddLevel.FreeExtraDouble, true, true)),
                     };
                 }
