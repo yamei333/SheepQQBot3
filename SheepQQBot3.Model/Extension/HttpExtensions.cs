@@ -114,12 +114,12 @@ public static class HttpExtensions
     /// http下载
     /// </summary>
     public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
-        string url, string path, bool checkOnly = false)
+        string url, string path, bool checkOnly = false, string customTempFileName = null)
     {
         if (string.IsNullOrEmpty(url))
             return (false, string.Empty);
 
-        var tempFileName = Guid.NewGuid().ToString();
+        var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
         var response = await HttpGetAsync(url);
         if (response?.StatusCode != HttpStatusCode.OK)
             return (false, string.Empty);

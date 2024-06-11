@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.Linq;
 
 namespace SheepQQBot3.Model.Setu;
 
@@ -36,38 +37,58 @@ public class SetuInfo
     /// <summary>
     /// 显示文本
     /// </summary>
-    public SetuType SetuType { get; set; }
+    public SetuType SetuType { get; }
 
     /// <summary>
     /// 显示文本
     /// </summary>
-    public string SourceText { get; set; }
+    public string SourceText { get; }
 
     /// <summary>
     /// 图源地址
     /// </summary>
-    public string SourceUrl { get; set; }
+    public string SourceUrl { get; }
 
     /// <summary>
     /// 压缩图片地址
     /// </summary>
-    public string ImageUrl { get; set; }
+    public string ImageUrl { get; }
 
     /// <summary>
     /// 色图取得状态
     /// </summary>
     public SetuResult Result { get; set; }
+
+    /// <summary>
+    /// 色图缓存文件名
+    /// </summary>
+    public string CacheFileName => FullCacheFileName[..^4];
+
+    /// <summary>
+    /// 色图缓存文件名(带后缀)
+    /// </summary>
+    public string FullCacheFileName => SourceUrl.Split('/').Last();
 }
 
+/// <summary>
+/// 色图API类型
+/// </summary>
 public enum SetuType
 {
     Lolicon,
     Yuban,
     NyanCatda,
     Jitsu,
+
+    /// <summary>
+    /// Jitsu个人版
+    /// </summary>
     JitsuSelf,
 }
 
+/// <summary>
+/// 色图API取得结果
+/// </summary>
 public enum SetuResult
 {
     Successed,
