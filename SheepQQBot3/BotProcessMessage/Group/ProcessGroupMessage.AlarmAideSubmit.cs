@@ -1,16 +1,15 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -109,7 +108,7 @@ public static partial class ProcessGroupMessage
                 {
                     new(groupMessage.MessageId),
                     new(PublicVar.BOT_NAME, PublicVar.BotId, resendAlarmMessage),
-                    new(PublicVar.BOT_NAME, PublicVar.BotId, "投稿成功!!")
+                    new(PublicVar.BOT_NAME, PublicVar.BotId, "投稿成功!!"),
                 });
                 ConfigExtensions.SaveConfig();
                 return true;
