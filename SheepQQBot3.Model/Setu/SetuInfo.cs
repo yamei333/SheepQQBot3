@@ -62,12 +62,12 @@ public class SetuInfo
     /// <summary>
     /// 色图缓存文件名
     /// </summary>
-    public string CacheFileName => FullCacheFileName[..^4];
+    public string CacheFileName => SourceUrl.Split('/').Last()[..^4];
 
     /// <summary>
-    /// 色图缓存文件名(带后缀)
+    /// 色图缓存文件名(默认缓存为png)
     /// </summary>
-    public string FullCacheFileName => SourceUrl.Split('/').Last();
+    public string FullCacheFileName => $"{CacheFileName}.png";
 }
 
 /// <summary>
