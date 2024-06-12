@@ -1,4 +1,6 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
+using Masuit.Tools.Media;
 using SheepQQBot3.Model.Model.GetIP;
 using SixLabors.ImageSharp;
 using System;
@@ -114,7 +116,7 @@ public static class HttpExtensions
     /// http下载
     /// </summary>
     public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
-        string url, string path, bool checkOnly = false, string customTempFileName = null)
+        string url, string path, bool needResize, bool checkOnly = false, string customTempFileName = null)
     {
         if (string.IsNullOrEmpty(url))
             return (false, string.Empty);
@@ -136,15 +138,26 @@ public static class HttpExtensions
         {
             var stream = await response.Content.ReadAsStreamAsync();
             var image = await Image.LoadAsync(stream);
-            switch (fileExtend)
+
+            if (needResize)
             {
-                case "gif":
-                    await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
-                    break;
-                default:
-                    await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
-                    break;
+                await image.ResizeImage(image.Width + GetRandom(), image.Height + GetRandom())
+                    .SaveAsPngAsync($"{path}/{tempFileName}.png");
             }
+            else
+            {
+                switch (fileExtend)
+                {
+                    case "gif":
+                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
+                        break;
+                    default:
+                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                        break;
+                }
+            }
+
+            int GetRandom() => new[] { -1, -2, -3, 0, 1, 2, 3 }.Random();
         }
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");

@@ -74,7 +74,7 @@ public static partial class ProcessGroupMessage
                 var picUrl = match.Groups[2].Value;
                 var replaceContent = match.Groups[1].Value;
                 var (isSuccessed, fileName) = HttpExtensions
-                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
+                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
                     .Result;
                 if (isSuccessed)
                 {

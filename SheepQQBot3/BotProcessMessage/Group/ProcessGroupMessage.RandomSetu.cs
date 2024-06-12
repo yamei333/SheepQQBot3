@@ -1109,7 +1109,7 @@ public static partial class ProcessGroupMessage
                     if (setuInfo.Result == SetuResult.Successed)
                     {
                         (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
-                            setuInfo.ImageUrl, PATH_CACHE_IMAGE, checkImageOnly, setuInfo.CacheFileName).ConfigureAwait(false);
+                            setuInfo.ImageUrl, PATH_CACHE_IMAGE, true, checkImageOnly, setuInfo.CacheFileName).ConfigureAwait(false);
                         if (getSuccessed)
                             continue;
                     }
