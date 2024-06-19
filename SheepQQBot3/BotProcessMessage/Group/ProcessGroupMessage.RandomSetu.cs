@@ -1086,7 +1086,8 @@ public static partial class ProcessGroupMessage
                         .ConfigureAwait(false);
                 }
 
-                if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
+                if (setuInfo.Result == SetuResult.Successed 
+                    && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
                 {
                     if (PublicVar.IsDebug)
                     {
@@ -1097,7 +1098,6 @@ public static partial class ProcessGroupMessage
                     // MEMO : 缓存中存在该图, 跳过下载
                     return (setuInfo, setuInfo.CacheFileName);
                 }
-
                 DebugSendSetuInfo(setuInfo);
 
                 var fileName = string.Empty;
@@ -1123,6 +1123,18 @@ public static partial class ProcessGroupMessage
                     //    $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
                     retryTimes++;
                     setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
+                    if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
+                    {
+                        if (PublicVar.IsDebug)
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
+                                .ConfigureAwait(false);
+                        }
+
+                        // MEMO : 缓存中存在该图, 跳过下载
+                        return (setuInfo, setuInfo.CacheFileName);
+                    }
+
                     DebugSendSetuInfo(setuInfo);
                     CommonExtensions.Sleep(500);
                 }
@@ -1170,6 +1182,8 @@ public static partial class ProcessGroupMessage
                             .ConfigureAwait(false);
                     }
                 }
+
+
             }
         }
         else

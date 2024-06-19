@@ -1,6 +1,7 @@
-﻿using System.Windows;
+﻿using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.Extension;
+using System.Windows;
 using System.Windows.Controls;
-using SheepQQBot3.Extensions;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -44,7 +45,7 @@ public partial class MainWindowFunctionTest : UserControl
     }
 
     /// <summary>
-    /// 测试发送Json消息1
+    /// 测试发送Json消息
     /// </summary>
     private async void TestSendJsonMessage1(object sender, RoutedEventArgs e)
     {
@@ -57,6 +58,15 @@ public partial class MainWindowFunctionTest : UserControl
                 string.Empty).ConfigureAwait(false),
                 Vm.SetConfigs).ConfigureAwait(false);
         }
+    }
+
+    /// <summary>
+    /// 测试发送Bark推送
+    /// </summary>
+    private async void TestSendPushBarkMessage(object sender, RoutedEventArgs e)
+    {
+        await PushExtensions.PushBarkMessageAsync(TxtTestPushBarkMessage_Message.Text, TxtTestPushBarkMessage_Title.Text)
+            .ConfigureAwait(false);
     }
 
     //Vm.CqApi.SendGroupForwardMessage(15873217, new GroupForwardMessage[]

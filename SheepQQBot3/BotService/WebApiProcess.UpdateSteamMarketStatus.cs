@@ -7,6 +7,9 @@ namespace SheepQQBot3.BotService;
 
 public static partial class WebApiProcess
 {
+    /// <summary>
+    /// steam市场状态最终更新时间
+    /// </summary>
     public static DateTime LastUpdateSteamMarketStatusDate { get; set; }
 
     private static void AddRoute_UpdateSteamMarketStatus()

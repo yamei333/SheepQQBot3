@@ -1,10 +1,10 @@
-﻿using System;
+﻿using SheepQQBot3.Model.Enums;
+using System;
 using System.Configuration;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Extension;
 
