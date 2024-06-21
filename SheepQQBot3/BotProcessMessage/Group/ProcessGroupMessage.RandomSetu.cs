@@ -82,7 +82,7 @@ public static partial class ProcessGroupMessage
     {
         {SetuType.Lolicon, 30},
         {SetuType.Yuban, 0}, // 会出现R18, 办了
-        {SetuType.NyanCatda, 8},
+        {SetuType.NyanCatda, 0},  // 挂了, 2024-6-21
         {SetuType.Jitsu, 2},
         {SetuType.JitsuSelf, 12},
     };
@@ -433,11 +433,11 @@ public static partial class ProcessGroupMessage
             message = message[..^1];
             targetSetuApiType = SetuType.Yuban;
         }
-        else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
-        {
-            message = message[..^1];
-            targetSetuApiType = SetuType.NyanCatda;
-        }
+        //else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
+        //{
+        //    message = message[..^1];
+        //    targetSetuApiType = SetuType.NyanCatda;
+        //}
         else if (message.EndsWith("J", StringComparison.CurrentCultureIgnoreCase))
         {
             message = message[..^1];
@@ -1086,7 +1086,7 @@ public static partial class ProcessGroupMessage
                         .ConfigureAwait(false);
                 }
 
-                if (setuInfo.Result == SetuResult.Successed 
+                if (setuInfo.Result == SetuResult.Successed
                     && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
                 {
                     if (PublicVar.IsDebug)
@@ -1096,7 +1096,7 @@ public static partial class ProcessGroupMessage
                     }
 
                     // MEMO : 缓存中存在该图, 跳过下载
-                    return (setuInfo, setuInfo.CacheFileName);
+                    return (setuInfo, setuInfo.FullCacheFileName);
                 }
                 DebugSendSetuInfo(setuInfo);
 
@@ -1132,7 +1132,7 @@ public static partial class ProcessGroupMessage
                         }
 
                         // MEMO : 缓存中存在该图, 跳过下载
-                        return (setuInfo, setuInfo.CacheFileName);
+                        return (setuInfo, setuInfo.FullCacheFileName);
                     }
 
                     DebugSendSetuInfo(setuInfo);
@@ -1182,8 +1182,6 @@ public static partial class ProcessGroupMessage
                             .ConfigureAwait(false);
                     }
                 }
-
-
             }
         }
         else

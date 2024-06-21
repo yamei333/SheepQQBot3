@@ -177,8 +177,8 @@ public static partial class SetuExtensions
         return new SetuInfo(
             SetuType.NyanCatda,
             setuData.SetuInfo,
-            imageUrl.ToImageUrl(),
-            imageUrl.ToSmallImageUrl(),
+            imageUrl?.ToImageUrl(),
+            imageUrl?.ToSmallImageUrl(),
             setuResult);
     }
 
