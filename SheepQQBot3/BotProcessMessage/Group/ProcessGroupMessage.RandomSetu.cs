@@ -736,7 +736,6 @@ public static partial class ProcessGroupMessage
             if (!canSendSetu)
             {
                 AddCD();
-                var isShowDate = Rand.CheckPercent(3);
                 string sendMessage;
                 if (addSecond > 0)
                 {
@@ -747,23 +746,20 @@ public static partial class ProcessGroupMessage
                             sendMessage = $"{CQCode.At(senderId)}"
                                 + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
                                 + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo()
-                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                + GetSetuLvInfo();
                             break;
                         case AddCDReason.NotReady:
                             sendMessage = $"{CQCode.At(senderId)}"
                                 + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
                                 + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo()
-                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                + GetSetuLvInfo();
                             break;
                         default:
                             // MEMO : 应该不会有此Case
                             sendMessage = $"{CQCode.At(senderId)}"
                                 + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
                                 + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo()
-                                + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                                + GetSetuLvInfo();
                             break;
                     }
                 }
@@ -773,8 +769,7 @@ public static partial class ProcessGroupMessage
                     sendMessage = $"{CQCode.At(senderId)}"
                         + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                         + $" ({addSecond}s)"
-                        + GetSetuLvInfo()
-                        + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                        + GetSetuLvInfo();
                 }
 
                 await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, false, false, false, false))
@@ -785,18 +780,18 @@ public static partial class ProcessGroupMessage
             }
             else
             {
-                AddCD();
-                var isShowDate = Rand.CheckPercent(3);
                 if (!isAdmin && addSecond == 0)
                 {
                     // MEMO : 白嫖
                     isFree = true;
                     var sendMessage = $"{CQCode.At(senderId)}"
-                        + $"什么!? 你成功白嫖了一张{sourceTag}{SETU_KEYWORD}!"
-                        + (isShowDate ? $" [CD {GetCD(setuDoushiInfo)}]" : string.Empty);
+                        + $"什么!? 你成功白嫖了一张{sourceTag}{SETU_KEYWORD}!";
                     await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                     goto SendSetu;
                 }
+
+                // MEMO : 白嫖不加CD
+                AddCD();
             }
 
             var revertCd = DateTime.MinValue;
@@ -882,10 +877,9 @@ public static partial class ProcessGroupMessage
                                 $"{CQCode.At(senderId)}{_setuKexiStart.Random()}" +
                                 $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             .ConfigureAwait(false);
-                        setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
+                        setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
-                        await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree,
-                                false))
+                        await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))
                             .ConfigureAwait(false);
                         return true;
                     default:
@@ -1049,7 +1043,6 @@ public static partial class ProcessGroupMessage
 
             void AddCD()
             {
-                revertCd = dateNow.AddSeconds(20);
                 setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
                     .AddSeconds(addSecond).ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
