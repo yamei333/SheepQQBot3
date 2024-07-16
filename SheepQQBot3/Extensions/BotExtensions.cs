@@ -26,7 +26,7 @@ public static partial class BotExtensions
     /// </summary>
     public static void KillServerExe()
     {
-        var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["napcatbat"]?.Replace(".bat", string.Empty));
+        var processes = Process.GetProcessesByName("QQ");
         processes.ForEach(each => each.Kill());
     }
 

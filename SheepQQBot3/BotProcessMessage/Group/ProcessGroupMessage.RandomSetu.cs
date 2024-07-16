@@ -108,37 +108,37 @@ public static partial class ProcessGroupMessage
     };
 
     private static readonly string[] _setuNo =
-    {
+    [
         "别", "憋", "鳖", "No",
-    };
+    ];
 
     private static readonly string[] _setuSendLe =
-    {
+    [
         "发了", "要了", "整了", "冲了", "弄了",
-    };
+    ];
 
     private static readonly string[] _setuRequest =
-    {
+    [
         "获取",
-    };
+    ];
 
     private static readonly string[] _setuGetting =
-    {
+    [
         "下载中", "传送中", "获取中", "取得中", "载入中",
-    };
+    ];
 
     private static readonly string[] _setuCDWasAdded =
-    {
+    [
         "被$ADD_LEVEL$了!", "被$ADD_LEVEL$, 时间延长了!", "被$ADD_LEVEL$, 大加特加了!",
-    };
+    ];
 
     private static readonly string[] _setuCDWasReduced =
-    {
+    [
         "色图的CD发生了$ADD_LEVEL$变化, 被减少了!",
-    };
+    ];
 
     private static readonly string[] _setuKexiStart =
-    {
+    [
         "太可惜了!",
         "Taxi了!",
         "悲剧啊!",
@@ -146,25 +146,25 @@ public static partial class ProcessGroupMessage
         "寄了!",
         "鸡了!",
         "JI了!",
-    };
+    ];
 
     private static readonly string[] _setuUnluck =
-    {
+    [
         "你运气差!",
         "你霉运!",
         "你脸黑!",
         "你非洲人!",
-    };
+    ];
 
     private static readonly string[] _setuKexiEnd =
-    {
+    [
         "我的我的, 哈哈",
         "都怪ruojiji2",
         "今日不宜色图",
         "吔?你的XP有点怪",
         "一定是关键字太怪了",
         "图库懂的都没你多",
-    };
+    ];
 
     private static readonly Dictionary<string, string> _tagDictionary = new()
     {
@@ -178,7 +178,7 @@ public static partial class ProcessGroupMessage
     };
 
     private static readonly string[] _banKeywordList =
-    {
+    [
         "蟑螂",
         "元梦之星",
         "元",
@@ -196,7 +196,7 @@ public static partial class ProcessGroupMessage
         "原批",
         "比头大",
         "你妈",
-    };
+    ];
 
     /// <summary>
     /// 随机色图

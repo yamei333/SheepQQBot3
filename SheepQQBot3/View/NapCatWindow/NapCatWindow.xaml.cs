@@ -46,7 +46,7 @@ namespace SheepQQBot3.View
             }
 
             var hasRunningTarget = true;
-            var napCatName = napCatBat?.Replace(".bat", string.Empty);
+            var napCatName = "QQ";
             while (hasRunningTarget)
             {
                 var targetProcesses = Process.GetProcessesByName(napCatName);

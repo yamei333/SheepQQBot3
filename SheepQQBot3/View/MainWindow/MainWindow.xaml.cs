@@ -280,9 +280,8 @@ public partial class MainWindow : Window
     {
         // MEMO : 结束时不再关闭Server, 以处理历史消息
         // MEMO : debug时还是关闭(为了保持Server进程关闭)
-        if (PublicVar.IsDebug)
-            BotExtensions.KillServerExe();
-
+        // MEMO : 0.14.0.1 结束时还是关闭, 暂时不处理中断时的历史消息
+        BotExtensions.KillServerExe();
         BotExtensions.KillBarkExe();
         Application.Current.Shutdown();
     }
