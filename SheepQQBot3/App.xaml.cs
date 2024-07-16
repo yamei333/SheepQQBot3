@@ -18,7 +18,7 @@ public partial class App : Application
     {
         var args = Environment.GetCommandLineArgs();
 
-        BotExtensions.KillBarkexe();
+        BotExtensions.KillBarkExe();
 
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接

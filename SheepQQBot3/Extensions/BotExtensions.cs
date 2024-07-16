@@ -22,9 +22,18 @@ public static partial class BotExtensions
         => botFunctions.FirstOrDefault(each => each.BotFunctionType == botFunctionType)?.IsUsed ?? false;
 
     /// <summary>
+    /// 关闭NapCat进程
+    /// </summary>
+    public static void KillServerExe()
+    {
+        var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["napcatbat"]?.Replace(".bat", string.Empty));
+        processes.ForEach(each => each.Kill());
+    }
+
+    /// <summary>
     /// 关闭Bark进程
     /// </summary>
-    public static void KillBarkexe()
+    public static void KillBarkExe()
     {
         var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["barkexe"]?.Replace(".exe", string.Empty));
         processes.ForEach(each => each.Kill());

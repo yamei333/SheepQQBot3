@@ -1,4 +1,11 @@
-﻿using System;
+﻿using Masuit.Tools;
+using SheepQQBot3.Enums;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
+using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
+using System;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -8,13 +15,6 @@ using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using Masuit.Tools;
-using SheepQQBot3.Enums;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -76,11 +76,18 @@ public partial class MainWindow : Window
     {
         this.Left -= int.MaxValue;
         this.Visibility = Visibility.Collapsed;
+        // MEMO : NapCat
+        PublicVar.NapCatWindow = new NapCatWindow
+        {
+            Visibility = Visibility.Collapsed,
+            WindowStyle = WindowStyle.None,
+        };
+        PublicVar.NapCatWindow.Show();
         // MEMO : Bark
         PublicVar.BarkWindow = new BarkWindow
         {
             Visibility = Visibility.Collapsed,
-            WindowStyle = WindowStyle.None
+            WindowStyle = WindowStyle.None,
         };
         PublicVar.BarkWindow.Show();
         Vm.AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化完成"));
@@ -271,12 +278,23 @@ public partial class MainWindow : Window
 
     private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
     {
-        BotExtensions.KillBarkexe();
+        // MEMO : 结束时不再关闭Server, 以处理历史消息
+        // MEMO : debug时还是关闭(为了保持Server进程关闭)
+        if (PublicVar.IsDebug)
+            BotExtensions.KillServerExe();
+
+        BotExtensions.KillBarkExe();
         Application.Current.Shutdown();
     }
 
     private void NotifyIcon_OnShowMainWindow(object sender, RoutedEventArgs e)
         => OnNotifyIconDoubleClick(sender, e);
+
+    private void NotifyIcon_OnShowNapCatWindow(object sender, RoutedEventArgs e)
+    {
+        PublicVar.NapCatWindow.Visibility = Visibility.Visible;
+        PublicVar.NapCatWindow.Activate();
+    }
 
     private void NotifyIcon_OnShowBarkWindow(object sender, RoutedEventArgs e)
     {

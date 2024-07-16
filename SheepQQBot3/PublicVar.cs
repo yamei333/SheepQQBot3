@@ -1,9 +1,4 @@
-﻿using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using Masuit.Tools;
+﻿using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.DbModel.JiebaDb;
@@ -11,6 +6,11 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
+using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Configuration;
+using System.Diagnostics;
 
 namespace SheepQQBot3;
 
@@ -94,6 +94,8 @@ public static class PublicVar
     /// </summary>
     public static BotServer BotServer => Vm.BotServer;
 
+    public static Process NapCat;
+    public static NapCatWindow NapCatWindow;
     public static Process Bark;
     public static BarkWindow BarkWindow;
 

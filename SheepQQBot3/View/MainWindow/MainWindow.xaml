@@ -220,6 +220,8 @@
                     <ContextMenu>
                         <MenuItem Click="NotifyIcon_OnShowMainWindow"
                                   Header="打开主界面" />
+                        <MenuItem Click="NotifyIcon_OnShowNapCatWindow"
+                                  Header="打开NapCat界面" />
                         <MenuItem Click="NotifyIcon_OnShowBarkWindow"
                                   Header="打开BarkServer界面"
                                   Visibility="{Binding IsBarkUsed,
