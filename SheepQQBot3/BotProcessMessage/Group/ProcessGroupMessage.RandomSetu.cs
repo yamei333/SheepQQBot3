@@ -82,10 +82,10 @@ public static partial class ProcessGroupMessage
     private static readonly Dictionary<SetuType, int> _setuWeight = new()
     {
         {SetuType.Lolicon, 30},
-        {SetuType.Yuban, 0}, // 会出现R18, 办了
+        {SetuType.Yuban, 4},
         {SetuType.NyanCatda, 0},  // 挂了, 2024-6-21
         {SetuType.Jitsu, 2},
-        {SetuType.JitsuSelf, 12},
+        {SetuType.JitsuSelf, 6},
     };
 
     private static readonly string[] _setuBuman =
