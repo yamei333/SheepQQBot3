@@ -7,6 +7,7 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.DbModel.BotDb;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.QQ;
 using SheepQQBot3.Model.Setu;
 using System;
 using System.Collections.Generic;
@@ -196,6 +197,7 @@ public static partial class ProcessGroupMessage
         "原批",
         "比头大",
         "你妈",
+        "充气薯",
     ];
 
     /// <summary>
@@ -265,7 +267,7 @@ public static partial class ProcessGroupMessage
                 }
                 else
                 {
-                    await BotServer.SendGroupMessageAsync(groupId, "输入不正确").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
                 }
             }
 
@@ -290,11 +292,11 @@ public static partial class ProcessGroupMessage
                         await BotDb.AddAsync(new SetuDoushiInfo(searchUserId)).ConfigureAwait(false);
                     }
 
-                    await BotServer.SendGroupMessageAsync(groupId, "CD已清空!").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
                 else
                 {
-                    await BotServer.SendGroupMessageAsync(groupId, "输入不正确").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
                 }
 
                 return true;
@@ -316,11 +318,11 @@ public static partial class ProcessGroupMessage
                         await BotDb.AddAsync(new SetuDoushiInfo(searchTargetId)).ConfigureAwait(false);
                     }
 
-                    await BotServer.SendGroupMessageAsync(groupId, "Lv已清空!").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
                 else
                 {
-                    await BotServer.SendGroupMessageAsync(groupId, "输入不正确").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
                 }
 
                 return true;
@@ -343,11 +345,11 @@ public static partial class ProcessGroupMessage
                         await BotDb.AddAsync(new SetuDoushiInfo(searchTargetId)).ConfigureAwait(false);
                     }
 
-                    await BotServer.SendGroupMessageAsync(groupId, "色图斗士状态已重置!").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
                 else
                 {
-                    await BotServer.SendGroupMessageAsync(groupId, "输入不正确").ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
                 }
 
                 return true;
@@ -471,10 +473,7 @@ public static partial class ProcessGroupMessage
             setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
             BotDb.Update(setuDoushiInfo);
-            var sendMessage = $"{CQCode.At(senderId)}"
-                + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
-                + $"[斗士Lv{setuDoushiLv}]";
-            await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
             return true;
         }
 
@@ -516,10 +515,7 @@ public static partial class ProcessGroupMessage
                 setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
                 setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                 BotDb.Update(setuDoushiInfo);
-                var sendMessage = $"{CQCode.At(senderId)}"
-                    + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Death.ToAddLevelString())}"
-                    + $"[斗士Lv{setuDoushiLv}]";
-                await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
             }
         }
@@ -532,19 +528,14 @@ public static partial class ProcessGroupMessage
                 if (setuDoushiInfo.ToFastTimes >= 2)
                 {
                     // MEMO : 连续刷则关小黑屋
-                    var sendMessage = $"{CQCode.At(senderId)}"
-                        + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}"
-                        + $"[斗士Lv{setuDoushiLv}]";
-                    await BotServer.SendGroupMessageAsync(groupId, sendMessage)
-                        .ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                     setuDoushiInfo.ToFastTimes = 0;
                     setuDoushiInfo.BlackListCD = dateNow.AddHours(1).ToTimeStamp();
                 }
                 else
                 {
                     // MEMO : 一定时间内不连续响应
-                    await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.Reply(senderId, messageId)}太快了, 休息一下吧")
-                        .ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
                     setuDoushiInfo.ToFastTimes += 1;
                 }
 
@@ -628,8 +619,7 @@ public static partial class ProcessGroupMessage
                     if ((setuCd - dateNow).TotalSeconds >= 300 - (int)(setuDoushiLv * 150.0 / 15))
                     {
                         // MEMO : CD5分钟以上, 老实等着吧
-                        await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.Reply(senderId, messageId)}CD还早呢, 先歇着吧")
-                            .ConfigureAwait(false);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
                         return true;
                     }
 
@@ -669,11 +659,7 @@ public static partial class ProcessGroupMessage
                         {
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                             BotDb.Update(setuDoushiInfo);
-                            var sendMessage = $"{CQCode.At(senderId)}"
-                                + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
-                                + $"[斗士Lv{setuDoushiLv}]";
-                            await BotServer.SendGroupMessageAsync(groupId, sendMessage)
-                                .ConfigureAwait(false);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                             return true;
                         }
                     }
@@ -689,11 +675,7 @@ public static partial class ProcessGroupMessage
                     setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                     setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                     BotDb.Update(setuDoushiInfo);
-                    var sendMessage = $"{CQCode.At(senderId)}"
-                        + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
-                        + $"[斗士Lv{setuDoushiLv}]";
-                    await BotServer.SendGroupMessageAsync(groupId, sendMessage)
-                        .ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                     return true;
                 }
 
@@ -736,23 +718,25 @@ public static partial class ProcessGroupMessage
             if (!canSendSetu)
             {
                 AddCD();
-                string sendMessage;
+                var sendMessage = string.Empty;
                 if (addSecond > 0)
                 {
                     // MEMO : CD增加
                     switch (addCDReason)
                     {
                         case AddCDReason.RequestFailed:
-                            sendMessage = $"{CQCode.At(senderId)}"
-                                + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
-                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo();
+                            //sendMessage = $"{CQCode.At(senderId)}"
+                            //    + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
+                            //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                            //    + GetSetuLvInfo();
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Error);
                             break;
                         case AddCDReason.NotReady:
-                            sendMessage = $"{CQCode.At(senderId)}"
-                                + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
-                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo();
+                            //sendMessage = $"{CQCode.At(senderId)}"
+                            //    + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
+                            //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                            //    + GetSetuLvInfo();
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Sleep);
                             break;
                         default:
                             // MEMO : 应该不会有此Case
@@ -774,8 +758,12 @@ public static partial class ProcessGroupMessage
 
                 await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, false, false, false, false))
                     .ConfigureAwait(false);
-                await BotServer.SendGroupMessageAsync(groupId, sendMessage)
-                    .ConfigureAwait(false);
+                if (!string.IsNullOrEmpty(sendMessage))
+                {
+                    await BotServer.SendGroupMessageAsync(groupId, sendMessage)
+                        .ConfigureAwait(false);
+                }
+
                 return true;
             }
             else
@@ -784,9 +772,7 @@ public static partial class ProcessGroupMessage
                 {
                     // MEMO : 白嫖
                     isFree = true;
-                    var sendMessage = $"{CQCode.At(senderId)}"
-                        + $"什么!? 你成功白嫖了一张{sourceTag}{SETU_KEYWORD}!";
-                    await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                     goto SendSetu;
                 }
 
@@ -856,27 +842,18 @@ public static partial class ProcessGroupMessage
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                             BotDb.Update(setuDoushiInfo);
-                            var sendMessage = $"{CQCode.At(senderId)}"
-                                + $"{SETU_KEYWORD}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.Platinum.ToAddLevelString())}"
-                                + $"[斗士Lv{setuDoushiLv}]";
-                            await BotServer.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                             return true;
                         }
 
-                        await BotServer.SendGroupMessageAsync(groupId,
-                                $"{CQCode.At(senderId)}{_setuKexiStart.Random()} "
-                                + $"色图库中没找到色图~, {_setuKexiEnd.Random()} {GetSetuLvInfo()}")
-                            .ConfigureAwait(false);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
                         //setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
                         //BotDb.Update(setuDoushiInfo);
                         return true;
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
                     case SetuResult.OtherError:
-                        await BotServer.SendGroupMessageAsync(groupId,
-                                $"{CQCode.At(senderId)}{_setuKexiStart.Random()}" +
-                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
-                            .ConfigureAwait(false);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Liuhan);
                         setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
                         await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))
@@ -1073,11 +1050,7 @@ public static partial class ProcessGroupMessage
             {
                 var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
                 if (sendDownloadingMessage)
-                {
-                    await BotServer.SendGroupMessageAsync(groupId,
-                            $"{CQCode.Reply(senderId, messageId)}{SETU_KEYWORD}正在{_setuGetting.Random()}...(API提供: {setuInfo.SetuType})")
-                        .ConfigureAwait(false);
-                }
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
 
                 if (setuInfo.Result == SetuResult.Successed
                     && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
@@ -1112,8 +1085,6 @@ public static partial class ProcessGroupMessage
                         continue;
                     }
 
-                    //await Api.SendGroupMessage(groupId,
-                    //    $"啊, 该{_setuKeyWords.Random()}被作者删了!{ENTER}正在第{retryTimes}次重新{_setuGetting.Random()}...");
                     retryTimes++;
                     setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
                     if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
@@ -1134,7 +1105,7 @@ public static partial class ProcessGroupMessage
 
                 if (retryTimes > maxRetryTimes)
                 {
-                    await BotServer.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
+                    //await BotServer.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
                     setuInfo.Result = SetuResult.ApiError;
                     return (setuInfo, string.Empty);
                 }
@@ -1187,7 +1158,7 @@ public static partial class ProcessGroupMessage
                     new(1000, 0),
                     new(100, 1),
                     new(30, 2),
-                    new(5, 3)
+                    new(5, 3),
                 };
                 var addSetuSenderLv = 0;
                 if (randActions.TryGetRandomWeight(out var item))
@@ -1203,12 +1174,8 @@ public static partial class ProcessGroupMessage
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
                 setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
                     .AddSeconds(addSecond).ToTimeStamp();
-                //var sendMessage = $"{CQCode.At(targetId)}" +
-                //    $"{_setuKeyWords.Random()}的CD神秘地{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", SetuAddLevel.SuperDouble.ToAddLevelString())}" +
-                //    $"[斗士Lv{setuDoushiLv}] {addLvString}";
                 BotDb.Update(setuDoushiInfo);
-
-                //await Api.SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+                BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
             }
 

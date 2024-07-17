@@ -4,6 +4,7 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.QQ;
 using SheepQQBot3.SDK.Server.Utils;
 using System;
 using System.Collections.Concurrent;
@@ -438,6 +439,21 @@ partial class BotServer
             var clientData = JsonSerializer.Deserialize<ClientReceiveData_GroupMember>(jsonText);
             return clientData.Data.ToDictionary(each => each.UserId, each => each);
         }, timeout);
+    }
+
+    /// <summary>
+    /// 发送表情回应
+    /// </summary>
+    /// <param name="messageId">消息ID</param>
+    /// <param name="emoji"><see cref="Emoji"/>></param>
+    public async void SendMessageEmojiAsync(long messageId, Emoji emoji)
+    {
+        var echo = Guid.NewGuid();
+        await SendDataAsync("set_msg_emoji_like", new ParamData
+        {
+            MessageId = messageId.ToString(),
+            EmojiId = ((int)emoji).ToString(),
+        }, echo).ConfigureAwait(false);
     }
 
     private T GetReply<T>(Guid echo, Func<string, T> getFunc, double timeout)

@@ -67,4 +67,7 @@ public class ParamData
 
     [JsonPropertyName("no_cache")]
     public bool NoCache { get; set; }
+
+    [JsonPropertyName("emoji_id")]
+    public string EmojiId { get; set; }
 }
