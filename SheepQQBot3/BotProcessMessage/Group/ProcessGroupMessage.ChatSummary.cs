@@ -125,10 +125,7 @@ public static partial class ProcessGroupMessage
             if (File.Exists(chatSummaryGroupConfigFilePath))
             {
                 var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-                chatSummaryGroupConfig = JsonSerializer.Deserialize<ChatSummaryGroupConfig>(jsonText, new JsonSerializerOptions
-                {
-                    IncludeFields = true,
-                });
+                chatSummaryGroupConfig = JsonExtensions.Deserialize<ChatSummaryGroupConfig>(jsonText);
             }
 
             switch (summaryType)
@@ -159,7 +156,7 @@ public static partial class ProcessGroupMessage
                         return false;
                     }
 
-                    File.WriteAllText(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, CommonExtensions.DefaultJsonOptions));
+                    File.WriteAllText(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, JsonExtensions.DefaultJsonOptions));
                     await BotServer.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
                     return true;
                 case "H":

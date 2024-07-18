@@ -52,7 +52,7 @@ public static partial class ProcessPrivateMessage
         //if (File.Exists(chatSummaryConfigFilePath))
         //{
         //    var jsonText = await File.ReadAllTextAsync(chatSummaryConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-        //    charSummaryConfig = JsonSerializer.Deserialize<ChatSummaryConfig>(jsonText, new JsonSerializerOptions
+        //    charSummaryConfig = JsonExtensions.Deserialize<ChatSummaryConfig>(jsonText, new JsonSerializerOptions
         //    {
         //        IncludeFields = true,
         //    });

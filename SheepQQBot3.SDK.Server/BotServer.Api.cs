@@ -1,4 +1,5 @@
-﻿using Masuit.Tools;
+﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -10,7 +11,6 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -288,7 +288,7 @@ partial class BotServer
                 .Select(each => new GroupForwardMessageElement(each))
                 .ToList(),
         }, echo).ConfigureAwait(false);
-        callBack?.Invoke(GetReply(echo, jsonInfo => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo), timeout));
+        callBack?.Invoke(GetReply(echo, JsonExtensions.Deserialize<ClientReceiveData>, timeout));
     }
 
     /// <summary>
@@ -316,7 +316,7 @@ partial class BotServer
 
         var groupMessage = GetReply(echo, jsonInfo =>
         {
-            var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
+            var clientReceiveData = JsonExtensions.Deserialize<ClientReceiveData>(jsonInfo);
             return new GroupMessage(clientReceiveData.Data);
         }, timeout);
         return groupMessage;
@@ -337,7 +337,7 @@ partial class BotServer
 
         return GetReply(echo, jsonInfo =>
         {
-            var clientReceiveData = JsonSerializer.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
+            var clientReceiveData = JsonExtensions.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
             return clientReceiveData.Data.Messages;
         }, timeout);
     }
@@ -436,7 +436,7 @@ partial class BotServer
 
         return GetReply(echo, jsonText =>
         {
-            var clientData = JsonSerializer.Deserialize<ClientReceiveData_GroupMember>(jsonText);
+            var clientData = JsonExtensions.Deserialize<ClientReceiveData_GroupMember>(jsonText);
             return clientData.Data.ToDictionary(each => each.UserId, each => each);
         }, timeout);
     }

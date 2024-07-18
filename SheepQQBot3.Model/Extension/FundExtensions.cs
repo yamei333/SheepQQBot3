@@ -36,7 +36,7 @@ public static class FundExtensions
         //var fundJsonText = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
         //try
         //{
-        //    var fundData = JsonSerializer.Deserialize<FundData>(fundJsonText);
+        //    var fundData = JsonExtensions.Deserialize<FundData>(fundJsonText);
         //}
         //catch (Exception e)
         //{

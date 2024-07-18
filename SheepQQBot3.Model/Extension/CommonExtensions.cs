@@ -1,52 +1,20 @@
-﻿using System.Collections.Generic;
-using System.IO;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Serialization;
-using System.Text.RegularExpressions;
-using System.Threading;
-using Masuit.Tools;
+﻿using Masuit.Tools;
 using MessagePack;
 using SheepQQBot3.Enums;
+using System.Collections.Generic;
+using System.IO;
+using System.Text.RegularExpressions;
+using System.Threading;
 
 namespace System;
 
 public static class CommonExtensions
 {
-    public static readonly JsonSerializerOptions DefaultJsonOptions = new JsonSerializerOptions
-    {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-    };
-
-    public static JsonSerializerOptions GetJsonOptions(bool ignoreNull)
-        => ignoreNull
-            ? new JsonSerializerOptions
-            {
-                DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            }
-            : new JsonSerializerOptions
-            {
-                Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-            };
-
     private const string KH_LEFT = @"&#91;";
     private const string KH_RIGHT = @"&#93;";
 
     public static bool CheckPercent(this Random rand, int percent)
         => rand.Next(100) + 1 <= percent;
-
-    //[Obsolete("为了适配所有对象深拷贝, 使用BinaryFormatter")]
-    //public static T Clone<T>(T realObject)
-    //{
-    //    var objectStream = new MemoryStream();
-    //    //利用 System.Runtime.Serialization序列化与反序列化完成引用对象的复制
-    //    var formatter = new BinaryFormatter();
-    //    formatter.Serialize(objectStream, realObject);
-    //    objectStream.Seek(0, SeekOrigin.Begin);
-    //    return (T)formatter.Deserialize(objectStream);
-    //}
 
     /// <summary>
     /// 基于MessagePackObject的深拷贝

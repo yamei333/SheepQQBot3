@@ -36,7 +36,7 @@ public static class HttpExtensions
     {
         try
         {
-            var data = await HttpClient.GetFromJsonAsync<T>(url, CommonExtensions.DefaultJsonOptions)
+            var data = await HttpClient.GetFromJsonAsync<T>(url, JsonExtensions.DefaultJsonOptions)
                 .ConfigureAwait(false);
             return new HttpResponse<T>(HttpResponseResult.Successed, data);
         }

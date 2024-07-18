@@ -1,4 +1,5 @@
-﻿using Masuit.Tools;
+﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -11,7 +12,6 @@ using System.ComponentModel;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
@@ -63,7 +63,7 @@ public partial class MainWindow : Window
             var holidayInfo = new Dictionary<string, bool>();
             regHolidayInfo.Matches(holidayInfoJson).ForEach(each =>
             {
-                var holidayInfoData = JsonSerializer.Deserialize<HolidayInfoData>(each.Value);
+                var holidayInfoData = JsonExtensions.Deserialize<HolidayInfoData>(each.Value);
                 if (holidayInfoData != null)
                     holidayInfo.Add(holidayInfoData.Date, holidayInfoData.Holiday);
             });

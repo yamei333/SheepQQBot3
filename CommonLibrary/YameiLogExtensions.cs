@@ -6,10 +6,13 @@ namespace CommonLibrary;
 
 public static class YameiLogExtensions
 {
-    private static readonly YameiLog yameiLog = new YameiLog();
+    private static readonly YameiLog yameiLog = new();
 
     public static void WriteLog(LogType logType, string logText)
         => yameiLog.WriteLog(logType, logText);
+
+    public static void WriteJsonDeserializeLog(Exception ex, string typeName, string jsonText)
+        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}\r\nType:{typeName}\r\nJson:{jsonText}");
 
     /// <summary>
     /// 写入错误日志

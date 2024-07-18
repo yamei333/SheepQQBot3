@@ -1,5 +1,5 @@
-﻿using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Enums;
+﻿using SheepQQBot3.Model.Enums;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model;
 
@@ -27,7 +27,7 @@ public class GroupMember
     public long LastSendTime { get; set; }
 
     [JsonPropertyName("level")]
-    public int Level { get; set; }
+    public string LevelStr { get; set; }
 
     [JsonPropertyName("nickname")]
     public string NickName { get; set; }

@@ -1,4 +1,9 @@
-﻿using System;
+﻿using CommonLibrary;
+using SheepQQBot3.DbModel;
+using SheepQQBot3.Model;
+using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
+using System;
 using System.Configuration;
 using System.Linq;
 using System.Net.WebSockets;
@@ -6,11 +11,6 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using CommonLibrary;
-using SheepQQBot3.DbModel;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
 using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Server;
@@ -118,10 +118,10 @@ public partial class BotServer : IDisposable
         return;
 
         ClientReceiveData GetClientReceiveData(string jsonInfo)
-            => JsonSerializer.Deserialize<ClientReceiveData>(jsonInfo);
+            => JsonExtensions.Deserialize<ClientReceiveData>(jsonInfo);
 
         ReceiveData GetReceiveData(string jsonInfo)
-            => JsonSerializer.Deserialize<ReceiveData>(jsonInfo);
+            => JsonExtensions.Deserialize<ReceiveData>(jsonInfo);
     }
 
     private void ProcessClientReceiveData(ClientReceiveData receiveData)
@@ -243,7 +243,7 @@ public partial class BotServer : IDisposable
         if (!Connected)
             return false;
 
-        var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), CommonExtensions.DefaultJsonOptions);
+        var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), JsonExtensions.DefaultJsonOptions);
         await _server.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
         return true;
     }
@@ -254,7 +254,7 @@ public partial class BotServer : IDisposable
             return false;
 
         var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData, echo == default ? null : echo.ToString()),
-            CommonExtensions.DefaultJsonOptions);
+            JsonExtensions.DefaultJsonOptions);
         await _server.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
         return true;
     }

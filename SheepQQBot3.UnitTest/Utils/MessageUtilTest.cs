@@ -19,7 +19,7 @@ public class MessageUtilTest
     public void NormalTest()
     {
         //var jsonInfo = "{\"self_id\":205552607,\"user_id\":381559116,\"time\":1709883310,\"message_id\":-2147483512,\"real_id\":\"7343892892256555542\",\"message_type\":\"group\",\"sender\":{\"user_id\":381559116,\"nickname\":\"凡\",\"card\":\"ruojiji2\",\"role\":\"owner\"},\"raw_message\":\"女的走了你工作量翻倍吗\",\"font\":14,\"sub_type\":\"normal\",\"message\":[{\"data\":{\"text\":\"女的走了你工作量翻倍吗\"},\"type\":\"text\"}],\"message_format\":\"array\",\"post_type\":\"message\",\"group_id\":414774779}";
-        //var zap = JsonSerializer.Deserialize<ClientData>(jsonInfo);
+        //var zap = JsonExtensions.Deserialize<ClientData>(jsonInfo);
 
         #region Test
 
@@ -37,7 +37,7 @@ public class MessageUtilTest
 
         //var zap =
         //    "{\"post_type\":\"notice\",\"notice_type\":\"notify\",\"time\":1676531224,\"self_id\":1366869256,\"sub_type\":\"honor\",\"group_id\":122187517,\"user_id\":252961222,\"honor_type\":\"talkative\"}";
-        //var setuResponse = JsonSerializer.Deserialize<ReceiveData>(zap);
+        //var setuResponse = JsonExtensions.Deserialize<ReceiveData>(zap);
 
         //var receiveJson = @"{""anonymous"":null,""font"":0,""group_id"":675106101,
         //    ""message"":""test for tlpmdm"",""message_id"":-1144564185,
@@ -47,7 +47,7 @@ public class MessageUtilTest
         //        ""nickname"":""淘气の雅美"",""role"":""owner"",""sex"":""unknown"",""Title"":"""",""user_id"":252961222
         //        },
         //    ""sub_type"":""normal"",""time"":1610090450,""user_id"":252961222}";
-        //var receiveData = JsonConvert.DeserializeObject<ReceiveData>(receiveJson);
+        //var receiveData = JsonExtensions.Deserialize<ReceiveData>(receiveJson);
 
         #endregion Test
 

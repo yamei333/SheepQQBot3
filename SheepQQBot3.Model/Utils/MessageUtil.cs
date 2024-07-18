@@ -1,9 +1,9 @@
-﻿using System;
+﻿using CommonLibrary;
+using SheepQQBot3.Model.Extension;
+using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Text.RegularExpressions;
-using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Model;
 
@@ -84,7 +84,7 @@ public static class MessageUtil
         ElementBaseData GetElementBaseData()
         {
             var subJson = GetSubJson();
-            var jsonData = JsonSerializer.Deserialize<ElementBaseData>(subJson);
+            var jsonData = JsonExtensions.Deserialize<ElementBaseData>(subJson);
             return jsonData;
         }
 
@@ -117,7 +117,7 @@ public static class MessageUtil
                 .Select(eachSubData => string.Join(":", eachSubData.Split('=')
                     .Select(eachElement => $"\"{eachElement}\"")
                     .ToArray())));
-            var elementBaseData = JsonSerializer.Deserialize<ElementBaseData>($"{{{subJsonContent}}}");
+            var elementBaseData = JsonExtensions.Deserialize<ElementBaseData>($"{{{subJsonContent}}}");
             elementBaseData.Data = xmlString[5..];
             return elementBaseData;
         }

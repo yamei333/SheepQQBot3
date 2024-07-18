@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text.Json;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.JsonCard;
+using System;
+using System.Text.Json;
+using System.Threading.Tasks;
 
 namespace SheepQQBot3.Extensions;
 
@@ -31,7 +31,7 @@ public static class CQCode
     {
         var jsonText = JsonSerializer.Serialize(
             new JsonCard_StructMsg(PublicVar.BotId, title, content, tag, url, previewIcon, tagIcon),
-            CommonExtensions.DefaultJsonOptions);
+            JsonExtensions.DefaultJsonOptions);
         var signedJsonText = await HttpExtensions.HttpClient
             .GetStringAsync($"http://ovoa.cc/api/VIPArk.php?jsonStr={jsonText}")
             .ConfigureAwait(false);

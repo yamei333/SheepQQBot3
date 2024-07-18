@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.Model.Enums;
+﻿using CommonLibrary;
+using SheepQQBot3.Model.Enums;
 using System;
 using System.Configuration;
 using System.Net.Http;
@@ -52,7 +53,7 @@ public static class PushExtensions
                 IsAutoCopy = isAutoCopy ? 1 : 0
             };
             var stringContent = new StringContent(
-                JsonSerializer.Serialize(pushBarkData, CommonExtensions.GetJsonOptions(false)),
+                JsonSerializer.Serialize(pushBarkData, JsonExtensions.GetJsonOptions(false)),
                 Encoding.UTF8, "application/json");
             var request = await HttpExtensions.HttpClient
                 .PostAsync($"http://yamimi.moe:30008/{key}", stringContent)

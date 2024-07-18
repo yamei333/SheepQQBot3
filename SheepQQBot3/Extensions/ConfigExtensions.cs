@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CommonLibrary;
+using Masuit.Tools;
+using Microsoft.VisualBasic.FileIO;
+using SheepQQBot3.Model.Config;
+using System;
 using System.Collections.Concurrent;
 using System.IO;
 using System.Linq;
@@ -7,10 +11,6 @@ using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
-using Masuit.Tools;
-using Microsoft.VisualBasic.FileIO;
-using SheepQQBot3.Model.Config;
-using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.Extensions;
@@ -57,10 +57,7 @@ public static class ConfigExtensions
                 jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
             }
 
-            var botConfig = JsonSerializer.Deserialize<BotConfig>(jsonText, new JsonSerializerOptions
-            {
-                IncludeFields = true,
-            });
+            var botConfig = JsonExtensions.Deserialize<BotConfig>(jsonText);
             var defaultBotFunctions = SetConfig.DefaultBotFunctions;
             botConfig.SetConfigs.Values.ForEach(each =>
             {

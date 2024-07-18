@@ -1,6 +1,6 @@
-﻿using System;
-using System.Text.Json;
+﻿using CommonLibrary;
 using SheepQQBot3.Model.Model;
+using System;
 using WatsonWebserver.Core;
 
 namespace SheepQQBot3.BotService;
@@ -18,7 +18,7 @@ public static partial class WebApiProcess
         _webServer.AddStaticRoute(HttpMethod.POST, "/UpdateSteamMarketStatus/", async context =>
         {
             var jsonText = context.Request.DataAsString;
-            var steamMarketStatus = JsonSerializer.Deserialize<SteamMarketStatus>(jsonText);
+            var steamMarketStatus = JsonExtensions.Deserialize<SteamMarketStatus>(jsonText);
             if (steamMarketStatus?.SheepQQBot3 == "yamei")
             {
                 LastUpdateSteamMarketStatusDate = DateTime.Now;

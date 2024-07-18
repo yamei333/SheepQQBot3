@@ -1,9 +1,9 @@
-﻿using System.Configuration;
-using System.Linq;
-using System.Threading.Tasks;
-using SheepQQBot3.Extensions;
+﻿using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
+using System.Configuration;
+using System.Linq;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -44,7 +44,7 @@ public static partial class ProcessGroupMessage
         //    $"&db=999&output_type=2&url={url}").ConfigureAwait(false);
 
         //var zap = await resp.Content.ReadAsStringAsync().ConfigureAwait(false);
-        //var sazap = JsonSerializer.Deserialize<SauceNaoResponse>(zap);
+        //var sazap = JsonExtensions.Deserialize<SauceNaoResponse>(zap);
         //;
 
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SauceNaoResponse>(
