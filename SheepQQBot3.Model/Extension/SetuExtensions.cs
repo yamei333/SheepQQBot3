@@ -105,8 +105,8 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivDirect}" +
-                  $"{GetUrlTagString()}{(r18 ? "&r18=1&level=4-6" : string.Empty)}";
+        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivDirect}"
+            + $"{GetUrlTagString()}{(r18 ? "&r18=1&level=4-6" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolisuki>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
@@ -142,6 +142,9 @@ public static partial class SetuExtensions
 
         string GetUrlTagString()
         {
+            if (string.IsNullOrEmpty(tag))
+                return string.Empty;
+
             return tag.Contains('|')
                 ? $"&{string.Join('&', tag.Split('|').Select(each => $"tag={each}"))}"
                 : $"&tag={tag}";
