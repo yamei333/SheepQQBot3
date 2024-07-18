@@ -45,7 +45,7 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivDirect}" +
+        var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivDirect}" +
                   $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
@@ -80,13 +80,68 @@ public static partial class SetuExtensions
             setuData.Urls?.Original?.ToSmallImageUrl(),
             setuResult);
 
-        string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}";
+        string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-5).ToTimeStamp()}";
 
         string GetUrlTagString()
         {
             if (string.IsNullOrEmpty(tag))
                 return GetDateString();
 
+            return tag.Contains('|')
+                ? $"&{string.Join('&', tag.Split('|').Select(each => $"tag={each}"))}"
+                : $"&tag={tag}";
+        }
+    }
+
+    public static Task<SetuInfo> GetSetu_LolisukiAsync(string tag)
+        => GetSetu_Lolisuki_CoreAsync(tag);
+
+    public static Task<SetuInfo> GetSetu_Lolisuki_R18Async(string tag)
+        => GetSetu_Lolisuki_CoreAsync(tag, true);
+
+    private static async Task<SetuInfo> GetSetu_Lolisuki_CoreAsync(string tag, bool r18 = false)
+    {
+        var setuData = new SetuData_Lolisuki();
+        var setuJsonText = string.Empty;
+        var setuResult = SetuResult.Successed;
+
+        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivDirect}" +
+                  $"{GetUrlTagString()}{(r18 ? "&r18=1&level=4-6" : string.Empty)}";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolisuki>(url).ConfigureAwait(false);
+        switch (httpResponse.Result)
+        {
+            case HttpResponseResult.Successed:
+                var setuResponse = httpResponse.Data;
+                if (setuResponse == null)
+                    return new SetuInfo(SetuType.Lolisuki, SetuResult.ApiError);
+
+                if (!setuResponse.Data.Any())
+                    return new SetuInfo(SetuType.Lolisuki, SetuResult.NoSearchResult);
+
+                setuData = setuResponse.Data.First();
+                break;
+            case HttpResponseResult.UnknownHost:
+                setuResult = SetuResult.ApiError;
+                break;
+            case HttpResponseResult.TimeOut:
+                setuResult = SetuResult.Timeout;
+                break;
+            case HttpResponseResult.UnknownError:
+                YameiLogExtensions.WriteLog(LogType.Error,
+                    $"GetSetu_Lolisuki_Core-{setuJsonText}-{httpResponse.ErrorMessage}");
+                setuResult = SetuResult.OtherError;
+                break;
+        }
+
+        return new SetuInfo(
+            SetuType.Lolisuki,
+            setuData.SetuInfo,
+            setuData.Urls?.Original?.ToImageUrl(),
+            setuData.Urls?.Original?.ToSmallImageUrl(),
+            setuResult);
+
+        string GetUrlTagString()
+        {
             return tag.Contains('|')
                 ? $"&{string.Join('&', tag.Split('|').Select(each => $"tag={each}"))}"
                 : $"&tag={tag}";

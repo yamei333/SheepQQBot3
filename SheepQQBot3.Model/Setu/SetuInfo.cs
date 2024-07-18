@@ -76,6 +76,7 @@ public class SetuInfo
 public enum SetuType
 {
     Lolicon,
+    Lolisuki,
     Yuban,
     NyanCatda,
     Jitsu,

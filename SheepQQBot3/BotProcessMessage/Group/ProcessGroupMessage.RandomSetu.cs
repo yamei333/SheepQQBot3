@@ -82,6 +82,7 @@ public static partial class ProcessGroupMessage
     private static readonly Dictionary<SetuType, int> _setuWeight = new()
     {
         {SetuType.Lolicon, 30},
+        {SetuType.Lolisuki, 20},
         {SetuType.Yuban, 4},
         {SetuType.NyanCatda, 0},  // 挂了, 2024-6-21
         {SetuType.Jitsu, 2},
@@ -89,24 +90,24 @@ public static partial class ProcessGroupMessage
     };
 
     private static readonly string[] _setuBuman =
-    {
+    [
         "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜",
-    };
+    ];
 
     private static readonly string[] _setuYouwant =
-    {
+    [
         string.Empty, "你要的", "你点的", "请求的", "申请的", "需求的",
-    };
+    ];
 
     private static readonly string[] _setuGetted =
-    {
+    [
         "来了", "已经送出", "到了", "来咯", "lei了", "已发送", "给你了",
-    };
+    ];
 
     private static readonly string[] _setuSource =
-    {
+    [
         "原图", "大图", "查看大图", "原图查看", "源链接", "图源",
-    };
+    ];
 
     private static readonly string[] _setuNo =
     [
@@ -425,30 +426,25 @@ public static partial class ProcessGroupMessage
         }
 
         // MEMO : 处理色图类型关键字
-        if (message.EndsWith("L", StringComparison.CurrentCultureIgnoreCase))
+        var messageEndWithChar = message[^1..].ToUpper();
+        switch (messageEndWithChar)
         {
-            message = message[..^1];
-            targetSetuApiType = SetuType.Lolicon;
-        }
-        else if (message.EndsWith("Y", StringComparison.CurrentCultureIgnoreCase))
-        {
-            message = message[..^1];
-            targetSetuApiType = SetuType.Yuban;
-        }
-        //else if (message.EndsWith("N", StringComparison.CurrentCultureIgnoreCase))
-        //{
-        //    message = message[..^1];
-        //    targetSetuApiType = SetuType.NyanCatda;
-        //}
-        else if (message.EndsWith("J", StringComparison.CurrentCultureIgnoreCase))
-        {
-            message = message[..^1];
-            targetSetuApiType = SetuType.Jitsu;
-        }
-        else if (message.EndsWith("JS", StringComparison.CurrentCultureIgnoreCase))
-        {
-            message = message[..^2];
-            targetSetuApiType = SetuType.JitsuSelf;
+            case "L":
+                message = message[..^1];
+                targetSetuApiType = SetuType.Lolicon;
+                break;
+            case "S":
+                message = message[..^1];
+                targetSetuApiType = SetuType.Lolisuki;
+                break;
+            case "Y":
+                message = message[..^1];
+                targetSetuApiType = SetuType.Yuban;
+                break;
+            case "J":
+                message = message[..^1];
+                targetSetuApiType = SetuType.Jitsu;
+                break;
         }
 
         // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
@@ -788,14 +784,16 @@ public static partial class ProcessGroupMessage
                 var randomSetuKeyword = targetSetuApiType switch
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
+                    SetuType.Lolisuki => GetRandomWeightSetuInfo(isR18, SetuType.Lolisuki),
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
                     _ => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Yuban, SetuType.Jitsu),
+                        SetuType.Lolicon, SetuType.Lolisuki, SetuType.Yuban, SetuType.Jitsu),
                 };
                 var randomSetu = targetSetuApiType switch
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
+                    SetuType.Lolisuki => GetRandomWeightSetuInfo(isR18, SetuType.Lolisuki),
                     SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
@@ -937,7 +935,7 @@ public static partial class ProcessGroupMessage
                 {
                     isR18 = true;
                     var randomSetuR18Keyword = GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
+                        SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
                     var randomSetuR18 = GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>());
                     var (setuInfoR18, _) = await GetSetu(() => isSearchTag
                             ? randomSetuR18Keyword.TryGetRandomWeight(out var funcResult)
@@ -1204,6 +1202,8 @@ public static partial class ProcessGroupMessage
             {
                 SetuType.Lolicon => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Lolicon_R18Async : SetuExtensions.GetSetu_LoliconAsync),
+                SetuType.Lolisuki => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_Lolisuki_R18Async : SetuExtensions.GetSetu_LolisukiAsync),
                 SetuType.Yuban => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Yuban_R18Async : SetuExtensions.GetSetu_YubanAsync),
                 SetuType.NyanCatda => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
