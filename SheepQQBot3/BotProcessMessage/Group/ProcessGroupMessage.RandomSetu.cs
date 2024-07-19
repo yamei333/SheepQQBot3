@@ -13,6 +13,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static Masuit.Tools.Systems.EnumExt;
@@ -23,6 +24,8 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
+
+    private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Multiline);
 
     /// <summary>
     /// 色图命令的开头
@@ -226,7 +229,10 @@ public static partial class ProcessGroupMessage
 
         if ((dateNow - setuDoushiInfo.BlackListCD.ToDateTime()).TotalMicroseconds < 0)
         {
-            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Monkey);
+            // MEMO : 应只给色图请求打标记
+            if (_regCorrectSetuMessage.IsMatch(message))
+                BotServer.SendMessageEmojiAsync(messageId, Emoji.Kulou);
+
             return false;
         }
 
@@ -728,7 +734,7 @@ public static partial class ProcessGroupMessage
                             //    + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
                             //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                             //    + GetSetuLvInfo();
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Error);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.DogeBig);
                             break;
                         case AddCDReason.NotReady:
                             //sendMessage = $"{CQCode.At(senderId)}"
@@ -743,7 +749,7 @@ public static partial class ProcessGroupMessage
                             //    + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
                             //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                             //    + GetSetuLvInfo();
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Sleep);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom);
                             break;
                     }
                 }
@@ -772,7 +778,7 @@ public static partial class ProcessGroupMessage
                 {
                     // MEMO : 白嫖
                     isFree = true;
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Flash);
                     goto SendSetu;
                 }
 
@@ -857,7 +863,7 @@ public static partial class ProcessGroupMessage
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
                     case SetuResult.OtherError:
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Liuhan);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom);
                         setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
                         BotDb.Update(setuDoushiInfo);
                         await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))

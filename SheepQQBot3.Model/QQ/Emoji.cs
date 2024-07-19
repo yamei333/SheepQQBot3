@@ -6,6 +6,21 @@
     public enum Emoji
     {
         /// <summary>
+        /// 骷髅
+        /// </summary>
+        Kulou = 37,
+
+        /// <summary>
+        /// Boom
+        /// </summary>
+        Boom = 333,
+
+        /// <summary>
+        /// 大冤种
+        /// </summary>
+        DogeBig = 377,
+
+        /// <summary>
         /// 闪光
         /// </summary>
         E_Flash = 10024,
@@ -63,11 +78,26 @@
         /// <summary>
         /// OK
         /// </summary>
+        OK = 124,
+
+        /// <summary>
+        /// OK(emoji)
+        /// </summary>
         E_OK = 128076,
+
+        /// <summary>
+        /// 点赞(emoji)
+        /// </summary>
+        E_DianZan = 128077,
 
         /// <summary>
         /// 点赞
         /// </summary>
-        E_DianZan = 128077,
+        DianZan = 76,
+
+        /// <summary>
+        /// 反向点赞
+        /// </summary>
+        DianZanDown = 77,
     }
 }
