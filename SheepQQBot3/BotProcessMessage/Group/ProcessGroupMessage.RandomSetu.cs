@@ -94,45 +94,45 @@ public static partial class ProcessGroupMessage
         "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜",
     ];
 
-    private static readonly string[] _setuYouwant =
-    [
-        string.Empty, "你要的", "你点的", "请求的", "申请的", "需求的",
-    ];
+    //private static readonly string[] _setuYouwant =
+    //[
+    //    string.Empty, "你要的", "你点的", "请求的", "申请的", "需求的",
+    //];
 
-    private static readonly string[] _setuGetted =
-    [
-        "来了", "已经送出", "到了", "来咯", "lei了", "已发送", "给你了",
-    ];
+    //private static readonly string[] _setuGetted =
+    //[
+    //    "来了", "已经送出", "到了", "来咯", "lei了", "已发送", "给你了",
+    //];
 
     private static readonly string[] _setuSource =
     [
         "原图", "大图", "查看大图", "原图查看", "源链接", "图源",
     ];
 
-    private static readonly string[] _setuNo =
-    [
-        "别", "憋", "鳖", "No",
-    ];
+    //private static readonly string[] _setuNo =
+    //[
+    //    "别", "憋", "鳖", "No",
+    //];
 
-    private static readonly string[] _setuSendLe =
-    [
-        "发了", "要了", "整了", "冲了", "弄了",
-    ];
+    //private static readonly string[] _setuSendLe =
+    //[
+    //    "发了", "要了", "整了", "冲了", "弄了",
+    //];
 
-    private static readonly string[] _setuRequest =
-    [
-        "获取",
-    ];
+    //private static readonly string[] _setuRequest =
+    //[
+    //    "获取",
+    //];
 
-    private static readonly string[] _setuGetting =
-    [
-        "下载中", "传送中", "获取中", "取得中", "载入中",
-    ];
+    //private static readonly string[] _setuGetting =
+    //[
+    //    "下载中", "传送中", "获取中", "取得中", "载入中",
+    //];
 
-    private static readonly string[] _setuCDWasAdded =
-    [
-        "被$ADD_LEVEL$了!", "被$ADD_LEVEL$, 时间延长了!", "被$ADD_LEVEL$, 大加特加了!",
-    ];
+    //private static readonly string[] _setuCDWasAdded =
+    //[
+    //    "被$ADD_LEVEL$了!", "被$ADD_LEVEL$, 时间延长了!", "被$ADD_LEVEL$, 大加特加了!",
+    //];
 
     private static readonly string[] _setuCDWasReduced =
     [
@@ -150,13 +150,13 @@ public static partial class ProcessGroupMessage
         "JI了!",
     ];
 
-    private static readonly string[] _setuUnluck =
-    [
-        "你运气差!",
-        "你霉运!",
-        "你脸黑!",
-        "你非洲人!",
-    ];
+    //private static readonly string[] _setuUnluck =
+    //[
+    //    "你运气差!",
+    //    "你霉运!",
+    //    "你脸黑!",
+    //    "你非洲人!",
+    //];
 
     private static readonly string[] _setuKexiEnd =
     [
@@ -225,7 +225,10 @@ public static partial class ProcessGroupMessage
         }
 
         if ((dateNow - setuDoushiInfo.BlackListCD.ToDateTime()).TotalMicroseconds < 0)
+        {
+            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Monkey);
             return false;
+        }
 
         var setuDoushiLv = setuDoushiInfo.SetuDoushiLv;
         var setuCd = setuDoushiInfo.SetuCD.ToDateTime();
@@ -732,14 +735,15 @@ public static partial class ProcessGroupMessage
                             //    + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
                             //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                             //    + GetSetuLvInfo();
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Sleep);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
                             break;
                         default:
                             // MEMO : 应该不会有此Case
-                            sendMessage = $"{CQCode.At(senderId)}"
-                                + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
-                                + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                                + GetSetuLvInfo();
+                            //sendMessage = $"{CQCode.At(senderId)}"
+                            //    + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
+                            //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
+                            //    + GetSetuLvInfo();
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Sleep);
                             break;
                     }
                 }
@@ -778,6 +782,8 @@ public static partial class ProcessGroupMessage
 
             var revertCd = DateTime.MinValue;
         SendSetu:
+            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
+
             try
             {
                 var isR18 = false;
@@ -844,7 +850,7 @@ public static partial class ProcessGroupMessage
                             return true;
                         }
 
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Error);
                         //setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
                         //BotDb.Update(setuDoushiInfo);
                         return true;
@@ -1047,8 +1053,7 @@ public static partial class ProcessGroupMessage
                 bool checkImageOnly)
             {
                 var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
-                if (sendDownloadingMessage)
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
+                //if (sendDownloadingMessage)
 
                 if (setuInfo.Result == SetuResult.Successed
                     && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))

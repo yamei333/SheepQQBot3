@@ -13,11 +13,6 @@
         /// <summary>
         /// 错误
         /// </summary>
-        E_No = 10060,
-
-        /// <summary>
-        /// 错误
-        /// </summary>
         E_Error = 10060,
 
         /// <summary>
@@ -29,6 +24,11 @@
         /// 咖啡
         /// </summary>
         E_Coffee = 9749,
+
+        /// <summary>
+        /// 猴子
+        /// </summary>
+        E_Monkey = 128053,
 
         /// <summary>
         /// Zzz
