@@ -109,7 +109,7 @@ public static partial class ProcessGroupMessage
             var dateNow = DateTime.Now;
             if (!BotExtensions.IsAdmin(senderId) && (dateNow - _chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
             {
-                BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
+                BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee);
                 return true;
             }
 

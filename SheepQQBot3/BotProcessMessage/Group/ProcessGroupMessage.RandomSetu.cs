@@ -5,11 +5,11 @@ using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.DbModel.BotDb;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using SheepQQBot3.Model.Setu;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -26,6 +26,8 @@ public static partial class ProcessGroupMessage
     //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
 
     private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Multiline);
+
+    private static readonly ConcurrentDictionary<long, SetuDoushiInfo> _setuDoushiInfoCache = new();
 
     /// <summary>
     /// 色图命令的开头
@@ -217,21 +219,12 @@ public static partial class ProcessGroupMessage
         var message = groupMessage.Message;
         var dateNow = DateTime.Now;
 
-        SetuDoushiInfo setuDoushiInfo;
-        lock (BotDb.SyncLock)
-            setuDoushiInfo = BotDb.SetuDoushiInfos.FindAsync(senderId).Result;
-
-        if (setuDoushiInfo == null)
-        {
-            setuDoushiInfo = new SetuDoushiInfo(senderId);
-            await BotDb.AddAsync(setuDoushiInfo).ConfigureAwait(false);
-        }
-
+        var setuDoushiInfo = await GetSetuDoushiInfo(senderId).ConfigureAwait(false);
         if ((dateNow - setuDoushiInfo.BlackListCD.ToDateTime()).TotalMicroseconds < 0)
         {
-            // MEMO : 应只给色图请求打标记
+            // MEMO : 黑名单的人, 给色图请求打标记
             if (_regCorrectSetuMessage.IsMatch(message))
-                BotServer.SendMessageEmojiAsync(messageId, Emoji.Kulou);
+                BotServer.SendMessageEmojiAsync(messageId, Emoji.DogeBig);
 
             return false;
         }
@@ -266,8 +259,7 @@ public static partial class ProcessGroupMessage
                     }
                     else
                     {
-                        var searchSetuDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchUserId)
-                            ?? new SetuDoushiInfo(searchUserId);
+                        var searchSetuDoushiInfo = await GetSetuDoushiInfo(searchUserId, false);
                         // MEMO : 显CD
                         var sendMessage = $"目标色图斗士Lv{searchSetuDoushiInfo.CalcSetuDoushiLv(dateNow)} " +
                             $"CD[{GetCD(searchSetuDoushiInfo)}], " +
@@ -291,16 +283,9 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETCD_LIBRARY.Length..], out var searchUserId))
                 {
                     // MEMO : 清空CD
-                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchUserId);
-                    if (targetDoushiInfo != null)
-                    {
-                        targetDoushiInfo.SetuCD = 0;
-                        BotDb.Update(targetDoushiInfo);
-                    }
-                    else
-                    {
-                        await BotDb.AddAsync(new SetuDoushiInfo(searchUserId)).ConfigureAwait(false);
-                    }
+                    var targetDoushiInfo = await GetSetuDoushiInfo(searchUserId);
+                    targetDoushiInfo.SetuCD = 0;
+                    UpdateSetuDoushiInfo(targetDoushiInfo);
 
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
@@ -317,16 +302,9 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETLV_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空Lv
-                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
-                    if (targetDoushiInfo != null)
-                    {
-                        targetDoushiInfo.SetuDoushiLv = 0;
-                        BotDb.Update(targetDoushiInfo);
-                    }
-                    else
-                    {
-                        await BotDb.AddAsync(new SetuDoushiInfo(searchTargetId)).ConfigureAwait(false);
-                    }
+                    var targetDoushiInfo = await GetSetuDoushiInfo(searchTargetId);
+                    targetDoushiInfo.SetuDoushiLv = 0;
+                    UpdateSetuDoushiInfo(targetDoushiInfo);
 
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
@@ -343,17 +321,10 @@ public static partial class ProcessGroupMessage
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY.Length..], out var searchTargetId))
                 {
                     // MEMO : 清空CD
-                    var targetDoushiInfo = BotDb.SetuDoushiInfos.FindLock(searchTargetId);
-                    if (targetDoushiInfo != null)
-                    {
-                        targetDoushiInfo.SetuDoushiLv = 0;
-                        targetDoushiInfo.SetuCD = 0;
-                        BotDb.Update(targetDoushiInfo);
-                    }
-                    else
-                    {
-                        await BotDb.AddAsync(new SetuDoushiInfo(searchTargetId)).ConfigureAwait(false);
-                    }
+                    var targetDoushiInfo = await GetSetuDoushiInfo(searchTargetId);
+                    targetDoushiInfo.SetuDoushiLv = 0;
+                    targetDoushiInfo.SetuCD = 0;
+                    UpdateSetuDoushiInfo(targetDoushiInfo);
 
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
                 }
@@ -477,7 +448,7 @@ public static partial class ProcessGroupMessage
         {
             setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
-            BotDb.Update(setuDoushiInfo);
+            UpdateSetuDoushiInfo(setuDoushiInfo);
             BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
             return true;
         }
@@ -519,7 +490,7 @@ public static partial class ProcessGroupMessage
             {
                 setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
                 setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
-                BotDb.Update(setuDoushiInfo);
+                UpdateSetuDoushiInfo(setuDoushiInfo);
                 BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
             }
@@ -540,11 +511,11 @@ public static partial class ProcessGroupMessage
                 else
                 {
                     // MEMO : 一定时间内不连续响应
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee);
                     setuDoushiInfo.ToFastTimes += 1;
                 }
 
-                BotDb.Update(setuDoushiInfo);
+                UpdateSetuDoushiInfo(setuDoushiInfo);
                 return true;
             }
 
@@ -624,7 +595,7 @@ public static partial class ProcessGroupMessage
                     if ((setuCd - dateNow).TotalSeconds >= 300 - (int)(setuDoushiLv * 150.0 / 15))
                     {
                         // MEMO : CD5分钟以上, 老实等着吧
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee);
                         return true;
                     }
 
@@ -650,28 +621,22 @@ public static partial class ProcessGroupMessage
                     };
                 }
 
-                if (randActions.TryGetRandomWeight(out var resultAction))
+                randActions.TryGetRandomWeight(out var resultAction);
+                SetSetuValues(resultAction.Value);
+                if (!canSendSetu)
                 {
-                    SetSetuValues(resultAction.Value);
-                    if (!canSendSetu)
+                    var last9Historys = targetSetuSendHistorys
+                        .OrderByDescending(each => each.TimeStamp)
+                        .Take(9)
+                        .ToArray();
+                    // MEMO : 色图10连跪, 冷静24小时
+                    if (last9Historys.Length == 9 && last9Historys.All(each => !each.IsRequestSuccessed.ToBool()))
                     {
-                        var last9Historys = targetSetuSendHistorys
-                            .OrderByDescending(each => each.TimeStamp)
-                            .Take(9)
-                            .ToArray();
-                        // MEMO : 色图10连跪, 冷静24小时
-                        if (last9Historys.Length == 9 && last9Historys.All(each => !each.IsRequestSuccessed.ToBool()))
-                        {
-                            setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
-                            BotDb.Update(setuDoushiInfo);
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
-                            return true;
-                        }
+                        setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
+                        UpdateSetuDoushiInfo(setuDoushiInfo);
+                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
+                        return true;
                     }
-                }
-                else
-                {
-                    // MEMO : 应该不会发生
                 }
 
                 // MEMO : 参数注入意图
@@ -679,7 +644,7 @@ public static partial class ProcessGroupMessage
                 {
                     setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                     setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
-                    BotDb.Update(setuDoushiInfo);
+                    UpdateSetuDoushiInfo(setuDoushiInfo);
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                     return true;
                 }
@@ -704,7 +669,7 @@ public static partial class ProcessGroupMessage
                     setuDoushiLv = MaxSenderLv;
 
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv;
-                BotDb.Update(setuDoushiInfo);
+                UpdateSetuDoushiInfo(setuDoushiInfo);
             }
 
             if (PublicVar.IsDebug)
@@ -734,14 +699,14 @@ public static partial class ProcessGroupMessage
                             //    + $"{_setuKexiStart.Random()} {_setuUnluck.Random()} {SETU_KEYWORD}{_setuRequest.Random()[..2]}失败!"
                             //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                             //    + GetSetuLvInfo();
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.DogeBig);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.Moyu);
                             break;
                         case AddCDReason.NotReady:
                             //sendMessage = $"{CQCode.At(senderId)}"
                             //    + $"{_setuNo.Random()}{_setuSendLe.Random()}, {SETU_KEYWORD}CD还没到呢!"
                             //    + $"{SETU_KEYWORD}的CD{_setuCDWasAdded.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
                             //    + GetSetuLvInfo();
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Coffee);
+                            BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee);
                             break;
                         default:
                             // MEMO : 应该不会有此Case
@@ -851,21 +816,19 @@ public static partial class ProcessGroupMessage
                         {
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
-                            BotDb.Update(setuDoushiInfo);
+                            UpdateSetuDoushiInfo(setuDoushiInfo);
                             BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                             return true;
                         }
 
                         BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Error);
-                        //setuDoushiInfo.SetuCD = revertCd.ToTimeStamp();
-                        //BotDb.Update(setuDoushiInfo);
                         return true;
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
                     case SetuResult.OtherError:
                         BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom);
                         setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
-                        BotDb.Update(setuDoushiInfo);
+                        UpdateSetuDoushiInfo(setuDoushiInfo);
                         await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))
                             .ConfigureAwait(false);
                         return true;
@@ -990,8 +953,7 @@ public static partial class ProcessGroupMessage
                             //    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
                             //    $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
                             //    .ConfigureAwait(false);
-                            await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree,
-                                    true))
+                            await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, true))
                                 .ConfigureAwait(false);
                             break;
                     }
@@ -1032,7 +994,7 @@ public static partial class ProcessGroupMessage
             {
                 setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
                     .AddSeconds(addSecond).ToTimeStamp();
-                BotDb.Update(setuDoushiInfo);
+                UpdateSetuDoushiInfo(setuDoushiInfo);
             }
 
             string GetSetuLvInfo()
@@ -1173,17 +1135,9 @@ public static partial class ProcessGroupMessage
                 if (randActions.TryGetRandomWeight(out var item))
                     addSetuSenderLv = item.Value;
 
-                //var addString = string.Empty;
-                //if (addSetuSenderLv > 0)
-                //    addString += $"神秘{addSetuSenderLv.ToSignString()}";
-
-                //var addLvString = (string.IsNullOrEmpty(addString)
-                //    ? string.Empty
-                //    : $"本次{addSetuSenderLv.ToSignString()}({addString})");
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
-                setuDoushiInfo.SetuCD = (setuCd > dateNow ? setuCd : dateNow)
-                    .AddSeconds(addSecond).ToTimeStamp();
-                BotDb.Update(setuDoushiInfo);
+                setuDoushiInfo.BlackListCD = dateNow.AddHours(3).ToTimeStamp();
+                UpdateSetuDoushiInfo(setuDoushiInfo);
                 BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
             }
@@ -1225,6 +1179,45 @@ public static partial class ProcessGroupMessage
                     isR18 ? SetuExtensions.GetSetu_JitsuSelf_R18Async : SetuExtensions.GetSetu_JitsuSelfAsync),
                 _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null)
             };
+    }
+
+    /// <summary>
+    /// 取得色图斗士信息(带缓存)
+    /// </summary>
+    /// <param name="senderId">QQID</param>
+    /// <param name="addToCache">是否添加到缓存</param>
+    /// <returns>色图斗士信息</returns>
+    private static async Task<SetuDoushiInfo> GetSetuDoushiInfo(long senderId, bool addToCache = true)
+    {
+        if (_setuDoushiInfoCache.TryGetValue(senderId, out var setuDoushiInfo))
+            return setuDoushiInfo;
+
+        lock (BotDb.SyncLock)
+            setuDoushiInfo = BotDb.SetuDoushiInfos.FindAsync(senderId).Result;
+
+        if (setuDoushiInfo == null && addToCache)
+        {
+            setuDoushiInfo = new SetuDoushiInfo(senderId);
+            await BotDb.AddAsync(setuDoushiInfo).ConfigureAwait(false);
+        }
+
+        if (addToCache)
+        {
+            _setuDoushiInfoCache.AddOrUpdate(senderId,
+                _ => setuDoushiInfo,
+                (_, __) => setuDoushiInfo);
+        }
+
+        return setuDoushiInfo;
+    }
+
+    private static void UpdateSetuDoushiInfo(SetuDoushiInfo setuDoushiInfo)
+    {
+        var targetId = setuDoushiInfo.TargetId;
+        _setuDoushiInfoCache.AddOrUpdate(targetId,
+            _ => setuDoushiInfo,
+            (_, __) => setuDoushiInfo);
+        BotDb.Update(setuDoushiInfo);
     }
 }
 

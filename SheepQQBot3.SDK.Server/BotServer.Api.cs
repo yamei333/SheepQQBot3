@@ -456,6 +456,23 @@ partial class BotServer
         }, echo).ConfigureAwait(false);
     }
 
+    /// <summary>
+    /// 获取Cookies
+    /// </summary>
+    public async Task<string> GetCookiesAsync(string domain, double timeout = 5)
+    {
+        var echo = Guid.NewGuid();
+        await SendDataAsync("get_cookies", new ParamData
+        {
+            Domain = domain,
+        }, echo).ConfigureAwait(false);
+
+        return GetReply(echo, jsonText =>
+        {
+            return jsonText;
+        }, timeout);
+    }
+
     private T GetReply<T>(Guid echo, Func<string, T> getFunc, double timeout)
         where T : class
     {

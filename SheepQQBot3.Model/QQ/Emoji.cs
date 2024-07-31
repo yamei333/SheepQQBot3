@@ -11,6 +11,21 @@
         Kulou = 37,
 
         /// <summary>
+        /// 咖啡
+        /// </summary>
+        Coffee = 60,
+
+        /// <summary>
+        /// 茶
+        /// </summary>
+        Tea = 171,
+
+        /// <summary>
+        /// 摸鱼
+        /// </summary>
+        Moyu = 285,
+
+        /// <summary>
         /// Boom
         /// </summary>
         Boom = 333,
@@ -18,7 +33,7 @@
         /// <summary>
         /// 大冤种
         /// </summary>
-        DogeBig = 377,
+        DogeBig = 344,
 
         /// <summary>
         /// 闪光

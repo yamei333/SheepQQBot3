@@ -70,4 +70,7 @@ public class ParamData
 
     [JsonPropertyName("emoji_id")]
     public string EmojiId { get; set; }
+
+    [JsonPropertyName("domain")]
+    public string Domain { get; set; }
 }
