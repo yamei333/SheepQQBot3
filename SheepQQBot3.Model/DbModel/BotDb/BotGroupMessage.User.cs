@@ -35,7 +35,7 @@ public partial class BotGroupMessage
             if (_regCQCode.Match(cqCode).Value == "image" && !messageImage.Contains(cqCode))
                 messageImage += cqCode;
         });
-        MessageText = _regCQArea.Replace(message, string.Empty);
+        MessageText = _regCQArea.Replace(message, string.Empty).TrimStart();
         MessageImage = messageImage;
     }
 }

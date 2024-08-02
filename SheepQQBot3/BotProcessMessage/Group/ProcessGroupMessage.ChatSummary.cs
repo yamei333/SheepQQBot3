@@ -292,7 +292,8 @@ public static partial class ProcessGroupMessage
             || uMessage.EndsWith("色图L")
             || uMessage.EndsWith("色图N")
             || uMessage.EndsWith("色图J")
-            || uMessage.EndsWith("色图Y"))
+            || uMessage.EndsWith("色图Y")
+            || uMessage.EndsWith("色图S"))
         {
             return false;
         }

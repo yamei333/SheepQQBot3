@@ -50,6 +50,11 @@ public static class PublicVar
     public static readonly long BotId = long.Parse(ConfigurationManager.AppSettings["selfId"]!);
 
     /// <summary>
+    /// 色图斗士信息缓存
+    /// </summary>
+    public static readonly ConcurrentDictionary<long, SetuDoushiInfo> SetuDoushiInfoCache = new();
+
+    /// <summary>
     /// 半角逗号
     /// </summary>
     public const char COMMA = ',';

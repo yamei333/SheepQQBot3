@@ -27,8 +27,6 @@ public static partial class ProcessGroupMessage
 
     private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Multiline);
 
-    private static readonly ConcurrentDictionary<long, SetuDoushiInfo> _setuDoushiInfoCache = new();
-
     /// <summary>
     /// 色图命令的开头
     /// </summary>
@@ -96,7 +94,7 @@ public static partial class ProcessGroupMessage
 
     private static readonly string[] _setuBuman =
     [
-        "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜",
+        "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜", "吗",
     ];
 
     //private static readonly string[] _setuYouwant =
@@ -1136,7 +1134,7 @@ public static partial class ProcessGroupMessage
                     addSetuSenderLv = item.Value;
 
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
-                setuDoushiInfo.BlackListCD = dateNow.AddHours(3).ToTimeStamp();
+                setuDoushiInfo.BlackListCD = dateNow.AddHours(2).ToTimeStamp();
                 UpdateSetuDoushiInfo(setuDoushiInfo);
                 BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
@@ -1189,7 +1187,7 @@ public static partial class ProcessGroupMessage
     /// <returns>色图斗士信息</returns>
     private static async Task<SetuDoushiInfo> GetSetuDoushiInfo(long senderId, bool addToCache = true)
     {
-        if (_setuDoushiInfoCache.TryGetValue(senderId, out var setuDoushiInfo))
+        if (SetuDoushiInfoCache.TryGetValue(senderId, out var setuDoushiInfo))
             return setuDoushiInfo;
 
         lock (BotDb.SyncLock)
@@ -1203,7 +1201,7 @@ public static partial class ProcessGroupMessage
 
         if (addToCache)
         {
-            _setuDoushiInfoCache.AddOrUpdate(senderId,
+            SetuDoushiInfoCache.AddOrUpdate(senderId,
                 _ => setuDoushiInfo,
                 (_, __) => setuDoushiInfo);
         }
@@ -1214,7 +1212,7 @@ public static partial class ProcessGroupMessage
     private static void UpdateSetuDoushiInfo(SetuDoushiInfo setuDoushiInfo)
     {
         var targetId = setuDoushiInfo.TargetId;
-        _setuDoushiInfoCache.AddOrUpdate(targetId,
+        SetuDoushiInfoCache.AddOrUpdate(targetId,
             _ => setuDoushiInfo,
             (_, __) => setuDoushiInfo);
         BotDb.Update(setuDoushiInfo);
