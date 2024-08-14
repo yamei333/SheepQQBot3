@@ -82,7 +82,7 @@ public static class ConfigExtensions
             if (isImportConfigFileExists)
                 FileSystem.DeleteFile(configFilePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
         }
-        catch (Exception e)
+        catch (Exception)
         {
             if (!isImportConfigFileExists)
             {

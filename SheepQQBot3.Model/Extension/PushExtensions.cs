@@ -50,7 +50,7 @@ public static class PushExtensions
                 LinkUrl = string.IsNullOrEmpty(url) ? null : url,
                 IsArchive = isArchive ? 1 : 0,
                 IsCopy = isCopy ? 1 : 0,
-                IsAutoCopy = isAutoCopy ? 1 : 0
+                IsAutoCopy = isAutoCopy ? 1 : 0,
             };
             var stringContent = new StringContent(
                 JsonSerializer.Serialize(pushBarkData, JsonExtensions.GetJsonOptions(false)),
