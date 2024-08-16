@@ -51,9 +51,9 @@ public partial class MainWindowFunctionTest : UserControl
     /// </summary>
     private async void TestSendJsonMessage1(object sender, RoutedEventArgs e)
     {
-        if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
+        if (long.TryParse(TxtTestSendJsonMessage1_GroupId.Text, out var groupId))
         {
-            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQCode.JsonCard_StructMsgAsync(
+            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQCode.JsonCard_TianxuanShareAsync(
                 TxtTestSendJsonMessage1_Title.Text,
                 TxtTestSendJsonMessage1_Content.Text,
                 TxtTestSendJsonMessage1_Url.Text,

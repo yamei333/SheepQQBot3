@@ -30,7 +30,7 @@ public class SetuData_Lolisuki
     public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"来源:[Lolisuki]PIXIV 画师:{Author} PID:{Pid}";
+    public string SetuInfo => $"画师:{Author}\r\nPID:{Pid}";
 }
 
 public class SetuData_Lolisuki_Url

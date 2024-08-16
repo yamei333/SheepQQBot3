@@ -1,7 +1,4 @@
-﻿using System;
-using System.Linq;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -9,6 +6,9 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.LiveAlarm;
+using System;
+using System.Linq;
+using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
@@ -91,14 +91,16 @@ public static partial class TaskProcess
         if ((DateTime.Now - startTime).TotalSeconds > 90)
             return;
 
-        var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
-                          $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
-        //var sendMessage = await CQCode.JsonCard_StructMsg(
-        //    liveRoomResponseData.RoomInfo.Title,
-        //    $"主播ID: {liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}{ENTER}房间号: {liveRoomId}",
-        //    $"https://live.bilibili.com/{liveRoomId}",
-        //    liveRoomResponseData.AnchorInfo.UserBaseInfo.Face)
-        //    .ConfigureAwait(false);
+        var roomInfo = liveRoomResponseData.RoomInfo;
+        var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
+        var sendMessage = await CQCode.JsonCard_TianxuanShareAsync(
+            "正在直播!",
+            $"主播:{userBaseInfo.Name}{ENTER}标题:{roomInfo.Title}",
+            $"https://live.bilibili.com/{liveRoomId}",
+            userBaseInfo.Face)
+            .ConfigureAwait(false);
+        //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
+        //                  $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
 
         var targetId = setConfig.TargetId;
         switch (setConfig.TargetType)

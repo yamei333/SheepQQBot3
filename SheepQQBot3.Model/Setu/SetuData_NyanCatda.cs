@@ -26,5 +26,5 @@ public class SetuData_NyanCatda
     public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"来源:[NyanCatda]PIXIV 画师:{Author} PID:{Pid}";
+    public string SetuInfo => $"画师:{Author}\r\nPID:{Pid}";
 }

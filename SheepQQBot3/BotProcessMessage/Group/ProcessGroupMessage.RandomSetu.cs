@@ -9,7 +9,6 @@ using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using SheepQQBot3.Model.Setu;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -23,7 +22,15 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 
 public static partial class ProcessGroupMessage
 {
-    //private const string SETUAPI_ICON = "https://lolicon.app/favicon.ico";
+    //private const string[] SETUAPI_ICONS = "https://lolicon.app/favicon.ico";
+    private static readonly string[] setuIcons = [
+        "https://i0.hdslb.com/bfs/garb/66a0850681611ac4dede74823a34e197913fb97f.png",
+        "https://i0.hdslb.com/bfs/garb/6f57a2e1d8cedd68f5b837a7118bba37275ba5c4.png",
+        "https://i0.hdslb.com/bfs/garb/20e2b689aebcd2fa8bbe1ffa440827c3062cc420.png",
+        "https://i0.hdslb.com/bfs/garb/ac9c50a5751f9b02af366c9096b703a8889d7ea4.png",
+        "https://i0.hdslb.com/bfs/garb/177b264dcdc99a107481ae8e7ead45dc7448dbd7.png",
+        "https://i0.hdslb.com/bfs/garb/8b6d3154bd4eb96df7603163cffc1db407d92bf2.png",
+    ];
 
     private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Multiline);
 
@@ -837,23 +844,20 @@ public static partial class ProcessGroupMessage
                 var sendMessages = new List<GroupForwardMessage>
                 {
                     //new(messageId),
-                    //new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
-                    //new(BOT_NAME, BotId, CQCode.Image(CommonExtensions.GetPath(CACHE_DIRECTORY_NAME, fileName))),
-                    //new(BOT_NAME, BotId, $"{setuInfo.SourceText}"),
-                    //new(BOT_NAME, BotId, await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
-                    //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)),
-
-                    //new(messageId),
                     //new(groupMessage.Sender.NickName, senderId, $"{CQCode.Reply(senderId, messageId)}"),
                     new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
-                    new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
+                    //new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
 
-                    // MEMO : LLOneBot转发里面不能用Reply
+                    // MEMO : LLOneBot转发里面不能用Reply, 因为他是先发给自己, 再群组转发
                     //new(BOT_NAME, BotId, $"{CQCode.Reply(targetId, messageId)}{GetSetuLvInfo()}"),
                     new($"{setuInfo.SetuType}", BotId,
                         CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_IMAGE, fileName, GetPathType.CQCodePath))),
-                    new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
-                        $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
+                    //new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
+                    //    $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
+                    // MEMO : 0.14.3.0 使用json卡片发送
+                    new(BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                        "查看大图", setuInfo.SourceText, $"{setuInfo.SetuType}",
+                        setuInfo.SourceUrl, setuIcons.Random()).ConfigureAwait(false)),
                 };
 
                 if (addLevel is SetuAddLevel.ExtraDouble or SetuAddLevel.FreeExtraDouble)
@@ -875,9 +879,13 @@ public static partial class ProcessGroupMessage
                                 $"你获得了额外的色图+{bonusTimes}{new string('!', bonusTimes)}"));
                             sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
                                 CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_IMAGE, bonusFileName, GetPathType.CQCodePath))));
-                            sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
-                                $"{bonusSetuInfo.SourceText}" +
-                                $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
+                            //sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
+                            //    $"{bonusSetuInfo.SourceText}" +
+                            //    $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
+                            sendMessages.Add(new GroupForwardMessage(
+                                BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                                    "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
+                                    bonusSetuInfo.SourceUrl, setuIcons.Random()).ConfigureAwait(false)));
                         }
                         else
                         {
@@ -932,9 +940,13 @@ public static partial class ProcessGroupMessage
                             //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)));
                             sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
                                 $"[这是一张额外的金色传说{sourceTag}色图, 不可预览]"));
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
-                                $"{setuInfoR18.SourceText}" +
-                                $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
+                            //sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
+                            //    $"{setuInfoR18.SourceText}" +
+                            //    $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
+                            sendMessages.Add(new GroupForwardMessage(
+                                BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                                    "查看大图", setuInfoR18.SourceText, $"{setuInfoR18.SetuType}",
+                                    setuInfoR18.SourceUrl, setuIcons.Random()).ConfigureAwait(false)));
                             break;
                         case SetuResult.NoSearchResult:
                             sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,

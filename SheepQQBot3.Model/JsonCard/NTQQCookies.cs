@@ -13,7 +13,7 @@ namespace SheepQQBot3.Model.JsonCard
 
     public class NTQQCookies_Data
     {
-        [JsonPropertyName("bkn")]
-        public string Bkn { get; set; }
+        [JsonPropertyName("cookies")]
+        public string Cookies { get; set; }
     }
 }

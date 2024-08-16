@@ -1,6 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Masuit.Tools.Media;
+using SheepQQBot3.Model.JsonCard;
 using SheepQQBot3.Model.Model.GetIP;
 using SixLabors.ImageSharp;
 using System;
@@ -8,13 +9,27 @@ using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
 using System.Text;
+using System.Text.Json;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SheepQQBot3.Model.Extension;
 
 public static class HttpExtensions
 {
+    private static Regex _regGetPsKey = new(@"(?<=p_skey\=).+", RegexOptions.Multiline);
+
+    /// <summary>
+    /// Http请求通用
+    /// </summary>
     public static readonly HttpClient HttpClient;
+
+    /// <summary>
+    /// QQ专用(发送json卡片消息用)
+    /// </summary>
+    private static readonly HttpClient HttpClient_QQJsonCard;
+
+    private static string _qqZoneCookies;
 
     private const string UNKNOWN_HOST_EXCEPTION = "不知道这样的主机";
     private const string SOCKET_FORCE_CLOSE_EXCEPTION = "远程主机强迫关闭了一个现有的连接";
@@ -26,6 +41,42 @@ public static class HttpExtensions
         httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
         HttpClient = new HttpClient(httpclientHandler);
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
+
+        HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
+    }
+
+    /// <summary>
+    /// 取得Ark签名后的JsonCard消息
+    /// </summary>
+    /// <param name="getCookieAsync">后台取得cookies的方法</param>
+    /// <param name="jsonCardTianxuanShare">天选JsonCard对象</param>
+    /// <returns>JsonCard的CQ格式字符串</returns>
+    public static async Task<string> GetSignedArkAsync(
+        Func<string, double, Task<string>> getCookieAsync,
+        JsonCard_TianxuanShare jsonCardTianxuanShare)
+    {
+        if (string.IsNullOrEmpty(_qqZoneCookies))
+        {
+            var cookiesJson = await getCookieAsync("act.qzone.qq.com", 5D).ConfigureAwait(false);
+            var ntCookies = JsonExtensions.Deserialize<NTQQCookies>(cookiesJson);
+            _qqZoneCookies = ntCookies.Data.Cookies;
+        }
+
+        var psKey = _regGetPsKey.Match(_qqZoneCookies).Value;
+        var gtk = QQExtensions.GetGtk(psKey);
+        var getArkUrl = $"https://act.qzone.qq.com/v2/vip/tx/trpc/ark-share/GenSignedArk?g_tk={gtk}";
+        var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, getArkUrl);
+        httpRequestMessage.Headers.Add("Cookie", _qqZoneCookies);
+        httpRequestMessage.Content = new StringContent(
+            JsonSerializer.Serialize(new JsonCardRequest(jsonCardTianxuanShare), JsonExtensions.GetJsonOptions(false)),
+            Encoding.UTF8, "application/json");
+        var response = await HttpClient_QQJsonCard.SendAsync(httpRequestMessage);
+        var jsonCardResponse = await response.Content.ReadFromJsonAsync<JsonCardResponse>();
+        if (jsonCardResponse.Code != 0)
+            return $"ark签名失败, 原因是[{jsonCardResponse.Data.Message}]";
+
+        var signedJsonText = jsonCardResponse.Data.SignedArk;
+        return $"[CQ:json,data={signedJsonText}]";
     }
 
     /// <summary>

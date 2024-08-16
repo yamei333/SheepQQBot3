@@ -24,7 +24,7 @@ namespace SheepQQBot3.Model.JsonCard
             string content,
             string tag,
             string url,
-            string previewIcon,
+            string previewImage,
             string tagIcon)
         {
             App = "com.tencent.structmsg";
@@ -41,7 +41,7 @@ namespace SheepQQBot3.Model.JsonCard
                     Desc = content,
                     Tag = tag,
                     JumpUrl = url,
-                    PreviewImage = previewIcon,
+                    PreviewImage = previewImage,
                     SourceIcon = tagIcon,
                     Uin = targetId
                 }

@@ -82,6 +82,9 @@ public class UserBaseInfo
     [JsonPropertyName("uname")]
     public string Name { get; set; }
 
+    /// <summary>
+    /// 用户头像
+    /// </summary>
     [JsonPropertyName("face")]
     public string Face { get; set; }
 }
