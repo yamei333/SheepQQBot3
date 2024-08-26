@@ -19,4 +19,9 @@ public enum PushBarkResultType
     /// 发起推送失败
     /// </summary>
     PushError,
+
+    /// <summary>
+    /// BarkUrl错误
+    /// </summary>
+    UrlError,
 }

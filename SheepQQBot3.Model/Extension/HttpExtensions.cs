@@ -29,8 +29,6 @@ public static class HttpExtensions
     /// </summary>
     private static readonly HttpClient HttpClient_QQJsonCard;
 
-    private static string _qqZoneCookies;
-
     private const string UNKNOWN_HOST_EXCEPTION = "不知道这样的主机";
     private const string SOCKET_FORCE_CLOSE_EXCEPTION = "远程主机强迫关闭了一个现有的连接";
     private const string ESTABLISHED_CONNECTION_EXCEPTION = "你的主机中的软件中止了一个已建立的连接";
@@ -55,18 +53,14 @@ public static class HttpExtensions
         Func<string, double, Task<string>> getCookieAsync,
         JsonCard_TianxuanShare jsonCardTianxuanShare)
     {
-        if (string.IsNullOrEmpty(_qqZoneCookies))
-        {
-            var cookiesJson = await getCookieAsync("act.qzone.qq.com", 5D).ConfigureAwait(false);
-            var ntCookies = JsonExtensions.Deserialize<NTQQCookies>(cookiesJson);
-            _qqZoneCookies = ntCookies.Data.Cookies;
-        }
-
-        var psKey = _regGetPsKey.Match(_qqZoneCookies).Value;
+        var cookiesJson = await getCookieAsync("act.qzone.qq.com", 5D).ConfigureAwait(false);
+        var ntCookies = JsonExtensions.Deserialize<NTQQCookies>(cookiesJson);
+        var cookies = ntCookies.Data.Cookies;
+        var psKey = _regGetPsKey.Match(cookies).Value;
         var gtk = QQExtensions.GetGtk(psKey);
         var getArkUrl = $"https://act.qzone.qq.com/v2/vip/tx/trpc/ark-share/GenSignedArk?g_tk={gtk}";
         var httpRequestMessage = new HttpRequestMessage(HttpMethod.Post, getArkUrl);
-        httpRequestMessage.Headers.Add("Cookie", _qqZoneCookies);
+        httpRequestMessage.Headers.Add("Cookie", cookies);
         httpRequestMessage.Content = new StringContent(
             JsonSerializer.Serialize(new JsonCardRequest(jsonCardTianxuanShare), JsonExtensions.GetJsonOptions(false)),
             Encoding.UTF8, "application/json");

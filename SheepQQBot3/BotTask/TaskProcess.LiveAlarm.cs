@@ -45,7 +45,7 @@ public static partial class TaskProcess
                                 // 删除过期记录
                                 DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
                                 // 发送直播提醒消息
-                                await SendLiveAlarmMessage(setConfig, liveAlarmConfig, dateNow).ConfigureAwait(false);
+                                await SendLiveAlarmMessageAsync(setConfig, liveAlarmConfig, dateNow).ConfigureAwait(false);
                             }
                         });
                 }
@@ -62,7 +62,7 @@ public static partial class TaskProcess
     /// <summary>
     /// 发送直播提醒消息
     /// </summary>
-    public static async Task SendLiveAlarmMessage(
+    public static async Task SendLiveAlarmMessageAsync(
         SetConfig setConfig,
         LiveAlarmConfig liveAlarmConfig,
         DateTime now,
@@ -95,7 +95,7 @@ public static partial class TaskProcess
         var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
         var sendMessage = await CQCode.JsonCard_TianxuanShareAsync(
             "正在直播!",
-            $"主播:{userBaseInfo.Name}{ENTER}标题:{roomInfo.Title}",
+            $"{userBaseInfo.Name}{ENTER}{roomInfo.Title}",
             $"https://live.bilibili.com/{liveRoomId}",
             userBaseInfo.Face)
             .ConfigureAwait(false);
@@ -116,7 +116,7 @@ public static partial class TaskProcess
             case BotConfigTargetType.Common:
             default:
                 throw new ArgumentOutOfRangeException(
-                    $"{nameof(SendLiveAlarmMessage)}.{nameof(setConfig.TargetType)}",
+                    $"{nameof(SendLiveAlarmMessageAsync)}.{nameof(setConfig.TargetType)}",
                     setConfig.TargetType.ToString());
         }
 

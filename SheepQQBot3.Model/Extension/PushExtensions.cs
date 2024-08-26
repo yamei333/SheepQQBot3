@@ -40,6 +40,10 @@ public static class PushExtensions
     {
         try
         {
+            var barkUrl = ConfigurationManager.AppSettings["barkurl"];
+            if (string.IsNullOrEmpty(barkUrl))
+                return PushBarkResultType.UrlError;
+
             var pushBarkData = new PushBarkData
             {
                 Body = message,
@@ -56,7 +60,7 @@ public static class PushExtensions
                 JsonSerializer.Serialize(pushBarkData, JsonExtensions.GetJsonOptions(false)),
                 Encoding.UTF8, "application/json");
             var request = await HttpExtensions.HttpClient
-                .PostAsync($"http://yamimi.moe:30008/{key}", stringContent)
+                .PostAsync($"{barkUrl}/{key}", stringContent)
                 .ConfigureAwait(false);
             return request.IsSuccessStatusCode
                 ? PushBarkResultType.Success
