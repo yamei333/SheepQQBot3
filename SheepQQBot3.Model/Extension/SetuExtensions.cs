@@ -31,7 +31,7 @@ public static partial class SetuExtensions
     /// <summary>
     /// Pixiv反代目标地址(国内可用)
     /// </summary>
-    private const string PixivDirect = "i.pximg.org";
+    private const string PixivDirect = "i.suimoe.com";
 
     public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
         => GetSetu_Lolicon_CoreAsync(tag);
