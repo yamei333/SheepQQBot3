@@ -6,6 +6,7 @@ using System;
 using System.Collections.Generic;
 using System.Configuration;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
 
 namespace SheepQQBot3.Extensions;
@@ -26,8 +27,22 @@ public static partial class BotExtensions
     /// </summary>
     public static void KillServerExe()
     {
-        var processes = Process.GetProcessesByName("QQ");
-        processes.ForEach(each => each.Kill());
+        var napCatPath = ConfigurationManager.AppSettings["napcat"];
+        var napCatKill = ConfigurationManager.AppSettings["napcatkill"];
+        if (!string.IsNullOrEmpty(napCatPath) && !string.IsNullOrEmpty(napCatKill))
+        {
+            new Process
+            {
+                StartInfo =
+                {
+                    WorkingDirectory = napCatPath!,
+                    FileName = Path.Combine(napCatPath, napCatKill),
+                    UseShellExecute = false,
+                    RedirectStandardOutput = false,
+                    CreateNoWindow = true,
+                },
+            }.Start();
+        }
     }
 
     /// <summary>

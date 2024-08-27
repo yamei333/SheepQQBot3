@@ -99,7 +99,6 @@ public static class PublicVar
     /// </summary>
     public static BotServer BotServer => Vm.BotServer;
 
-    public static Process NapCat;
     public static NapCatWindow NapCatWindow;
     public static Process Bark;
     public static BarkWindow BarkWindow;

@@ -1,4 +1,4 @@
-﻿using Masuit.Tools;
+﻿using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using System;
 using System.ComponentModel;
@@ -36,29 +36,24 @@ namespace SheepQQBot3.View
 
         private async void LaunchChildProcess()
         {
-            var napCatBat = ConfigurationManager.AppSettings["napcatbat"];
             var napCatPath = ConfigurationManager.AppSettings["napcat"];
-            var napCatBatPath = Path.Combine(napCatPath, napCatBat);
-            if (!File.Exists(napCatBatPath))
+            var napCatBat = ConfigurationManager.AppSettings["napcatbat"];
+            // MEMO : 未配置Napcat则return
+            if (string.IsNullOrEmpty(napCatPath) || string.IsNullOrEmpty(napCatBat))
             {
-                Vm.AddRunLog(new RunLog_SystemError("NapCat 不存在!"));
+                Vm.AddRunLog(new RunLog_SystemError("未正确配置 NapCat 路径"));
                 return;
             }
 
-            var hasRunningTarget = true;
-            var napCatName = "QQ";
-            while (hasRunningTarget)
+            var napCatBatPath = Path.Combine(napCatPath, napCatBat);
+            if (!File.Exists(napCatBatPath))
             {
-                var targetProcesses = Process.GetProcessesByName(napCatName);
-                hasRunningTarget = targetProcesses.Length > 0;
-                if (hasRunningTarget)
-                    targetProcesses.ForEach(each => each.Kill());
+                Vm.AddRunLog(new RunLog_SystemError("已配置的 NapCat 路径不存在!"));
+                return;
             }
 
-            if (NapCat is { HasExited: false })
-                NapCat.Kill();
-
-            NapCat = new Process
+            BotExtensions.KillServerExe();
+            var napCat = new Process
             {
                 StartInfo =
                 {
@@ -71,13 +66,13 @@ namespace SheepQQBot3.View
                     CreateNoWindow = true,
                 },
             };
-            NapCat.Start();
+            napCat.Start();
             Vm.AddRunLog(new RunLog_SystemInfo("NapCat 已启动"));
             await Task.Run(() =>
             {
-                while (!NapCat.StandardOutput.EndOfStream)
+                while (!napCat.StandardOutput.EndOfStream)
                 {
-                    var line = NapCat.StandardOutput.ReadLine();
+                    var line = napCat.StandardOutput.ReadLine();
                     if (string.IsNullOrEmpty(line))
                         continue;
 
@@ -109,6 +104,7 @@ namespace SheepQQBot3.View
                     }
                 }
             }).ConfigureAwait(false);
+            return;
 
             void AppendRichText(string addMessage, Brush brush)
             {

@@ -64,8 +64,8 @@ public static class HttpExtensions
         httpRequestMessage.Content = new StringContent(
             JsonSerializer.Serialize(new JsonCardRequest(jsonCardTianxuanShare), JsonExtensions.GetJsonOptions(false)),
             Encoding.UTF8, "application/json");
-        var response = await HttpClient_QQJsonCard.SendAsync(httpRequestMessage);
-        var jsonCardResponse = await response.Content.ReadFromJsonAsync<JsonCardResponse>();
+        var response = await HttpClient_QQJsonCard.SendAsync(httpRequestMessage).ConfigureAwait(false);
+        var jsonCardResponse = await response.Content.ReadFromJsonAsync<JsonCardResponse>().ConfigureAwait(false);
         if (jsonCardResponse.Code != 0)
             return $"ark签名失败, 原因是[{jsonCardResponse.Data.Message}]";
 
