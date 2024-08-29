@@ -26,7 +26,7 @@ public class SetuData_Lolicon
     public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"画师:{Author}\r\nPID:{Pid}";
+    public string SetuInfo => $"{Author}\r\n{Pid}";
 }
 
 public class SetuData_Lolicon_Url

@@ -26,7 +26,7 @@ public class SetuData_Yuban
     public SetuData_Yuban_Author Author { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"画师:{Author.Name}\r\nPID:{Artwork.Id}";
+    public string SetuInfo => $"{Author.Name}\r\n{Artwork.Id}";
 }
 
 public class SetuData_Yuban_Author

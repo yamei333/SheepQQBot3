@@ -17,5 +17,5 @@ public class SetuData_Rainchan
     public string UserName { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"画师:{UserName}\r\nPID:{Id}";
+    public string SetuInfo => $"{UserName}\r\n{Id}";
 }

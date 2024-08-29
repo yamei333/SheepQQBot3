@@ -20,5 +20,5 @@ public class SetuData_Jitsu
     public int Pid { get; set; }
 
     [JsonIgnore]
-    public string SetuInfo => $"画师:{Author}\r\nPID:{Pid}";
+    public string SetuInfo => $"{Author}\r\n{Pid}";
 }

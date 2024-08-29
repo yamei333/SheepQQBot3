@@ -17,5 +17,5 @@ public class SetuData_JitsuSelf
     public string Pid => SetuExtensions.RegGetPixivPid.Match(Urls[0]).Value;
 
     [JsonIgnore]
-    public string SetuInfo => $"PID:{Pid}";
+    public string SetuInfo => $"{Pid}";
 }
