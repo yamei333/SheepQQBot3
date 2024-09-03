@@ -23,7 +23,7 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     //private const string[] SETUAPI_ICONS = "https://lolicon.app/favicon.ico";
-    private static readonly string[] setuIcons = [
+    private static readonly string[] _setuIcons = [
         "https://i0.hdslb.com/bfs/garb/66a0850681611ac4dede74823a34e197913fb97f.png",
         "https://i0.hdslb.com/bfs/garb/6f57a2e1d8cedd68f5b837a7118bba37275ba5c4.png",
         "https://i0.hdslb.com/bfs/garb/20e2b689aebcd2fa8bbe1ffa440827c3062cc420.png",
@@ -857,7 +857,7 @@ public static partial class ProcessGroupMessage
                     // MEMO : 0.14.3.0 使用json卡片发送
                     new(BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                         "查看大图", setuInfo.SourceText, $"{setuInfo.SetuType}",
-                        setuInfo.SourceUrl, setuIcons.Random()).ConfigureAwait(false)),
+                        setuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)),
                 };
 
                 if (addLevel is SetuAddLevel.ExtraDouble or SetuAddLevel.FreeExtraDouble)
@@ -885,7 +885,7 @@ public static partial class ProcessGroupMessage
                             sendMessages.Add(new GroupForwardMessage(
                                 BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                                     "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
-                                    bonusSetuInfo.SourceUrl, setuIcons.Random()).ConfigureAwait(false)));
+                                    bonusSetuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
                         }
                         else
                         {
@@ -946,7 +946,7 @@ public static partial class ProcessGroupMessage
                             sendMessages.Add(new GroupForwardMessage(
                                 BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                                     "查看大图", setuInfoR18.SourceText, $"{setuInfoR18.SetuType}",
-                                    setuInfoR18.SourceUrl, setuIcons.Random()).ConfigureAwait(false)));
+                                    setuInfoR18.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
                             break;
                         case SetuResult.NoSearchResult:
                             sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,

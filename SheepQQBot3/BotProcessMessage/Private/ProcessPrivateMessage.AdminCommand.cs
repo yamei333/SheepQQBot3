@@ -1,8 +1,6 @@
 ﻿using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
 using System;
-using System.Configuration;
-using System.Linq;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
@@ -53,68 +51,69 @@ public static partial class ProcessPrivateMessage
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取has剩余流量...").ConfigureAwait(false);
-                var hasMessage = string.Empty;
-                var url = ConfigurationManager.AppSettings["has_hk"];
-                var today = DateTime.Today;
-                if (!string.IsNullOrEmpty(url))
-                {
-                    if (!string.IsNullOrEmpty(hasMessage))
-                        hasMessage += ENTER;
+                // MEMO : 0.14.3.6 获取has流量功能暂时弃用
+                //await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取has剩余流量...").ConfigureAwait(false);
+                //var hasMessage = string.Empty;
+                //var url = ConfigurationManager.AppSettings["has_hk"];
+                //var today = DateTime.Today;
+                //if (!string.IsNullOrEmpty(url))
+                //{
+                //    if (!string.IsNullOrEmpty(hasMessage))
+                //        hasMessage += ENTER;
 
-                    var httpResponse = await HttpExtensions.GetFromJsonAsync<JMS_Hongkong>(url).ConfigureAwait(false);
-                    hasMessage += "JMS(HK): ";
-                    if (httpResponse.Result == HttpResponseResult.Successed)
-                    {
-                        var jmsHongkong = httpResponse.Data;
-                        var resetDayOfMonth = jmsHongkong.ResetDayOfMonth;
-                        var nextMonth = today.AddMonths(1);
-                        var nextResetDate = today.Day >= resetDayOfMonth
-                            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
-                            : new DateTime(today.Year, today.Month, resetDayOfMonth);
-                        var avgEveryday = (nextResetDate - today).TotalDays + 1;
-                        var remainBand = (jmsHongkong.MonthLimit - jmsHongkong.Counter) / 1024.0 / 1024.0 / 1024.0;
-                        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}"
-                            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
-                    }
-                    else
-                    {
-                        hasMessage += "取得失败";
-                    }
+                //    var httpResponse = await HttpExtensions.GetFromJsonAsync<JMS_Hongkong>(url).ConfigureAwait(false);
+                //    hasMessage += "JMS(HK): ";
+                //    if (httpResponse.Result == HttpResponseResult.Successed)
+                //    {
+                //        var jmsHongkong = httpResponse.Data;
+                //        var resetDayOfMonth = jmsHongkong.ResetDayOfMonth;
+                //        var nextMonth = today.AddMonths(1);
+                //        var nextResetDate = today.Day >= resetDayOfMonth
+                //            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
+                //            : new DateTime(today.Year, today.Month, resetDayOfMonth);
+                //        var avgEveryday = (nextResetDate - today).TotalDays + 1;
+                //        var remainBand = (jmsHongkong.MonthLimit - jmsHongkong.Counter) / 1024.0 / 1024.0 / 1024.0;
+                //        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}"
+                //            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
+                //    }
+                //    else
+                //    {
+                //        hasMessage += "取得失败";
+                //    }
 
-                    hasMessage += ENTER;
-                }
+                //    hasMessage += ENTER;
+                //}
 
-                url = ConfigurationManager.AppSettings["has_los"];
-                if (!string.IsNullOrEmpty(url))
-                {
-                    if (!string.IsNullOrEmpty(hasMessage))
-                        hasMessage += ENTER;
+                //url = ConfigurationManager.AppSettings["has_los"];
+                //if (!string.IsNullOrEmpty(url))
+                //{
+                //    if (!string.IsNullOrEmpty(hasMessage))
+                //        hasMessage += ENTER;
 
-                    var httpResponse = await HttpExtensions.GetFromJsonAsync<BWH_LosAngeles>(url).ConfigureAwait(false);
-                    hasMessage += "BWH(LOS): ";
-                    if (httpResponse.Result == HttpResponseResult.Successed)
-                    {
-                        var bwhLosAngeles = httpResponse.Data;
-                        var resetDayOfMonth = bwhLosAngeles.ResetDayOfMonth;
-                        var nextMonth = today.AddMonths(1);
-                        var nextResetDate = today.Day >= resetDayOfMonth
-                            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
-                            : new DateTime(today.Year, today.Month, resetDayOfMonth);
-                        var avgEveryday = (nextResetDate - today).TotalDays + 1;
-                        var remainBand = (bwhLosAngeles.MonthLimit - bwhLosAngeles.Counter) / 1024.0 / 1024.0 / 1024.0;
-                        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}, 地址-{bwhLosAngeles.HostName}({bwhLosAngeles.IPAddresses.First()})"
-                            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
-                    }
-                    else
-                    {
-                        hasMessage += "取得失败";
-                    }
+                //    var httpResponse = await HttpExtensions.GetFromJsonAsync<BWH_LosAngeles>(url).ConfigureAwait(false);
+                //    hasMessage += "BWH(LOS): ";
+                //    if (httpResponse.Result == HttpResponseResult.Successed)
+                //    {
+                //        var bwhLosAngeles = httpResponse.Data;
+                //        var resetDayOfMonth = bwhLosAngeles.ResetDayOfMonth;
+                //        var nextMonth = today.AddMonths(1);
+                //        var nextResetDate = today.Day >= resetDayOfMonth
+                //            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
+                //            : new DateTime(today.Year, today.Month, resetDayOfMonth);
+                //        var avgEveryday = (nextResetDate - today).TotalDays + 1;
+                //        var remainBand = (bwhLosAngeles.MonthLimit - bwhLosAngeles.Counter) / 1024.0 / 1024.0 / 1024.0;
+                //        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}, 地址-{bwhLosAngeles.HostName}({bwhLosAngeles.IPAddresses.First()})"
+                //            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
+                //    }
+                //    else
+                //    {
+                //        hasMessage += "取得失败";
+                //    }
 
-                    hasMessage += ENTER;
-                }
+                //    hasMessage += ENTER;
+                //}
 
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
+                //await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
                 break;
             default:
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);

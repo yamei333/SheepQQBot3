@@ -27,4 +27,8 @@
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
   </ItemGroup>
 
+  <ItemGroup>
+    <Folder Include="ProxyBandwidth\" />
+  </ItemGroup>
+
 </Project>
