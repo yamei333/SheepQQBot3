@@ -60,7 +60,6 @@ public static class TargetTypeExtensions
                 BotFunctionType.Group_SearchImageSource,
                 BotFunctionType.Group_Roll,
                 BotFunctionType.Group_ChatSummary,
-                BotFunctionType.Group_GenshinHelper,
             },
             BotConfigTargetType.Private => new HashSet<BotFunctionType>
             {

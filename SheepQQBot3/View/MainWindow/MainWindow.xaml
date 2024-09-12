@@ -196,12 +196,6 @@
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowLiveAlarm />
                     </TabItem>
-                    <TabItem Header="原神助手"
-                             IsVisibleChanged="TabItem_IsVisibleChanged"
-                             Visibility="{Binding Path=SelectedSetBotFunctions[2200].IsUsed,
-                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <local:MainWindowGenshinHelper />
-                    </TabItem>
                 </TabControl>
             </Grid>
         </TabItem>

@@ -1,8 +1,8 @@
-﻿using System;
+﻿using SheepQQBot3.Model.Enums;
+using System;
 using System.Globalization;
 using System.Windows.Data;
 using System.Windows.Media;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Converter;
 
@@ -27,7 +27,6 @@ public class RunLogColorConverter : IValueConverter
             case LogMessageType.AlarmAide:
             case LogMessageType.FundHelper:
             case LogMessageType.LiveAlarm:
-            case LogMessageType.GenshinDailyNoteAlarm:
                 return Brushes.DarkGreen;
             case LogMessageType.GroupMessage:
             case LogMessageType.GroupRevokeMessage:

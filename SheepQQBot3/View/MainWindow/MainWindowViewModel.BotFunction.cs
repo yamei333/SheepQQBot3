@@ -24,7 +24,6 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
-        StartTask(TaskProcess.GenshinEventAlarmAsync);
         StartTask(TaskProcess.SteamMarketWatchAsync);
     }
 

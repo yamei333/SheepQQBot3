@@ -48,9 +48,6 @@ public enum BotFunctionType
 
     [Display(Name = "群聊总结")]
     Group_ChatSummary = 2008,
-
-    [Display(Name = "原神助手")]
-    Group_GenshinHelper = 2200,
 }
 
 public static class BotFunctionTypeExtensions
@@ -68,6 +65,5 @@ public static class BotFunctionTypeExtensions
             BotFunctionType.Group_RepeaterKiller,
             BotFunctionType.Group_FundHelper,
             BotFunctionType.Group_LiveAlarm,
-            BotFunctionType.Group_GenshinHelper,
         };
 }

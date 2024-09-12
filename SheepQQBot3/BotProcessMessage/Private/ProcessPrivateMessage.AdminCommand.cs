@@ -51,21 +51,20 @@ public static partial class ProcessPrivateMessage
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
-                // MEMO : 0.14.3.6 获取has流量功能暂时弃用
                 //await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取has剩余流量...").ConfigureAwait(false);
                 //var hasMessage = string.Empty;
-                //var url = ConfigurationManager.AppSettings["has_hk"];
+                //var url = AppSettingExtensions.Get("has").Base64Decrypt();
                 //var today = DateTime.Today;
                 //if (!string.IsNullOrEmpty(url))
                 //{
                 //    if (!string.IsNullOrEmpty(hasMessage))
                 //        hasMessage += ENTER;
 
-                //    var httpResponse = await HttpExtensions.GetFromJsonAsync<JMS_Hongkong>(url).ConfigureAwait(false);
-                //    hasMessage += "JMS(HK): ";
-                //    if (httpResponse.Result == HttpResponseResult.Successed)
+                //    var httpResponseString = await HttpExtensions.HttpClient.GetStringAsync(url).ConfigureAwait(false);
+                //    hasMessage += ": ";
+                //    if (string.IsNullOrEmpty(httpResponseString))
                 //    {
-                //        var jmsHongkong = httpResponse.Data;
+                //        var jmsHongkong = httpResponseString;
                 //        var resetDayOfMonth = jmsHongkong.ResetDayOfMonth;
                 //        var nextMonth = today.AddMonths(1);
                 //        var nextResetDate = today.Day >= resetDayOfMonth

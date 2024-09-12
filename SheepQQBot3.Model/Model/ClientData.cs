@@ -25,7 +25,7 @@ public class ClientData
     public string RawMessage { get; set; }
 
     [JsonPropertyName("real_id")]
-    public string RealId { get; set; }
+    public int RealId { get; set; }
 
     [JsonIgnore]
     public DateTime DateTime => Time.ToDateTime();

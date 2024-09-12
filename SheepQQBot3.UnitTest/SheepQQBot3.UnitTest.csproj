@@ -30,6 +30,7 @@
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj" />
+    <ProjectReference Include="..\SheepQQBot3\SheepQQBot3.csproj" />
   </ItemGroup>
 
 </Project>

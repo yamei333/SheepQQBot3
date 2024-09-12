@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.Json.Serialization;
-using Masuit.Tools.Systems;
+﻿using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
+using System;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -64,7 +64,6 @@ public class RunLog
             LogMessageType.AlarmAide => DefaultColor,
             LogMessageType.FundHelper => DefaultColor,
             LogMessageType.LiveAlarm => DefaultColor,
-            LogMessageType.GenshinDailyNoteAlarm => DefaultColor,
             LogMessageType.System_Error => "Red",
             LogMessageType.System_Warning => "Blue",
             LogMessageType.BlockedByServer => "Blue",
@@ -204,18 +203,6 @@ public class RunLog_LiveAlarm : RunLog
         : base(LogMessageType.LiveAlarm, targetType, targetId, content)
     {
         OtherId = otherId;
-    }
-}
-
-/// <summary>
-/// 原神每日提醒日志类型
-/// </summary>
-public class RunLog_GenshinDailyNoteAlarm : RunLog
-{
-    /// <inheritdoc />
-    public RunLog_GenshinDailyNoteAlarm(BotConfigTargetType targetType, long senderId, string content)
-        : base(LogMessageType.GenshinDailyNoteAlarm, targetType, senderId, content)
-    {
     }
 }
 

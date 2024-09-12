@@ -1,10 +1,10 @@
-﻿using Masuit.Tools;
+﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
@@ -27,8 +27,8 @@ public static partial class BotExtensions
     /// </summary>
     public static void KillServerExe()
     {
-        var napCatPath = ConfigurationManager.AppSettings["napcat"];
-        var napCatKill = ConfigurationManager.AppSettings["napcatkill"];
+        var napCatPath = AppSettingExtensions.Get("napcat");
+        var napCatKill = AppSettingExtensions.Get("napcatkill");
         if (!string.IsNullOrEmpty(napCatPath) && !string.IsNullOrEmpty(napCatKill))
         {
             new Process
@@ -50,7 +50,7 @@ public static partial class BotExtensions
     /// </summary>
     public static void KillBarkExe()
     {
-        var processes = Process.GetProcessesByName(ConfigurationManager.AppSettings["barkexe"]?.Replace(".exe", string.Empty));
+        var processes = Process.GetProcessesByName(AppSettingExtensions.Get("barkexe").Replace(".exe", string.Empty));
         processes.ForEach(each => each.Kill());
     }
 

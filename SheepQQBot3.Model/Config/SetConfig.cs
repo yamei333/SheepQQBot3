@@ -1,13 +1,12 @@
-﻿using System;
+﻿using CommonLibrary;
+using MessagePack;
+using SheepQQBot3.Model.Enums;
+using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
-using CommonLibrary;
-using MessagePack;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -45,7 +44,7 @@ public class SetConfig
     [IgnoreMember]
     public BitmapFrame Icon => TargetType switch
     {
-        BotConfigTargetType.Common => QQExtensions.GetQQImage(int.Parse(ConfigurationManager.AppSettings["selfId"])),
+        BotConfigTargetType.Common => QQExtensions.GetQQImage(int.Parse(AppSettingExtensions.Get("selfId", "0"))),
         BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
         BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
         _ => QQExtensions.GetQQImage(10000),
@@ -98,12 +97,6 @@ public class SetConfig
     /// </summary>
     [Key(nameof(LiveAlarmConfigs))]
     public Dictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
-
-    /// <summary>
-    /// 原神助手配置
-    /// </summary>
-    [Key(nameof(GenshinHelperConfig))]
-    public GenshinHelperConfig GenshinHelperConfig { get; set; }
 
     #region 已执行内容的保存
 

@@ -240,16 +240,6 @@ partial class MainWindowViewModel
             StartTaskList(taskList, () => ProcessGroupMessage.RepeaterKiller(groupMessage));
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_GenshinHelper, config =>
-        {
-            StartTaskList(taskList, GenshinHelper);
-
-            void GenshinHelper() => ProcessGroupMessage.GenshinHelperAsync(
-                config.GenshinHelperConfig?.GenshinResinAlarms.Values
-                    .ToDictionary(each => each.TargetId, each => each),
-                groupMessage);
-        });
-
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
         {
             StartTaskList(taskList, SearchImageSource);
@@ -262,16 +252,19 @@ partial class MainWindowViewModel
             async void Roll() => await ProcessGroupMessage.RollAsync(groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_Roll, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_ChatSummary, config =>
         {
             StartTaskList(taskList, ChatSummary);
             async void ChatSummary() => await ProcessGroupMessage.ChatSummaryAsync(groupMessage).ConfigureAwait(false);
         });
 
-        Task.WaitAll(taskList.ToArray());
-        //GetSelectedConfigs(BotFunctionType.Group_RepeatRevokeMessage, groupId)
-        //    .ForEach(each => StartTask(() => ProcessGroupMessage.CustomGroupAlarm(each.CustomGroupAlarms, groupMessage)));
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, config =>
+        {
+            StartTaskList(taskList, RepeatRevokeMessage);
+            async void RepeatRevokeMessage() => await ProcessGroupMessage.RepeatRevokeMessageAsync(groupMessage).ConfigureAwait(false);
+        });
 
+        Task.WaitAll(taskList.ToArray());
         //var setConfig = SetConfigs.FirstOrDefault(each => each.Value.TargetId == groupMessage.GroupId).Value;
         //if (setConfig == null)
         //    return;

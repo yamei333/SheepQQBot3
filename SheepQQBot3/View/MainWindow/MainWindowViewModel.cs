@@ -8,7 +8,6 @@ using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Server;
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Linq;
 using System.Reflection;
 
@@ -47,7 +46,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         Title = $"助手哈莉 - Ver {version}";
         IsLoadComplete = false;
-        IsBarkUsed = !string.IsNullOrEmpty(ConfigurationManager.AppSettings["bark"]);
+        IsBarkUsed = !string.IsNullOrEmpty(AppSettingExtensions.Get("bark"));
 
         InitViewModel();
         AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
@@ -74,7 +73,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
         MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
         MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
-        MainWindowGenshinHelperViewModel = new MainWindowGenshinHelperViewModel();
     }
 
     public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -84,7 +82,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
     public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
     public MainWindowLiveAlarmViewModel MainWindowLiveAlarmViewModel { get; set; }
-    public MainWindowGenshinHelperViewModel MainWindowGenshinHelperViewModel { get; set; }
 
     public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 
@@ -106,7 +103,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
             MainWindowRepeaterKillerViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowBlackListViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowLiveAlarmViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
-            MainWindowGenshinHelperViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
         }
     }
 

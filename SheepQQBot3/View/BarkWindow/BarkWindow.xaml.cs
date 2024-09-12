@@ -1,6 +1,9 @@
-﻿using System;
+﻿using CommonLibrary;
+using Masuit.Tools;
+using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Extension;
+using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -9,9 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using Masuit.Tools;
-using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -40,8 +40,8 @@ public partial class BarkWindow
 
     private async void LaunchChildProcess()
     {
-        var barkexe = ConfigurationManager.AppSettings["barkexe"];
-        var barkPath = ConfigurationManager.AppSettings["bark"];
+        var barkexe = AppSettingExtensions.Get("barkexe");
+        var barkPath = AppSettingExtensions.Get("bark");
         var barkExePath = Path.Combine(barkPath, barkexe);
         if (!File.Exists(barkExePath))
         {

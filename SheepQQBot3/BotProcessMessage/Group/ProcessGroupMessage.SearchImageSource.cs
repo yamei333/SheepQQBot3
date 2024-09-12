@@ -1,7 +1,7 @@
-﻿using SheepQQBot3.Extensions;
+﻿using CommonLibrary;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
-using System.Configuration;
 using System.Linq;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
@@ -22,7 +22,7 @@ public static partial class ProcessGroupMessage
     /// <returns></returns>
     public static async Task<bool> SearchImageSource(GroupMessage groupMessage)
     {
-        var sauceNaoKey = ConfigurationManager.AppSettings["saucenaokey"];
+        var sauceNaoKey = AppSettingExtensions.Get("saucenaokey");
         if (string.IsNullOrEmpty(sauceNaoKey))
             return false;
 
@@ -34,11 +34,12 @@ public static partial class ProcessGroupMessage
             return false;
 
         message = message[4..];
-        var url = RegexGenerator.CQImageUrl().Matches(message).FirstOrDefault()?.Value;
+        var url = CQCode.GetImageUrl(message);
         if (string.IsNullOrEmpty(url))
             return false;
 
         await BotServer.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);
+
         // MEMO : 调试代码
         //var resp = await HttpExtensions.HttpGetAsync($"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
         //    $"&db=999&output_type=2&url={url}").ConfigureAwait(false);

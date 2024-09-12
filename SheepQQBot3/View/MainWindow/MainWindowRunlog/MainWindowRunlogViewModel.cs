@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Masuit.Tools.Systems;
+﻿using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
+using System;
+using System.Collections.Generic;
 using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
 namespace SheepQQBot3.View;
@@ -57,7 +57,7 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
         var result = new List<RunLogMessage>
         {
             new($"时间: {runLog.DateTimeStrFFF}"),
-            new($"类型: {runLog.LogMessageType.GetDisplay()}")
+            new($"类型: {runLog.LogMessageType.GetDisplay()}"),
         };
         switch (runLog.LogMessageType)
         {
@@ -78,9 +78,6 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
             case LogMessageType.LiveAlarm:
                 result.Add(new RunLogMessage($"群号: {runLog.SenderId}"));
                 result.Add(new RunLogMessage($"直播间号: {runLog.GroupId}"));
-                break;
-            case LogMessageType.GenshinDailyNoteAlarm:
-                result.Add(new RunLogMessage($"群号: {runLog.SenderId}"));
                 break;
             case LogMessageType.GroupMessage:
                 result.Add(new RunLogMessage($"来源-群号: {runLog.GroupId}"));

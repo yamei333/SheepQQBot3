@@ -49,12 +49,6 @@ public enum LogMessageType
     LiveAlarm,
 
     /// <summary>
-    /// 原神每日提醒消息
-    /// </summary>
-    [Display(Name = "原神每日提醒")]
-    GenshinDailyNoteAlarm,
-
-    /// <summary>
     /// 群消息
     /// </summary>
     [Display(Name = "群消息")]

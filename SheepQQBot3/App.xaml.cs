@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using System;
 using System.Linq;

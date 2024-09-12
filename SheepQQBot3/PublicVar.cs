@@ -1,4 +1,5 @@
-﻿using Masuit.Tools;
+﻿using CommonLibrary;
+using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.DbModel.JiebaDb;
@@ -9,7 +10,6 @@ using SheepQQBot3.View;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Diagnostics;
 
 namespace SheepQQBot3;
@@ -42,17 +42,17 @@ public static class PublicVar
     /// <summary>
     /// 管理员ID
     /// </summary>
-    public static readonly HashSet<long> AdminIds = ConfigurationManager.AppSettings["adminId"]!.Split(',').ToHashSet(long.Parse);
+    public static readonly HashSet<long> AdminIds = AppSettingExtensions.Get("adminId").Split(',').ToHashSet(long.Parse);
 
     /// <summary>
     /// BotID
     /// </summary>
-    public static readonly long BotId = long.Parse(ConfigurationManager.AppSettings["selfId"]!);
+    public static readonly long BotId = long.Parse(AppSettingExtensions.Get("selfId", "0"));
 
     /// <summary>
     /// 色图斗士信息缓存
     /// </summary>
-    public static readonly ConcurrentDictionary<long, SetuDoushiInfo> SetuDoushiInfoCache = new();
+    public static readonly ConcurrentDictionary<long, SetuDoushiInfo> SetuDoushiInfoCache = [];
 
     /// <summary>
     /// 半角逗号
@@ -103,8 +103,10 @@ public static class PublicVar
     public static Process Bark;
     public static BarkWindow BarkWindow;
 
-    public static ConcurrentDictionary<long, DGPDailyNote> GenshinDailyNote = new();
-    public static bool DGPProcessOK = false;
+    /// <summary>
+    /// 已记录的群消息(用于防止撤回)
+    /// </summary>
+    public static ConcurrentDictionary<int, GroupMessage> SavedGroupMessages { get; set; } = new ConcurrentDictionary<int, GroupMessage>();
 
     /// <summary>
     /// Jieba数据库

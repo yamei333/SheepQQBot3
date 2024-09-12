@@ -1,8 +1,8 @@
-﻿using SheepQQBot3.Extensions;
+﻿using CommonLibrary;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using System;
 using System.ComponentModel;
-using System.Configuration;
 using System.Diagnostics;
 using System.IO;
 using System.Text;
@@ -36,8 +36,8 @@ namespace SheepQQBot3.View
 
         private async void LaunchChildProcess()
         {
-            var napCatPath = ConfigurationManager.AppSettings["napcat"];
-            var napCatBat = ConfigurationManager.AppSettings["napcatbat"];
+            var napCatPath = AppSettingExtensions.Get("napcat");
+            var napCatBat = AppSettingExtensions.Get("napcatbat");
             // MEMO : 未配置Napcat则return
             if (string.IsNullOrEmpty(napCatPath) || string.IsNullOrEmpty(napCatBat))
             {
@@ -60,7 +60,7 @@ namespace SheepQQBot3.View
                     WorkingDirectory = napCatPath!,
                     FileName = napCatBatPath,
                     UseShellExecute = false,
-                    Arguments = $"-q {BotId}",
+                    Arguments = $"{BotId}",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
                     CreateNoWindow = true,

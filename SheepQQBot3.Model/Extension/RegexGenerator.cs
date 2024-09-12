@@ -34,31 +34,13 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\$.+\$")]
     public static partial Regex ConditionJsonText();
 
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (11|14|15|23):00:\d{2}")]
-    public static partial Regex GenshinDailyNoteRefresh();
-
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
-    public static partial Regex GenshinResin();
-
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
-    public static partial Regex GenshinDailyMission();
-
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 00:\d{2}:\d{2}")]
-    public static partial Regex GenshinTransformer();
-
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d (20|21):0(0|1|2):\d{2}")]
-    public static partial Regex GenshinWbAlarm();
-
-    [GeneratedRegex(@"\d{4}-\d{2}-\d{2}-\d-\d 21:0(0|1|2):\d{2}")]
-    public static partial Regex GenshinEventAlarm();
-
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
     public static partial Regex CmdStart();
 
-    [GeneratedRegex(@"\[CQ:image.+\]")]
+    [GeneratedRegex(@"\[CQ:image.+?\]")]
     public static partial Regex CQImage();
 
-    [GeneratedRegex(@"(?<=url=).+(?=\?)")]
+    [GeneratedRegex(@"(?<=url\=).+?(?=,)")]
     public static partial Regex CQImageUrl();
 
     [GeneratedRegex(@"""echo"":""(.+?)""")]

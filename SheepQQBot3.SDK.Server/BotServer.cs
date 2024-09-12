@@ -4,7 +4,6 @@ using SheepQQBot3.Model;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using System;
-using System.Configuration;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
@@ -44,8 +43,8 @@ public partial class BotServer : IDisposable
     public BotServer(BotDbContext botDb)
     {
         _botDb = botDb;
-        var address = ConfigurationManager.AppSettings["serverAddress"];
-        var port = ConfigurationManager.AppSettings["serverPort"];
+        var address = AppSettingExtensions.Get("serverAddress");
+        var port = AppSettingExtensions.Get("serverPort");
         _server = string.IsNullOrEmpty(address)
             ? new WatsonWsServer(DEFAULT_IP_ADDRESS, DEFAULT_PORT)
             : new WatsonWsServer(address,

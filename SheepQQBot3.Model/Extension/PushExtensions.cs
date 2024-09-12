@@ -1,7 +1,6 @@
 ﻿using CommonLibrary;
 using SheepQQBot3.Model.Enums;
 using System;
-using System.Configuration;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -40,7 +39,7 @@ public static class PushExtensions
     {
         try
         {
-            var barkUrl = ConfigurationManager.AppSettings["barkurl"];
+            var barkUrl = AppSettingExtensions.Get("barkurl");
             if (string.IsNullOrEmpty(barkUrl))
                 return PushBarkResultType.UrlError;
 
@@ -49,7 +48,7 @@ public static class PushExtensions
                 Body = message,
                 Title = string.IsNullOrEmpty(title) ? null : title,
                 Icon = string.IsNullOrEmpty(icon)
-                    ? $"https://q.qlogo.cn/headimg_dl?dst_uin={ConfigurationManager.AppSettings["selfId"]}&spec=100"
+                    ? $"https://q.qlogo.cn/headimg_dl?dst_uin={AppSettingExtensions.Get("selfId", "10000")}&spec=100"
                     : icon,
                 LinkUrl = string.IsNullOrEmpty(url) ? null : url,
                 IsArchive = isArchive ? 1 : 0,
@@ -84,7 +83,7 @@ public static class PushExtensions
         string title)
     {
         return await PushBarkMessageAsync(
-            ConfigurationManager.AppSettings["barkkey"],
+            AppSettingExtensions.Get("barkkey"),
             message, title);
     }
 }
