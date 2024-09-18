@@ -1,10 +1,10 @@
 ﻿using System;
 using System.Text.Json.Serialization;
 
-namespace SheepQQBot3.Model.Model
+namespace SheepQQBot3.Model.Model.WebApi
 {
     [Serializable]
-    public class SteamMarketStatus
+    public class WebApi_SteamMarketStatus
     {
         /// <summary>
         /// 验证用字段

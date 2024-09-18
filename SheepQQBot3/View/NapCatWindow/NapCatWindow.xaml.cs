@@ -60,7 +60,7 @@ namespace SheepQQBot3.View
                     WorkingDirectory = napCatPath!,
                     FileName = napCatBatPath,
                     UseShellExecute = false,
-                    Arguments = $"{BotId}",
+                    Arguments = $"-q {BotId}",
                     RedirectStandardOutput = true,
                     StandardOutputEncoding = Encoding.UTF8,
                     CreateNoWindow = true,

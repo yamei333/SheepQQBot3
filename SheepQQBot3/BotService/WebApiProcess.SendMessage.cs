@@ -1,29 +1,27 @@
 ﻿using CommonLibrary;
+using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Model.WebApi;
-using System;
 using WatsonWebserver.Core;
 
 namespace SheepQQBot3.BotService;
 
 public static partial class WebApiProcess
 {
-    /// <summary>
-    /// steam市场状态最终更新时间
-    /// </summary>
-    public static DateTime LastUpdateSteamMarketStatusDate { get; set; }
-
-    private static void AddRoute_UpdateSteamMarketStatus()
+    private static void AddRoute_SendMessage()
     {
         // MEMO : Steam市场状态上报时使用的POST
-        _webServer.AddStaticRoute(HttpMethod.POST, "/UpdateSteamMarketStatus/", async context =>
+        _webServer.AddStaticRoute(HttpMethod.POST, "/SendMessage/", async context =>
         {
             var jsonText = context.Request.DataAsString;
             try
             {
-                var steamMarketStatus = JsonExtensions.Deserialize<WebApi_SteamMarketStatus>(jsonText);
-                if (steamMarketStatus?.SheepQQBot3 == TOKEN)
+                var apiSendMessage = JsonExtensions.Deserialize<WebApi_SendMessage>(jsonText);
+                if (apiSendMessage?.SheepQQBot3 == TOKEN)
                 {
-                    LastUpdateSteamMarketStatusDate = DateTime.Now;
+                    await PublicVar.BotServer.SendMessageAsync(
+                        apiSendMessage.IsGroup ? MessageTargetType.Group : MessageTargetType.Private,
+                        apiSendMessage.TargetId,
+                        apiSendMessage.Message).ConfigureAwait(false);
                     //LogExtensions.AddRunLog(new RunLog_SystemInfo("[Steam市场监控]状态已刷新"));
                     const string result = @"{Result: 200}";
                     await context.Response.Send(result).ConfigureAwait(false);
