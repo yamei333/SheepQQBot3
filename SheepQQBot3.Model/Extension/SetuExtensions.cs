@@ -29,9 +29,18 @@ public static partial class SetuExtensions
     private const string PximgRe = "i.pixiv.re";
 
     /// <summary>
-    /// Pixiv反代目标地址(国内可用)
+    /// 取得Pixiv反代地址
     /// </summary>
-    private const string PixivDirect = "i.suimoe.com";
+    private static string PixivReverseProxy
+    {
+        get
+        {
+            var url = AppSettingExtensions.Get("pixivReverseProxy");
+            return string.IsNullOrEmpty(url) ? "i.pixiv.re" : url;
+        }
+    }
+
+    //private const string PixivDirect = "i.suimoe.com";
 
     public static Task<SetuInfo> GetSetu_LoliconAsync(string tag)
         => GetSetu_Lolicon_CoreAsync(tag);
@@ -45,7 +54,7 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivDirect}" +
+        var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReverseProxy}" +
                   $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
@@ -105,7 +114,7 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivDirect}"
+        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivReverseProxy}"
             + $"{GetUrlTagString()}{(r18 ? "&r18=1&level=4-6" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolisuki>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
@@ -334,13 +343,13 @@ public static partial class SetuExtensions
     }
 
     private static string ToImageUrl(this string url)
-        => url.Replace(Pximg, PixivDirect).Replace(PximgRe, PixivDirect);
+        => url.Replace(Pximg, PixivReverseProxy).Replace(PximgRe, PixivReverseProxy);
 
     private static string ToSmallImageUrl(this string url)
     {
         var temp = url
-            .Replace(Pximg, PixivDirect)
-            .Replace(PximgRe, PixivDirect)
+            .Replace(Pximg, PixivReverseProxy)
+            .Replace(PximgRe, PixivReverseProxy)
             .Replace("img-original", "c/540x540_70/img-master");
         //.Replace("img-original", "img-master");
         var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
