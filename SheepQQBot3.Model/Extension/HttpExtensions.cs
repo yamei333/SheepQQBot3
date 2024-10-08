@@ -39,7 +39,6 @@ public static class HttpExtensions
         httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
         HttpClient = new HttpClient(httpclientHandler);
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
-
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
     }
 

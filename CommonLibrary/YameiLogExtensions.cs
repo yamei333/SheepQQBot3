@@ -61,7 +61,7 @@ public static class YameiLogExtensions
                     LogType.Info => "○",
                     LogType.Warning => "！",
                     LogType.Error => "×",
-                    _ => "@"
+                    _ => "@",
                 };
                 sw.Write($"\r\n{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
                 sw.Close();

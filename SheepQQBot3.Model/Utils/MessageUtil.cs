@@ -14,7 +14,6 @@ public static class MessageUtil
 {
     private static readonly Regex _regGetCQArea = RegexGenerator.GetCQArea();
     private static readonly Regex _regGetCQCode = RegexGenerator.GetCQCode();
-    private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeReplaceImage();
     private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveFileSize();
 
     /// <summary>

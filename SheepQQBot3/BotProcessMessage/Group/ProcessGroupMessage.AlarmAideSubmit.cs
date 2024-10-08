@@ -26,9 +26,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private const string TG_DIRECTORY_NAME = "TgImage";
 
-    private static readonly Regex _regReplaceImage = RegexGenerator.CQCodeReplaceImage();
-    private static readonly Regex _regRemoveUrl = RegexGenerator.CQCodeRemoveUrl();
-    private static readonly Regex _regRemoveFileSize = RegexGenerator.CQCodeRemoveFileSize();
+    private static readonly Regex _regCQImage = RegexGenerator.CQImage();
 
     /// <summary>
     /// 闹钟助手投稿
@@ -64,31 +62,22 @@ public static partial class ProcessGroupMessage
         }
 
         var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
-        var resendAlarmMessage = alarmMessage;
         // MEMO : 有image表情的时候移除url和subType
-        if (alarmMessage.IndexOf("CQ:image", StringComparison.Ordinal) > 0)
+        var matches = _regCQImage.Matches(alarmMessage);
+        matches.ForEach(match =>
         {
-            var matches = _regReplaceImage.Matches(alarmMessage);
-            matches.ForEach(match =>
+            var replaceContent = match.Value;
+            var picUrl = CQCode.GetImageUrl(replaceContent);
+            var (isSuccessed, fileName) = HttpExtensions
+                .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
+                .Result;
+            if (isSuccessed)
             {
-                var picUrl = match.Groups[2].Value;
-                var replaceContent = match.Groups[1].Value;
-                var (isSuccessed, fileName) = HttpExtensions
-                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
-                    .Result;
-                if (isSuccessed)
-                {
-                    alarmMessage = alarmMessage.Replace(
-                        replaceContent,
-                        CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName, GetPathType.CQCodePath));
-                }
-
-                alarmMessage = _regRemoveUrl.Replace(alarmMessage, string.Empty);
-                alarmMessage = _regRemoveFileSize.Replace(alarmMessage, string.Empty);
-                resendAlarmMessage = _regRemoveUrl.Replace(resendAlarmMessage, string.Empty);
-                resendAlarmMessage = _regRemoveFileSize.Replace(resendAlarmMessage, string.Empty);
-            });
-        }
+                alarmMessage = alarmMessage.Replace(
+                    replaceContent,
+                    CQCode.Image(CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName, GetPathType.CQCodePath)));
+            }
+        });
 
         try
         {
@@ -106,17 +95,17 @@ public static partial class ProcessGroupMessage
                 // MEMO : 发送反馈
                 await BotServer.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
                 {
-                    new(groupMessage.MessageId),
-                    new(PublicVar.BOT_NAME, PublicVar.BotId, resendAlarmMessage),
-                    new(PublicVar.BOT_NAME, PublicVar.BotId, "投稿成功!!"),
-                });
+                    //new(groupMessage.MessageId),
+                    new(BOT_NAME, BotId, alarmMessage),
+                    new(BOT_NAME, BotId, "投稿成功!!"),
+                }).ConfigureAwait(false);
                 ConfigExtensions.SaveConfig();
                 return true;
             }
         }
         catch (Exception)
         {
-            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!");
+            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
             YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
             return false;
         }

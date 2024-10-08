@@ -54,7 +54,7 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://api.lolicon.app/setu/v2?proxy={PixivReverseProxy}" +
+        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivReverseProxy}" +
                   $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
