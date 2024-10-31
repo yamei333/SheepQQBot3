@@ -141,7 +141,7 @@ public static class ConfigExtensions
                 var jsonText = JsonSerializer.Serialize(PublicVar.BotConfig, new JsonSerializerOptions
                 {
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                    WriteIndented = true
+                    WriteIndented = true,
                 });
                 File.WriteAllText("config.json", jsonText, Encoding.UTF8);
             }

@@ -852,12 +852,13 @@ public static partial class ProcessGroupMessage
                     //new(BOT_NAME, BotId, $"{CQCode.Reply(targetId, messageId)}{GetSetuLvInfo()}"),
                     new($"{setuInfo.SetuType}", BotId,
                         CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_IMAGE, fileName, GetPathType.CQCodePath))),
-                    //new($"{setuInfo.SetuType}", BotId, $"{setuInfo.SourceText}" +
-                    //    $"{ENTER}{_setuSource.Random()}:{setuInfo.SourceUrl}"),
                     // MEMO : 0.14.3.0 使用json卡片发送
-                    new(BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
-                        "查看大图", setuInfo.SourceText, $"{setuInfo.SetuType}",
-                        setuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)),
+                    // MEMO : 0.14.4.3 json卡片出问题了, 返回原本的发送方式
+                    new(BOT_NAME, BotId, $"[{setuInfo.SetuType}]{setuInfo.SourceText}"
+                        + $"{ENTER}{setuInfo.SourceUrl}"),
+                    //new(BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                    //    "查看大图", setuInfo.SourceText, $"{setuInfo.SetuType}",
+                    //    setuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)),
                 };
 
                 if (addLevel is SetuAddLevel.ExtraDouble or SetuAddLevel.FreeExtraDouble)
@@ -882,10 +883,12 @@ public static partial class ProcessGroupMessage
                             //sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
                             //    $"{bonusSetuInfo.SourceText}" +
                             //    $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
-                            sendMessages.Add(new GroupForwardMessage(
-                                BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
-                                    "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
-                                    bonusSetuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                $"[{setuInfo.SetuType}]{setuInfo.SourceText}{ENTER}{setuInfo.SourceUrl}"));
+                            //sendMessages.Add(new GroupForwardMessage(
+                            //    BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                            //        "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
+                            //        bonusSetuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
                         }
                         else
                         {
@@ -943,10 +946,12 @@ public static partial class ProcessGroupMessage
                             //sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
                             //    $"{setuInfoR18.SourceText}" +
                             //    $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
-                            sendMessages.Add(new GroupForwardMessage(
-                                BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
-                                    "查看大图", setuInfoR18.SourceText, $"{setuInfoR18.SetuType}",
-                                    setuInfoR18.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
+                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
+                                $"[{setuInfoR18.SetuType}]{setuInfoR18.SourceText}{ENTER}{setuInfoR18.SourceUrl}"));
+                            //sendMessages.Add(new GroupForwardMessage(
+                            //    BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
+                            //        "查看大图", setuInfoR18.SourceText, $"{setuInfoR18.SetuType}",
+                            //        setuInfoR18.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
                             break;
                         case SetuResult.NoSearchResult:
                             sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
@@ -1187,7 +1192,7 @@ public static partial class ProcessGroupMessage
                     isR18 ? SetuExtensions.GetSetu_Jitsu_R18Async : SetuExtensions.GetSetu_JitsuAsync),
                 SetuType.JitsuSelf => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_JitsuSelf_R18Async : SetuExtensions.GetSetu_JitsuSelfAsync),
-                _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null)
+                _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null),
             };
     }
 
@@ -1283,7 +1288,7 @@ public static class SetuAddLevelUtil
             SetuAddLevel.LuckGolden => "黄金幸运",
             SetuAddLevel.Free => "白嫖",
             SetuAddLevel.ExtraDouble => "双倍色图",
-            _ => throw new ArgumentOutOfRangeException(nameof(setuAddLevel), setuAddLevel, null)
+            _ => throw new ArgumentOutOfRangeException(nameof(setuAddLevel), setuAddLevel, null),
         };
 }
 

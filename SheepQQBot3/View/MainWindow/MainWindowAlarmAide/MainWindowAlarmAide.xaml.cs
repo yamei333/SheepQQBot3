@@ -81,7 +81,7 @@ public partial class MainWindowAlarmAide : UserControl
         var addAlarmAideDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Edit)
         {
             AlarmName = selectedAlarmAideConfig.AlarmName,
-            Condition = selectedAlarmAideConfig.Condition
+            Condition = selectedAlarmAideConfig.Condition,
         };
         if (addAlarmAideDialog.ShowDialog() != true)
             return;
@@ -199,7 +199,7 @@ public partial class MainWindowAlarmAide : UserControl
     {
         var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.MWindow, sender, DialogMode.Edit)
         {
-            AlarmText = _vm.SelectedAlarmText.Value
+            AlarmText = _vm.SelectedAlarmText.Value,
         };
         if (addAlarmAideTextDialog.ShowDialog() == true)
         {
@@ -267,7 +267,7 @@ public partial class MainWindowAlarmAide : UserControl
             Filter = "文本文件(*.txt)|*.txt",
             OverwritePrompt = true,
             CheckPathExists = true,
-            DefaultExt = "txt"
+            DefaultExt = "txt",
         };
         if (saveFileDialog.ShowDialog() == true)
             File.WriteAllLines(saveFileDialog.FileName, _vm.SelectedAlarmAideConfig.AlarmTexts.Values.ToArray());
@@ -284,7 +284,7 @@ public partial class MainWindowAlarmAide : UserControl
             Filter = "文本文件(*.txt)|*.txt",
             CheckPathExists = true,
             CheckFileExists = true,
-            DefaultExt = "txt"
+            DefaultExt = "txt",
         };
         if (opneFileDialog.ShowDialog() != true)
             return;

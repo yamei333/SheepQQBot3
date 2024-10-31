@@ -2,27 +2,26 @@
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
-namespace SheepQQBot3.Model.JsonCard
+namespace SheepQQBot3.Model.JsonCard;
+
+/// <summary>
+/// QQJson卡片
+/// </summary>
+public class JsonCardRequest
 {
+    [JsonPropertyName("ark")]
+    public string Ark { get; set; }
+
     /// <summary>
-    /// QQJson卡片
+    /// 默认构造函数
     /// </summary>
-    public class JsonCardRequest
+    public JsonCardRequest(string ark)
     {
-        [JsonPropertyName("ark")]
-        public string Ark { get; set; }
+        Ark = ark;
+    }
 
-        /// <summary>
-        /// 默认构造函数
-        /// </summary>
-        public JsonCardRequest(string ark)
-        {
-            Ark = ark;
-        }
-
-        public JsonCardRequest(JsonCard_TianxuanShare jsonCard)
-        {
-            Ark = JsonSerializer.Serialize(jsonCard, JsonExtensions.DefaultJsonOptions);
-        }
+    public JsonCardRequest(JsonCard_TianxuanShare jsonCard)
+    {
+        Ark = JsonSerializer.Serialize(jsonCard, JsonExtensions.DefaultJsonOptions);
     }
 }

@@ -65,7 +65,7 @@ public static class TargetTypeExtensions
             {
                 BotFunctionType.Private_AdminConfig,
             },
-            _ => null
+            _ => null,
         };
     }
 }

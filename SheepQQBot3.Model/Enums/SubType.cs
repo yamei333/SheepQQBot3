@@ -102,4 +102,9 @@ public enum SubType
     /// 退出群
     /// </summary>
     Leave,
+
+    /// <summary>
+    /// 输入状态
+    /// </summary>
+    Input_Status,
 }

@@ -1,7 +1,7 @@
-﻿using System;
-using System.Text.Json.Serialization;
-using MessagePack;
+﻿using MessagePack;
 using SheepQQBot3.Model.Enums;
+using System;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -32,7 +32,7 @@ public class LiveAlarmConfig : NotifyPropertyChangedConfigBase
         => LiveType switch
         {
             LiveType.Bilibili => "B站",
-            _ => string.Empty
+            _ => string.Empty,
         };
 
     /// <summary>

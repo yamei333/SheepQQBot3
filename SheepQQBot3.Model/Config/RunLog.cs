@@ -67,7 +67,7 @@ public class RunLog
             LogMessageType.System_Error => "Red",
             LogMessageType.System_Warning => "Blue",
             LogMessageType.BlockedByServer => "Blue",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(),
         };
 
     /// <summary>

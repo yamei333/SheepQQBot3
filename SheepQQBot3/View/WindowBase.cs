@@ -16,7 +16,7 @@ public class WindowBase<T> : Window
         // MEMO : 设置Window的Style
         var resourceDictionary = new ResourceDictionary
         {
-            Source = new Uri("CommonStyles.xaml", UriKind.RelativeOrAbsolute)
+            Source = new Uri("CommonStyles.xaml", UriKind.RelativeOrAbsolute),
         };
         Style = resourceDictionary["WindowBaseStyle"] as Style;
     }

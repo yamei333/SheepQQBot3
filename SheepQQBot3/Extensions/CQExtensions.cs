@@ -44,7 +44,7 @@ public static class CQCode
     public static string GetImageUrl(string message)
     {
         var cqImageUrl = _regCQImageUrl.Match(message).Value;
-        return cqImageUrl.Replace("&amp;","&").Replace("multimedia.nt.qq.com.cn", "gchat.qpic.cn");
+        return cqImageUrl.Replace("&amp;", "&").Replace("multimedia.nt.qq.com.cn", "gchat.qpic.cn");
     }
 
     /// <summary>

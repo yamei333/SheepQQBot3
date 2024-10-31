@@ -243,7 +243,7 @@ partial class BotServer
         {
             UserId = userId.ToString(),
             GroupId = groupId.HasValue ? groupId.ToString() : null,
-            Message = MessageUtil.ProcessCQMessage(message)
+            Message = MessageUtil.ProcessCQMessage(message),
         });
 
     /// <summary>
@@ -298,7 +298,7 @@ partial class BotServer
     public Task DeleteMessageAsync(int messageId)
         => SendDataAsync("delete_msg", new ParamData
         {
-            MessageId = messageId.ToString()
+            MessageId = messageId.ToString(),
         });
 
     /// <summary>
@@ -365,7 +365,7 @@ partial class BotServer
         {
             GroupId = groupId.ToString(),
             UserId = userId.ToString(),
-            Reject_Add_Request = isReject.ToString()
+            Reject_Add_Request = isReject.ToString(),
         }).ConfigureAwait(false);
 
     /// <summary>

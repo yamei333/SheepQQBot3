@@ -93,14 +93,14 @@ public static partial class TaskProcess
 
         var roomInfo = liveRoomResponseData.RoomInfo;
         var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
-        var sendMessage = await CQCode.JsonCard_TianxuanShareAsync(
-            "正在直播!",
-            $"{userBaseInfo.Name}{ENTER}{roomInfo.Title}",
-            $"https://live.bilibili.com/{liveRoomId}",
-            userBaseInfo.Face)
-            .ConfigureAwait(false);
-        //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}" +
-        //                  $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
+        //var sendMessage = await CQCode.JsonCard_TianxuanShareAsync(
+        //    "正在直播!",
+        //    $"{userBaseInfo.Name}{ENTER}{roomInfo.Title}",
+        //    $"https://live.bilibili.com/{liveRoomId}",
+        //    userBaseInfo.Face)
+        //    .ConfigureAwait(false);
+        var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}"
+                + $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
 
         var targetId = setConfig.TargetId;
         switch (setConfig.TargetType)

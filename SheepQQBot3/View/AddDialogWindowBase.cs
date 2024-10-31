@@ -1,9 +1,9 @@
-﻿using System;
+﻿using SheepQQBot3.Enums;
+using System;
 using System.ComponentModel;
 using System.Windows;
 using System.Windows.Controls;
 using System.Windows.Input;
-using SheepQQBot3.Enums;
 
 namespace SheepQQBot3.View;
 
@@ -28,7 +28,7 @@ public class AddDialogWindowBase<T> : Window
         // MEMO : 设置Window的Style
         var resourceDictionary = new ResourceDictionary
         {
-            Source = new Uri("View/Style/CommonStyles.xaml", UriKind.RelativeOrAbsolute)
+            Source = new Uri("View/Style/CommonStyles.xaml", UriKind.RelativeOrAbsolute),
         };
         Style = resourceDictionary["WindowBaseStyle"] as Style;
         // MEMO : 初始化

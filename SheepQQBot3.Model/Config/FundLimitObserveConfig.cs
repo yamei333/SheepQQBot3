@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MessagePack;
+using SheepQQBot3.Model.Enums;
+using System;
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
-using MessagePack;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -103,7 +103,7 @@ public class LimitObserveFundConfig
             FundObserveType.ThreeMonths => "3月",
             FundObserveType.SixMonths => "半年",
             FundObserveType.Year => "年",
-            _ => throw new ArgumentOutOfRangeException()
+            _ => throw new ArgumentOutOfRangeException(),
         };
 
     /// <summary>

@@ -1350,7 +1350,7 @@ public static class EnumerableExtensions
                 ? enumerable.Select(each => int.TryParse(each.Key.ToString(), out var keyValue) ? keyValue : 0)
                     .Max() + 1
                 : 0,
-            _ => 0
+            _ => 0,
         };
     }
 
@@ -1370,7 +1370,7 @@ public static class EnumerableExtensions
                 ? (enumerable.Select(each => int.TryParse(each.Key.ToString(), out var keyValue) ? keyValue : 0)
                     .Max()) + 1
                 : 0,
-            _ => 0
+            _ => 0,
         };
     }
 

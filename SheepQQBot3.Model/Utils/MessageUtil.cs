@@ -66,6 +66,7 @@ public static class MessageUtil
             //    YameiExtensions.PlaySe3(GetElementBaseData().File);
             //    return new Element(ElementType.text, new ElementBaseData(string.Empty));
             case ElementType.json:
+            case ElementType.lightapp:
                 return new Element(cqType, GetElementBaseData_Json());
             case ElementType.xml:
                 return new Element(cqType, GetElementBaseData_Xml());
@@ -93,7 +94,7 @@ public static class MessageUtil
             var subMessage = message.Substring(subIndex, message.Length - cqCode.Length - 6);
             return new ElementBaseData
             {
-                Data = subMessage[5..]
+                Data = subMessage[5..],
             };
         }
 

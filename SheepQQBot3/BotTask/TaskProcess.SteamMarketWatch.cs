@@ -17,6 +17,12 @@ public static partial class TaskProcess
     /// </summary>
     public static async Task SteamMarketWatchAsync()
     {
+        if (!Vm.IsBarkUsed)
+        {
+            AddRunLog(new RunLog_SystemWarning("Steam市场监控状态 启动失败! [由于未配置Bark]"));
+            return;
+        }
+
         AddTaskRunLog("Steam市场监控状态");
         while (true)
         {

@@ -72,8 +72,8 @@ public partial class BarkWindow
                 Arguments = "-addr 0.0.0.0:30008 -data ./bark-data",
                 RedirectStandardOutput = true,
                 StandardOutputEncoding = Encoding.UTF8,
-                CreateNoWindow = true
-            }
+                CreateNoWindow = true,
+            },
         };
 
         Bark.Start();
@@ -129,11 +129,11 @@ public partial class BarkWindow
             var p = new Paragraph
             {
                 FontFamily = new FontFamily(fontFamily),
-                LineHeight = 1
+                LineHeight = 1,
             };
             p.Inlines.Add(new Run(addMessage)
             {
-                Foreground = brush
+                Foreground = brush,
             });
             RichTextBox.Document.Blocks.Add(p);
         }

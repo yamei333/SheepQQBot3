@@ -13,123 +13,122 @@ using System.Windows.Documents;
 using System.Windows.Media;
 using static SheepQQBot3.PublicVar;
 
-namespace SheepQQBot3.View
+namespace SheepQQBot3.View;
+
+/// <summary>
+/// NapCatWindow.xaml 的交互逻辑
+/// </summary>
+public partial class NapCatWindow : Window
 {
-    /// <summary>
-    /// NapCatWindow.xaml 的交互逻辑
-    /// </summary>
-    public partial class NapCatWindow : Window
+    private readonly Regex _logLvReg = new(@"\[.+?(?<logLv>INFO|ERROR|DEBUG).+?\]");
+
+    public NapCatWindow()
     {
-        private readonly Regex _logLvReg = new(@"\[.+?(?<logLv>INFO|ERROR|DEBUG).+?\]");
-
-        public NapCatWindow()
+        InitializeComponent();
+        Loaded += (s, e) =>
         {
-            InitializeComponent();
-            Loaded += (s, e) =>
-            {
-                LaunchChildProcess();
-                Visibility = Visibility.Collapsed;
-                WindowStyle = WindowStyle.SingleBorderWindow;
-            };
-            RichTextBox.Document.Blocks.Clear();
-        }
+            LaunchChildProcess();
+            Visibility = Visibility.Collapsed;
+            WindowStyle = WindowStyle.SingleBorderWindow;
+        };
+        RichTextBox.Document.Blocks.Clear();
+    }
 
-        private async void LaunchChildProcess()
+    private async void LaunchChildProcess()
+    {
+        var napCatPath = AppSettingExtensions.Get("napcat");
+        var napCatBat = AppSettingExtensions.Get("napcatbat");
+        // MEMO : 未配置Napcat则return
+        if (string.IsNullOrEmpty(napCatPath) || string.IsNullOrEmpty(napCatBat))
         {
-            var napCatPath = AppSettingExtensions.Get("napcat");
-            var napCatBat = AppSettingExtensions.Get("napcatbat");
-            // MEMO : 未配置Napcat则return
-            if (string.IsNullOrEmpty(napCatPath) || string.IsNullOrEmpty(napCatBat))
-            {
-                Vm.AddRunLog(new RunLog_SystemError("未正确配置 NapCat 路径"));
-                return;
-            }
-
-            var napCatBatPath = Path.Combine(napCatPath, napCatBat);
-            if (!File.Exists(napCatBatPath))
-            {
-                Vm.AddRunLog(new RunLog_SystemError("已配置的 NapCat 路径不存在!"));
-                return;
-            }
-
-            BotExtensions.KillServerExe();
-            var napCat = new Process
-            {
-                StartInfo =
-                {
-                    WorkingDirectory = napCatPath!,
-                    FileName = napCatBatPath,
-                    UseShellExecute = false,
-                    Arguments = $"-q {BotId}",
-                    RedirectStandardOutput = true,
-                    StandardOutputEncoding = Encoding.UTF8,
-                    CreateNoWindow = true,
-                },
-            };
-            napCat.Start();
-            Vm.AddRunLog(new RunLog_SystemInfo("NapCat 已启动"));
-            await Task.Run(() =>
-            {
-                while (!napCat.StandardOutput.EndOfStream)
-                {
-                    var line = napCat.StandardOutput.ReadLine();
-                    if (string.IsNullOrEmpty(line))
-                        continue;
-
-                    var result = _logLvReg.Replace(line!, "${logLv}");
-                    Brush color;
-                    if (result.Contains("[WARNING]", StringComparison.Ordinal))
-                        color = Brushes.DarkGoldenrod;
-                    else if (result.Contains("[ERROR]", StringComparison.Ordinal))
-                        color = Brushes.DarkRed;
-                    else
-                        color = Brushes.DarkGreen;
-
-                    try
-                    {
-                        Dispatcher.Invoke(() =>
-                        {
-                            AppendRichText(result, color);
-                            var blocks = RichTextBox.Document.Blocks;
-                            if (blocks.Count > 1000)
-                                blocks.Remove(blocks.FirstBlock);
-
-                            if (LogAutoScroll.IsChecked == true)
-                                RichTextBox.ScrollToEnd();
-                        });
-                    }
-                    catch (Exception)
-                    {
-                        // IGNORE
-                    }
-                }
-            }).ConfigureAwait(false);
+            Vm.AddRunLog(new RunLog_SystemError("未正确配置 NapCat 路径"));
             return;
-
-            void AppendRichText(string addMessage, Brush brush)
-            {
-                // 创建一个新的 Paragraph 对象
-                var p = new Paragraph
-                {
-                    LineHeight = 1,
-                };
-                p.Inlines.Add(new Run(addMessage)
-                {
-                    Foreground = brush
-                });
-                RichTextBox.Document.Blocks.Add(p);
-            }
         }
 
-        //private void OnRestartNapCat(object sender, RoutedEventArgs e)
-        //{
-        //    LaunchChildProcess();
-        //}
-
-        private void NapCatWindow_OnClosing(object sender, CancelEventArgs e)
+        var napCatBatPath = Path.Combine(napCatPath, napCatBat);
+        if (!File.Exists(napCatBatPath))
         {
-            this.Visibility = Visibility.Collapsed;
-            e.Cancel = true;
+            Vm.AddRunLog(new RunLog_SystemError("已配置的 NapCat 路径不存在!"));
+            return;
         }
+
+        BotExtensions.KillServerExe();
+        var napCat = new Process
+        {
+            StartInfo =
+            {
+                WorkingDirectory = napCatPath!,
+                FileName = napCatBatPath,
+                UseShellExecute = false,
+                Arguments = $"-q {BotId}",
+                RedirectStandardOutput = true,
+                StandardOutputEncoding = Encoding.UTF8,
+                CreateNoWindow = true,
+            },
+        };
+        napCat.Start();
+        Vm.AddRunLog(new RunLog_SystemInfo("NapCat 已启动"));
+        await Task.Run(() =>
+        {
+            while (!napCat.StandardOutput.EndOfStream)
+            {
+                var line = napCat.StandardOutput.ReadLine();
+                if (string.IsNullOrEmpty(line))
+                    continue;
+
+                var result = _logLvReg.Replace(line!, "${logLv}");
+                Brush color;
+                if (result.Contains("[WARNING]", StringComparison.Ordinal))
+                    color = Brushes.DarkGoldenrod;
+                else if (result.Contains("[ERROR]", StringComparison.Ordinal))
+                    color = Brushes.DarkRed;
+                else
+                    color = Brushes.DarkGreen;
+
+                try
+                {
+                    Dispatcher.Invoke(() =>
+                    {
+                        AppendRichText(result, color);
+                        var blocks = RichTextBox.Document.Blocks;
+                        if (blocks.Count > 1000)
+                            blocks.Remove(blocks.FirstBlock);
+
+                        if (LogAutoScroll.IsChecked == true)
+                            RichTextBox.ScrollToEnd();
+                    });
+                }
+                catch (Exception)
+                {
+                    // IGNORE
+                }
+            }
+        }).ConfigureAwait(false);
+        return;
+
+        void AppendRichText(string addMessage, Brush brush)
+        {
+            // 创建一个新的 Paragraph 对象
+            var p = new Paragraph
+            {
+                LineHeight = 1,
+            };
+            p.Inlines.Add(new Run(addMessage)
+            {
+                Foreground = brush,
+            });
+            RichTextBox.Document.Blocks.Add(p);
+        }
+    }
+
+    //private void OnRestartNapCat(object sender, RoutedEventArgs e)
+    //{
+    //    LaunchChildProcess();
+    //}
+
+    private void NapCatWindow_OnClosing(object sender, CancelEventArgs e)
+    {
+        this.Visibility = Visibility.Collapsed;
+        e.Cancel = true;
     }
 }

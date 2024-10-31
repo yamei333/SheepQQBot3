@@ -222,7 +222,7 @@ public partial class MainWindow : Window
         {
             TargetName = selectedSetConfig.TargetName,
             TargetId = selectedSetConfig.TargetId,
-            TargetType = selectedSetConfig.TargetType
+            TargetType = selectedSetConfig.TargetType,
         };
         if (addGroupDialog.ShowDialog() == true)
         {

@@ -184,7 +184,7 @@ public class SetConfig
             BotConfigTargetType.Common => $"系统-{TargetId}",
             BotConfigTargetType.Group => $"群-{TargetId}",
             BotConfigTargetType.Private => $"{TargetId}",
-            _ => throw new NotImplementedException()
+            _ => throw new NotImplementedException(),
         };
 
     /// <summary>

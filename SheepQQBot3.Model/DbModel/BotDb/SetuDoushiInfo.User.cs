@@ -1,41 +1,40 @@
 ﻿using System;
 using Yamei.Common;
 
-namespace SheepQQBot3.DbModel
+namespace SheepQQBot3.DbModel;
+
+public partial class SetuDoushiInfo
 {
-    public partial class SetuDoushiInfo
+    public long CalcSetuDoushiLv(DateTime dateNow)
     {
-        public long CalcSetuDoushiLv(DateTime dateNow)
-        {
-            var setuDoushiLv = SetuDoushiLv;
-            if (setuDoushiLv <= 0)
-                return setuDoushiLv;
-
-            var setuCd = SetuCD.ToDateTime();
-            if (setuCd == DateTime.MinValue)
-                return setuDoushiLv;
-
-            var changeLvTimePoint = (long)((dateNow - setuCd).TotalMinutes / 90);
-            while (setuDoushiLv > 0 && changeLvTimePoint >= setuDoushiLv)
-            {
-                changeLvTimePoint -= setuDoushiLv;
-                setuDoushiLv--;
-            }
-
+        var setuDoushiLv = SetuDoushiLv;
+        if (setuDoushiLv <= 0)
             return setuDoushiLv;
+
+        var setuCd = SetuCD.ToDateTime();
+        if (setuCd == DateTime.MinValue)
+            return setuDoushiLv;
+
+        var changeLvTimePoint = (long)((dateNow - setuCd).TotalMinutes / 90);
+        while (setuDoushiLv > 0 && changeLvTimePoint >= setuDoushiLv)
+        {
+            changeLvTimePoint -= setuDoushiLv;
+            setuDoushiLv--;
         }
 
-        public SetuDoushiInfo()
-        {
-        }
+        return setuDoushiLv;
+    }
 
-        public SetuDoushiInfo(long targetId)
-        {
-            TargetId = targetId;
-            SetuDoushiLv = 0;
-            ToFastTimes = 0;
-            SetuCD = 0;
-            BlackListCD = 0;
-        }
+    public SetuDoushiInfo()
+    {
+    }
+
+    public SetuDoushiInfo(long targetId)
+    {
+        TargetId = targetId;
+        SetuDoushiLv = 0;
+        ToFastTimes = 0;
+        SetuCD = 0;
+        BlackListCD = 0;
     }
 }
