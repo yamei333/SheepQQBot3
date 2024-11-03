@@ -1,5 +1,6 @@
 ﻿using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.Extension;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;

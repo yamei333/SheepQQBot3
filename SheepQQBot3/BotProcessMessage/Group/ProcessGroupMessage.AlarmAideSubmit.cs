@@ -62,7 +62,7 @@ public static partial class ProcessGroupMessage
         }
 
         var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
-        // MEMO : 有image表情的时候移除url和subType
+        // MEMO : 0.14.4.4 已在接收消息层处理image消息, 此处不需要额外处理
         var matches = _regCQImage.Matches(alarmMessage);
         matches.ForEach(match =>
         {

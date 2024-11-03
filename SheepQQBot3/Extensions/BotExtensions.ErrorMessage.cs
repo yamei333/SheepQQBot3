@@ -7,6 +7,7 @@ using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
 using Yamei.Common;
 
 namespace SheepQQBot3.Extensions;
@@ -21,6 +22,7 @@ public static partial class BotExtensions
     /// <returns></returns>
     public static string GetMessage_CommandTypeError(long targetId, int messageId)
         => GetMessage_CommonError(targetId, messageId, "命令格式错误!");
+
     /// <summary>
     /// 生成错误消息(参数范围错误)
     /// </summary>

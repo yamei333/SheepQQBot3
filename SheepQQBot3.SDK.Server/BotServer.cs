@@ -179,6 +179,7 @@ public partial class BotServer : IDisposable
 
     private void ProcessMessage(ReceiveData receiveData)
     {
+        receiveData.Message = CQCode.ReplaceCQImage(receiveData.Message);
         switch (receiveData.MessageTargetType)
         {
             case MessageTargetType.Group:

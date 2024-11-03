@@ -4,6 +4,7 @@ using SheepQQBot3.DbModel;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using SheepQQBot3.Model.QQ;
 using System;

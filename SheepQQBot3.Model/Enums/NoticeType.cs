@@ -89,4 +89,9 @@ public enum NoticeType
     /// 群禁言
     /// </summary>
     Group_Ban,
+
+    /// <summary>
+    /// 群消息表情回应
+    /// </summary>
+    Group_Msg_Emoji_Like,
 }

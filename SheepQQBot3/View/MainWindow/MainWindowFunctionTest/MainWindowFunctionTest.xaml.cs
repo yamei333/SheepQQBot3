@@ -53,7 +53,7 @@ public partial class MainWindowFunctionTest : UserControl
     {
         if (long.TryParse(TxtTestSendJsonMessage1_GroupId.Text, out var groupId))
         {
-            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQCode.JsonCard_TianxuanShareAsync(
+            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
                 TxtTestSendJsonMessage1_Title.Text,
                 TxtTestSendJsonMessage1_Content.Text,
                 TxtTestSendJsonMessage1_Url.Text,

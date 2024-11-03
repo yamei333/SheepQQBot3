@@ -27,16 +27,20 @@ public partial class BotGroupMessage
         MessageId = messageId;
         TimeStamp = timeStamp;
 
-        var messageImage = string.Empty;
-        _regCQArea.Matches(message).ForEach(each =>
-        {
-            var cqCode = ReplaceCQImage(each.Value);
-            // MEMO : 一个表情重复发也只算1次
-            if (_regCQCode.Match(cqCode).Value == "image" && !messageImage.Contains(cqCode))
-                messageImage += cqCode;
-        });
-        MessageText = _regCQArea.Replace(message, string.Empty).TrimStart();
-        MessageImage = messageImage;
+        //var messageImage = string.Empty;
+        //_regCQArea.Matches(message).ForEach(each =>
+        //{
+        //    var cqCode = ReplaceCQImage(each.Value);
+        //    // MEMO : 一个表情重复发也只算1次
+        //    if (_regCQCode.Match(cqCode).Value == "image" && !messageImage.Contains(cqCode))
+        //        messageImage += cqCode;
+        //});
+        // MEMO : 清除所有CQ段
+        // MEMO : 0.14.4.4 字母默认大写
+        MessageText = _regCQArea.Replace(message, string.Empty).TrimStart().ToUpper();
+        // MEMO : 0.14.4.4 不再记录图片
+        //MessageImage = messageImage;
+        MessageImage = string.Empty;
     }
 
     /// <summary>

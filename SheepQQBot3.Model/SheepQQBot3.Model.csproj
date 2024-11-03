@@ -29,6 +29,7 @@
 
   <ItemGroup>
     <Folder Include="ProxyBandwidth\" />
+    <Folder Include="新文件夹\" />
   </ItemGroup>
 
 </Project>

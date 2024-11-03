@@ -884,7 +884,7 @@ public static partial class ProcessGroupMessage
                             //    $"{bonusSetuInfo.SourceText}" +
                             //    $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
                             sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
-                                $"[{setuInfo.SetuType}]{setuInfo.SourceText}{ENTER}{setuInfo.SourceUrl}"));
+                                $"[{bonusSetuInfo.SetuType}]{bonusSetuInfo.SourceText}{ENTER}{bonusSetuInfo.SourceUrl}"));
                             //sendMessages.Add(new GroupForwardMessage(
                             //    BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                             //        "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
