@@ -127,13 +127,18 @@ public static class MyStringExtensions
     /// </summary>
     /// <param name="str">对象字符串</param>
     /// <param name="conditionStr">查找字符串组</param>
+    /// <param name="findedStr">找到的字符串</param>
     /// <param name="stringComparison"><see cref="StringComparison"/></param>
     /// <returns>结果</returns>
     public static bool ContainsAny(
         this string str,
         string[] conditionStr,
+        out string findedStr,
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
-        => conditionStr.Any(each => str.Contains(each, stringComparison));
+    {
+        findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
+        return string.IsNullOrEmpty(findedStr);
+    }
 
     /// <summary>
     /// string.Contains 拓展
@@ -141,13 +146,18 @@ public static class MyStringExtensions
     /// </summary>
     /// <param name="str">对象字符串</param>
     /// <param name="conditionStr">查找字符串组</param>
+    /// <param name="findedStr">找到的字符串</param>
     /// <param name="stringComparison"><see cref="StringComparison"/></param>
     /// <returns>结果</returns>
     public static bool ContainsAny(
         this string str,
         IEnumerable<string> conditionStr,
+        out string findedStr,
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
-        => conditionStr.Any(each => str.Contains(each, stringComparison));
+    {
+        findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
+        return string.IsNullOrEmpty(findedStr);
+    }
 
     /// <summary>
     /// string.StartsWith 拓展

@@ -60,6 +60,11 @@ public static partial class ProcessGroupMessage
     private const string COMMAND_CUSTOM_GROUP_SETU_RESETLV_LIBRARY = "#STRESETLV#";
 
     /// <summary>
+    /// 色图解封命令
+    /// </summary>
+    private const string COMMAND_CUSTOM_GROUP_SETU_RESETBAN_LIBRARY = "#STRESETBAN#";
+
+    /// <summary>
     /// 色图清空所有命令
     /// </summary>
     private const string COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY = "#STRESETALL#";
@@ -99,10 +104,22 @@ public static partial class ProcessGroupMessage
         {SetuType.JitsuSelf, 6},
     };
 
-    private static readonly string[] _setuBuman =
-    [
-        "不够", "这也", "一般", "不色", "就这", "太小", "好菜", "真菜", "吗",
-    ];
+    /// <summary>
+    /// 色图不满时的反击关键词, 拉黑时间为分钟
+    /// </summary>
+    private static readonly Dictionary<string, int> _setuBuman = new()
+    {
+        {"不够", 60},
+        {"这也", 60},
+        {"一般", 60},
+        {"不色", 120},
+        {"就这", 300},
+        {"太小", 120},
+        {"菜", 300},
+        {"不行", 120},
+        {"不太行", 120},
+        {"吗", 60},
+    };
 
     //private static readonly string[] _setuYouwant =
     //[
@@ -321,14 +338,34 @@ public static partial class ProcessGroupMessage
                 return true;
             }
 
+            if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_RESETBAN_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+            {
+                if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETBAN_LIBRARY.Length..], out var searchTargetId))
+                {
+                    // MEMO : 解封
+                    var targetDoushiInfo = await GetSetuDoushiInfo(searchTargetId);
+                    targetDoushiInfo.BlackListCD = 0;
+                    UpdateSetuDoushiInfo(targetDoushiInfo);
+
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
+                }
+                else
+                {
+                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Question);
+                }
+
+                return true;
+            }
+
             if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             {
                 if (long.TryParse(message[COMMAND_CUSTOM_GROUP_SETU_RESETALL_LIBRARY.Length..], out var searchTargetId))
                 {
-                    // MEMO : 清空CD
+                    // MEMO : 清空CD以及解封
                     var targetDoushiInfo = await GetSetuDoushiInfo(searchTargetId);
                     targetDoushiInfo.SetuDoushiLv = 0;
                     targetDoushiInfo.SetuCD = 0;
+                    targetDoushiInfo.BlackListCD = 0;
                     UpdateSetuDoushiInfo(targetDoushiInfo);
 
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Congratolation);
@@ -1136,9 +1173,8 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            if (message.ContainsAny(_setuBuman) && (dateNow - setuSendHistory).TotalSeconds <= 30)
+            if (message.ContainsAny(_setuBuman.Keys, out var findedStr) && (dateNow - setuSendHistory).TotalSeconds <= 15)
             {
-                var addSecond = Rand.Next(60 + (int)setuDoushiLv * 10, 600 + (int)setuDoushiLv * 600);
                 var randActions = new List<RandomWeight<int>>
                 {
                     new(1000, 0),
@@ -1151,7 +1187,8 @@ public static partial class ProcessGroupMessage
                     addSetuSenderLv = item.Value;
 
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
-                setuDoushiInfo.BlackListCD = dateNow.AddHours(2).ToTimeStamp();
+                var addMinutes = _setuBuman[findedStr];
+                setuDoushiInfo.BlackListCD = dateNow.AddMinutes(Rand.Next(addMinutes / 2, addMinutes)).ToTimeStamp();
                 UpdateSetuDoushiInfo(setuDoushiInfo);
                 BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
                 return true;
