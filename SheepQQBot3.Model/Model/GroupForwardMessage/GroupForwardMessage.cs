@@ -5,13 +5,10 @@ namespace SheepQQBot3.Model;
 
 public class GroupForwardMessage
 {
-    [JsonPropertyName("id")]
-    public int? MessageId { get; set; }
-
-    [JsonPropertyName("name")]
+    [JsonPropertyName("nickname")]
     public string Name { get; set; }
 
-    [JsonPropertyName("uin")]
+    [JsonPropertyName("user_id")]
     public string UserId { get; set; }
 
     [JsonPropertyName("content")]
@@ -22,10 +19,5 @@ public class GroupForwardMessage
         Name = name;
         UserId = userId.ToString();
         Message = MessageUtil.ProcessCQMessage(message);
-    }
-
-    public GroupForwardMessage(int messageId)
-    {
-        MessageId = messageId;
     }
 }

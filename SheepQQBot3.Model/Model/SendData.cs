@@ -73,4 +73,19 @@ public class ParamData
 
     [JsonPropertyName("domain")]
     public string Domain { get; set; }
+
+    [JsonPropertyName("type")]
+    public string MiniAppType { get; set; }
+
+    [JsonPropertyName("title")]
+    public string Title { get; set; }
+
+    [JsonPropertyName("desc")]
+    public string Content { get; set; }
+
+    [JsonPropertyName("picUrl")]
+    public string PicUrl { get; set; }
+
+    [JsonPropertyName("jumpUrl")]
+    public string JumpUrl { get; set; }
 }

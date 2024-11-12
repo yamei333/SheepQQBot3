@@ -1,5 +1,6 @@
-﻿using SheepQQBot3.Extensions;
+﻿using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
 using static SheepQQBot3.PublicVar;
@@ -51,14 +52,29 @@ public partial class MainWindowFunctionTest : UserControl
     /// </summary>
     private async void TestSendJsonMessage1(object sender, RoutedEventArgs e)
     {
+        //var miniAppJson = await Vm.BotServer.GetMiniAppJsonAsync(MiniAppType.WeiBo,
+        //    "测试标题", "测试内容", "https://thirdqq.qlogo.cn/g?b=oidb&k=09ElpZZZUTHFhoIlvs0lFg&kti=ZyBvjxHhVOI&s=640",
+        //    "https://www.bilibili.com/video/BV1GJ411x7h7/?share_source=copy_web&vd_source=f952e0bb6dedea89c4fea625fbb2aab1")
+        //    .ConfigureAwait(false);
+
         if (long.TryParse(TxtTestSendJsonMessage1_GroupId.Text, out var groupId))
         {
-            await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
-                TxtTestSendJsonMessage1_Title.Text,
-                TxtTestSendJsonMessage1_Content.Text,
-                TxtTestSendJsonMessage1_Url.Text,
-                string.Empty).ConfigureAwait(false),
-                Vm.SetConfigs).ConfigureAwait(false);
+            var sendMessages = new List<GroupForwardMessage>
+            {
+                new("测试1", 252961222, "Test Message1"),
+                new("测试2", 252961222, "Test Message2"),
+            };
+
+            await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
+
+            //await Vm.BotServer.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
+            //    .ConfigureAwait(false);
+            //await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
+            //    TxtTestSendJsonMessage1_Title.Text,
+            //    TxtTestSendJsonMessage1_Content.Text,
+            //    TxtTestSendJsonMessage1_Url.Text,
+            //    string.Empty).ConfigureAwait(false),
+            //    Vm.SetConfigs).ConfigureAwait(false);
         }
     }
 

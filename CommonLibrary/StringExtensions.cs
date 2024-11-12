@@ -137,7 +137,7 @@ public static class MyStringExtensions
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
-        return string.IsNullOrEmpty(findedStr);
+        return !string.IsNullOrEmpty(findedStr);
     }
 
     /// <summary>
@@ -156,7 +156,7 @@ public static class MyStringExtensions
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
-        return string.IsNullOrEmpty(findedStr);
+        return !string.IsNullOrEmpty(findedStr);
     }
 
     /// <summary>

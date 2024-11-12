@@ -51,7 +51,7 @@ public static partial class TaskProcess
                                     if (extendCondition.DayOfMonthOffset.HasValue)
                                     {
                                         var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();
-                                        var (dayOfMonth, lastDayOfMonth) = YameiExtensions.GetDayOfMonthAndLastDayOfMonth(DateTime.Now);
+                                        var (dayOfMonth, lastDayOfMonth) = DateTime.Now.GetDayOfMonthAndLastDayOfMonth();
                                         if (dayOfMonthOffsetValue > 0)
                                         {
                                             if (dayOfMonthOffsetValue != dayOfMonth)

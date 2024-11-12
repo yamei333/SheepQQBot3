@@ -21,6 +21,9 @@ public static class CQCode
     public static string Reply(long targetId, int messageId)
         => $"[CQ:reply,qq={targetId},id={messageId}]";
 
+    public static string Json(string signedJson)
+        => $"[CQ:json,data={signedJson}]";
+
     /// <summary>
     /// 将收到的CQImage段替换为可发送的CQImage段
     /// </summary>

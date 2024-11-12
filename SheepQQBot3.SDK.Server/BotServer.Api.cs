@@ -1,16 +1,19 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using Masuit.Tools.Systems;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.JsonCard;
 using SheepQQBot3.Model.QQ;
 using SheepQQBot3.SDK.Server.Utils;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
+using System.Text.RegularExpressions;
 using System.Threading;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -76,6 +79,7 @@ partial class BotServer
             GroupId = groupId.ToString(),
             Message = messageList,
         }, echo).ConfigureAwait(false);
+        return;
 
         void ProcessYmMessage(ElementType ymElementType, Action<Element> action)
         {
@@ -155,10 +159,11 @@ partial class BotServer
                         FreeCount = items.Count(each => each.IsFree.ToBool()),
                         R18BonusCount = items.Count(each => each.IsR18Bonus.ToBool()),
                     };
-                });
+                })
+                .ToArray();
 
             var sendMessage = "=====今日色图大哥=====";
-            if (!countInfos.Any())
+            if (countInfos.Length == 0)
             {
                 sendMessage += "\r\n今日竟无一人色图! 这个世界怎么了!";
             }
@@ -207,6 +212,7 @@ partial class BotServer
             }
 
             await SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
+            return;
 
             string GetSetuSenderName(long userId)
             {
@@ -347,7 +353,7 @@ partial class BotServer
     /// </summary>
     /// <param name="userId">对象QQ</param>
     /// <param name="times">点赞次数</param>
-    public async void SendLike(long userId, int times)
+    public async Task<bool> SendLikeAsync(long userId, int times)
         => await SendDataAsync("send_like", new ParamData
         {
             UserId = userId.ToString(),
@@ -360,7 +366,7 @@ partial class BotServer
     /// <param name="groupId">群号</param>
     /// <param name="userId">对象QQ号</param>
     /// <param name="isReject">是否不再接受申请</param>
-    public async void SetGroupKick(long groupId, long userId, bool isReject = false)
+    public async Task<bool> SetGroupKickAsync(long groupId, long userId, bool isReject = false)
         => await SendDataAsync("set_group_kick", new ParamData
         {
             GroupId = groupId.ToString(),
@@ -374,7 +380,7 @@ partial class BotServer
     /// <param name="groupId">群号</param>
     /// <param name="userId">对象QQ号</param>
     /// <param name="duration">禁言时长(单位秒), 0表示取消禁言</param>
-    public async void SetGroupBan(long groupId, long userId, int duration)
+    public async Task<bool> SetGroupBanAsync(long groupId, long userId, int duration)
         => await SendDataAsync("set_group_ban", new ParamData
         {
             GroupId = groupId.ToString(),
@@ -387,7 +393,7 @@ partial class BotServer
     /// </summary>
     /// <param name="groupId">群号</param>
     /// <param name="enable">是否禁言</param>
-    public async void SetGroupAllBan(long groupId, bool enable)
+    public async Task<bool> SetGroupAllBanAsync(long groupId, bool enable)
         => await SendDataAsync("set_group_whole_ban", new ParamData
         {
             GroupId = groupId.ToString(),
@@ -400,7 +406,7 @@ partial class BotServer
     /// <param name="groupId">群号</param>
     /// <param name="userId">对象QQ号</param>
     /// <param name="card">群名片</param>
-    public async void SetGroupCard(long groupId, int userId, string card)
+    public async Task<bool> SetGroupCardAsync(long groupId, int userId, string card)
         => await SendDataAsync("set_group_card", new ParamData
         {
             GroupId = groupId.ToString(),
@@ -413,7 +419,7 @@ partial class BotServer
     /// </summary>
     /// <param name="groupId">群号</param>
     /// <param name="groupName">群名称</param>
-    public async void SetGroupName(long groupId, string groupName)
+    public async Task<bool> SetGroupNameAsync(long groupId, string groupName)
         => await SendDataAsync("set_group_name", new ParamData
         {
             GroupId = groupId.ToString(),
@@ -446,14 +452,44 @@ partial class BotServer
     /// </summary>
     /// <param name="messageId">消息ID</param>
     /// <param name="emoji"><see cref="Emoji"/>></param>
-    public async void SendMessageEmojiAsync(long messageId, Emoji emoji)
+    public async Task<bool> SendMessageEmojiAsync(long messageId, Emoji emoji)
     {
         var echo = Guid.NewGuid();
-        await SendDataAsync("set_msg_emoji_like", new ParamData
+        return await SendDataAsync("set_msg_emoji_like", new ParamData
         {
             MessageId = messageId.ToString(),
             EmojiId = ((int)emoji).ToString(),
         }, echo).ConfigureAwait(false);
+    }
+
+    /// <summary>
+    /// 获取小程序卡片Json
+    /// </summary>
+    /// <param name="miniAppType"><see cref="MiniAppType"/></param>
+    /// <param name="title">标题</param>
+    /// <param name="content">内容</param>
+    /// <param name="picUrl">图片Url</param>
+    /// <param name="jumpUrl">跳转Url</param>
+    /// <param name="timeout">超时时间</param>
+    /// <returns>小程序卡片Json</returns>
+    public async Task<string> GetMiniAppJsonAsync(
+        MiniAppType miniAppType, string title, string content, string picUrl, string jumpUrl, double timeout = 5)
+    {
+        var echo = Guid.NewGuid();
+        await SendDataAsync("get_mini_app_ark", new ParamData
+        {
+            MiniAppType = miniAppType.GetDisplay(),
+            Title = title,
+            Content = content,
+            PicUrl = picUrl,
+            JumpUrl = jumpUrl,
+        }, echo).ConfigureAwait(false);
+
+        return GetReply(echo, jsonText =>
+        {
+            var getJsonRegex = new Regex(@"(?<=\{""data"":).+(?=\},""message"":)", RegexOptions.Multiline);
+            return getJsonRegex.Match(jsonText).Value;
+        }, timeout);
     }
 
     /// <summary>
@@ -467,10 +503,7 @@ partial class BotServer
             Domain = domain,
         }, echo).ConfigureAwait(false);
 
-        return GetReply(echo, jsonText =>
-        {
-            return jsonText;
-        }, timeout);
+        return GetReply(echo, jsonText => jsonText, timeout);
     }
 
     private T GetReply<T>(Guid echo, Func<string, T> getFunc, double timeout)
