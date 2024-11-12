@@ -437,12 +437,12 @@ public static partial class ProcessGroupMessage
 
         var isSetuDebug = false;
         var tag = string.Empty;
-        var setuKeywordCheck = false;
+        var setuKeywordCheckOK = false;
         SetuType? targetSetuApiType = null;
         // MEMO : #st# (#st#支持关键字)
         if (message.StartsWith(COMMAND_CUSTOM_GROUP_SETU_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
         {
-            setuKeywordCheck = true;
+            setuKeywordCheckOK = true;
             tag = message[COMMAND_CUSTOM_GROUP_SETU_LIBRARY.Length..];
             goto StartSetu;
         }
@@ -472,7 +472,7 @@ public static partial class ProcessGroupMessage
         // MEMO : 字数在8字以内, 并包含色图关键字 (支持前置关键字)
         if (message.GetByteCount() <= 45 && message.EndsWith(SETU_KEYWORD))
         {
-            setuKeywordCheck = true;
+            setuKeywordCheckOK = true;
             tag = message[..^2];
             goto StartSetu;
         }
@@ -481,7 +481,7 @@ public static partial class ProcessGroupMessage
         if (message.Equals(COMMAND_CUSTOM_GROUP_SETUDEBUG_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
         {
             isSetuDebug = true;
-            setuKeywordCheck = true;
+            setuKeywordCheckOK = true;
             goto StartSetu;
         }
 
@@ -539,7 +539,7 @@ public static partial class ProcessGroupMessage
         }
 
         var setuSendHistory = lastHistory?.TimeStamp.ToDateTime() ?? DateTime.MinValue;
-        if (setuKeywordCheck)
+        if (setuKeywordCheckOK)
         {
             if (!isSetuDebug && (dateNow - setuSendHistory).TotalSeconds <= 5 + setuDoushiLv * 5)
             {

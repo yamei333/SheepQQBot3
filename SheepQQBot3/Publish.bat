@@ -1,0 +1,1 @@
+dotnet publish --self-contained true -p:PublishSingleFile=true -p:EnableCompressionInSingleFile=true -p:DebugSymbols=false -p:IncludeNativeLibrariesForSelfExtract=true

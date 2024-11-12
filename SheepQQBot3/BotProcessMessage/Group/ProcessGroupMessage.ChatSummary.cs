@@ -181,36 +181,36 @@ public static partial class ProcessGroupMessage
 
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
                     CalcWordCloud(groupId, dateNow.AddHours(-hour));
-                    wordCloudWidth = 800;
-                    wordNums = 100;
+                    wordCloudWidth = 1200;
+                    wordNums = 200;
                     break;
                 case "D":
                     // MEMO : 日统计
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
                     CalcWordCloud(groupId, dateNow.AddDays(-1));
-                    wordCloudWidth = 1200;
-                    wordNums = 150;
+                    wordCloudWidth = 1500;
+                    wordNums = 250;
                     break;
                 case "W":
                     // MEMO : 周统计
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
                     CalcWordCloud(groupId, dateNow.AddDays(-7));
-                    wordCloudWidth = 1500;
-                    wordNums = 200;
+                    wordCloudWidth = 1800;
+                    wordNums = 300;
                     break;
                 case "M":
                     // MEMO : 月统计
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
                     CalcWordCloud(groupId, dateNow.AddMonths(-1));
-                    wordCloudWidth = 2000;
-                    wordNums = 250;
+                    wordCloudWidth = 2400;
+                    wordNums = 400;
                     break;
                 case "Y":
                     // MEMO : 年统计
                     BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
                     CalcWordCloud(414774779, dateNow.AddYears(-1));
                     wordCloudWidth = 3000;
-                    wordNums = 300;
+                    wordNums = 500;
                     break;
                 default:
                     await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
