@@ -37,4 +37,22 @@ public class GroupForwardMessageParamData
 
     [JsonPropertyName("messages")]
     public List<GroupForwardMessageElement> Messages { get; set; }
+
+    /// <summary>
+    /// 外显
+    /// </summary>
+    [JsonPropertyName("prompt")]
+    public string Prompt { get; set; }
+
+    /// <summary>
+    /// 底下文本
+    /// </summary>
+    [JsonPropertyName("summary")]
+    public string Summary { get; set; }
+
+    /// <summary>
+    /// 内容
+    /// </summary>
+    [JsonPropertyName("source")]
+    public string Source { get; set; }
 }

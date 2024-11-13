@@ -54,8 +54,10 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivReverseProxy}" +
-                  $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}";
+        var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivReverseProxy}"
+            + $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}"
+            + (string.IsNullOrEmpty(tag) ? $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}" : string.Empty);
+
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
@@ -114,8 +116,8 @@ public static partial class SetuExtensions
         var setuJsonText = string.Empty;
         var setuResult = SetuResult.Successed;
 
-        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivReverseProxy}"
-            + $"{GetUrlTagString()}{(r18 ? "&r18=1&level=4-6" : string.Empty)}";
+        var url = @$"https://lolisuki.cn/api/setu/v1?proxy={PixivReverseProxy}&r18=2"
+            + $"{GetUrlTagString()}{(r18 ? "&level=5-6" : "&level=0-4")}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolisuki>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
