@@ -216,7 +216,7 @@ public static partial class SetuExtensions
     {
         var setuData = new SetuData_NyanCatda();
         var setuResult = SetuResult.Successed;
-        var url = @$"https://sex.nyan.xyz/api/v2/?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? "true" : "false")}";
+        var url = @$"https://sex.nyan.run/api/v2/?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? "true" : "false")}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
