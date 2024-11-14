@@ -99,7 +99,7 @@ public static partial class ProcessGroupMessage
         {SetuType.Lolicon, 30},
         {SetuType.Lolisuki, 20},
         {SetuType.Yuban, 4},
-        {SetuType.NyanCatda, 0},  // 挂了, 2024-6-21
+        {SetuType.NyanCatda, 10},
         {SetuType.Jitsu, 2},
         {SetuType.JitsuSelf, 6},
     };
@@ -459,6 +459,10 @@ public static partial class ProcessGroupMessage
                 message = message[..^1];
                 targetSetuApiType = SetuType.Lolisuki;
                 break;
+            case "N":
+                message = message[..^1];
+                targetSetuApiType = SetuType.NyanCatda;
+                break;
             case "Y":
                 message = message[..^1];
                 targetSetuApiType = SetuType.Yuban;
@@ -804,10 +808,11 @@ public static partial class ProcessGroupMessage
                 {
                     SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
                     SetuType.Lolisuki => GetRandomWeightSetuInfo(isR18, SetuType.Lolisuki),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
                     SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
                     SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
                     _ => GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Lolisuki, SetuType.Yuban, SetuType.Jitsu),
+                        SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
                 };
                 var randomSetu = targetSetuApiType switch
                 {
@@ -882,7 +887,7 @@ public static partial class ProcessGroupMessage
                 {
                     //new(messageId),
                     //new(groupMessage.Sender.NickName, senderId, $"{CQCode.Reply(senderId, messageId)}"),
-                    new(groupMessage.Sender.NickName, senderId, $"{groupMessage.Sender.NickName}({senderId}): {message}"),
+                    new(groupMessage.Sender.NickName, senderId, message),
                     //new(BOT_NAME, BotId, $"{GetSetuLvInfo()}"),
 
                     // MEMO : LLOneBot转发里面不能用Reply, 因为他是先发给自己, 再群组转发
