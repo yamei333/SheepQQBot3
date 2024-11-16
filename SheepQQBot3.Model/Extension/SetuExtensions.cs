@@ -19,6 +19,11 @@ public static partial class SetuExtensions
     public static readonly Regex RegGetPixivPid = GetPixivPid();
 
     /// <summary>
+    /// R18的tag
+    /// </summary>
+    private const string TAG_R18 = "R-18";
+
+    /// <summary>
     /// Pximg地址, 无法直接使用
     /// </summary>
     private const string Pximg = "i.pximg.net";
@@ -55,7 +60,7 @@ public static partial class SetuExtensions
         var setuResult = SetuResult.Successed;
 
         var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivReverseProxy}"
-            + $"{GetUrlTagString()}{(r18 ? "&r18=1" : string.Empty)}"
+            + $"{GetUrlTagString()}{(r18 ? "&r18=1" : "&r18=0")}"
             + (string.IsNullOrEmpty(tag) ? $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}" : string.Empty);
 
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
@@ -70,6 +75,9 @@ public static partial class SetuExtensions
                     return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
 
                 setuData = setuResponse.Data.First();
+                if (!r18 && setuData.Tags.Contains(TAG_R18))
+                    setuResult = SetuResult.ApiR18ReviewError;
+
                 break;
             case HttpResponseResult.UnknownHost:
                 setuResult = SetuResult.ApiError;
@@ -130,6 +138,9 @@ public static partial class SetuExtensions
                     return new SetuInfo(SetuType.Lolisuki, SetuResult.NoSearchResult);
 
                 setuData = setuResponse.Data.First();
+                if (!r18 && setuData.Tags.Contains(TAG_R18))
+                    setuResult = SetuResult.ApiR18ReviewError;
+
                 break;
             case HttpResponseResult.UnknownHost:
                 setuResult = SetuResult.ApiError;
@@ -187,6 +198,8 @@ public static partial class SetuExtensions
 
             var setuResponse = await request.Content.ReadFromJsonAsync<SetuResponse_Yuban>().ConfigureAwait(false);
             setuData = setuResponse.Data.First();
+            if (!r18 && setuData.Tags.Contains(TAG_R18))
+                setuResult = SetuResult.ApiR18ReviewError;
         }
         catch (TaskCanceledException)
         {
@@ -229,6 +242,9 @@ public static partial class SetuExtensions
                     return new SetuInfo(SetuType.NyanCatda, SetuResult.NoSearchResult);
 
                 setuData = setuResponse.Data.First();
+                if (!r18 && setuData.Tags.Contains(TAG_R18))
+                    setuResult = SetuResult.ApiR18ReviewError;
+
                 break;
             case HttpResponseResult.UnknownHost:
                 setuResult = SetuResult.ApiError;
@@ -274,6 +290,9 @@ public static partial class SetuExtensions
                     return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
 
                 setuData = setuDatas.First();
+                if (!r18 && setuData.Tags.Contains(TAG_R18))
+                    setuResult = SetuResult.ApiR18ReviewError;
+
                 break;
             case HttpResponseResult.UnknownHost:
                 setuData = new SetuData_Jitsu();

@@ -104,4 +104,10 @@ public enum SetuResult
 
     [Display(Name = "Api未知错误")]
     OtherError,
+
+    /// <summary>
+    /// ApiR18审查失败
+    /// </summary>
+    [Display(Name = "ApiR18审查错误")]
+    ApiR18ReviewError,
 }

@@ -1123,7 +1123,7 @@ public static class EnumerableExtensions
     /// <param name="addItem">增加的项目</param>
     [DebuggerStepThrough]
     public static List<T> CopyAdd<T>(this List<T> enumerable, T addItem)
-        => new(enumerable ?? new List<T>()) { addItem };
+        => [.. enumerable ?? [], addItem];
 
     /// <summary>
     /// Dictionary复制项目后增加新项目
@@ -1140,7 +1140,7 @@ public static class EnumerableExtensions
         TValue addItemValue)
         where TKey : notnull
     {
-        enumerable ??= new Dictionary<TKey, TValue>();
+        enumerable ??= [];
         enumerable.Add(addItemKey, addItemValue);
         return new Dictionary<TKey, TValue>(enumerable);
     }
@@ -1160,7 +1160,7 @@ public static class EnumerableExtensions
         TValue addItemValue)
         where TKey : notnull
     {
-        enumerable ??= new ConcurrentDictionary<TKey, TValue>();
+        enumerable ??= [];
         enumerable.TryAdd(addItemKey, addItemValue);
         return new ConcurrentDictionary<TKey, TValue>(enumerable);
     }
@@ -1176,11 +1176,7 @@ public static class EnumerableExtensions
         this HashSet<T> hashSet,
         T addItem)
         where T : unmanaged
-    {
-        return hashSet == null
-            ? new HashSet<T> { addItem }
-            : new HashSet<T>(hashSet) { addItem };
-    }
+        => hashSet == null ? [addItem] : [.. hashSet, addItem];
 
     /// <summary>
     /// <see cref="HashSet{T}"/>复制后删除项目
@@ -1199,11 +1195,11 @@ public static class EnumerableExtensions
         if (hashSet == null)
         {
             deleteSuccessed = false;
-            return new HashSet<T>();
+            return [];
         }
 
         deleteSuccessed = hashSet.Remove(deleteItem);
-        return new HashSet<T>(hashSet);
+        return [.. hashSet];
     }
 
     /// <summary>

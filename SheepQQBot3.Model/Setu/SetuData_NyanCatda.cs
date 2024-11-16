@@ -1,4 +1,5 @@
-﻿using System.Text.Json.Serialization;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Setu;
 
@@ -24,6 +25,12 @@ public class SetuData_NyanCatda
     /// </summary>
     [JsonPropertyName("pid")]
     public int Pid { get; set; }
+
+    /// <summary>
+    /// pixiv Tag
+    /// </summary>
+    [JsonPropertyName("tags")]
+    public HashSet<string> Tags { get; set; }
 
     [JsonIgnore]
     public string SetuInfo => $"{Author}\r\n{Pid}";

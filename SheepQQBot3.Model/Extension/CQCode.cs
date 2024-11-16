@@ -25,6 +25,17 @@ public static class CQCode
         => $"[CQ:json,data={signedJson}]";
 
     /// <summary>
+    /// 自定义音乐
+    /// </summary>
+    /// <param name="url"></param>
+    /// <param name="audio"></param>
+    /// <param name="title"></param>
+    /// <param name="image"></param>
+    /// <returns></returns>
+    public static string CustomMusic(string url, string audio, string title, string image)
+        => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image}]";
+
+    /// <summary>
     /// 将收到的CQImage段替换为可发送的CQImage段
     /// </summary>
     /// <param name="message"></param>

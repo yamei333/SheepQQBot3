@@ -873,6 +873,7 @@ public static partial class ProcessGroupMessage
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
                     case SetuResult.OtherError:
+                    case SetuResult.ApiR18ReviewError:
                         BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom);
                         setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
                         UpdateSetuDoushiInfo(setuDoushiInfo);
@@ -1003,6 +1004,7 @@ public static partial class ProcessGroupMessage
                         case SetuResult.ApiError:
                         case SetuResult.Timeout:
                         case SetuResult.OtherError:
+                        case SetuResult.ApiR18ReviewError:
                             sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                                 $"{_setuKexiStart.Random()} " +
                                 $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
