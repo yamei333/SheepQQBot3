@@ -11,6 +11,11 @@ public enum Emoji
     Kulou = 37,
 
     /// <summary>
+    /// 锤子敲打
+    /// </summary>
+    Knock = 38,
+
+    /// <summary>
     /// 咖啡
     /// </summary>
     Coffee = 60,
@@ -36,12 +41,17 @@ public enum Emoji
     DogeBig = 344,
 
     /// <summary>
+    /// 按按钮(+1)
+    /// </summary>
+    Plus1 = 424,
+
+    /// <summary>
     /// 闪光
     /// </summary>
     E_Flash = 10024,
 
     /// <summary>
-    /// 错误
+    /// 错误(目前手机不显示)
     /// </summary>
     E_Error = 10060,
 

@@ -789,7 +789,7 @@ public static partial class ProcessGroupMessage
                 {
                     // MEMO : 白嫖
                     isFree = true;
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Flash);
+                    await BotServer.SendMessageEmojiAsync(messageId, Emoji.Plus1).ConfigureAwait(false);
                     goto SendSetu;
                 }
 
@@ -799,7 +799,7 @@ public static partial class ProcessGroupMessage
 
             var revertCd = DateTime.MinValue;
         SendSetu:
-            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
+            await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
 
             try
             {
@@ -864,17 +864,17 @@ public static partial class ProcessGroupMessage
                             setuDoushiInfo.BlackListCD = dateNow.AddHours(72).ToTimeStamp();
                             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                             UpdateSetuDoushiInfo(setuDoushiInfo);
-                            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
+                            await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat).ConfigureAwait(false);
                             return true;
                         }
 
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Error);
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.Knock).ConfigureAwait(false);
                         return true;
                     case SetuResult.ApiError:
                     case SetuResult.Timeout:
                     case SetuResult.OtherError:
                     case SetuResult.ApiR18ReviewError:
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom);
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom).ConfigureAwait(false);
                         setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
                         UpdateSetuDoushiInfo(setuDoushiInfo);
                         await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))
