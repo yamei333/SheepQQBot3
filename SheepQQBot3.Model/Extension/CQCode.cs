@@ -24,6 +24,12 @@ public static class CQCode
     public static string Json(string signedJson)
         => $"[CQ:json,data={signedJson}]";
 
+    public static string MarkDown(string content)
+        => $"[CQ:markdown,content={content}]";
+
+    public static string Forward(string messageId)
+        => $"[CQ:forward,id={messageId}]";
+
     /// <summary>
     /// 自定义音乐
     /// </summary>

@@ -1028,8 +1028,8 @@ public static partial class ProcessGroupMessage
                     if (clientReceiveData?.IsSuccessed != false)
                         return;
 
-                    // MEMO : 图片被风控, 发送文字消息
-                    sendMessages[2] = new GroupForwardMessage($"{setuInfo.SetuType}", BotId, "[该图片已被风控拦截!]");
+                    // MEMO : 消息被风控, 发送文字消息
+                    sendMessages[2] = new GroupForwardMessage($"{setuInfo.SetuType}", BotId, "[该消息已被风控拦截!]");
                     await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
                 }
             }

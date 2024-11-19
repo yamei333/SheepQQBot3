@@ -61,11 +61,33 @@ public partial class MainWindowFunctionTest : UserControl
         {
             var sendMessages = new List<GroupForwardMessage>
             {
-                new("测试1", 252961222, "Test Message1"),
-                new("测试2", 252961222, "Test Message2"),
+                new("测试1", 10000, "test1"),
+                new("测试2", 10000, "test2"),
             };
-
             await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
+
+            //var sendMessages = new List<GroupForwardMessage>
+            //{
+            //    new("测试2", 252961222, CQCode.MarkDown("### 测试徐州鸡\\n- 鸡群1\\n- 鸡群2\\n- 鸡群3")),
+            //};
+
+            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages, 15, data =>
+            //{
+            //    if (data is { IsSuccessed: false, RetCode: 1200 })
+            //    {
+            //        var reg = new Regex("(?<=发送转发消息（res_id：).+(?= 失败)", RegexOptions.Multiline);
+            //        var match = reg.Match(data.Wording);
+            //        if (match.Success)
+            //        {
+            //            var sendMessages2 = new List<GroupForwardMessage>
+            //            {
+            //                new("测试1", 252961222, "测试md"),
+            //                new("测试2", 252961222, CQCode.Forward(match.Value)),
+            //            };
+            //            Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages2).ConfigureAwait(false);
+            //        }
+            //    }
+            //}).ConfigureAwait(false);
 
             //await Vm.BotServer.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
             //    .ConfigureAwait(false);

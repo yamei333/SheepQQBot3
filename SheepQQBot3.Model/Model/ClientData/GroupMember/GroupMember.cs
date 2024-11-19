@@ -27,7 +27,7 @@ public class GroupMember
     public long LastSendTime { get; set; }
 
     [JsonPropertyName("level")]
-    public int Level { get; set; }
+    public string Level { get; set; }
 
     [JsonPropertyName("nickname")]
     public string NickName { get; set; }

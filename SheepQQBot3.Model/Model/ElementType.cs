@@ -57,6 +57,16 @@ public enum ElementType
     node,
 
     /// <summary>
+    /// markdown消息节点
+    /// </summary>
+    markdown,
+
+    /// <summary>
+    /// 转发消息消息节点
+    /// </summary>
+    forward,
+
+    /// <summary>
     /// 雅美自定义_色图排行
     /// </summary>
     ym_setu_rank,
