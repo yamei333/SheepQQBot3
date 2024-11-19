@@ -94,6 +94,8 @@ public static partial class SetuExtensions
 
         return new SetuInfo(
             SetuType.Lolicon,
+            setuData.Author,
+            setuData.Pid,
             setuData.SetuInfo,
             setuData.Urls?.Original?.ToImageUrl(),
             setuData.Urls?.Original?.ToSmallImageUrl(),
@@ -157,6 +159,8 @@ public static partial class SetuExtensions
 
         return new SetuInfo(
             SetuType.Lolisuki,
+            setuData.Author,
+            setuData.Pid,
             setuData.SetuInfo,
             setuData.Urls?.Original?.ToImageUrl(),
             setuData.Urls?.Original?.ToSmallImageUrl(),
@@ -213,6 +217,8 @@ public static partial class SetuExtensions
 
         return new SetuInfo(
             SetuType.Yuban,
+            setuData.Author.Name,
+            setuData.Artwork.Id ?? 0,
             setuData.SetuInfo,
             setuData?.Urls?.Original.ToImageUrl(),
             setuData?.Urls?.Original.ToSmallImageUrl(),
@@ -261,6 +267,8 @@ public static partial class SetuExtensions
         var imageUrl = setuData.Url;
         return new SetuInfo(
             SetuType.NyanCatda,
+            setuData.Author,
+            setuData.Pid,
             setuData.SetuInfo,
             imageUrl?.ToImageUrl(),
             imageUrl?.ToSmallImageUrl(),
@@ -312,6 +320,8 @@ public static partial class SetuExtensions
         var imageUrl = setuData!.Url;
         return new SetuInfo(
             SetuType.Jitsu,
+            setuData.Author,
+            setuData.Pid,
             setuData.SetuInfo,
             imageUrl?.ToImageUrl(),
             imageUrl?.ToSmallImageUrl(),
@@ -357,6 +367,8 @@ public static partial class SetuExtensions
         var imageUrl = setuData.Urls?[0];
         return new SetuInfo(
             SetuType.JitsuSelf,
+            "未知画师",
+            int.Parse(setuData.Pid),
             setuData.SetuInfo,
             imageUrl?.ToImageUrl(),
             imageUrl?.ToSmallImageUrl(),

@@ -13,12 +13,16 @@ public class SetuInfo
     /// </summary>
     public SetuInfo(
         SetuType setuType,
+        string author,
+        int pid,
         string sourceText,
         string sourceUrl,
         string imageUrl,
         SetuResult setuResult)
     {
         SetuType = setuType;
+        Author = author;
+        Pid = pid;
         SourceText = sourceText;
         SourceUrl = sourceUrl;
         ImageUrl = imageUrl;
@@ -38,6 +42,16 @@ public class SetuInfo
     /// 显示文本
     /// </summary>
     public SetuType SetuType { get; }
+
+    /// <summary>
+    /// 画师
+    /// </summary>
+    public string Author { get; set; }
+
+    /// <summary>
+    /// pixiv 图片ID
+    /// </summary>
+    public int Pid { get; set; }
 
     /// <summary>
     /// 显示文本

@@ -278,11 +278,19 @@ partial class BotServer
     /// </summary>
     /// <param name="groupId">群号</param>
     /// <param name="messages">消息内容</param>
+    /// <param name="title">标题</param>
+    /// <param name="content">内容</param>
+    /// <param name="summary">底部注释</param>
+    /// <param name="prompt">左侧外显</param>
     /// <param name="timeout">超时时间</param>
     /// <param name="callBack">回调</param>
     public async Task SendGroupForwardMessageAsync(
         long groupId,
         IEnumerable<GroupForwardMessage> messages,
+        string title = null,
+        string[] content = null,
+        string summary = null,
+        string prompt = null,
         double timeout = 5,
         Action<ClientReceiveData> callBack = null)
     {
@@ -293,6 +301,10 @@ partial class BotServer
             Messages = messages
                 .Select(each => new GroupForwardMessageElement(each))
                 .ToList(),
+            Contents = content?.Select(each => new GroupForwardMessageNew(each)).ToList(),
+            Summary = summary,
+            Prompt = prompt,
+            Title = title,
         }, echo).ConfigureAwait(false);
         callBack?.Invoke(GetReply(echo, JsonExtensions.Deserialize<ClientReceiveData>, timeout));
     }

@@ -39,7 +39,7 @@ public class GroupForwardMessageParamData
     public List<GroupForwardMessageElement> Messages { get; set; }
 
     /// <summary>
-    /// 外显
+    /// 左侧聊天记录外显内容
     /// </summary>
     [JsonPropertyName("prompt")]
     public string Prompt { get; set; }
@@ -51,8 +51,28 @@ public class GroupForwardMessageParamData
     public string Summary { get; set; }
 
     /// <summary>
-    /// 内容
+    /// 预览文本(预览正文)
+    /// </summary>
+    [JsonPropertyName("news")]
+    public List<GroupForwardMessageNew> Contents { get; set; }
+
+    /// <summary>
+    /// 上方标题内容
     /// </summary>
     [JsonPropertyName("source")]
-    public string Source { get; set; }
+    public string Title { get; set; }
+}
+
+public class GroupForwardMessageNew
+{
+    public GroupForwardMessageNew(string text)
+    {
+        Text = text;
+    }
+
+    /// <summary>
+    /// 预览文本
+    /// </summary>
+    [JsonPropertyName("text")]
+    public string Text { get; set; }
 }

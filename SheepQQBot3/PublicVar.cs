@@ -40,6 +40,11 @@ public static class PublicVar
     public static readonly long CommonId = 22222;
 
     /// <summary>
+    /// 系统ID
+    /// </summary>
+    public static readonly long SystemId = 10000;
+
+    /// <summary>
     /// 管理员ID
     /// </summary>
     public static readonly HashSet<long> AdminIds = AppSettingExtensions.Get("adminId").Split(',').ToHashSet(long.Parse);
