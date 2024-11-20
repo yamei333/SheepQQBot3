@@ -490,7 +490,7 @@ partial class BotServer
         var echo = Guid.NewGuid();
         await SendDataAsync("get_mini_app_ark", new ParamData
         {
-            MiniAppType = miniAppType.GetDisplay(),
+            Type = miniAppType.GetDisplay(),
             Title = title,
             Content = content,
             PicUrl = picUrl,

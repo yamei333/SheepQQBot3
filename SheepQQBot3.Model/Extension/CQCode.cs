@@ -31,15 +31,16 @@ public static class CQCode
         => $"[CQ:forward,id={messageId}]";
 
     /// <summary>
-    /// 自定义音乐
+    /// 自定义音乐卡片
     /// </summary>
-    /// <param name="url"></param>
-    /// <param name="audio"></param>
-    /// <param name="title"></param>
-    /// <param name="image"></param>
+    /// <param name="url">目标地址</param>
+    /// <param name="audio">音乐地址</param>
+    /// <param name="title">标题</param>
+    /// <param name="image">图片</param>
+    /// <param name="singer">演唱者</param>
     /// <returns></returns>
-    public static string CustomMusic(string url, string audio, string title, string image)
-        => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image}]";
+    public static string CustomMusic(string url, string audio, string title, string image, string singer)
+        => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image},singer={singer}]";
 
     /// <summary>
     /// 将收到的CQImage段替换为可发送的CQImage段

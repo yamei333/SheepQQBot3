@@ -79,6 +79,15 @@ public class ElementBaseData
     [JsonPropertyName("data")]
     public string Data { get; set; }
 
+    [JsonPropertyName("image")]
+    public string Image { get; set; }
+
+    /// <summary>
+    /// 演唱者(音乐卡片)
+    /// </summary>
+    [JsonPropertyName("singer")]
+    public string Singer { get; set; }
+
     public ElementBaseData()
     {
     }

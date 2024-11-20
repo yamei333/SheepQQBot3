@@ -75,7 +75,7 @@ public class ParamData
     public string Domain { get; set; }
 
     [JsonPropertyName("type")]
-    public string MiniAppType { get; set; }
+    public string Type { get; set; }
 
     [JsonPropertyName("title")]
     public string Title { get; set; }

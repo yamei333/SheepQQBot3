@@ -38,7 +38,12 @@ public enum ElementType
     share,
     contact,
     location,
+
+    /// <summary>
+    /// 音乐卡片
+    /// </summary>
     music,
+
     reply,
 
     /// <summary>
