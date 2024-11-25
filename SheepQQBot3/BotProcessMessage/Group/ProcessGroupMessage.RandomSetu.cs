@@ -416,24 +416,6 @@ public static partial class ProcessGroupMessage
             }
         }
 
-        //lock (_syncKeyword)
-        //{
-        //    if (_setuKeyWords == null)
-        //    {
-        //        _setuKeyWords = new HashSet<string>();
-        //        var startText = new[]
-        //        {
-        //            "涩", "色", "瑟", "铯"
-        //        };
-        //        var endText = new[]
-        //        {
-        //            "图", "囤", "圖", "図", "屯"
-        //        };
-
-        //        startText.ForEach(eachStart => endText.ForEach(eachEnd => _setuKeyWords.Add(eachStart + eachEnd)));
-        //    }
-        //}
-
         var isSetuDebug = false;
         var tag = string.Empty;
         var setuKeywordCheckOK = false;
@@ -494,7 +476,7 @@ public static partial class ProcessGroupMessage
             setuDoushiInfo.BlackListCD = dateNow.AddHours(336).ToTimeStamp();
             setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
             UpdateSetuDoushiInfo(setuDoushiInfo);
-            BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
+            await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat).ConfigureAwait(false);
             return true;
         }
 
@@ -768,8 +750,7 @@ public static partial class ProcessGroupMessage
                     // MEMO : 幸运(CD减少)
                     sendMessage = $"{CQCode.At(senderId)}"
                         + $"运气好, {_setuCDWasReduced.Random().Replace("$ADD_LEVEL$", addLevel.ToAddLevelString())}"
-                        + $" ({addSecond}s)"
-                        + GetSetuLvInfo();
+                        + $" ({addSecond}s)";
                 }
 
                 await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, false, false, false, false))
@@ -896,7 +877,7 @@ public static partial class ProcessGroupMessage
                         CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_IMAGE, fileName, GetPathType.CQCodePath))),
                     // MEMO : 0.14.3.0 使用json卡片发送
                     // MEMO : 0.14.4.3 json卡片出问题了, 返回原本的发送方式
-                    new(setuInfo.Author, SystemId, $"{setuInfo.SourceUrl}"),
+                    new(setuInfo.Author, SystemId, setuInfo.SourceUrl),
                     //new(BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                     //    "查看大图", setuInfo.SourceText, $"{setuInfo.SetuType}",
                     //    setuInfo.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)),
@@ -919,13 +900,12 @@ public static partial class ProcessGroupMessage
                         {
                             sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                                 $"你获得了额外的色图+{bonusTimes}{new string('!', bonusTimes)}"));
-                            sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
+                            sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", SystemId,
                                 CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_IMAGE, bonusFileName, GetPathType.CQCodePath))));
                             //sendMessages.Add(new GroupForwardMessage($"{bonusSetuInfo.SetuType}", BotId,
                             //    $"{bonusSetuInfo.SourceText}" +
                             //    $"{ENTER}{_setuSource.Random()}:{bonusSetuInfo.SourceUrl}"));
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
-                                $"[{bonusSetuInfo.SetuType}]{bonusSetuInfo.SourceText}{ENTER}{bonusSetuInfo.SourceUrl}"));
+                            sendMessages.Add(new GroupForwardMessage(bonusSetuInfo.Author, SystemId, bonusSetuInfo.SourceUrl));
                             //sendMessages.Add(new GroupForwardMessage(
                             //    BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                             //        "查看大图", bonusSetuInfo.SourceText, $"{bonusSetuInfo.SetuType}",
@@ -982,22 +962,21 @@ public static partial class ProcessGroupMessage
                             //sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                             //    await CQCode.JsonCard_StructMsg("点击查看大图", $"API提供: {setuInfo.SetuType}",
                             //    setuInfo.SourceUrl, SETUAPI_ICON).ConfigureAwait(false)));
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
+                            sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", SystemId,
                                 $"[这是一张额外的金色传说{sourceTag}色图, 不可预览]"));
                             //sendMessages.Add(new GroupForwardMessage($"{setuInfoR18.SetuType}", BotId,
                             //    $"{setuInfoR18.SourceText}" +
                             //    $"{ENTER}{_setuSource.Random()}:{setuInfoR18.SourceUrl}"));
-                            sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
-                                $"[{setuInfoR18.SetuType}]{setuInfoR18.SourceText}{ENTER}{setuInfoR18.SourceUrl}"));
+                            sendMessages.Add(new GroupForwardMessage(setuInfoR18.Author, SystemId, setuInfoR18.SourceUrl));
                             //sendMessages.Add(new GroupForwardMessage(
                             //    BOT_NAME, BotId, await CQCode.JsonCard_TianxuanShareAsync(
                             //        "查看大图", setuInfoR18.SourceText, $"{setuInfoR18.SetuType}",
                             //        setuInfoR18.SourceUrl, _setuIcons.Random()).ConfigureAwait(false)));
                             break;
                         case SetuResult.NoSearchResult:
-                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", BotId,
+                            sendMessages.Add(new GroupForwardMessage($"{setuInfo.SetuType}", SystemId,
                                 $"{_setuKexiStart.Random()} " +
-                                $"色图库中没找到金色传说色图~, {_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
+                                $"色图库中没找到金色传说色图~, {_setuKexiEnd.Random()}"));
                             break;
                         case SetuResult.ApiError:
                         case SetuResult.Timeout:
@@ -1005,7 +984,7 @@ public static partial class ProcessGroupMessage
                         case SetuResult.ApiR18ReviewError:
                             sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId,
                                 $"{_setuKexiStart.Random()} " +
-                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}"));
+                                $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()}"));
                             //await Api.SendGroupMessageAsync(groupId,
                             //    $"{CQCode.At(targetId)}{_setuKexiStart.Random()}" +
                             //    $"{setuInfo.Result.GetDisplay()}[{setuInfo.SetuType}],金色传说色图取得失败!{_setuKexiEnd.Random()} {GetSetuLvInfo()}")
@@ -1020,9 +999,7 @@ public static partial class ProcessGroupMessage
                     .ConfigureAwait(false);
                 await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
                         $"{groupMessage.Sender.NickName}的色图",
-                        [
-                            $"关键字: {(isSearchTag ? sourceTag : "无")}",
-                        ],
+                        (isSearchTag ? new[] { $"关键字: {sourceTag}" } : []).Concat(GetSetuLvInfo()).ToArray(),
                         $"查看所有{bonusTimes + (r18Bonus ? 1 : 0)}张色图", "[色图]",
                         15, RunAction)
                     .ConfigureAwait(false);
@@ -1060,7 +1037,7 @@ public static partial class ProcessGroupMessage
                 UpdateSetuDoushiInfo(setuDoushiInfo);
             }
 
-            string GetSetuLvInfo()
+            string[] GetSetuLvInfo()
             {
                 var addString = string.Empty;
                 if (changeLvTime < 0)
@@ -1072,10 +1049,21 @@ public static partial class ProcessGroupMessage
                 if (!string.IsNullOrEmpty(addString))
                     addString = addString[1..];
 
-                var addLvString = (string.IsNullOrEmpty(addString)
-                    ? string.Empty
-                    : $"本次{addSetuSenderLv.ToSignString()}({addString})");
-                return $"[斗士Lv{oldSetuSenderLv}] {addLvString}";
+                if (addSetuSenderLv != 0)
+                {
+                    return
+                    [
+                        $"[斗士Lv{oldSetuSenderLv}] 本次{addSetuSenderLv.ToSignString()}",
+                        addString,
+                    ];
+                }
+                else
+                {
+                    return
+                    [
+                        $"[斗士Lv{oldSetuSenderLv}]",
+                    ];
+                }
             }
 
             async Task<(SetuInfo, string)> GetSetu(
