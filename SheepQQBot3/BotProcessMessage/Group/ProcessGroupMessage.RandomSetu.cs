@@ -109,14 +109,13 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private static readonly Dictionary<string, int> _setuBuman = new()
     {
-        {"不够", 60},
         {"这也", 60},
         {"一般", 60},
-        {"不色", 120},
-        {"就这", 300},
+        {"不.{0,3}色", 120},
+        {"不.{0,3}行", 120},
         {"太小", 120},
+        {"就这", 300},
         {"菜", 300},
-        {"不太行", 120},
         {"吗", 60},
     };
 
@@ -1176,7 +1175,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            if (message.ContainsAny(_setuBuman.Keys, out var findedStr) && (dateNow - setuSendHistory).TotalSeconds <= 15)
+            if (message.ContainsAny(_setuBuman, out var addMinutes) && (dateNow - setuSendHistory).TotalSeconds <= 15)
             {
                 var randActions = new List<RandomWeight<int>>
                 {
@@ -1190,7 +1189,6 @@ public static partial class ProcessGroupMessage
                     addSetuSenderLv = item.Value;
 
                 setuDoushiInfo.SetuDoushiLv = setuDoushiLv + addSetuSenderLv;
-                var addMinutes = _setuBuman[findedStr];
                 setuDoushiInfo.BlackListCD = dateNow.AddMinutes(Rand.Next(addMinutes / 2, addMinutes)).ToTimeStamp();
                 UpdateSetuDoushiInfo(setuDoushiInfo);
                 await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat).ConfigureAwait(false);

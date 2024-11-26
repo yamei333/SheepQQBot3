@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace Masuit.Tools;
 
@@ -155,8 +156,50 @@ public static class MyStringExtensions
         out string findedStr,
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
-        findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
-        return !string.IsNullOrEmpty(findedStr);
+        foreach (var regStr in conditionStr)
+        {
+            var regex = new Regex(regStr, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var match = regex.Match(str);
+            if (match.Success)
+            {
+                findedStr = match.Value;
+                return true;
+            }
+        }
+
+        findedStr = string.Empty;
+        return false;
+    }
+
+    /// <summary>
+    /// string.Contains 拓展(参数为Dictionary)
+    /// <see cref="IEnumerable{T}"/>版本
+    /// </summary>
+    /// <param name="str">对象字符串</param>
+    /// <param name="conditionDictionary">查找字典</param>
+    /// <param name="findedValue">找到结果对应的值</param>
+    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <returns>结果</returns>
+    public static bool ContainsAny<T>(
+        this string str,
+        Dictionary<string, T> conditionDictionary,
+        out T findedValue,
+        StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+        where T : notnull
+    {
+        foreach (var keyValue in conditionDictionary)
+        {
+            var regex = new Regex(keyValue.Key, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var match = regex.Match(str);
+            if (match.Success)
+            {
+                findedValue = keyValue.Value;
+                return true;
+            }
+        }
+
+        findedValue = default;
+        return false;
     }
 
     /// <summary>
