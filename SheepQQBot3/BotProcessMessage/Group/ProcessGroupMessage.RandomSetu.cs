@@ -584,7 +584,8 @@ public static partial class ProcessGroupMessage
                     // MEMO : 0.13.3.16 除了基数其他都x6, 以维持10%暴击率
                     randActions = new List<RandomWeight<SendSetuConfig>>
                     {
-                        new(20000, new SendSetuConfig(SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
+                        new(20000, new SendSetuConfig(
+                            SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
                             AddCDReason.RequestSuccessed, SetuAddLevel.Normal, true)),
                         new(2100, new SendSetuConfig(
                             SendBaseDelay + (int)(60 * Math.Pow(setuDoushiLv, 2)) + Rand.Next(-60, 60),
@@ -661,7 +662,7 @@ public static partial class ProcessGroupMessage
                     {
                         setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                         UpdateSetuDoushiInfo(setuDoushiInfo);
-                        BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat).ConfigureAwait(false);
                         return true;
                     }
                 }
@@ -672,20 +673,20 @@ public static partial class ProcessGroupMessage
                     setuDoushiInfo.BlackListCD = dateNow.AddHours(24).ToTimeStamp();
                     setuDoushiInfo.SetuCD = dateNow.ToTimeStamp();
                     UpdateSetuDoushiInfo(setuDoushiInfo);
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat);
+                    await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_Beat).ConfigureAwait(false);
                     return true;
                 }
 
                 // MEMO : 色图Lv增加
                 if (canSendSetu)
                 {
-                    if (isSearchTag && Rand.CheckPercent(60))
+                    if (isSearchTag && Rand.CheckPercent(30))
                     {
                         changeLvTag = 1;
                         setuDoushiLv++;
                     }
 
-                    if ((dateNow - setuCd).TotalSeconds <= 90)
+                    if ((dateNow - setuCd).TotalSeconds <= 60)
                     {
                         changeLvFast = 1;
                         setuDoushiLv++;
@@ -855,7 +856,7 @@ public static partial class ProcessGroupMessage
                     case SetuResult.OtherError:
                     case SetuResult.ApiR18ReviewError:
                         await BotServer.SendMessageEmojiAsync(messageId, Emoji.Boom).ConfigureAwait(false);
-                        setuDoushiInfo.SetuCD = dateNow.AddSeconds(20).ToTimeStamp();
+                        setuDoushiInfo.SetuCD = dateNow.AddSeconds(-60).ToTimeStamp();
                         UpdateSetuDoushiInfo(setuDoushiInfo);
                         await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, true, false, isFree, false))
                             .ConfigureAwait(false);
@@ -999,7 +1000,10 @@ public static partial class ProcessGroupMessage
                     .ConfigureAwait(false);
                 await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
                         $"{groupMessage.Sender.NickName}的色图",
-                        (isSearchTag ? new[] { $"关键字: {sourceTag}" } : []).Concat(GetSetuLvInfo()).ToArray(),
+                        (isSearchTag ? new[] { $"关键字: {sourceTag}" } : [])
+                        .Concat([$"CD变化: {(addSecond >= 0 ? $"+{addSecond}" : addSecond.ToString())}s"])
+                        .Concat(GetSetuLvInfo())
+                        .ToArray(),
                         $"查看所有{bonusTimes + (r18Bonus ? 1 : 0)}张色图", "[色图]",
                         15, RunAction)
                     .ConfigureAwait(false);
