@@ -1175,7 +1175,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            if (message.ContainsAny(_setuBuman, out var addMinutes) && (dateNow - setuSendHistory).TotalSeconds <= 15)
+            if ((dateNow - setuSendHistory).TotalSeconds <= 30 && message.ContainsAny(_setuBuman, out var addMinutes))
             {
                 var randActions = new List<RandomWeight<int>>
                 {
