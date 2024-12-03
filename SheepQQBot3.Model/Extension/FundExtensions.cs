@@ -1,6 +1,5 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Fund;
 using System;
@@ -25,7 +24,7 @@ public static class FundExtensions
     /// </summary>
     /// <param name="fundIds"></param>
     /// <returns></returns>
-    public static async Task<ConcurrentHashSet<FundData>> GetFundDataAsync(IEnumerable<string> fundIds)
+    public static async Task<FundData[]> GetFundDatasAsync(IEnumerable<string> fundIds)
     {
         var fundIdArray = fundIds as string[] ?? fundIds.ToArray();
         if (fundIdArray.Any() != true)
@@ -39,29 +38,22 @@ public static class FundExtensions
         //return httpResponse.Result == HttpResponseResult.Successed
         //    ? httpResponse.Data : null;
 
-        var taskList = new List<Task>();
-        var fundDatas = new ConcurrentHashSet<FundData>();
-        fundIdArray.ForEach(fundId =>
-        {
-            var task = new Task(() => GetFundData(fundId));
-            taskList.Add(task);
-            task.Start();
-        });
-        Task.WaitAll(taskList.ToArray());
-        return fundDatas;
+        var tasks = fundIdArray.Select(GetFundDataAsync);
+        return await Task.WhenAll(tasks).ConfigureAwait(false);
 
-        void GetFundData(string fundId)
+        async Task<FundData> GetFundDataAsync(string fundId)
         {
             try
             {
                 var url = $"https://fundgz.1234567.com.cn/js/{fundId}.js";
-                var restResponse = HttpExtensions.Get<string>(url);
+                var restResponse = await HttpExtensions.GetAsync(url).ConfigureAwait(false);
                 var fundJson = _regGetFundJson.Match(restResponse.Content).Value;
-                fundDatas.Add(fundJson.JsonDeserialize<FundData>());
+                return fundJson.JsonDeserialize<FundData>();
             }
             catch (Exception e)
             {
                 YameiLogExtensions.WriteLog(e);
+                return null;
             }
         }
 
@@ -101,7 +93,7 @@ public static class FundExtensions
     }
 
     public static string GetFundAlarmString(
-        ConcurrentHashSet<FundData> fundDatas,
+        FundData[] fundDatas,
         ConcurrentDictionary<int, AlarmFundConfig> fundAlarmConfigsDic)
     {
         var maxGrowth = -999.0;
@@ -137,7 +129,7 @@ public static class FundExtensions
         if (isDateError)
             return string.Empty;
 
-        var avgGrowth = allGrowth / fundDatas!.Count;
+        var avgGrowth = allGrowth / fundDatas.Length;
 
         // MEMO : 添加怪话总结
         sb.AppendLine("================");
@@ -225,7 +217,7 @@ public static class FundExtensions
     /// 获取基金阈值观测结果
     /// </summary>
     public static string GetFundLimitString(
-        ConcurrentHashSet<FundData> fundDatas,
+        FundData[] fundDatas,
         LimitObserveFundConfig[] limitObserveFundConfigs)
     {
         // TODO : 基金取历史数据坏了, 暂时禁用该功能

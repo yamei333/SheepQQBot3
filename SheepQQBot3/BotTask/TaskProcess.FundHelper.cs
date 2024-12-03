@@ -1,6 +1,5 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using Masuit.Tools.Systems;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -110,13 +109,12 @@ public static partial class TaskProcess
             var alarmFundConfigs = fundAlarmConfig.AlarmFundConfigs;
             var fundIds = alarmFundConfigs.Values
                 .Where(each => each.IsActive)
-                .Select(each => each.FundId)
-                .ToArray();
-            ConcurrentHashSet<FundData> fundDatas = null;
+                .Select(each => each.FundId);
+            var fundDatas = Array.Empty<FundData>();
             if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
             {
-                fundDatas = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
-                return fundDatas?.Any() == true;
+                fundDatas = await FundExtensions.GetFundDatasAsync(fundIds).ConfigureAwait(false);
+                return fundDatas?.Any(each => each != null) == true;
             }).ConfigureAwait(false))
             {
                 return;
@@ -179,10 +177,10 @@ public static partial class TaskProcess
             .Distinct()
             .ToArray();
 
-        ConcurrentHashSet<FundData> fundDatas = null;
+        FundData[] fundDatas = null;
         if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
             {
-                fundDatas = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
+                fundDatas = await FundExtensions.GetFundDatasAsync(fundIds).ConfigureAwait(false);
                 return fundDatas?.Any() == true;
             }).ConfigureAwait(false))
         {

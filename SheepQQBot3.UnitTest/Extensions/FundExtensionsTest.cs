@@ -9,14 +9,14 @@ public class FundExtensionsTest
     [TestMethod]
     public void GetFundTest()
     {
-        var fundData = FundExtensions.GetFundDataAsync(new[] { "004235", "161725" })!.Result;
-        Assert.AreEqual("中欧价值智选混合C", fundData.Data?[0].Name);
-        Assert.AreEqual("招商中证白酒指数(LOF)A", fundData.Data?[1].Name);
+        var fundDatas = FundExtensions.GetFundDatasAsync(["004235", "161725"]).Result;
+        Assert.AreEqual("中欧价值智选混合C", fundDatas[0].Name);
+        Assert.AreEqual("招商中证白酒指数(LOF)A", fundDatas[1].Name);
 
         var dic = new ConcurrentDictionary<int, AlarmFundConfig>();
         dic.TryAdd(0, new AlarmFundConfig("004235", "", true));
         dic.TryAdd(1, new AlarmFundConfig("161725", "白酒", true));
-        var alarmString = FundExtensions.GetFundAlarmString(fundData, dic);
+        var alarmString = FundExtensions.GetFundAlarmString(fundDatas, dic);
         ;
     }
 
