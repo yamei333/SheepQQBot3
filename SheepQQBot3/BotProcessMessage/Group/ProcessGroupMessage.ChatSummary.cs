@@ -55,7 +55,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private static DateTime _chatSummaryRequestLastTime = DateTime.MinValue;
 
-    private static Queue<string> _repeatSkipQueue = new();
+    private static readonly Queue<string> _repeatSkipQueue = new();
 
     /// <summary>
     /// 群聊总结
@@ -70,213 +70,220 @@ public static partial class ProcessGroupMessage
         var timeStamp = groupMessage.DateTime.ToTimeStamp();
         var message = groupMessage.Message;
 
-        // MEMO : 命令格式检查
-        if (!message.StartsWith(COMMAND_CHATSUMMARY, StringComparison.CurrentCultureIgnoreCase))
+        try
         {
-            if (!NeedRecordMessage(message))
-                return true;
-
-            // MEMO : 复读消息不添加
-            if (_repeatSkipQueue.Contains(message))
-                return true;
-
-            var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
-            if (addBotGroupMessage.MessageText.GetByteCount() > CHATSUMMARY_BYTELIMIT)
-                return true;
-
-            _repeatSkipQueue.Enqueue(message);
-            if (_repeatSkipQueue.Count > REPEAT_SKIP)
-                _repeatSkipQueue.Dequeue();
-
-            // MEMO : 将群聊录入数据库
-            lock (BotDb.SyncLock)
+            // MEMO : 命令格式检查
+            if (!message.StartsWith(COMMAND_CHATSUMMARY, StringComparison.CurrentCultureIgnoreCase))
             {
-                var botGroupMessage = BotDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).Result;
-                if (botGroupMessage == null)
-                {
-                    botGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
-                    if (!string.IsNullOrEmpty(botGroupMessage.MessageText) || !string.IsNullOrEmpty(botGroupMessage.MessageImage))
-                        BotDb.AddAsync(botGroupMessage);
-                }
-            }
-
-            return true;
-        }
-        else
-        {
-            if (message.Length <= 4)
-                return false;
-
-            var dateNow = DateTime.Now;
-            if (!BotExtensions.IsAdmin(senderId) && (dateNow - _chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
-            {
-                BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee);
-                return true;
-            }
-
-            _chatSummaryRequestLastTime = dateNow;
-            var summaryType = message.ToUpper().Substring(4, 1);
-            var summaryWords = new Dictionary<string, int>();
-            var wordCloudWidth = 1000;
-            var wordNums = 100;
-
-            var chatSummaryGroupConfigFilePath = Path.Combine(PATH_WORDCLOUD_CONFIG, $"{groupId}.json");
-            var chatSummaryGroupConfig = (ChatSummaryGroupConfig)null;
-            var regNumber = new Regex("[0-9]+");
-            if (File.Exists(chatSummaryGroupConfigFilePath))
-            {
-                var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-                chatSummaryGroupConfig = JsonExtensions.Deserialize<ChatSummaryGroupConfig>(jsonText);
-            }
-
-            switch (summaryType)
-            {
-                case "B":
-                    if (!BotExtensions.IsAdmin(senderId))
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
-                        return false;
-                    }
-
-                    var dataMessage = message[5..];
-                    if (string.IsNullOrEmpty(dataMessage))
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-                        return false;
-                    }
-
-                    if (JiebaDb.StopWords.Find(dataMessage) != null)
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
-                        return false;
-                    }
-
-                    if (!chatSummaryGroupConfig.ExcludeWords.Add(dataMessage))
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于群配置").ConfigureAwait(false);
-                        return false;
-                    }
-
-                    File.WriteAllText(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, JsonExtensions.DefaultJsonOptions));
-                    await BotServer.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
+                if (!NeedRecordMessage(message))
                     return true;
-                case "H":
-                    // MEMO : 小时统计
-                    var hourStr = message[5..];
-                    var hour = 12;
-                    if (!string.IsNullOrEmpty(hourStr))
+
+                // MEMO : 复读消息不添加
+                if (_repeatSkipQueue.Contains(message))
+                    return true;
+
+                var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
+                if (addBotGroupMessage.MessageText.GetByteCount() > CHATSUMMARY_BYTELIMIT)
+                    return true;
+
+                _repeatSkipQueue.Enqueue(message);
+                if (_repeatSkipQueue.Count > REPEAT_SKIP)
+                    _repeatSkipQueue.Dequeue();
+
+                // MEMO : 将群聊录入数据库
+                lock (BotDb.SyncLock)
+                {
+                    var botGroupMessage = BotDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).Result;
+                    if (botGroupMessage == null)
                     {
-                        if (!int.TryParse(hourStr, out hour))
+                        botGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
+                        if (!string.IsNullOrEmpty(botGroupMessage.MessageText) || !string.IsNullOrEmpty(botGroupMessage.MessageImage))
+                            BotDb.AddAsync(botGroupMessage);
+                    }
+                }
+
+                return true;
+            }
+            else
+            {
+                if (message.Length <= 4)
+                    return false;
+
+                var dateNow = DateTime.Now;
+                if (!BotExtensions.IsAdmin(senderId) && (dateNow - _chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
+                {
+                    await BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
+                    return true;
+                }
+
+                _chatSummaryRequestLastTime = dateNow;
+                var summaryType = message.ToUpper().Substring(4, 1);
+                var summaryWords = new Dictionary<string, int>();
+                var wordCloudWidth = 1000;
+                var wordNums = 100;
+
+                var chatSummaryGroupConfigFilePath = Path.Combine(PATH_WORDCLOUD_CONFIG, $"{groupId}.json");
+                var chatSummaryGroupConfig = (ChatSummaryGroupConfig)null;
+                var regNumber = new Regex("[0-9]+");
+                if (File.Exists(chatSummaryGroupConfigFilePath))
+                {
+                    var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
+                    chatSummaryGroupConfig = JsonExtensions.JsonDeserialize<ChatSummaryGroupConfig>(jsonText);
+                }
+
+                switch (summaryType)
+                {
+                    case "B":
+                        if (!BotExtensions.IsAdmin(senderId))
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
+                            return false;
+                        }
+
+                        var dataMessage = message[5..];
+                        if (string.IsNullOrEmpty(dataMessage))
                         {
                             await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                             return false;
                         }
 
-                        if (hour is <= 0 or >= 24)
+                        if (JiebaDb.StopWords.Find(dataMessage) != null)
                         {
-                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                            await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
                             return false;
                         }
-                    }
 
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
-                    CalcWordCloud(groupId, dateNow.AddHours(-hour));
-                    wordCloudWidth = 1200;
-                    wordNums = 200;
-                    break;
-                case "D":
-                    // MEMO : 日统计
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
-                    CalcWordCloud(groupId, dateNow.AddDays(-1));
-                    wordCloudWidth = 1500;
-                    wordNums = 250;
-                    break;
-                case "W":
-                    // MEMO : 周统计
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
-                    CalcWordCloud(groupId, dateNow.AddDays(-7));
-                    wordCloudWidth = 1800;
-                    wordNums = 300;
-                    break;
-                case "M":
-                    // MEMO : 月统计
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
-                    CalcWordCloud(groupId, dateNow.AddMonths(-1));
-                    wordCloudWidth = 2400;
-                    wordNums = 400;
-                    break;
-                case "Y":
-                    // MEMO : 年统计
-                    BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK);
-                    CalcWordCloud(414774779, dateNow.AddYears(-1));
-                    wordCloudWidth = 3000;
-                    wordNums = 500;
-                    break;
-                default:
-                    await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-                    return false;
-            }
-
-            var wordCloudImage = $"{groupId}.png";
-            var maskFilePath = CommonExtensions.GetPath(PATH_WORDCLOUD_CONFIG, wordCloudImage, GetPathType.Normal);
-            var wordCloudWords = summaryWords.OrderByDescending(each => each.Value)
-                .Take(wordNums)
-                .ToDictionary(each => each.Key, each => each.Value);
-
-            wordCloudWords
-                .GenerateWordCloud(wordCloudWidth, wordCloudWidth,
-                    CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
-            File.WriteAllText(Path.Combine(PATH_CACHE_WORDCLOUD, $"{groupId}.txt"), string.Join("\r\n", wordCloudWords.Keys));
-
-            await BotServer.SendGroupMessageAsync(groupId,
-                CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.CQCodePath))).ConfigureAwait(false);
-            if (IsDebug)
-                await BotServer.SendGroupMessageAsync(groupId, "聊天记录统计已发送!").ConfigureAwait(false);
-
-            return true;
-
-            void CalcWordCloud(long targetGroupId, DateTime fromDate, DateTime? toDate = null)
-            {
-                lock (BotDb.SyncLock)
-                {
-                    var fromDateTimeStamp = fromDate.ToTimeStamp();
-                    var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
-                    var repeatSkipQueue = new Queue<string>();
-                    BotDb.BotGroupMessages
-                        .Where(each => each.GroupId == targetGroupId
-                            && each.TimeStamp >= fromDateTimeStamp
-                            && each.TimeStamp < toDateTimeStamp)
-                        .ForEach(each =>
+                        if (!chatSummaryGroupConfig.ExcludeWords.Add(dataMessage))
                         {
-                            var historyMessage = each.MessageText;
-                            historyMessage = historyMessage.Trim();
-                            if (string.IsNullOrEmpty(historyMessage))
-                                return;
+                            await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于群配置").ConfigureAwait(false);
+                            return false;
+                        }
 
-                            // MEMO : REPEAT_SKIP_SUMMARY 句以内复读则忽略
-                            if (repeatSkipQueue.Contains(historyMessage))
-                                return;
+                        await File.WriteAllTextAsync(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, JsonExtensions.DefaultJsonOptions)).ConfigureAwait(false);
+                        await BotServer.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
+                        return true;
+                    case "H":
+                        // MEMO : 小时统计
+                        var hourStr = message[5..];
+                        var hour = 12;
+                        if (!string.IsNullOrEmpty(hourStr))
+                        {
+                            if (!int.TryParse(hourStr, out hour))
+                            {
+                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                                return false;
+                            }
 
-                            repeatSkipQueue.Enqueue(historyMessage);
-                            if (repeatSkipQueue.Count > REPEAT_SKIP_SUMMARY)
-                                repeatSkipQueue.Dequeue();
+                            if (hour is <= 0 or >= 24)
+                            {
+                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                                return false;
+                            }
+                        }
 
-                            var segmenterResult = historyMessage.ExtractTagsWithWeight_Idf();
-                            var excludeWords = chatSummaryGroupConfig?.ExcludeWords;
-                            segmenterResult
-                                .Where(wordWeightPair =>
-                                {
-                                    var word = wordWeightPair.Word;
-                                    if (regNumber.Match(word).Value == word)
-                                        return false;
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        CalcWordCloud(groupId, dateNow.AddHours(-hour));
+                        wordCloudWidth = 1200;
+                        wordNums = 200;
+                        break;
+                    case "D":
+                        // MEMO : 日统计
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        CalcWordCloud(groupId, dateNow.AddDays(-1));
+                        wordCloudWidth = 1500;
+                        wordNums = 250;
+                        break;
+                    case "W":
+                        // MEMO : 周统计
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        CalcWordCloud(groupId, dateNow.AddDays(-7));
+                        wordCloudWidth = 1800;
+                        wordNums = 300;
+                        break;
+                    case "M":
+                        // MEMO : 月统计
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        CalcWordCloud(groupId, dateNow.AddMonths(-1));
+                        wordCloudWidth = 2400;
+                        wordNums = 400;
+                        break;
+                    case "Y":
+                        // MEMO : 年统计
+                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        CalcWordCloud(414774779, dateNow.AddYears(-1));
+                        wordCloudWidth = 3000;
+                        wordNums = 500;
+                        break;
+                    default:
+                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                        return false;
+                }
 
-                                    return excludeWords == null || !excludeWords.Contains(word);
-                                })
-                                .ForEach(wordWeightPair => summaryWords
-                                    .AddOrUpdate(wordWeightPair.Word, (int)(wordWeightPair.Weight * 100), (_, oldValue) => oldValue + (int)(wordWeightPair.Weight * 100)));
-                        });
+                var wordCloudImage = $"{groupId}.png";
+                var maskFilePath = CommonExtensions.GetPath(PATH_WORDCLOUD_CONFIG, wordCloudImage, GetPathType.Normal);
+                var wordCloudWords = summaryWords.OrderByDescending(each => each.Value)
+                    .Take(wordNums)
+                    .ToDictionary(each => each.Key, each => each.Value);
+
+                wordCloudWords
+                    .GenerateWordCloud(wordCloudWidth, wordCloudWidth,
+                        CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
+                await File.WriteAllTextAsync(Path.Combine(PATH_CACHE_WORDCLOUD, $"{groupId}.txt"), string.Join("\r\n", wordCloudWords.Keys)).ConfigureAwait(false);
+                await BotServer.SendGroupMessageAsync(groupId,
+                    CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.CQCodePath))).ConfigureAwait(false);
+                if (IsDebug)
+                    await BotServer.SendGroupMessageAsync(groupId, "聊天记录统计已发送!").ConfigureAwait(false);
+
+                return true;
+
+                void CalcWordCloud(long targetGroupId, DateTime fromDate, DateTime? toDate = null)
+                {
+                    lock (BotDb.SyncLock)
+                    {
+                        var fromDateTimeStamp = fromDate.ToTimeStamp();
+                        var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
+                        var repeatSkipQueue = new Queue<string>();
+                        BotDb.BotGroupMessages
+                            .Where(each => each.GroupId == targetGroupId
+                                && each.TimeStamp >= fromDateTimeStamp
+                                && each.TimeStamp < toDateTimeStamp)
+                            .ForEach(each =>
+                            {
+                                var historyMessage = each.MessageText;
+                                historyMessage = historyMessage.Trim();
+                                if (string.IsNullOrEmpty(historyMessage))
+                                    return;
+
+                                // MEMO : REPEAT_SKIP_SUMMARY 句以内复读则忽略
+                                if (repeatSkipQueue.Contains(historyMessage))
+                                    return;
+
+                                repeatSkipQueue.Enqueue(historyMessage);
+                                if (repeatSkipQueue.Count > REPEAT_SKIP_SUMMARY)
+                                    repeatSkipQueue.Dequeue();
+
+                                var segmenterResult = historyMessage.ExtractTagsWithWeight_Idf();
+                                var excludeWords = chatSummaryGroupConfig?.ExcludeWords;
+                                segmenterResult
+                                    .Where(wordWeightPair =>
+                                    {
+                                        var word = wordWeightPair.Word;
+                                        if (regNumber.Match(word).Value == word)
+                                            return false;
+
+                                        return excludeWords == null || !excludeWords.Contains(word);
+                                    })
+                                    .ForEach(wordWeightPair => summaryWords
+                                        .AddOrUpdate(wordWeightPair.Word, (int)(wordWeightPair.Weight * 100), (_, oldValue) => oldValue + (int)(wordWeightPair.Weight * 100)));
+                            });
+                    }
                 }
             }
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(e);
+            return false;
         }
     }
 

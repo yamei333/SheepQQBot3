@@ -56,14 +56,14 @@ public partial class MainWindow : Window
                 holidayInfoJson = await HttpExtensions.HttpClient
                     .GetStringAsync($"https://timor.tech/api/holiday/year/{nowYear}/")
                     .ConfigureAwait(false);
-                File.WriteAllLines(holidayInfoPath, new[] { holidayInfoJson }, Encoding.UTF8);
+                File.WriteAllLines(holidayInfoPath, [holidayInfoJson], Encoding.UTF8);
             }
 
             var regHolidayInfo = RegexGenerator.HolidayInfo();
             var holidayInfo = new Dictionary<string, bool>();
             regHolidayInfo.Matches(holidayInfoJson).ForEach(each =>
             {
-                var holidayInfoData = JsonExtensions.Deserialize<HolidayInfoData>(each.Value);
+                var holidayInfoData = each.Value.JsonDeserialize<HolidayInfoData>();
                 if (holidayInfoData != null)
                     holidayInfo.Add(holidayInfoData.Date, holidayInfoData.Holiday);
             });

@@ -12,15 +12,16 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="EntityFrameworkCore.Sqlite.NodaTime" Version="8.0.1" />
-    <PackageReference Include="Masuit.Tools.Core" Version="2024.5.9" />
-    <PackageReference Include="MessagePack" Version="2.5.187" />
-    <PackageReference Include="MessagePackAnalyzer" Version="2.5.187">
+    <PackageReference Include="EntityFrameworkCore.Sqlite.NodaTime" Version="9.1.0" />
+    <PackageReference Include="Masuit.Tools.Core" Version="2024.6.0" />
+    <PackageReference Include="MessagePack" Version="2.5.192" />
+    <PackageReference Include="MessagePackAnalyzer" Version="2.5.192">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
-    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="8.0.10" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.5" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="9.0.0" />
+    <PackageReference Include="RestSharp" Version="112.1.0" />
+    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.6" />
   </ItemGroup>
 
   <ItemGroup>

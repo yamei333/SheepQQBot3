@@ -5,25 +5,10 @@ namespace SheepQQBot3.Model.Fund;
 
 public class FundData
 {
-    [JsonPropertyName("code")]
-    public int Code { get; set; }
-
-    [JsonPropertyName("msg")]
-    public string Message { get; set; }
-
-    [JsonPropertyName("data")]
-    public FundSimpleData[] Data { get; set; }
-}
-
-/// <summary>
-/// 简单基金信息Json数据类型
-/// </summary>
-public class FundSimpleData
-{
     /// <summary>
     /// 基金编号
     /// </summary>
-    [JsonPropertyName("code")]
+    [JsonPropertyName("fundcode")]
     public string Code { get; set; }
 
     /// <summary>
@@ -33,23 +18,68 @@ public class FundSimpleData
     public string Name { get; set; }
 
     /// <summary>
-    /// 当前净值
+    /// 当前净值(昨日)
     /// </summary>
-    [JsonPropertyName("networth")]
+    [JsonPropertyName("dwjz")]
     public string NetWorthSource { get; set; }
 
     /// <summary>
-    /// 净值估算
+    /// 净值估算(今日)
     /// </summary>
-    [JsonPropertyName("valuation")]
-    public string ExpectWorthSrouce { get; set; }
+    [JsonPropertyName("gsz")]
+    public string ExpectWorthSource { get; set; }
 
     /// <summary>
     /// 净值估算(涨跌幅)
     /// </summary>
-    [JsonPropertyName("valuationP")]
+    [JsonPropertyName("gszzl")]
     public string ExpectGrowthSource { get; set; }
 
+    /// <summary>
+    /// 更新日期
+    /// </summary>
+    [JsonPropertyName("gztime")]
+    public string UpdateDateSource { get; set; }
+
+    [JsonIgnore]
+    public float NetWorth => FloatParse(NetWorthSource);
+
+    [JsonIgnore]
+    public float ExpectWorth => FloatParse(ExpectWorthSource);
+
+    [JsonIgnore]
+    public float ExpectGrowth => FloatParse(ExpectGrowthSource);
+
+    /// <summary>
+    /// 净值估算(涨跌幅)(格式化)
+    /// </summary>
+    [JsonIgnore]
+    public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
+
+    /// <summary>
+    /// 更新时间(格式化)
+    /// </summary>
+    [JsonIgnore]
+    public DateTime UpdateDate => FormatDate(UpdateDateSource);
+
+    private static string FormatGrowth(float growthValue) =>
+        $"{(growthValue < 0 ? "－" : "＋")}{Math.Abs(growthValue):0.00}";
+
+    private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
+
+    private static DateTime FormatDate(string dateString)
+        => string.IsNullOrEmpty(dateString)
+            ? DateTime.MinValue
+            : DateTime.TryParse(dateString, out var dateValue)
+                ? dateValue
+                : DateTime.MinValue;
+}
+
+/// <summary>
+/// 简单基金信息Json数据类型
+/// </summary>
+public class FundSimpleData
+{
     ///// <summary>
     ///// 日涨跌
     ///// </summary>
@@ -86,21 +116,6 @@ public class FundSimpleData
     //[JsonPropertyName("lastYearGrowth")]
     //public string LastYearGrowthSource { get; set; }
 
-    /// <summary>
-    /// 更新日期
-    /// </summary>
-    [JsonPropertyName("gettime")]
-    public string UpdateDateSource { get; set; }
-
-    [JsonIgnore]
-    public float NetWorth => FloatParse(NetWorthSource);
-
-    [JsonIgnore]
-    public float ExpectWorth => FloatParse(ExpectWorthSrouce);
-
-    [JsonIgnore]
-    public float ExpectGrowth => FloatParse(ExpectGrowthSource);
-
     //[JsonIgnore]
     //public float DayGrowth => FloatParse(DayGrowthSource);
 
@@ -119,12 +134,6 @@ public class FundSimpleData
     //[JsonIgnore]
     //public float LastYearGrowth => FloatParse(LastYearGrowthSource);
 
-    [JsonIgnore]
-    public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
-
-    [JsonIgnore]
-    public DateTime UpdateDate => FormatDate(UpdateDateSource);
-
     //[JsonIgnore]
     //public DateTime ExpectWorthDate => FormatDate(ExpectWorthDateSource);
 
@@ -135,16 +144,4 @@ public class FundSimpleData
     //[JsonIgnore] public string LastSixMonthsGrowthString => FormatGrowth(LastSixMonthsGrowth);
 
     //[JsonIgnore] public string LastYearGrowthString => FormatGrowth(LastYearGrowth);
-
-    private static string FormatGrowth(float growthValue) =>
-        $"{(growthValue < 0 ? "－" : "＋")}{Math.Abs(growthValue):0.00}";
-
-    private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
-
-    private static DateTime FormatDate(string dateString)
-        => string.IsNullOrEmpty(dateString)
-            ? DateTime.MinValue
-            : DateTime.TryParse(dateString, out var dateValue)
-                ? dateValue
-                : DateTime.MinValue;
 }

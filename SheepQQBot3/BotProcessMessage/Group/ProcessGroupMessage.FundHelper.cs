@@ -1,9 +1,9 @@
-﻿using System;
-using System.Text;
-using System.Threading.Tasks;
-using SheepQQBot3.Extensions;
+﻿using CommonLibrary;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
+using System;
+using System.Text;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -35,7 +35,6 @@ public static partial class ProcessGroupMessage
         try
         {
             var changedMessageSpace = message[COMMAND_FUNDHELPER_LIBRARY.Length..];
-
             var changedMessage = changedMessageSpace
                 .Replace(SPACE, string.Empty);
 
@@ -43,8 +42,8 @@ public static partial class ProcessGroupMessage
             switch (startChar)
             {
                 case 'H':
-                    sendMessage.Append($" 基金助手功能介绍:" +
-                                       $"{ENTER}#jj#c000001 -> 查询000001的持仓");
+                    sendMessage.Append($" 基金助手功能介绍:"
+                        + $"{ENTER}#jj#c000001 -> 查询000001的持仓");
                     break;
                 case 'C':
                     var fundId = changedMessage[1..];
@@ -78,10 +77,11 @@ public static partial class ProcessGroupMessage
                     break;
             }
 
-            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}");
+            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}").ConfigureAwait(false);
         }
-        catch (Exception)
+        catch (Exception e)
         {
+            YameiLogExtensions.WriteLog(e);
             return false;
         }
 

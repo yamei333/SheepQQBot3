@@ -68,60 +68,67 @@ public static partial class TaskProcess
         DateTime now,
         bool forceSend = false)
     {
-        var configId = liveAlarmConfig.Id;
-        if (!forceSend && setConfig.LiveAlarmedList.ContainsKey(configId))
-            return;
-
-        var liveRoomId = liveAlarmConfig.LiveRoomId;
-        var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
-                $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
-            .ConfigureAwait(false);
-        if (httpResponse.Result != HttpResponseResult.Successed)
-            return;
-
-        var liveRoomResponse = httpResponse.Data;
-        if (liveRoomResponse == null)
-            return;
-
-        var liveRoomResponseData = liveRoomResponse.Data;
-        if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)
-            return;
-
-        var startTime = liveRoomResponse.Data.RoomInfo.LiveStartTime.ToDateTime();
-        if ((DateTime.Now - startTime).TotalSeconds > 90)
-            return;
-
-        var roomInfo = liveRoomResponseData.RoomInfo;
-        var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
-        var sendMessage = CQCode.CustomMusic(
-            $"https://live.bilibili.com/{liveRoomId}",
-            $"https://live.bilibili.com/{liveRoomId}",
-            $"[{userBaseInfo.Name}]正在直播!",
-            userBaseInfo.Face,
-            $"{roomInfo.Title}");
-        //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}"
-        //        + $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
-
-        var targetId = setConfig.TargetId;
-        switch (setConfig.TargetType)
+        try
         {
-            case BotConfigTargetType.Group:
-                await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
-                LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
-                break;
-            case BotConfigTargetType.Private:
-                await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
-                LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
-                break;
-            case BotConfigTargetType.Common:
-            default:
-                throw new ArgumentOutOfRangeException(
-                    $"{nameof(SendLiveAlarmMessageAsync)}.{nameof(setConfig.TargetType)}",
-                    setConfig.TargetType.ToString());
-        }
+            var configId = liveAlarmConfig.Id;
+            if (!forceSend && setConfig.LiveAlarmedList.ContainsKey(configId))
+                return;
 
-        // MEMO : 追加到已发送列表
-        if (!forceSend)
-            setConfig.LiveAlarmedList.Add(configId, now);
+            var liveRoomId = liveAlarmConfig.LiveRoomId;
+            var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
+                    $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
+                .ConfigureAwait(false);
+            if (httpResponse.Result != HttpResponseResult.Successed)
+                return;
+
+            var liveRoomResponse = httpResponse.Data;
+            if (liveRoomResponse == null)
+                return;
+
+            var liveRoomResponseData = liveRoomResponse.Data;
+            if (liveRoomResponseData?.RoomInfo?.LiveStatusType != LiveStatusType.Live)
+                return;
+
+            var startTime = liveRoomResponse.Data.RoomInfo.LiveStartTime.ToDateTime();
+            if ((DateTime.Now - startTime).TotalSeconds > 90)
+                return;
+
+            var roomInfo = liveRoomResponseData.RoomInfo;
+            var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
+            var sendMessage = CQCode.CustomMusic(
+                $"https://live.bilibili.com/{liveRoomId}",
+                $"https://live.bilibili.com/{liveRoomId}",
+                $"[{userBaseInfo.Name}]正在直播!",
+                userBaseInfo.Face,
+                $"{roomInfo.Title}");
+            //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}"
+            //        + $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
+
+            var targetId = setConfig.TargetId;
+            switch (setConfig.TargetType)
+            {
+                case BotConfigTargetType.Group:
+                    await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                    LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
+                    break;
+                case BotConfigTargetType.Private:
+                    await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                    LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
+                    break;
+                case BotConfigTargetType.Common:
+                default:
+                    throw new ArgumentOutOfRangeException(
+                        $"{nameof(SendLiveAlarmMessageAsync)}.{nameof(setConfig.TargetType)}",
+                        setConfig.TargetType.ToString());
+            }
+
+            // MEMO : 追加到已发送列表
+            if (!forceSend)
+                setConfig.LiveAlarmedList.Add(configId, now);
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(e);
+        }
     }
 }

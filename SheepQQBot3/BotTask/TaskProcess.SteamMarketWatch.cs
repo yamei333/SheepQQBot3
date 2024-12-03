@@ -1,10 +1,10 @@
-﻿using System;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools.DateTimeExt;
 using SheepQQBot3.BotService;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
+using System;
+using System.Threading.Tasks;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
 
@@ -24,9 +24,9 @@ public static partial class TaskProcess
         }
 
         AddTaskRunLog("Steam市场监控状态");
-        while (true)
+        try
         {
-            try
+            while (true)
             {
                 if (BotServer?.Connected == true)
                 {
@@ -46,11 +46,11 @@ public static partial class TaskProcess
                     }
                 }
             }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-                CommonExtensions.SleepSeconds(30);
-            }
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(e);
+            CommonExtensions.SleepSeconds(30);
         }
     }
 }

@@ -1,6 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Masuit.Tools.Media;
+using RestSharp;
 using SheepQQBot3.Model.JsonCard;
 using SheepQQBot3.Model.Model.GetIP;
 using SixLabors.ImageSharp;
@@ -17,12 +18,17 @@ namespace SheepQQBot3.Model.Extension;
 
 public static class HttpExtensions
 {
-    private static Regex _regGetPsKey = new(@"(?<=p_skey\=).+", RegexOptions.Multiline);
+    private static readonly Regex _regGetPsKey = new(@"(?<=p_skey\=).+", RegexOptions.Multiline);
 
     /// <summary>
     /// Http请求通用
     /// </summary>
     public static readonly HttpClient HttpClient;
+
+    /// <summary>
+    /// Http请求通用
+    /// </summary>
+    public static readonly RestClient RClient;
 
     /// <summary>
     /// QQ专用(发送json卡片消息用)
@@ -40,6 +46,10 @@ public static class HttpExtensions
         HttpClient = new HttpClient(httpclientHandler);
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
+        RClient = new RestClient(options =>
+        {
+            options.Timeout = TimeSpan.FromSeconds(15);
+        });
     }
 
     /// <summary>
@@ -53,7 +63,7 @@ public static class HttpExtensions
         JsonCard_TianxuanShare jsonCardTianxuanShare)
     {
         var cookiesJson = await getCookieAsync("act.qzone.qq.com", 5D).ConfigureAwait(false);
-        var ntCookies = JsonExtensions.Deserialize<NTQQCookies>(cookiesJson);
+        var ntCookies = cookiesJson.JsonDeserialize<NTQQCookies>();
         var cookies = ntCookies.Data.Cookies;
         var psKey = _regGetPsKey.Match(cookies).Value;
         var gtk = QQExtensions.GetGtk(psKey);
@@ -156,6 +166,45 @@ public static class HttpExtensions
         }
     }
 
+    public static async Task<RestResponse> GetAsync(string url)
+    {
+        try
+        {
+            var restRequest = new RestRequest(url);
+            var restResponse = await RClient.ExecuteAsync(restRequest).ConfigureAwait(false);
+            return restResponse;
+        }
+        catch (TaskCanceledException)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
+            return null;
+        }
+    }
+
+    public static RestResponse Get<T>(string url)
+        where T : class
+    {
+        try
+        {
+            var restRequest = new RestRequest(url);
+            var restResponse = RClient.Execute<T>(restRequest);
+            return restResponse;
+        }
+        catch (TaskCanceledException)
+        {
+            return null;
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
+            return null;
+        }
+    }
+
     /// <summary>
     /// http下载
     /// </summary>
@@ -180,23 +229,24 @@ public static class HttpExtensions
         CommonExtensions.CreatePath(path);
         if (!checkOnly)
         {
-            var stream = await response.Content.ReadAsStreamAsync();
-            var image = await Image.LoadAsync(stream);
+            var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            var image = await Image.LoadAsync(stream).ConfigureAwait(false);
 
             if (needResize)
             {
                 await image.ResizeImage(image.Width + GetRandom(), image.Height + GetRandom())
-                    .SaveAsPngAsync($"{path}/{tempFileName}.png");
+                    .SaveAsPngAsync($"{path}/{tempFileName}.png")
+                    .ConfigureAwait(false);
             }
             else
             {
                 switch (fileExtend)
                 {
                     case "gif":
-                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif");
+                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif").ConfigureAwait(false);
                         break;
                     default:
-                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png");
+                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png").ConfigureAwait(false);
                         break;
                 }
             }

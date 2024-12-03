@@ -117,10 +117,10 @@ public partial class BotServer : IDisposable
         return;
 
         ClientReceiveData GetClientReceiveData(string jsonInfo)
-            => JsonExtensions.Deserialize<ClientReceiveData>(jsonInfo);
+            => jsonInfo.JsonDeserialize<ClientReceiveData>();
 
         ReceiveData GetReceiveData(string jsonInfo)
-            => JsonExtensions.Deserialize<ReceiveData>(jsonInfo);
+            => jsonInfo.JsonDeserialize<ReceiveData>();
     }
 
     private void ProcessClientReceiveData(ClientReceiveData receiveData)
@@ -216,22 +216,21 @@ public partial class BotServer : IDisposable
                 }
                 break;
             case NoticeType.Group_Increase:
-                // TODO : 群成员增加
-                break;
+            // TODO : 群成员增加
             case NoticeType.Group_Decrease:
-                // TODO : 群成员减少
-                break;
+            // TODO : 群成员减少
             case NoticeType.Group_Card:
-                // TODO : 群名片变更
-                break;
+            // TODO : 群名片变更
             case NoticeType.Group_Upload:
-                // TODO : 上传群文件
-                break;
+            // TODO : 上传群文件
             case NoticeType.Essence:
-                // TODO : 设置精华消息
-                break;
+            // TODO : 设置精华消息
             case NoticeType.Group_Ban:
-                // TODO : 群禁言
+            // TODO : 群禁言
+            case NoticeType.Group_Msg_Emoji_Like:
+            // TODO : 群表情回应
+            case NoticeType.Group_Admin:
+                // TODO : 群设置管理员
                 break;
             default:
                 throw new ArgumentOutOfRangeException(nameof(receiveData.NoticeType), receiveData.NoticeType, "值不在正确范围内");

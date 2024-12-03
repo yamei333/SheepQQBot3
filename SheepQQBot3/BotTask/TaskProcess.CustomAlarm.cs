@@ -1,13 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using CommonLibrary;
+﻿using CommonLibrary;
 using Masuit.Tools;
-using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
+using System;
+using System.Collections.Generic;
+using System.Threading.Tasks;
 using static SheepQQBot3.Extensions.LogExtensions;
 using static SheepQQBot3.PublicVar;
 
@@ -24,9 +22,9 @@ public static partial class TaskProcess
         // MEMO : 清理过期提醒
         ClearHistoryData();
 
-        while (true)
+        try
         {
-            try
+            while (true)
             {
                 if (BotServer?.Connected == true)
                 {
@@ -84,13 +82,13 @@ public static partial class TaskProcess
                         customAlarms.Remove(customAlarm.Id);
                     }
                 }
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-            }
 
-            CommonExtensions.Sleep(1000);
+                CommonExtensions.Sleep(1000);
+            }
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(e);
         }
     }
 

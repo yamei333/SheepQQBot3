@@ -1,4 +1,6 @@
-﻿using Masuit.Tools;
+﻿using CommonLibrary;
+using Masuit.Tools;
+using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Fund;
 using System;
@@ -6,6 +8,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace SheepQQBot3.Model.Extension;
@@ -13,22 +16,54 @@ namespace SheepQQBot3.Model.Extension;
 public static class FundExtensions
 {
     /// <summary>
+    /// 取得基金Json的正则
+    /// </summary>
+    private static readonly Regex _regGetFundJson = new(@"(?<=jsonpgz\().+(?=\);)", RegexOptions.Multiline);
+
+    /// <summary>
     /// 获取基金基本信息
     /// </summary>
     /// <param name="fundIds"></param>
     /// <returns></returns>
-    public static async Task<FundData> GetFundDataAsync(IEnumerable<string> fundIds)
+    public static async Task<ConcurrentHashSet<FundData>> GetFundDataAsync(IEnumerable<string> fundIds)
     {
         var fundIdArray = fundIds as string[] ?? fundIds.ToArray();
         if (fundIdArray.Any() != true)
             return null;
 
-        // MEMO : doctorxiong炸了, 暂时不可用
+        // MEMO : doctorxiong 炸了
         //var url = $"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIdArray)}"
-        var url = $"https://www.cnuseful.com/api/index/fund?code={string.Join(",", fundIdArray)}";
-        var httpResponse = await HttpExtensions.GetFromJsonAsync<FundData>(url).ConfigureAwait(false);
-        return httpResponse.Result == HttpResponseResult.Successed
-            ? httpResponse.Data : null;
+        // MEMO : 0.14.7.7 cnuseful 炸了
+        //var url = $"https://www.cnuseful.com/api/index/fund?code={string.Join(",", fundIdArray)}";
+        //var httpResponse = await HttpExtensions.GetFromJsonAsync<FundData>(url).ConfigureAwait(false);
+        //return httpResponse.Result == HttpResponseResult.Successed
+        //    ? httpResponse.Data : null;
+
+        var taskList = new List<Task>();
+        var fundDatas = new ConcurrentHashSet<FundData>();
+        fundIdArray.ForEach(fundId =>
+        {
+            var task = new Task(() => GetFundData(fundId));
+            taskList.Add(task);
+            task.Start();
+        });
+        Task.WaitAll(taskList.ToArray());
+        return fundDatas;
+
+        void GetFundData(string fundId)
+        {
+            try
+            {
+                var url = $"https://fundgz.1234567.com.cn/js/{fundId}.js";
+                var restResponse = HttpExtensions.Get<string>(url);
+                var fundJson = _regGetFundJson.Match(restResponse.Content).Value;
+                fundDatas.Add(fundJson.JsonDeserialize<FundData>());
+            }
+            catch (Exception e)
+            {
+                YameiLogExtensions.WriteLog(e);
+            }
+        }
 
         #region 测试用代码
 
@@ -66,44 +101,43 @@ public static class FundExtensions
     }
 
     public static string GetFundAlarmString(
-        FundData fundData,
+        ConcurrentHashSet<FundData> fundDatas,
         ConcurrentDictionary<int, AlarmFundConfig> fundAlarmConfigsDic)
     {
-        var sb = new StringBuilder();
         var maxGrowth = -999.0;
         var allGrowth = 0.0;
         var isExistZero = false;
-        sb.AppendLine("=====基金播报=====");
-        var fundSimpleData = fundData.Data;
+        var sb = new StringBuilder($"=====基金播报=====\r\n");
         var isDateError = false;
         var fundAlarmConfigs = fundAlarmConfigsDic.Values;
-        fundSimpleData?.ForEach(each =>
-        {
-            if (each.UpdateDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
+        fundDatas.OrderBy(each => each.Code)
+            .ForEach(fundData =>
             {
-                isDateError = true;
-                return;
-            }
+                if (fundData.UpdateDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
+                {
+                    isDateError = true;
+                    return;
+                }
 
-            var fundAlarmConfig = fundAlarmConfigs
-                .First(alarmFundConfig => alarmFundConfig.FundId == each.Code);
-            var fundRemark = fundAlarmConfig.FundRemark;
-            var growth = each.ExpectGrowth;
-            if (growth > maxGrowth)
-                maxGrowth = growth;
+                var fundAlarmConfig = fundAlarmConfigs
+                    .First(alarmFundConfig => alarmFundConfig.FundId == fundData.Code);
+                var fundRemark = fundAlarmConfig.FundRemark;
+                var growth = fundData.ExpectGrowth;
+                if (growth > maxGrowth)
+                    maxGrowth = growth;
 
-            allGrowth += growth;
-            if (!isExistZero && Math.Abs(growth) <= 0.1)
-                isExistZero = true;
+                allGrowth += growth;
+                if (!isExistZero && Math.Abs(growth) <= 0.1)
+                    isExistZero = true;
 
-            sb.AppendLine($"{(string.IsNullOrEmpty(fundRemark) ? each.Name : fundRemark)}({each.Code}) {each.ExpectGrowthString}");
-        });
+                sb.AppendLine($"{(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}({fundData.Code}) {fundData.ExpectGrowthString}");
+            });
 
         // MEMO : 日期错误, 今日不播报基金
         if (isDateError)
             return string.Empty;
 
-        var avgGrowth = allGrowth / fundSimpleData.Length;
+        var avgGrowth = allGrowth / fundDatas!.Count;
 
         // MEMO : 添加怪话总结
         sb.AppendLine("================");
@@ -191,7 +225,7 @@ public static class FundExtensions
     /// 获取基金阈值观测结果
     /// </summary>
     public static string GetFundLimitString(
-        FundData fundData,
+        ConcurrentHashSet<FundData> fundDatas,
         LimitObserveFundConfig[] limitObserveFundConfigs)
     {
         // TODO : 基金取历史数据坏了, 暂时禁用该功能

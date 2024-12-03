@@ -1,5 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using Masuit.Tools.Systems;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -100,52 +101,59 @@ public static partial class TaskProcess
         DateTime now,
         bool forceSend = false)
     {
-        var configId = fundAlarmConfig.Id;
-        if (!forceSend && setConfig.FundAlarmedList.ContainsKey(configId))
-            return;
+        try
+        {
+            var configId = fundAlarmConfig.Id;
+            if (!forceSend && setConfig.FundAlarmedList.ContainsKey(configId))
+                return;
 
-        var alarmFundConfigs = fundAlarmConfig.AlarmFundConfigs;
-        var fundIds = alarmFundConfigs.Values
-            .Where(each => each.IsActive)
-            .Select(each => each.FundId)
-            .ToArray();
-        FundData fundInfo = null;
-        if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
+            var alarmFundConfigs = fundAlarmConfig.AlarmFundConfigs;
+            var fundIds = alarmFundConfigs.Values
+                .Where(each => each.IsActive)
+                .Select(each => each.FundId)
+                .ToArray();
+            ConcurrentHashSet<FundData> fundDatas = null;
+            if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
             {
-                fundInfo = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
-                return fundInfo != null;
+                fundDatas = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
+                return fundDatas?.Any() == true;
             }).ConfigureAwait(false))
-        {
-            return;
+            {
+                return;
+            }
+
+            var sendMessage = FundExtensions.GetFundAlarmString(fundDatas, alarmFundConfigs);
+            if (string.IsNullOrEmpty(sendMessage))
+                return;
+
+            var targetId = setConfig.TargetId;
+            switch (setConfig.TargetType)
+            {
+                case BotConfigTargetType.Group:
+                    await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                    LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
+                    break;
+                case BotConfigTargetType.Private:
+                    await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                    LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
+                    break;
+                case BotConfigTargetType.Common:
+                default:
+                    throw new ArgumentOutOfRangeException(setConfig.TargetType.ToString());
+            }
+
+            // MEMO : 追加到已发送列表
+            if (!forceSend)
+            {
+                setConfig.FundAlarmedList.AddOrUpdate(
+                    configId,
+                    now,
+                    (_, __) => now);
+            }
         }
-
-        var sendMessage = FundExtensions.GetFundAlarmString(fundInfo, alarmFundConfigs);
-        if (string.IsNullOrEmpty(sendMessage))
-            return;
-
-        var targetId = setConfig.TargetId;
-        switch (setConfig.TargetType)
+        catch (Exception e)
         {
-            case BotConfigTargetType.Group:
-                await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
-                LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
-                break;
-            case BotConfigTargetType.Private:
-                await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
-                LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
-                break;
-            case BotConfigTargetType.Common:
-            default:
-                throw new ArgumentOutOfRangeException(setConfig.TargetType.ToString());
-        }
-
-        // MEMO : 追加到已发送列表
-        if (!forceSend)
-        {
-            setConfig.FundAlarmedList.AddOrUpdate(
-                configId,
-                now,
-                (_, __) => now);
+            YameiLogExtensions.WriteLog(e);
         }
     }
 
@@ -171,17 +179,17 @@ public static partial class TaskProcess
             .Distinct()
             .ToArray();
 
-        FundData fundInfo = null;
+        ConcurrentHashSet<FundData> fundDatas = null;
         if (!await FUND_MAX_TRYTIMES.TryTimesAsync(async () =>
             {
-                fundInfo = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
-                return fundInfo != null;
+                fundDatas = await FundExtensions.GetFundDataAsync(fundIds).ConfigureAwait(false);
+                return fundDatas?.Any() == true;
             }).ConfigureAwait(false))
         {
             return;
         }
 
-        var sendMessage = FundExtensions.GetFundLimitString(fundInfo, activeFundLimitObserveConfigs);
+        var sendMessage = FundExtensions.GetFundLimitString(fundDatas, activeFundLimitObserveConfigs);
         if (string.IsNullOrEmpty(sendMessage))
             return;
 

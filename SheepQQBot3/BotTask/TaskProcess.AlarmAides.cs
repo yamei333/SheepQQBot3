@@ -21,9 +21,9 @@ public static partial class TaskProcess
     public static void AlarmAides()
     {
         AddTaskRunLog("闹钟助手");
-        while (true)
+        try
         {
-            try
+            while (true)
             {
                 if (BotServer?.Connected == true)
                 {
@@ -46,8 +46,7 @@ public static partial class TaskProcess
                                 {
                                     var matchValue = match.Value;
                                     condition = condition.Replace(matchValue, string.Empty);
-                                    var extendCondition = JsonExtensions.Deserialize<AlarmAideExtendCondition>(
-                                        matchValue.Replace("$", string.Empty));
+                                    var extendCondition = matchValue.Replace("$", string.Empty).JsonDeserialize<AlarmAideExtendCondition>();
                                     if (extendCondition.DayOfMonthOffset.HasValue)
                                     {
                                         var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();
@@ -71,24 +70,24 @@ public static partial class TaskProcess
                                 // 删除过期发送内容
                                 DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
                                 // 发送闹钟助手消息
-                                await SendAlarm(setConfig, alarmAidesConfig, dateNow);
+                                await SendAlarmAsync(setConfig, alarmAidesConfig, dateNow).ConfigureAwait(false);
                             }
                         });
                 }
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-            }
 
-            CommonExtensions.Sleep(1000);
+                CommonExtensions.Sleep(1000);
+            }
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteLog(e);
         }
     }
 
     /// <summary>
     /// 发送闹钟助手消息
     /// </summary>
-    private static async Task SendAlarm(SetConfig setConfig, AlarmAideConfig alarmAideConfig, DateTime now)
+    private static async Task SendAlarmAsync(SetConfig setConfig, AlarmAideConfig alarmAideConfig, DateTime now)
     {
         var alarmInfoKey = alarmAideConfig.Id;
         if (setConfig.AlarmAideAlarmedList.ContainsKey(alarmInfoKey))
@@ -102,17 +101,17 @@ public static partial class TaskProcess
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await BotServer.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs);
+                    await BotServer.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Group, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Private:
-                    await BotServer.SendPrivateMessageAsync(targetId, alarmText);
+                    await BotServer.SendPrivateMessageAsync(targetId, alarmText).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Private, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Common:
                 default:
                     throw new ArgumentOutOfRangeException(
-                        $"{nameof(SendAlarm)}.{nameof(setConfig.TargetType)}",
+                        $"{nameof(SendAlarmAsync)}.{nameof(setConfig.TargetType)}",
                         setConfig.TargetType.ToString());
             }
 

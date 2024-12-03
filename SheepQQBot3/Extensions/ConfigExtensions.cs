@@ -57,7 +57,7 @@ public static class ConfigExtensions
                 jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
             }
 
-            var botConfig = JsonExtensions.Deserialize<BotConfig>(jsonText);
+            var botConfig = jsonText.JsonDeserialize<BotConfig>();
             var defaultBotFunctions = SetConfig.DefaultBotFunctions;
             botConfig.SetConfigs.Values.ForEach(each =>
             {

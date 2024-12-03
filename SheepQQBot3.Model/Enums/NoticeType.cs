@@ -81,7 +81,7 @@ public enum NoticeType
     Friend_Add,
 
     /// <summary>
-    ///
+    /// 群设置管理员
     /// </summary>
     Group_Admin,
 

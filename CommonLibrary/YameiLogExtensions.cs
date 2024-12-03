@@ -11,6 +11,9 @@ public static class YameiLogExtensions
     public static void WriteLog(LogType logType, string logText)
         => yameiLog.WriteLog(logType, logText);
 
+    public static void WriteJsonSerializeLog(Exception ex, string typeName, object obj)
+        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}\r\nType:{typeName}\r\nObject:{obj}");
+
     public static void WriteJsonDeserializeLog(Exception ex, string typeName, string jsonText)
         => yameiLog.WriteLog(LogType.Error, $"{ex.Message}\r\nType:{typeName}\r\nJson:{jsonText}");
 

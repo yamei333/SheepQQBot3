@@ -29,7 +29,26 @@ public static class JsonExtensions
     /// <summary>
     /// JsonDeserialize, 带try写入日志
     /// </summary>
-    public static T Deserialize<T>(string jsonText, JsonSerializerOptions jsonSerializerOptions)
+    public static string JsonSerialize<T>(this object obj, JsonSerializerOptions jsonSerializerOptions)
+    {
+        string result;
+        try
+        {
+            result = JsonSerializer.Serialize(obj, jsonSerializerOptions);
+        }
+        catch (Exception e)
+        {
+            YameiLogExtensions.WriteJsonSerializeLog(e, typeof(T).Name, obj);
+            throw;
+        }
+
+        return result;
+    }
+
+    /// <summary>
+    /// JsonDeserialize, 带try写入日志
+    /// </summary>
+    public static T JsonDeserialize<T>(this string jsonText, JsonSerializerOptions jsonSerializerOptions)
     {
         T result;
         try
@@ -51,7 +70,7 @@ public static class JsonExtensions
     /// <typeparam name="T">目标类型</typeparam>
     /// <param name="jsonText">JsonText</param>
     /// <returns>结果</returns>
-    public static T Deserialize<T>(string jsonText) => Deserialize<T>(jsonText, DefaultJsonOptions);
+    public static T JsonDeserialize<T>(this string jsonText) => JsonDeserialize<T>(jsonText, DefaultJsonOptions);
 
     /// <summary>
     /// JsonDeserialize
@@ -60,5 +79,5 @@ public static class JsonExtensions
     /// <param name="jsonText">JsonText</param>
     /// <param name="ignoreNull">是否忽略null值</param>
     /// <returns>结果</returns>
-    public static T Deserialize<T>(string jsonText, bool ignoreNull) => Deserialize<T>(jsonText, GetJsonOptions(ignoreNull));
+    public static T JsonDeserialize<T>(this string jsonText, bool ignoreNull) => JsonDeserialize<T>(jsonText, GetJsonOptions(ignoreNull));
 }

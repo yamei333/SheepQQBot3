@@ -15,7 +15,7 @@ public class GroupPoke
     public GroupPoke(ReceiveData receiveData)
     {
         DateTime = receiveData.DateTime;
-        SenderId = receiveData.SenderId;
+        SenderId = receiveData.UserId;
         TargetId = receiveData.TargetId;
         GroupId = receiveData.GroupId;
     }

@@ -306,7 +306,7 @@ partial class BotServer
             Prompt = prompt,
             Title = title,
         }, echo).ConfigureAwait(false);
-        callBack?.Invoke(GetReply(echo, JsonExtensions.Deserialize<ClientReceiveData>, timeout));
+        callBack?.Invoke(GetReply(echo, JsonExtensions.JsonDeserialize<ClientReceiveData>, timeout));
     }
 
     /// <summary>
@@ -334,7 +334,7 @@ partial class BotServer
 
         var groupMessage = GetReply(echo, jsonInfo =>
         {
-            var clientReceiveData = JsonExtensions.Deserialize<ClientReceiveData>(jsonInfo);
+            var clientReceiveData = jsonInfo.JsonDeserialize<ClientReceiveData>();
             return new GroupMessage(clientReceiveData.Data);
         }, timeout);
         return groupMessage;
@@ -355,7 +355,7 @@ partial class BotServer
 
         return GetReply(echo, jsonInfo =>
         {
-            var clientReceiveData = JsonExtensions.Deserialize<ClientReceiveData_HistoryMessages>(jsonInfo);
+            var clientReceiveData = jsonInfo.JsonDeserialize<ClientReceiveData_HistoryMessages>();
             return clientReceiveData.Data.Messages;
         }, timeout);
     }
@@ -454,7 +454,7 @@ partial class BotServer
 
         return GetReply(echo, jsonText =>
         {
-            var clientData = JsonExtensions.Deserialize<ClientReceiveData_GroupMember>(jsonText);
+            var clientData = jsonText.JsonDeserialize<ClientReceiveData_GroupMember>();
             return clientData.Data.ToDictionary(each => each.UserId, each => each);
         }, timeout);
     }
