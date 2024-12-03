@@ -1,13 +1,14 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.Extensions;
-using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.LiveAlarm;
 using System;
 using System.Linq;
+using System.Net;
+using System.Net.Http;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
@@ -75,18 +76,28 @@ public static partial class TaskProcess
                 return;
 
             var liveRoomId = liveAlarmConfig.LiveRoomId;
-            var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
-                    $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
-                .ConfigureAwait(false);
-            if (httpResponse.Result != HttpResponseResult.Successed)
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
+            httpRequestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
+            var httpResponse = await HttpExtensions.HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
+            //var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
+            //        $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
+            //    .ConfigureAwait(false);
+            if (httpResponse.StatusCode != HttpStatusCode.OK)
                 return;
 
-            var liveRoomResponse = httpResponse.Data;
+            var httpResponseData = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+            var liveRoomResponse = httpResponseData.JsonDeserialize<LiveRoomResponse>();
             if (liveRoomResponse == null)
                 return;
 
             var liveRoomResponseData = liveRoomResponse.Data;
-            if (liveRoomResponseData?.RoomInfo?.LiveStatusType != LiveStatusType.Live)
+            if (liveRoomResponseData == null)
+            {
+                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 房间号[{liveRoomId}]"));
+                return;
+            }
+
+            if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)
                 return;
 
             var startTime = liveRoomResponse.Data.RoomInfo.LiveStartTime.ToDateTime();
@@ -109,11 +120,11 @@ public static partial class TaskProcess
             {
                 case BotConfigTargetType.Group:
                     await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
-                    LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
+                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
                     await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
-                    LogExtensions.AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
+                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:
                 default:

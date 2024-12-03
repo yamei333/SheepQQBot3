@@ -1,7 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Masuit.Tools.Media;
-using RestSharp;
 using SheepQQBot3.Model.JsonCard;
 using SheepQQBot3.Model.Model.GetIP;
 using SixLabors.ImageSharp;
@@ -13,6 +12,8 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+
+// ReSharper disable AsyncApostle.AsyncWait
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -26,11 +27,6 @@ public static class HttpExtensions
     public static readonly HttpClient HttpClient;
 
     /// <summary>
-    /// Http请求通用
-    /// </summary>
-    public static readonly RestClient RClient;
-
-    /// <summary>
     /// QQ专用(发送json卡片消息用)
     /// </summary>
     private static readonly HttpClient HttpClient_QQJsonCard;
@@ -42,14 +38,10 @@ public static class HttpExtensions
     static HttpExtensions()
     {
         var httpclientHandler = new HttpClientHandler();
-        httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
+        //httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
         HttpClient = new HttpClient(httpclientHandler);
         HttpClient.Timeout = TimeSpan.FromSeconds(15);
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
-        RClient = new RestClient(options =>
-        {
-            options.Timeout = TimeSpan.FromSeconds(15);
-        });
     }
 
     /// <summary>
@@ -166,41 +158,19 @@ public static class HttpExtensions
         }
     }
 
-    public static async Task<RestResponse> GetAsync(string url)
+    public static HttpResponseMessage HttpGet(string url)
     {
         try
         {
-            var restRequest = new RestRequest(url);
-            var restResponse = await RClient.ExecuteAsync(restRequest).ConfigureAwait(false);
-            return restResponse;
+            return HttpClient.GetAsync(url).Result;
         }
         catch (TaskCanceledException)
         {
-            return null;
+            return new HttpResponseMessage(HttpStatusCode.RequestTimeout);
         }
         catch (Exception e)
         {
-            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
-            return null;
-        }
-    }
-
-    public static RestResponse Get<T>(string url)
-        where T : class
-    {
-        try
-        {
-            var restRequest = new RestRequest(url);
-            var restResponse = RClient.Execute<T>(restRequest);
-            return restResponse;
-        }
-        catch (TaskCanceledException)
-        {
-            return null;
-        }
-        catch (Exception e)
-        {
-            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGetAsync)}-{e.Message}-{url}");
+            YameiLogExtensions.WriteLog(LogType.Error, $"{nameof(HttpGet)}-{e.Message}-{url}");
             return null;
         }
     }
@@ -215,7 +185,7 @@ public static class HttpExtensions
             return (false, string.Empty);
 
         var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
-        var response = await HttpGetAsync(url);
+        var response = await HttpGetAsync(url).ConfigureAwait(false);
         if (response?.StatusCode != HttpStatusCode.OK)
             return (false, string.Empty);
 
