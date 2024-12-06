@@ -37,10 +37,10 @@ public static class HttpExtensions
 
     static HttpExtensions()
     {
-        var httpclientHandler = new HttpClientHandler();
+        //var httpClientHandler = new HttpClientHandler();
         //httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
-        HttpClient = new HttpClient(httpclientHandler);
-        HttpClient.Timeout = TimeSpan.FromSeconds(15);
+        HttpClient = new HttpClient();
+        HttpClient.Timeout = TimeSpan.FromSeconds(10);
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
     }
 
