@@ -78,7 +78,7 @@ public static partial class TaskProcess
             var liveRoomId = liveAlarmConfig.LiveRoomId;
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
             httpRequestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
-            var httpResponse = await HttpExtensions.HttpClient.SendAsync(httpRequestMessage).ConfigureAwait(false);
+            var httpResponse = await HttpExtensions.CreateHttpClient().SendAsync(httpRequestMessage).ConfigureAwait(false);
             //var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
             //        $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
             //    .ConfigureAwait(false);

@@ -511,6 +511,7 @@ public static partial class ProcessGroupMessage
                     .ToList();
             }
 
+            // MEMO : 连续相同关键字失败拉黑
             if (last2Historys.Count == CHECK_TIMES
                 && last2Historys.All(history => history.SearchKeyword == lastKeyword
                     && !history.IsGetSuccessed.ToBool()))
@@ -784,26 +785,29 @@ public static partial class ProcessGroupMessage
 
             try
             {
-                var isR18 = false;
                 var randomSetuKeyword = targetSetuApiType switch
                 {
-                    SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
-                    SetuType.Lolisuki => GetRandomWeightSetuInfo(isR18, SetuType.Lolisuki),
-                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
-                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
-                    SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
-                    _ => GetRandomWeightSetuInfo(isR18,
+                    SetuType.Lolicon => GetRandomWeightSetuInfo(false, SetuType.Lolicon),
+                    SetuType.Lolisuki => GetRandomWeightSetuInfo(false, SetuType.Lolisuki),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(false, SetuType.NyanCatda),
+                    SetuType.Yuban => GetRandomWeightSetuInfo(false, SetuType.Yuban),
+                    SetuType.Jitsu => GetRandomWeightSetuInfo(false, SetuType.Jitsu),
+                    _ => GetRandomWeightSetuInfo(false,
                         SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
                 };
+
+                var randomSetuR18Keyword = GetRandomWeightSetuInfo(true,
+                    SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
+
                 var randomSetu = targetSetuApiType switch
                 {
-                    SetuType.Lolicon => GetRandomWeightSetuInfo(isR18, SetuType.Lolicon),
-                    SetuType.Lolisuki => GetRandomWeightSetuInfo(isR18, SetuType.Lolisuki),
-                    SetuType.NyanCatda => GetRandomWeightSetuInfo(isR18, SetuType.NyanCatda),
-                    SetuType.Yuban => GetRandomWeightSetuInfo(isR18, SetuType.Yuban),
-                    SetuType.Jitsu => GetRandomWeightSetuInfo(isR18, SetuType.Jitsu),
-                    SetuType.JitsuSelf => GetRandomWeightSetuInfo(isR18, SetuType.JitsuSelf),
-                    _ => GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>()),
+                    SetuType.Lolicon => GetRandomWeightSetuInfo(false, SetuType.Lolicon),
+                    SetuType.Lolisuki => GetRandomWeightSetuInfo(false, SetuType.Lolisuki),
+                    SetuType.NyanCatda => GetRandomWeightSetuInfo(false, SetuType.NyanCatda),
+                    SetuType.Yuban => GetRandomWeightSetuInfo(false, SetuType.Yuban),
+                    SetuType.Jitsu => GetRandomWeightSetuInfo(false, SetuType.Jitsu),
+                    SetuType.JitsuSelf => GetRandomWeightSetuInfo(false, SetuType.JitsuSelf),
+                    _ => GetRandomWeightSetuInfo(false, Enum.GetValues<SetuType>()),
                 };
                 Func<string, Task<SetuInfo>>[] randomSetuDefault =
                 [
@@ -939,10 +943,7 @@ public static partial class ProcessGroupMessage
 
                 if (r18Bonus)
                 {
-                    isR18 = true;
-                    var randomSetuR18Keyword = GetRandomWeightSetuInfo(isR18,
-                        SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
-                    var randomSetuR18 = GetRandomWeightSetuInfo(isR18, Enum.GetValues<SetuType>());
+                    var randomSetuR18 = GetRandomWeightSetuInfo(true, Enum.GetValues<SetuType>());
                     var (setuInfoR18, _) = await GetSetu(() => isSearchTag
                             ? randomSetuR18Keyword.TryGetRandomWeight(out var funcResult)
                                 ? funcResult.Value(tag)
@@ -1017,6 +1018,107 @@ public static partial class ProcessGroupMessage
                     sendMessages[^1] = new GroupForwardMessage($"{setuInfo.SetuType}", BotId, "[该消息已被风控拦截!]");
                     await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
                 }
+
+                async Task<(SetuInfo, string)> GetSetu(
+                    Func<Task<SetuInfo>> getSetuInfoFunc,
+                    bool sendDownloadingMessage,
+                    bool checkImageOnly)
+                {
+                    var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
+                    //if (sendDownloadingMessage)
+
+                    if (setuInfo.Result == SetuResult.Successed
+                        && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
+                    {
+                        if (PublicVar.IsDebug)
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
+                                .ConfigureAwait(false);
+                        }
+
+                        // MEMO : 缓存中存在该图, 跳过下载
+                        return (setuInfo, setuInfo.FullCacheFileName);
+                    }
+
+                    DebugSendSetuInfo(setuInfo);
+
+                    //const int maxRetryTimes = 5;
+                    //var retryTimes = 1;
+                    while (true)
+                    {
+                        if (setuInfo.Result == SetuResult.Successed)
+                        {
+                            if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
+                            {
+                                if (PublicVar.IsDebug)
+                                {
+                                    await BotServer.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
+                                        .ConfigureAwait(false);
+                                }
+
+                                // MEMO : 缓存中存在该图, 跳过下载
+                                return (setuInfo, setuInfo.FullCacheFileName);
+                            }
+
+                            var (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
+                                setuInfo.ImageUrl, PATH_CACHE_IMAGE, true, checkImageOnly, setuInfo.CacheFileName).ConfigureAwait(false);
+                            if (getSuccessed)
+                                return (setuInfo, fileName);
+                        }
+                        else if (setuInfo.Result == SetuResult.NoSearchResult)
+                        {
+                            var setuType = setuInfo.SetuType.ToString();
+                            if (!checkImageOnly)
+                            {
+                                if (randomSetuKeyword.Count == 1)
+                                    return (setuInfo, string.Empty);
+
+                                randomSetuKeyword = randomSetuKeyword.Where(each => !each.Value.Method.Name.Contains(setuType)).ToList();
+                            }
+                            else
+                            {
+                                if (randomSetuR18Keyword.Count == 1)
+                                    return (setuInfo, string.Empty);
+
+                                randomSetuR18Keyword = randomSetuR18Keyword!.Where(each => !each.Value.Method.Name.Contains(setuType)).ToList();
+                            }
+                        }
+
+                        //retryTimes++;
+                        //if (retryTimes > maxRetryTimes)
+                        //    break;
+
+                        setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
+                        DebugSendSetuInfo(setuInfo);
+                    }
+
+                    //await BotServer.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
+                    setuInfo.Result = SetuResult.ApiError;
+                    return (setuInfo, string.Empty);
+
+                    async void DebugSendSetuInfo(SetuInfo stInfo)
+                    {
+                        if (!PublicVar.IsDebug)
+                            return;
+
+                        if (stInfo.Result == SetuResult.Successed)
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
+                                    $"{ENTER}SetuType: {stInfo.SetuType}" +
+                                    $"{ENTER}SetuResult: {stInfo.Result}" +
+                                    $"{ENTER}SmallUrl: {stInfo.ImageUrl}" +
+                                    $"{ENTER}SourceUrl: {stInfo.SourceUrl}")
+                                .ConfigureAwait(false);
+                        }
+                        else
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
+                                    $"{ENTER}SetuType: {stInfo.SetuType}" +
+                                    $"{ENTER}SetuResult: {stInfo.Result}")
+                                .ConfigureAwait(false);
+                        }
+                    }
+                }
             }
             catch
             {
@@ -1067,94 +1169,6 @@ public static partial class ProcessGroupMessage
                     [
                         $"[斗士Lv{oldSetuSenderLv}]",
                     ];
-                }
-            }
-
-            async Task<(SetuInfo, string)> GetSetu(
-                Func<Task<SetuInfo>> getSetuInfoFunc,
-                bool sendDownloadingMessage,
-                bool checkImageOnly)
-            {
-                var setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
-                //if (sendDownloadingMessage)
-
-                if (setuInfo.Result == SetuResult.Successed
-                    && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
-                {
-                    if (PublicVar.IsDebug)
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
-                            .ConfigureAwait(false);
-                    }
-
-                    // MEMO : 缓存中存在该图, 跳过下载
-                    return (setuInfo, setuInfo.FullCacheFileName);
-                }
-                else if (setuInfo.Result == SetuResult.NoSearchResult)
-                {
-                    return (setuInfo, string.Empty);
-                }
-
-                DebugSendSetuInfo(setuInfo);
-
-                const int maxRetryTimes = 5;
-                var retryTimes = 1;
-                while (retryTimes <= maxRetryTimes)
-                {
-                    retryTimes++;
-                    setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
-                    if (setuInfo.Result == SetuResult.Successed)
-                    {
-                        if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
-                        {
-                            if (PublicVar.IsDebug)
-                            {
-                                await BotServer.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
-                                    .ConfigureAwait(false);
-                            }
-
-                            // MEMO : 缓存中存在该图, 跳过下载
-                            return (setuInfo, setuInfo.FullCacheFileName);
-                        }
-
-                        var (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
-                            setuInfo.ImageUrl, PATH_CACHE_IMAGE, true, checkImageOnly, setuInfo.CacheFileName).ConfigureAwait(false);
-                        if (getSuccessed)
-                            return (setuInfo, fileName);
-                    }
-                    else if (setuInfo.Result == SetuResult.NoSearchResult)
-                    {
-                        continue;
-                    }
-
-                    DebugSendSetuInfo(setuInfo);
-                }
-
-                //await BotServer.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
-                setuInfo.Result = SetuResult.ApiError;
-                return (setuInfo, string.Empty);
-
-                async void DebugSendSetuInfo(SetuInfo stInfo)
-                {
-                    if (!PublicVar.IsDebug)
-                        return;
-
-                    if (stInfo.Result == SetuResult.Successed)
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
-                                $"{ENTER}SetuType: {stInfo.SetuType}" +
-                                $"{ENTER}SetuResult: {stInfo.Result}" +
-                                $"{ENTER}SmallUrl: {stInfo.ImageUrl}" +
-                                $"{ENTER}SourceUrl: {stInfo.SourceUrl}")
-                            .ConfigureAwait(false);
-                    }
-                    else
-                    {
-                        await BotServer.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
-                                $"{ENTER}SetuType: {stInfo.SetuType}" +
-                                $"{ENTER}SetuResult: {stInfo.Result}")
-                            .ConfigureAwait(false);
-                    }
                 }
             }
         }

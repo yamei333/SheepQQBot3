@@ -53,7 +53,7 @@ public partial class MainWindow : Window
             }
             else
             {
-                holidayInfoJson = await HttpExtensions.HttpClient
+                holidayInfoJson = await HttpExtensions.CreateHttpClient()
                     .GetStringAsync($"https://timor.tech/api/holiday/year/{nowYear}/")
                     .ConfigureAwait(false);
                 File.WriteAllLines(holidayInfoPath, [holidayInfoJson], Encoding.UTF8);
