@@ -99,9 +99,10 @@ public static class FundExtensions
         var maxGrowth = -999.0;
         var allGrowth = 0.0;
         var isExistZero = false;
-        var sb = new StringBuilder($"=====基金播报=====\r\n");
+        var sb = new StringBuilder($"========基金播报========\r\n");
         var isDateError = false;
         var fundAlarmConfigs = fundAlarmConfigsDic.Values;
+
         fundDatas.OrderBy(each => each.Code)
             .ForEach(fundData =>
             {
@@ -122,20 +123,26 @@ public static class FundExtensions
                 if (!isExistZero && Math.Abs(growth) <= 0.1)
                     isExistZero = true;
 
-                sb.AppendLine($"{(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}({fundData.Code}) {fundData.ExpectGrowthString}");
+                //sb.AppendLine($"{(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}({fundData.Code}) {fundData.ExpectGrowthString}");
+                sb.AppendLine($"{fundData.Code}|{fundData.ExpectGrowthString} {(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}");
             });
 
         // MEMO : 日期错误, 今日不播报基金
         if (isDateError)
             return string.Empty;
 
-        var avgGrowth = allGrowth / fundDatas.Length;
+        var fundCount = fundDatas.Length;
+        var midGrowth = fundDatas.OrderBy(each => each.ExpectGrowth).Skip(fundCount / 2 - 1).First().ExpectGrowth;
+        // MEMO : 中位平均值
+        var avgGrowth = allGrowth / fundCount;
+        // MEMO : 中位平均值
+        var midAvgGrowth = (avgGrowth + midGrowth) / 2;
 
         // MEMO : 添加怪话总结
-        sb.AppendLine("================");
+        sb.AppendLine("=======================");
         switch (true)
         {
-            case true when maxGrowth > 1.5 && avgGrowth > 1:
+            case true when midAvgGrowth > 1:
                 sb.AppendLine(new[]
                 {
                     "红枫!",
@@ -147,9 +154,15 @@ public static class FundExtensions
                     "今天我就是恐惧魔王?",
                     "我贪婪成功?",
                     "立即买入, 我又是专家了",
+                    "上涨的恐惧!",
+                    "今天要把昨天失去的全部拿回来",
+                    "震荡期就赚震荡的钱",
+                    "资金都跑了, 今天也就反抽一下",
+                    "尾盘涨的你头晕目眩!",
+                    "我就是亚洲t王",
                 }.Random());
                 break;
-            case true when maxGrowth > 1.5 && avgGrowth is >= 0 and <= 1:
+            case true when midAvgGrowth is >= 0.2 and <= 1:
                 sb.AppendLine(new[]
                 {
                     "迷你吃",
@@ -160,9 +173,32 @@ public static class FundExtensions
                     "吃这点不够塞牙缝的",
                     "我大贪特贪",
                     "我抄底成功?",
+                    "大A就是你的提款机",
+                    "牛回速归",
+                    "蜗牛也是牛",
                 }.Random());
                 break;
-            case true when maxGrowth < 1.5 && avgGrowth < 0.5:
+            case true when midAvgGrowth is > -0.2 and < 0.2:
+                sb.AppendLine(new[]
+                {
+                    "半吃半吐, 等于没吃",
+                    "开始了, 都演起来了",
+                    "演了一天, 你们不累吗",
+                    "过了一天±0, 稳中向好",
+                    "今日+0, 又是超越87%的人的一天",
+                    "今天有人演戏, 我不说是谁",
+                    "演了一天好累喔",
+                    "演, 使劲演",
+                    "又度过了虚无的一天",
+                    "都可以演",
+                    "演了一天就这???",
+                    "今天有上涨的恐惧吗?",
+                    "要的就是这种无风险的感觉",
+                    "股票之道在于人弃我取",
+                    "相信今天是大奇迹日",
+                }.Random());
+                break;
+            case true when midAvgGrowth is >= -1 and <= -0.2:
                 sb.AppendLine(new[]
                 {
                     "小绿",
@@ -171,41 +207,46 @@ public static class FundExtensions
                     "1个点也叫跌? 是技术性调整",
                     "不慌, 拿住就是赢",
                     "绿一点好上车",
-                    "不要怕, 技术性回调",
                     "别人恐惧我加仓, 别人小亏我破产",
+                    "这玩意有一天不是全绿的吗",
+                    "低位怕个鸟",
+                    "今天的流出都是明天的追高",
+                    "站在青铜仰望钻石",
+                    "起视四境, 而空头又至矣",
+                    "做好人, 买好股, 得好报",
+                    "是时候团结起来让外资看看我们的力量!",
+                    "明天有上涨的恐惧吗?",
+                    "不跌还就不进了",
+                    "把钱当欢乐豆玩了",
+                    "我觉得现在是黎明前的黑暗",
                 }.Random());
                 break;
-            case true when avgGrowth is >= -0.5 and <= 0.5:
+            case true when midAvgGrowth < -1:
                 sb.AppendLine(new[]
                 {
-                    "半吃半吐, 等于没吃",
-                    "开始了, 都演起来了",
-                    "演了一天, 你们不累吗",
-                    "过了一天±0, 稳中向好",
-                    "今日+0, 又是超越87%的人的一天",
-                }.Random());
-                break;
-            case true when avgGrowth < 0:
-                sb.AppendLine(new[]
-                {
-                    "绿光",
+                    "一片绿光!",
                     "不要怕, 是技术性调整",
                     "绿疯了",
                     "表面上绿了, 抄底就是现在",
                     "我恐惧成功?",
                     "这不梭一把?",
                     "现在就是抄底的时候!",
-                }.Random());
-                break;
-            case true when isExistZero:
-                sb.AppendLine(new[]
-                {
-                    "今天有人演戏, 我不说是谁",
-                    "演了一天好累喔",
-                    "演, 使劲演",
-                    "又度过了虚无的一天",
-                    "都可以演",
-                    "演了一天就这???",
+                    "这是倒车接人的信号!",
+                    "持仓的至暗时刻",
+                    "今日割五万, 明日割十万",
+                    "散户之力有限, 空头之欲无厌",
+                    "经典大面夹小肉",
+                    "大A诈骗市场",
+                    "大家一起下地狱",
+                    "相信牛市, 会有救的",
+                    "保卫大盘!",
+                    "明天阳上影, 后天反包",
+                    "老乡别走, 在V了",
+                    "回到家, 煮了点面吃, 没有放盐",
+                    "都是外资搞得鬼",
+                    "空头没吃饭吗? 就这!",
+                    "满屏绿色",
+                    "爱是一道光",
                 }.Random());
                 break;
         }

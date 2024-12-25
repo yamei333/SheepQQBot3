@@ -21,10 +21,10 @@ public static class HttpExtensions
 {
     private static readonly Regex _regGetPsKey = new(@"(?<=p_skey\=).+", RegexOptions.Multiline);
 
-    /// <summary>
-    /// Http请求通用
-    /// </summary>
-    public static readonly HttpClient HttpClient;
+    ///// <summary>
+    ///// Http请求通用
+    ///// </summary>
+    //public static readonly HttpClient HttpClient;
 
     /// <summary>
     /// QQ专用(发送json卡片消息用)
@@ -39,9 +39,18 @@ public static class HttpExtensions
     {
         //var httpClientHandler = new HttpClientHandler();
         //httpclientHandler.ServerCertificateCustomValidationCallback = (message, cert, chain, error) => true;
-        HttpClient = new HttpClient();
-        HttpClient.Timeout = TimeSpan.FromSeconds(10);
+        //HttpClient = new HttpClient();
+        //HttpClient.Timeout = TimeSpan.FromSeconds(15);
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
+    }
+
+    public static HttpClient CreateHttpClient(int timeout = 10000, int connectTimeout = 3000)
+    {
+        var socketsHttpHandler = new SocketsHttpHandler();
+        socketsHttpHandler.ConnectTimeout = TimeSpan.FromMilliseconds(connectTimeout);
+        var httpClient = new HttpClient();
+        httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
+        return httpClient;
     }
 
     /// <summary>
@@ -82,7 +91,8 @@ public static class HttpExtensions
     {
         try
         {
-            var data = await HttpClient.GetFromJsonAsync<T>(url, JsonExtensions.DefaultJsonOptions)
+            var httpClient = CreateHttpClient();
+            var data = await httpClient.GetFromJsonAsync<T>(url, JsonExtensions.DefaultJsonOptions)
                 .ConfigureAwait(false);
             return new HttpResponse<T>(HttpResponseResult.Successed, data);
         }
@@ -128,7 +138,8 @@ public static class HttpExtensions
             : new StringContent(content, Encoding.UTF8, mediaType);
         try
         {
-            return HttpClient.Send(httpRequestMessage);
+            var httpClient = CreateHttpClient();
+            return httpClient.Send(httpRequestMessage);
         }
         catch (TaskCanceledException)
         {
@@ -145,7 +156,8 @@ public static class HttpExtensions
     {
         try
         {
-            return await HttpClient.GetAsync(url).ConfigureAwait(false);
+            var httpClient = CreateHttpClient();
+            return await httpClient.GetAsync(url).ConfigureAwait(false);
         }
         catch (TaskCanceledException)
         {
@@ -162,7 +174,8 @@ public static class HttpExtensions
     {
         try
         {
-            return HttpClient.GetAsync(url).Result;
+            var httpClient = CreateHttpClient();
+            return httpClient.GetAsync(url).Result;
         }
         catch (TaskCanceledException)
         {

@@ -88,4 +88,10 @@ public class ParamData
 
     [JsonPropertyName("jumpUrl")]
     public string JumpUrl { get; set; }
+
+    [JsonPropertyName("iconUrl")]
+    public string IconUrl { get; set; }
+
+    [JsonPropertyName("webUrl")]
+    public string WebUrl { get; set; }
 }

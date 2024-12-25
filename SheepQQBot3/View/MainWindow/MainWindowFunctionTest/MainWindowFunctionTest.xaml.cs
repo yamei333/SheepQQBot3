@@ -1,8 +1,8 @@
-﻿using SheepQQBot3.Model;
+﻿using System.Collections.Generic;
 using SheepQQBot3.Model.Extension;
-using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using SheepQQBot3.Model;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -66,12 +66,14 @@ public partial class MainWindowFunctionTest : UserControl
             };
             await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
 
+            //// MEMO : markdown发送测试
             //var sendMessages = new List<GroupForwardMessage>
             //{
             //    new("测试2", 252961222, CQCode.MarkDown("### 测试徐州鸡\\n- 鸡群1\\n- 鸡群2\\n- 鸡群3")),
             //};
 
-            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages, 15, data =>
+            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
+            //    "title", ["content"], "summary", "prompt", 15, data =>
             //{
             //    if (data is { IsSuccessed: false, RetCode: 1200 })
             //    {
@@ -89,6 +91,9 @@ public partial class MainWindowFunctionTest : UserControl
             //    }
             //}).ConfigureAwait(false);
 
+            //var miniAppJson = await Vm.BotServer.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
+            //    "https://ragnarokonline.gungho.jp/gameguide/system/expand-item/images/glacier/map01_armor.png",
+            //    "https://www.bilibili.com/video/BV1GJ411x7h7/").ConfigureAwait(false);
             //await Vm.BotServer.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
             //    .ConfigureAwait(false);
             //await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(

@@ -57,13 +57,19 @@ public class FundData
     public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
 
     /// <summary>
+    /// 净值估算(涨跌幅)(彩色格式化)
+    /// </summary>
+    [JsonIgnore]
+    public string ExpectGrowthColorString => FormatGrowth(ExpectGrowth, "\ud83d\udd3a", "\ud83d\udfe2");
+
+    /// <summary>
     /// 更新时间(格式化)
     /// </summary>
     [JsonIgnore]
     public DateTime UpdateDate => FormatDate(UpdateDateSource);
 
-    private static string FormatGrowth(float growthValue) =>
-        $"{(growthValue < 0 ? "－" : "＋")}{Math.Abs(growthValue):0.00}";
+    private static string FormatGrowth(float growthValue, string plusString = null, string minusString = null) =>
+        $"{(growthValue < 0 ? plusString ?? "－" : minusString ?? "＋")}{Math.Abs(growthValue):0.00}";
 
     private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
 
