@@ -1,8 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
+using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
-using SheepQQBot3.Model;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
