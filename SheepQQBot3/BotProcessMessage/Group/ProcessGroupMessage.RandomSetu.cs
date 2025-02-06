@@ -1065,7 +1065,9 @@ public static partial class ProcessGroupMessage
                             if (getSuccessed)
                                 return (setuInfo, fileName);
                         }
-                        else if (setuInfo.Result == SetuResult.NoSearchResult)
+                        // MEMO : 0.14.8.8 任意错误都移出搜索队列
+                        //else if (setuInfo.Result == SetuResult.NoSearchResult)
+                        else
                         {
                             var setuType = setuInfo.SetuType.ToString();
                             if (!checkImageOnly)
