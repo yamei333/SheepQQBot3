@@ -40,11 +40,8 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\[CQ:image.+?\]")]
     public static partial Regex CQImage();
 
-    [GeneratedRegex(@"(?<=url\=).+?(?=,)")]
+    [GeneratedRegex(@"(?<=image,.+?)https://multimedia.+?(?=[,\]])")]
     public static partial Regex CQImageUrl();
-
-    [GeneratedRegex(@"(?<=image,file\=).+?(?=\])")]
-    public static partial Regex CQFormattedImageUrl();
 
     [GeneratedRegex(@"""echo"":""(.+?)""")]
     public static partial Regex CQAPI_GetEcho();

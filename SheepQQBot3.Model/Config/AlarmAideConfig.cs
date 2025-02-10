@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Concurrent;
-using MessagePack;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -8,7 +8,7 @@ namespace SheepQQBot3.Model.Config;
 /// 直播提醒配置
 /// </summary>
 [MessagePackObject]
-public class AlarmAideConfig : NotifyPropertyChangedConfigBase
+public partial class AlarmAideConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 闹钟名称

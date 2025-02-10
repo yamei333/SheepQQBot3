@@ -1,8 +1,8 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Concurrent;
 using System.ComponentModel;
 using System.Text.Json.Serialization;
-using MessagePack;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -11,9 +11,10 @@ namespace SheepQQBot3.Model.Config;
 /// </summary>
 [Serializable]
 [MessagePackObject]
-public class RepeaterKillerConfig : INotifyPropertyChanged
+public partial class RepeaterKillerConfig : INotifyPropertyChanged
 {
-    [field: IgnoreMember, JsonIgnore]
+    [field: IgnoreMember]
+    [field: JsonIgnore]
     public event PropertyChangedEventHandler PropertyChanged;
 
     protected void OnPropertyChanged(string propertyName)

@@ -1,12 +1,11 @@
-﻿using System;
-using MessagePack;
+﻿using MessagePack;
+using System;
 
 namespace SheepQQBot3.Model;
 
 /// <summary>
 /// 配置类基类
 /// </summary>
-[MessagePackObject]
 public abstract class NotifyPropertyChangedConfigBase : NotifyPropertyChangedBase
 {
     /// <summary>
@@ -16,7 +15,7 @@ public abstract class NotifyPropertyChangedConfigBase : NotifyPropertyChangedBas
     public Guid Id { get; set; }
 
     [Key(nameof(_isActive))]
-    private bool _isActive;
+    protected bool _isActive;
 
     /// <summary>
     /// 是否启用

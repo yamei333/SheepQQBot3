@@ -7,7 +7,6 @@ public static class CQCode
 {
     private static Regex _regCQImage = RegexGenerator.CQImage();
     private static Regex _regCQImageUrl = RegexGenerator.CQImageUrl();
-    private static Regex _regCQFormattedImageUrl = RegexGenerator.CQFormattedImageUrl();
 
     public static string At(long targetId)
         => $"[CQ:at,qq={targetId}]";
@@ -61,11 +60,7 @@ public static class CQCode
 
     public static string GetImageUrl(string message)
     {
-        var formattedUrlMatch = _regCQFormattedImageUrl.Match(message);
-        if (formattedUrlMatch.Success)
-            return formattedUrlMatch.Value;
-
         var cqImageUrl = _regCQImageUrl.Match(message).Value;
-        return cqImageUrl.Replace("&amp;", "&").Replace("multimedia.nt.qq.com.cn", "gchat.qpic.cn");
+        return cqImageUrl.Replace("&amp;", "&");
     }
 }

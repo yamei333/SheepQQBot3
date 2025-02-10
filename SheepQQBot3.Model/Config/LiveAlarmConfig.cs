@@ -9,7 +9,7 @@ namespace SheepQQBot3.Model.Config;
 /// 直播提醒配置
 /// </summary>
 [MessagePackObject]
-public class LiveAlarmConfig : NotifyPropertyChangedConfigBase
+public partial class LiveAlarmConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 直播房间号

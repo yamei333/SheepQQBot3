@@ -1,14 +1,14 @@
-﻿using System.ComponentModel;
+﻿using MessagePack;
+using System.ComponentModel;
 using System.Text.Json.Serialization;
-using MessagePack;
 
 namespace SheepQQBot3.Model;
 
-[MessagePackObject]
 public abstract class NotifyPropertyChangedBase : INotifyPropertyChanged
 {
     /// <inheritdoc/>
-    [field: IgnoreMember, JsonIgnore]
+    [field: IgnoreMember]
+    [field: JsonIgnore]
     public event PropertyChangedEventHandler PropertyChanged;
 
     /// <summary>

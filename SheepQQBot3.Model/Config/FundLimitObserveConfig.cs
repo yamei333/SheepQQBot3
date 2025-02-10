@@ -10,7 +10,7 @@ namespace SheepQQBot3.Model.Config;
 /// 基金阈值观测配置
 /// </summary>
 [MessagePackObject]
-public class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
+public partial class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 阈值观测名称

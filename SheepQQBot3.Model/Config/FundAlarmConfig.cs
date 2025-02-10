@@ -1,6 +1,6 @@
-﻿using System;
+﻿using MessagePack;
+using System;
 using System.Collections.Concurrent;
-using MessagePack;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -8,7 +8,7 @@ namespace SheepQQBot3.Model.Config;
 /// 基金播报配置
 /// </summary>
 [MessagePackObject]
-public class FundAlarmConfig : NotifyPropertyChangedConfigBase
+public partial class FundAlarmConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 播报名称
