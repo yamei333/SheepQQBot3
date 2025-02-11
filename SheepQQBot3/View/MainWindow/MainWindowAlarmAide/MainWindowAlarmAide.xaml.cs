@@ -165,16 +165,7 @@ public partial class MainWindowAlarmAide : UserControl
     {
         var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.MWindow, sender, DialogMode.Add);
         if (addAlarmAideTextDialog.ShowDialog() == true)
-        {
-            var addAlarmAideText = addAlarmAideTextDialog.AlarmText;
-            var alarmTexts = _vm.SelectedAlarmAideConfig.AlarmTexts;
-            var newAlarmAideTextId = alarmTexts.GetSequence();
-            var newAlarmAideText = new KeyValuePair<int, string>(newAlarmAideTextId, addAlarmAideText);
-            _vm.SelectedAlarmAideConfig.AlarmTexts = _vm.SelectedAlarmAideConfig.AlarmTexts
-                .CopyAdd(newAlarmAideTextId, addAlarmAideText);
-            _vm.SelectedAlarmText = newAlarmAideText;
-            ConfigExtensions.SaveConfig(AlarmAideTextList);
-        }
+            _vm.OnAddAlarmAideTest(addAlarmAideTextDialog.AlarmText, AlarmAideTextList);
     }
 
     /// <summary>

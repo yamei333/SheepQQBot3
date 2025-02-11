@@ -26,11 +26,13 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
         <Grid.Resources>
-            <Style x:Key="HeaderTextBlockStyle" TargetType="TextBlock">
+            <Style x:Key="HeaderTextBlockStyle"
+                   TargetType="TextBlock">
                 <Setter Property="Padding" Value="3,2,0,0" />
             </Style>
         </Grid.Resources>
-        <TextBlock Style="{StaticResource HeaderTextBlockStyle}" Text="内容：" />
+        <TextBlock Style="{StaticResource HeaderTextBlockStyle}"
+                   Text="内容：" />
         <TextBox x:Name="TxtContent"
                  Grid.Row="0"
                  Grid.Column="1"

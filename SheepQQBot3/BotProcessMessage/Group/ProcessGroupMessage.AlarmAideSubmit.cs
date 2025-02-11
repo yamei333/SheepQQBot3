@@ -10,6 +10,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using SheepQQBot3.Model.Enums;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -91,7 +92,13 @@ public static partial class ProcessGroupMessage
             else
             {
                 // MEMO : 添加闹钟助手内容
-                alarmTexts.TryAdd(alarmTexts.GetSequence(), alarmMessage);
+                var selectedSetConfig = Vm.SelectedSetConfig;
+                // MEMO : 当前选中的配置与目标一致时调用画面的追加方法
+                if (selectedSetConfig.TargetType == BotConfigTargetType.Group && selectedSetConfig.TargetId == groupId)
+                    Vm.MainWindowAlarmAideViewModel.OnAddAlarmAideTest(alarmMessage);
+                else
+                    alarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(alarmTexts.GetSequence(), alarmMessage);
+
                 // MEMO : 发送反馈
                 await BotServer.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
                 {

@@ -1,5 +1,8 @@
-﻿using System.Collections.Generic;
+﻿using Masuit.Tools;
+using SheepQQBot3.Extensions;
 using SheepQQBot3.Model.Config;
+using System.Collections.Generic;
+using System.Windows.Controls;
 
 namespace SheepQQBot3.View;
 
@@ -76,5 +79,20 @@ public partial class MainWindowAlarmAideViewModel : MainWindowViewModelBase
             _isSingleSelectedAlarmAideText = value;
             OnPropertyChanged(nameof(IsSingleSelectedAlarmAideText));
         }
+    }
+
+    /// <summary>
+    /// 闹钟助手内容列表-新增
+    /// </summary>
+    /// <param name="newAlarmText">新增的提醒内容</param>
+    /// <param name="focusControl">设置焦点的控件</param>
+    internal void OnAddAlarmAideTest(string newAlarmText, Control focusControl = null)
+    {
+        var alarmTexts = SelectedAlarmAideConfig.AlarmTexts;
+        var newAlarmAideTextId = alarmTexts.GetSequence();
+        var newAlarmAideText = new KeyValuePair<int, string>(newAlarmAideTextId, newAlarmText);
+        SelectedAlarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(newAlarmAideTextId, newAlarmText);
+        SelectedAlarmText = newAlarmAideText;
+        ConfigExtensions.SaveConfig(focusControl);
     }
 }
