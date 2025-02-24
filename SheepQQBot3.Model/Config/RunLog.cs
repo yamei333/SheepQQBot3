@@ -1,7 +1,7 @@
-﻿using Masuit.Tools.Systems;
-using SheepQQBot3.Model.Enums;
-using System;
+﻿using System;
 using System.Text.Json.Serialization;
+using Masuit.Tools.Systems;
+using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -61,6 +61,7 @@ public class RunLog
             LogMessageType.GroupRevokeMessage => DefaultColor,
             LogMessageType.GroupPoke => DefaultColor,
             LogMessageType.System_Info => DefaultColor,
+            LogMessageType.BotBackground_Info => DefaultColor,
             LogMessageType.AlarmAide => DefaultColor,
             LogMessageType.FundHelper => DefaultColor,
             LogMessageType.LiveAlarm => DefaultColor,
@@ -100,6 +101,17 @@ public class RunLog_SystemInfo : RunLog
     public RunLog_SystemInfo(string content)
         : base(LogMessageType.System_Info, BotConfigTargetType.Common, content)
     { }
+}
+
+/// <inheritdoc />
+public class RunLog_BotBackgroundInfo : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_BotBackgroundInfo(string content)
+        : base(LogMessageType.BotBackground_Info, BotConfigTargetType.Background, content)
+    {
+        SenderId = "NapCat";
+    }
 }
 
 /// <inheritdoc />

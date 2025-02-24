@@ -1,7 +1,4 @@
-﻿using CommonLibrary;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model.Config;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -11,6 +8,9 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
+using CommonLibrary;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.Config;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -20,11 +20,11 @@ namespace SheepQQBot3.View;
 /// </summary>
 public partial class NapCatWindow : Window
 {
-    private readonly Regex _logLvReg = new(@"\[.+?(?<logLv>INFO|ERROR|DEBUG).+?\]", RegexOptions.IgnoreCase);
+    private readonly Regex _logLvReg = new(@"\[.+?(?<logLv>WARN|INFO|ERROR|DEBUG).+?\]", RegexOptions.IgnoreCase);
 
     private readonly Regex _logLoginQQReg = new Regex(@"(?<=正在快速登录\s+)\d+");
     private readonly Regex _logWebUiUrlReg = new Regex(@"(?<=\[NapCat\] \[WebUi\] WebUi User Panel Url: ).+", RegexOptions.IgnoreCase);
-    private readonly Regex _logNapCatCoreVerReg = new Regex("(?<=NapCat.Core Version: ).+", RegexOptions.IgnoreCase);
+    private readonly Regex _logNapCatCoreVerReg = new Regex(@"(?<=NapCat\.Core Version: ).+", RegexOptions.IgnoreCase);
 
     public NapCatWindow()
     {
@@ -72,9 +72,7 @@ public partial class NapCatWindow : Window
         };
         napCat.Start();
         Vm.AddRunLog(new RunLog_SystemInfo("NapCat 已启动"));
-        var isLoginQQChecked = false;
-        var isWebUiUrlChecked = false;
-        var isNapCatCoreVerChecked = false;
+        var needRegChecked = true;
         await Task.Run(() =>
         {
             while (!napCat.StandardOutput.EndOfStream)
@@ -83,49 +81,32 @@ public partial class NapCatWindow : Window
                 if (string.IsNullOrEmpty(line))
                     continue;
 
-                var result = _logLvReg.Replace(line!, "${logLv}");
-                if (!isLoginQQChecked)
-                {
-                    var match = _logLoginQQReg.Match(result);
-                    if (match.Success)
-                    {
-                        Vm.AddRunLog(new RunLog_SystemInfo($"登录QQ {match.Value}"));
-                        isLoginQQChecked = true;
-                    }
-
-                    goto LogProcess;
-                }
-
-                if (!isWebUiUrlChecked)
-                {
-                    var match = _logWebUiUrlReg.Match(result);
-                    if (match.Success)
-                    {
-                        Vm.AddRunLog(new RunLog_SystemInfo($"NapCat WebUi: {match.Value}"));
-                        isWebUiUrlChecked = true;
-                    }
-
-                    goto LogProcess;
-                }
-
-                if (!isNapCatCoreVerChecked)
+                var result = _logLvReg.Replace(line!, "[${logLv}]");
+                if (needRegChecked)
                 {
                     var match = _logNapCatCoreVerReg.Match(result);
                     if (match.Success)
-                    {
-                        Vm.AddRunLog(new RunLog_SystemInfo($"NapCat Core Ver: {match.Value}"));
-                        isNapCatCoreVerChecked = true;
-                    }
+                        Vm.AddRunLog(new RunLog_BotBackgroundInfo($"NapCat Core Ver: {match.Value}"));
 
-                    goto LogProcess;
+                    match = _logLoginQQReg.Match(result);
+                    if (match.Success)
+                        Vm.AddRunLog(new RunLog_BotBackgroundInfo($"登录QQ: {match.Value}"));
+
+                    match = _logWebUiUrlReg.Match(result);
+                    if (match.Success)
+                    {
+                        Vm.AddRunLog(new RunLog_BotBackgroundInfo($"NapCat WebUI: {match.Value}"));
+                        needRegChecked = false;
+                    }
                 }
 
-            LogProcess:
                 Brush color;
-                if (result.Contains("[WARNING]", StringComparison.OrdinalIgnoreCase))
+                if (result.Contains("[WARN]", StringComparison.OrdinalIgnoreCase))
                     color = Brushes.DarkGoldenrod;
                 else if (result.Contains("[ERROR]", StringComparison.OrdinalIgnoreCase))
                     color = Brushes.DarkRed;
+                else if (result.Contains("[DEBUG]", StringComparison.OrdinalIgnoreCase))
+                    color = Brushes.DarkGray;
                 else
                     color = Brushes.DarkGreen;
 

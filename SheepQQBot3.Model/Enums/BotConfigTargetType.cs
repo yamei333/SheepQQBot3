@@ -13,7 +13,7 @@ public enum BotConfigTargetType
     /// <summary>
     /// 系统
     /// </summary>
-    [Display(Name = "系统消息")]
+    [Display(Name = "系统")]
     Common = 0,
 
     /// <summary>
@@ -27,6 +27,12 @@ public enum BotConfigTargetType
     /// </summary>
     [Display(Name = "私聊消息")]
     Private = 2,
+
+    /// <summary>
+    /// 后台
+    /// </summary>
+    [Display(Name = "Bot后台")]
+    Background = 3,
 }
 
 public static class TargetTypeExtensions

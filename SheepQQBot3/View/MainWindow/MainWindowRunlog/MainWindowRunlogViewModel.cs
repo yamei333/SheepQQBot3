@@ -1,7 +1,7 @@
-﻿using Masuit.Tools.Systems;
-using SheepQQBot3.Model.Config;
-using System;
+﻿using System;
 using System.Collections.Generic;
+using Masuit.Tools.Systems;
+using SheepQQBot3.Model.Config;
 using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
 namespace SheepQQBot3.View;
@@ -18,6 +18,7 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
     }
 
     private List<RunLog> _runLogs;
+
     public List<RunLog> RunLogs
     {
         get => _runLogs;
@@ -31,9 +32,10 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
         }
     }
 
-    public IEnumerable<RunLogMessage> RunLogMessages { get; set; }
+    public List<RunLogMessage> RunLogMessages { get; set; }
 
     private RunLog _selectedRunLog;
+
     public RunLog SelectedRunLog
     {
         get => _selectedRunLog;
@@ -52,7 +54,7 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
         }
     }
 
-    private static IEnumerable<RunLogMessage> ProcessRunLog2LogMessage(RunLog runLog)
+    private static List<RunLogMessage> ProcessRunLog2LogMessage(RunLog runLog)
     {
         var result = new List<RunLogMessage>
         {
@@ -65,6 +67,9 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
             case LogMessageType.System_Error:
             case LogMessageType.System_Warning:
                 result.Add(new RunLogMessage($"来源: {runLog.SenderId}"));
+                break;
+            case LogMessageType.BotBackground_Info:
+                result.Add(new RunLogMessage($"来源: NapCat"));
                 break;
             case LogMessageType.MetaData:
                 result.Add(new RunLogMessage($"来源: {runLog.SenderId}"));

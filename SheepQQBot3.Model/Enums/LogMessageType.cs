@@ -25,6 +25,12 @@ public enum LogMessageType
     System_Warning,
 
     /// <summary>
+    /// QQBot后台日志_信息
+    /// </summary>
+    [Display(Name = "Bot后台")]
+    BotBackground_Info,
+
+    /// <summary>
     /// 元事件类型
     /// </summary>
     [Display(Name = "元事件")]

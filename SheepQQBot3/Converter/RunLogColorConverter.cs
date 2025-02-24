@@ -23,6 +23,7 @@ public class RunLogColorConverter : IValueConverter
             case LogMessageType.System_Warning:
             case LogMessageType.BlockedByServer:
                 return Brushes.OrangeRed;
+            case LogMessageType.BotBackground_Info:
             case LogMessageType.MetaData:
             case LogMessageType.AlarmAide:
             case LogMessageType.FundHelper:
