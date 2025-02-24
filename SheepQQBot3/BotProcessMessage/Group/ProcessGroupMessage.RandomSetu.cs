@@ -1011,7 +1011,7 @@ public static partial class ProcessGroupMessage
 
                 async void RunAction(ClientReceiveData clientReceiveData)
                 {
-                    if (clientReceiveData?.IsSuccessed != false)
+                    if (clientReceiveData?.IsSuccessed == true)
                         return;
 
                     // MEMO : 消息被风控, 发送文字消息

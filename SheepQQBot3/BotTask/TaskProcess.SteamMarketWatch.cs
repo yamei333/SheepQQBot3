@@ -32,7 +32,7 @@ public static partial class TaskProcess
                 {
                     var dateNowSeconds = DateTime.Now.GetTotalSeconds();
                     var lastUpdateSteamMarketStatusSeconds = WebApiProcess.LastUpdateSteamMarketStatusDate.GetTotalSeconds();
-                    if (dateNowSeconds - lastUpdateSteamMarketStatusSeconds > 600)
+                    if (dateNowSeconds - lastUpdateSteamMarketStatusSeconds > 1800)
                     {
                         const string errorMessage = "[Steam市场监控]出现问题!请检查!";
                         //await Api.SendPrivateMessageAsync(AdminId, errorMessage).ConfigureAwait(false);

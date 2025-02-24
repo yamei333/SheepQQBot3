@@ -383,6 +383,7 @@ public static partial class SetuExtensions
         var temp = url
             .Replace(Pximg, PixivReverseProxy)
             .Replace(PximgRe, PixivReverseProxy)
+            .Replace("sex.nyan.run",PixivReverseProxy)
             .Replace("img-original", "c/540x540_70/img-master");
         //.Replace("img-original", "img-master");
         var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
