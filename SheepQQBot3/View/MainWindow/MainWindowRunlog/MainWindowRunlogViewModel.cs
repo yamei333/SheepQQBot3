@@ -1,7 +1,7 @@
-﻿using System;
-using System.Collections.Generic;
-using Masuit.Tools.Systems;
+﻿using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
+using System;
+using System.Collections.Generic;
 using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
 namespace SheepQQBot3.View;

@@ -14,8 +14,10 @@ public static class CQCode
     public static string AtAll()
         => $"[CQ:at,qq=all]";
 
-    public static string Image(string filePath)
-        => $"[CQ:image,file={filePath}]";
+    public static string Image(string filePath, bool isBiaoQing = false, string summary = "")
+        => $"[CQ:image,file={filePath}"
+            + $"{(isBiaoQing ? ",sub_type=1" : string.Empty)}"
+            + $"{(!string.IsNullOrEmpty(summary) ? $",summary={summary}" : string.Empty)}]";
 
     public static string Reply(long targetId, int messageId)
         => $"[CQ:reply,qq={targetId},id={messageId}]";
