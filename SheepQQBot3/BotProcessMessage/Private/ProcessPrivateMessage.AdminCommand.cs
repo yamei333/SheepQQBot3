@@ -40,79 +40,36 @@ public static partial class ProcessPrivateMessage
         switch (contentMessage.ToUpper())
         {
             case COMMAND_ADMIN_IP:
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取IP...").ConfigureAwait(false);
-                var ip = await HttpExtensions.GetIPAddressAsync().ConfigureAwait(false);
-                if (string.IsNullOrEmpty(ip))
+                if (!RouterExtension.TryGetIPAddress(out var ipResult))
                 {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, "IP取得失败!").ConfigureAwait(false);
+                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
                     return true;
                 }
 
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ip}").ConfigureAwait(false);
+                if (string.IsNullOrEmpty(ipResult))
+                {
+                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
+                    return true;
+                }
+
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
-                //await BotServer.SendPrivateMessageAsync(senderId, groupId, "正在获取has剩余流量...").ConfigureAwait(false);
-                //var hasMessage = string.Empty;
-                //var url = AppSettingExtensions.Get("has").Base64Decrypt();
-                //var today = DateTime.Today;
-                //if (!string.IsNullOrEmpty(url))
-                //{
-                //    if (!string.IsNullOrEmpty(hasMessage))
-                //        hasMessage += ENTER;
+                if (!RouterExtension.TryGetClashInfo(out var clashInfoResult, out var remainBand, out var resetDayOfMonth, out var expireDate))
+                {
+                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Clash情报取得失败!{ENTER}原因: {clashInfoResult}").ConfigureAwait(false);
+                    return true;
+                }
 
-                //    var httpResponseString = await HttpExtensions.HttpClient.GetStringAsync(url).ConfigureAwait(false);
-                //    hasMessage += ": ";
-                //    if (string.IsNullOrEmpty(httpResponseString))
-                //    {
-                //        var jmsHongkong = httpResponseString;
-                //        var resetDayOfMonth = jmsHongkong.ResetDayOfMonth;
-                //        var nextMonth = today.AddMonths(1);
-                //        var nextResetDate = today.Day >= resetDayOfMonth
-                //            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
-                //            : new DateTime(today.Year, today.Month, resetDayOfMonth);
-                //        var avgEveryday = (nextResetDate - today).TotalDays + 1;
-                //        var remainBand = (jmsHongkong.MonthLimit - jmsHongkong.Counter) / 1024.0 / 1024.0 / 1024.0;
-                //        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}"
-                //            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
-                //    }
-                //    else
-                //    {
-                //        hasMessage += "取得失败";
-                //    }
-
-                //    hasMessage += ENTER;
-                //}
-
-                //url = ConfigurationManager.AppSettings["has_los"];
-                //if (!string.IsNullOrEmpty(url))
-                //{
-                //    if (!string.IsNullOrEmpty(hasMessage))
-                //        hasMessage += ENTER;
-
-                //    var httpResponse = await HttpExtensions.GetFromJsonAsync<BWH_LosAngeles>(url).ConfigureAwait(false);
-                //    hasMessage += "BWH(LOS): ";
-                //    if (httpResponse.Result == HttpResponseResult.Successed)
-                //    {
-                //        var bwhLosAngeles = httpResponse.Data;
-                //        var resetDayOfMonth = bwhLosAngeles.ResetDayOfMonth;
-                //        var nextMonth = today.AddMonths(1);
-                //        var nextResetDate = today.Day >= resetDayOfMonth
-                //            ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
-                //            : new DateTime(today.Year, today.Month, resetDayOfMonth);
-                //        var avgEveryday = (nextResetDate - today).TotalDays + 1;
-                //        var remainBand = (bwhLosAngeles.MonthLimit - bwhLosAngeles.Counter) / 1024.0 / 1024.0 / 1024.0;
-                //        hasMessage += $"剩余-{remainBand:0.0}G, 更新日-{resetDayOfMonth}, 地址-{bwhLosAngeles.HostName}({bwhLosAngeles.IPAddresses.First()})"
-                //            + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0}G";
-                //    }
-                //    else
-                //    {
-                //        hasMessage += "取得失败";
-                //    }
-
-                //    hasMessage += ENTER;
-                //}
-
-                //await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
+                var today = DateTime.Today;
+                var nextMonth = today.AddMonths(1);
+                var nextResetDate = today.Day >= resetDayOfMonth
+                    ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
+                    : new DateTime(today.Year, today.Month, resetDayOfMonth);
+                var avgEveryday = (nextResetDate - today).TotalDays + 1;
+                var hasMessage = $"流量剩余: {remainBand:0.0} GB{ENTER}重置日期: {resetDayOfMonth}号{ENTER}到期时间: {expireDate.ToYYYYMMDD()}"
+                    + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0} GB!";
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
                 break;
             default:
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);

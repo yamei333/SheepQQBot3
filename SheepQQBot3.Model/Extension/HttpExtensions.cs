@@ -2,7 +2,6 @@
 using Masuit.Tools;
 using Masuit.Tools.Media;
 using SheepQQBot3.Model.JsonCard;
-using SheepQQBot3.Model.Model.GetIP;
 using SixLabors.ImageSharp;
 using System;
 using System.Net;
@@ -238,17 +237,5 @@ public static class HttpExtensions
         }
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
-    }
-
-    /// <summary>
-    /// 取得外网IP
-    /// </summary>
-    public static async Task<string> GetIPAddressAsync()
-    {
-        var response = await GetFromJsonAsync<Ipify>("https://api.ipify.org/?format=json").ConfigureAwait(false);
-        if (!string.IsNullOrEmpty(response.ErrorMessage))
-            return null;
-
-        return response.Data.IP;
     }
 }

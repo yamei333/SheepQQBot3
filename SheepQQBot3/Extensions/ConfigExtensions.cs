@@ -143,7 +143,7 @@ public static class ConfigExtensions
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
                 });
-                File.WriteAllText("config.json", jsonText, Encoding.UTF8);
+                File.WriteAllText(ConfigPath, jsonText, Encoding.UTF8);
             }
             catch (Exception e)
             {
