@@ -10,9 +10,9 @@ namespace SheepQQBot3.Model.Extension
 {
     public static class RouterExtension
     {
-        private static Regex _regGetClashRemainBand = new Regex(@"(?<=\- )[\d\. GB\|].+$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static Regex _regGetClashTrafficReset = new Regex(@"(?<=\- Traffic Reset：)\d+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static Regex _regGetClashExpireDate = new Regex(@"(?<=\- 🏳️‍🌈 Expire Date：)[\d/]+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly Regex _regGetClashRemainBand = new(@"(?<=\- )[\d\. G\|].+$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly Regex _regGetClashTrafficReset = new(@"(?<=\- Traffic Reset：)\d+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly Regex _regGetClashExpireDate = new(@"(?<=\- 🏳️‍🌈 Expire Date：)[\d/]+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
         private const string SSH_CONFIG = "ssh.json";
 
         /// <summary>
@@ -75,7 +75,7 @@ namespace SheepQQBot3.Model.Extension
                     return false;
                 }
 
-                var bands = matchResult.Value.Replace("GB", "").Split('|');
+                var bands = matchResult.Value.Replace("G", "").Split('|');
                 var useBand = double.Parse(bands[0]);
                 var maxBand = double.Parse(bands[1]);
                 remainBand = maxBand - useBand;
