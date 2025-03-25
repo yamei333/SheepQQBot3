@@ -18,8 +18,7 @@ partial class MainWindowViewModel
     /// </summary>
     public void InitBotFunctions()
     {
-        var cancelToken = new CancellationTokenSource();
-        CancelToken = cancelToken;
+        CancelToken = new CancellationTokenSource();
         StartTask(TaskProcess.AlarmAides);
         StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
@@ -33,13 +32,6 @@ partial class MainWindowViewModel
     /// </summary>
     /// <param name="method"></param>
     private void StartTask(Action method)
-        => Task.Factory.StartNew(method, CancelToken.Token);
-
-    /// <summary>
-    /// 开始一个Bot的Task
-    /// </summary>
-    /// <param name="method"></param>
-    private void StartTask(Func<Task> method)
         => Task.Factory.StartNew(method, CancelToken.Token);
 
     /// <summary>
