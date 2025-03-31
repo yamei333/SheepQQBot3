@@ -55,20 +55,16 @@ public static partial class ProcessPrivateMessage
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
                 break;
             case COMMAND_ADMIN_HAS:
-                if (!RouterExtension.TryGetClashInfo(out var clashInfoResult, out var remainBand, out var resetDayOfMonth, out var expireDate))
+                if (!RouterExtension.TryGetClashInfo(out var clashInfoResult, out var remainBand, out var resetDaysLeft, out var expireDate))
                 {
                     await BotServer.SendPrivateMessageAsync(senderId, groupId, $"Clash情报取得失败!{ENTER}原因: {clashInfoResult}").ConfigureAwait(false);
                     return true;
                 }
 
                 var today = DateTime.Today;
-                var nextMonth = today.AddMonths(1);
-                var nextResetDate = today.Day >= resetDayOfMonth
-                    ? new DateTime(nextMonth.Year, nextMonth.Month, resetDayOfMonth)
-                    : new DateTime(today.Year, today.Month, resetDayOfMonth);
-                var avgEveryday = (nextResetDate - today).TotalDays + 1;
-                var hasMessage = $"流量剩余: {remainBand:0.0} GB{ENTER}重置日期: {resetDayOfMonth}号{ENTER}到期时间: {expireDate.ToYYYYMMDD()}"
-                    + $"{ENTER}每天还能高强度使用 {remainBand / avgEveryday:0.0} GB!";
+                var nextResetDate = today.AddDays(resetDaysLeft);
+                var hasMessage = $"流量剩余: {remainBand:0.0} GB{ENTER}重置日期: {nextResetDate.Day}号{ENTER}到期时间: {expireDate.ToYYYYMMDD()}"
+                    + $"{ENTER}每天还能高强度使用 {remainBand / (resetDaysLeft + 1):0.0} GB!";
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
                 break;
             default:

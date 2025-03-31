@@ -47,10 +47,10 @@ namespace SheepQQBot3.Model.Extension
         /// <summary>
         /// 取得MerlinClash的信息(剩余流量, 刷新日, 到期日)
         /// </summary>
-        public static bool TryGetClashInfo(out string result, out double remainBand, out int resetDayOfMonth, out DateTime expireDate)
+        public static bool TryGetClashInfo(out string result, out double remainBand, out int resetDaysLeft, out DateTime expireDate)
         {
             remainBand = 0;
-            resetDayOfMonth = 0;
+            resetDaysLeft = 0;
             expireDate = DateTime.MinValue;
             result = string.Empty;
             if (!File.Exists(SSH_CONFIG))
@@ -86,7 +86,7 @@ namespace SheepQQBot3.Model.Extension
                     return false;
                 }
 
-                resetDayOfMonth = int.Parse(matchResult.Value);
+                resetDaysLeft = int.Parse(matchResult.Value);
                 matchResult = _regGetClashExpireDate.Match(clashBandText);
                 if (!matchResult.Success)
                 {
