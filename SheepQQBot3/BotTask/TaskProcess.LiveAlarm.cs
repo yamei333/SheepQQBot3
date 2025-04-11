@@ -87,10 +87,16 @@ public static partial class TaskProcess
 
             var httpResponseData = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
             var jsonText = _regLiveRoomData.Match(httpResponseData).Value;
+            if (string.IsNullOrEmpty(jsonText))
+            {
+                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 用户ID[{liveUserId}], 用户不存在"));
+                return;
+            }
+
             var liveRoomData = jsonText.JsonDeserialize<LiveRoomData>();
             if (liveRoomData == null)
             {
-                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 用户ID[{liveUserId}]"));
+                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 用户ID[{liveUserId}], Json解析结果为null"));
                 return;
             }
 

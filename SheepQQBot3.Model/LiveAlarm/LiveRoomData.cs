@@ -14,7 +14,7 @@ public class LiveRoomData
     /// 直播间标题
     /// </summary>
     [JsonPropertyName("room_id")]
-    public string RoomId { get; set; }
+    public int RoomId { get; set; }
 
     /// <summary>
     /// 直播状态
