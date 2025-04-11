@@ -2,34 +2,19 @@
 
 namespace SheepQQBot3.Model.LiveAlarm;
 
-public class LiveRoomResponse
-{
-    [JsonPropertyName("data")]
-    public LiveRoomData Data { get; set; }
-}
-
 public class LiveRoomData
-{
-    [JsonPropertyName("room_info")]
-    public RoomInfo RoomInfo { get; set; }
-
-    [JsonPropertyName("anchor_info")]
-    public AnchorInfo AnchorInfo { get; set; }
-}
-
-public enum LiveStatusType
-{
-    End = 0,
-    Live = 1,
-}
-
-public class RoomInfo
 {
     /// <summary>
     /// 直播间标题
     /// </summary>
     [JsonPropertyName("title")]
     public string Title { get; set; }
+
+    /// <summary>
+    /// 直播间标题
+    /// </summary>
+    [JsonPropertyName("room_id")]
+    public string RoomId { get; set; }
 
     /// <summary>
     /// 直播状态
@@ -41,15 +26,15 @@ public class RoomInfo
     public LiveStatusType LiveStatusType => (LiveStatusType)LiveStatus;
 
     /// <summary>
-    /// 直播开始时间
+    /// 直播开播时间
     /// </summary>
-    [JsonPropertyName("live_start_time")]
+    [JsonPropertyName("live_time")]
     public long LiveStartTime { get; set; }
 
     /// <summary>
     /// 直播封面
     /// </summary>
-    [JsonPropertyName("cover")]
+    [JsonPropertyName("cover_from_user")]
     public string Cover { get; set; }
 
     /// <summary>
@@ -59,26 +44,8 @@ public class RoomInfo
     public string KeyFrame { get; set; }
 
     /// <summary>
-    /// 直播分区名称-子名称
+    /// 用户名
     /// </summary>
-    [JsonPropertyName("area_name")]
-    public string AreaName { get; set; }
-
-    /// <summary>
-    /// 直播分区名称
-    /// </summary>
-    [JsonPropertyName("parent_area_name")]
-    public string ParentAreaName { get; set; }
-}
-
-public class AnchorInfo
-{
-    [JsonPropertyName("base_info")]
-    public UserBaseInfo UserBaseInfo { get; set; }
-}
-
-public class UserBaseInfo
-{
     [JsonPropertyName("uname")]
     public string Name { get; set; }
 
@@ -88,3 +55,28 @@ public class UserBaseInfo
     [JsonPropertyName("face")]
     public string Face { get; set; }
 }
+
+public enum LiveStatusType
+{
+    End = 0,
+    Live = 1,
+    Live2 = 2,
+}
+
+//public class AnchorInfo
+//{
+//    [JsonPropertyName("base_info")]
+//    public UserBaseInfo UserBaseInfo { get; set; }
+//}
+
+//public class UserBaseInfo
+//{
+//    [JsonPropertyName("uname")]
+//    public string Name { get; set; }
+
+//    /// <summary>
+//    /// 用户头像
+//    /// </summary>
+//    [JsonPropertyName("face")]
+//    public string Face { get; set; }
+//}

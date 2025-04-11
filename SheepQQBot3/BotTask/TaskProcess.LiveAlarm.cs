@@ -9,6 +9,7 @@ using System;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.Extensions.LogExtensions;
@@ -18,6 +19,8 @@ namespace SheepQQBot3.BotTask;
 
 public static partial class TaskProcess
 {
+    private static readonly Regex _regLiveRoomData = new(@"{\""title"".+?}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
     /// <summary>
     /// 直播提醒
     /// </summary>
@@ -75,43 +78,37 @@ public static partial class TaskProcess
             if (!forceSend && setConfig.LiveAlarmedList.ContainsKey(configId))
                 return;
 
-            var liveRoomId = liveAlarmConfig.LiveRoomId;
-            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}");
+            var liveUserId = liveAlarmConfig.LiveRoomId;
+            var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids?uids[]={liveUserId}");
             httpRequestMessage.Headers.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/118.0.0.0 Safari/537.36");
             var httpResponse = await HttpExtensions.CreateHttpClient().SendAsync(httpRequestMessage).ConfigureAwait(false);
-            //var httpResponse = await HttpExtensions.GetFromJsonAsync<LiveRoomResponse>(
-            //        $"https://api.live.bilibili.com/xlive/web-room/v1/index/getInfoByRoom?room_id={liveRoomId}")
-            //    .ConfigureAwait(false);
             if (httpResponse.StatusCode != HttpStatusCode.OK)
                 return;
 
             var httpResponseData = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
-            var liveRoomResponse = httpResponseData.JsonDeserialize<LiveRoomResponse>();
-            if (liveRoomResponse == null)
-                return;
-
-            var liveRoomResponseData = liveRoomResponse.Data;
-            if (liveRoomResponseData == null)
+            var jsonText = _regLiveRoomData.Match(httpResponseData).Value;
+            var liveRoomData = jsonText.JsonDeserialize<LiveRoomData>();
+            if (liveRoomData == null)
             {
-                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 房间号[{liveRoomId}]"));
+                AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 用户ID[{liveUserId}]"));
                 return;
             }
 
-            if (liveRoomResponseData.RoomInfo.LiveStatusType != LiveStatusType.Live)
+            if (liveRoomData.LiveStatusType != LiveStatusType.Live)
                 return;
 
-            var startTime = liveRoomResponse.Data.RoomInfo.LiveStartTime.ToDateTime();
+            var startTime = liveRoomData.LiveStartTime.ToDateTime();
+            // MEMO : 开播超过90秒, 则不再提醒
             if ((DateTime.Now - startTime).TotalSeconds > 90)
                 return;
 
-            var roomInfo = liveRoomResponseData.RoomInfo;
-            var userBaseInfo = liveRoomResponseData.AnchorInfo.UserBaseInfo;
+            // MEMO : 0.14.9.4 修复直播提醒
             var sendMessage = CQCode.CustomMusic(
-                $"https://live.bilibili.com/{liveRoomId}",
-                $"https://live.bilibili.com/{liveRoomId}",
-                $"[{userBaseInfo.Name}]正在直播!",
-                userBaseInfo.Face,
-                $"{roomInfo.Title}");
+                $"https://live.bilibili.com/{liveRoomData.RoomId}",
+                $"https://live.bilibili.com/{liveRoomData.RoomId}",
+                $"{liveRoomData.Name}正在直播!",
+                $"{liveRoomData.Face}",
+                $"{liveRoomData.Title}");
             //var sendMessage = $"[{liveRoomResponseData.AnchorInfo.UserBaseInfo.Name}]正在直播-{liveRoomResponseData.RoomInfo.Title}"
             //        + $"{ENTER}赶紧加入观看吧: https://live.bilibili.com/{liveRoomId}";
 
@@ -120,11 +117,11 @@ public static partial class TaskProcess
             {
                 case BotConfigTargetType.Group:
                     await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
-                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveRoomId.ToString(), targetId, sendMessage));
+                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Group, liveUserId.ToString(), targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
                     await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
-                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveRoomId.ToString(), targetId, sendMessage));
+                    AddRunLog(new RunLog_LiveAlarm(BotConfigTargetType.Private, liveUserId.ToString(), targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:
                 default:
