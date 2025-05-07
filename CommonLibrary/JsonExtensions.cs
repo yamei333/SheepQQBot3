@@ -29,12 +29,12 @@ public static class JsonExtensions
     /// <summary>
     /// JsonDeserialize, 带try写入日志
     /// </summary>
-    public static string JsonSerialize<T>(this object obj, JsonSerializerOptions jsonSerializerOptions)
+    public static string JsonSerialize<T>(this object obj, JsonSerializerOptions jsonSerializerOptions = null)
     {
         string result;
         try
         {
-            result = JsonSerializer.Serialize(obj, jsonSerializerOptions);
+            result = JsonSerializer.Serialize(obj, jsonSerializerOptions ?? DefaultJsonOptions);
         }
         catch (Exception e)
         {

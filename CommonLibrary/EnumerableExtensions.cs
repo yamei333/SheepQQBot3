@@ -1383,4 +1383,30 @@ public static class EnumerableExtensions
 
         return new List<T>(enumerable);
     }
+
+    /// <summary>
+    /// 一直尝试某些操作, 直到满足条件或超过最大尝试次数后停止
+    /// </summary>
+    /// <param name="condition">条件</param>
+    /// <param name="process">操作</param>
+    /// <param name="processResult">process处理结果</param>
+    /// <param name="maxTryTimes">最大尝试次数</param>
+    /// <returns>是否超过最大尝试次数, 是否正常结束(process返回true)</returns>
+    [DebuggerStepThrough]
+    public static bool TryUntil(Func<bool> condition, Func<int, bool> process, out bool processResult, int maxTryTimes = 10)
+    {
+        var tryTimes = 0;
+        processResult = true;
+        while (tryTimes < maxTryTimes && !condition())
+        {
+            tryTimes++;
+            if (!process(tryTimes))
+            {
+                processResult = false;
+                return false;
+            }
+        }
+
+        return tryTimes < maxTryTimes;
+    }
 }

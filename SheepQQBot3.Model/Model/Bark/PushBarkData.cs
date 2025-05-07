@@ -53,4 +53,23 @@ public class PushBarkData
     [JsonPropertyName("autoCopy")]
     [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
     public int? IsAutoCopy { get; set; }
+
+    /// <summary>
+    /// 设置响铃名称
+    /// </summary>
+    [JsonPropertyName("sound")]
+    [JsonIgnore(Condition = JsonIgnoreCondition.WhenWritingNull)]
+    public string Sound { get; set; }
+
+    /// <summary>
+    /// 是否持续响铃30秒
+    /// </summary>
+    [JsonPropertyName("call")]
+    public int? IsCall { get; set; }
+
+    /// <summary>
+    /// 群组名称
+    /// </summary>
+    [JsonPropertyName("group")]
+    public string Group { get; set; }
 }

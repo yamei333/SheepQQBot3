@@ -1,6 +1,5 @@
 ﻿using CommonLibrary;
 using SheepQQBot3.Model.Enums;
-using System;
 using System.Net.Http;
 using System.Text;
 using System.Text.Json;
@@ -14,6 +13,7 @@ namespace SheepQQBot3.Model.Extension;
 public static class PushExtensions
 {
     public const string TITLE = "哈莉提醒";
+    private const string BOT_NAME = "助手哈莉";
 
     /// <summary>
     /// 使用Bark给手机推送
@@ -26,16 +26,22 @@ public static class PushExtensions
     /// <param name="isArchive">是否存档</param>
     /// <param name="isCopy">是否允许复制</param>
     /// <param name="isAutoCopy">是否自动复制</param>
+    /// <param name="sound">自定义声音文件名</param>
+    /// <param name="isCall">是否持续响铃30秒</param>
+    /// <param name="group">群组名称</param>
     /// <returns>推送结果</returns>
     public static async Task<PushBarkResultType> PushBarkMessageAsync(
         string key,
         string message,
         string title,
         string icon = "",
-        string url = "",
+        string url = null,
         bool isArchive = true,
         bool isCopy = false,
-        bool isAutoCopy = false)
+        bool isAutoCopy = false,
+        string sound = null,
+        bool isCall = false,
+        string group = null)
     {
         try
         {
@@ -50,10 +56,13 @@ public static class PushExtensions
                 Icon = string.IsNullOrEmpty(icon)
                     ? $"https://q.qlogo.cn/headimg_dl?dst_uin={AppSettingExtensions.Get("selfId", "10000")}&spec=100"
                     : icon,
-                LinkUrl = string.IsNullOrEmpty(url) ? null : url,
+                LinkUrl = url,
                 IsArchive = isArchive ? 1 : 0,
                 IsCopy = isCopy ? 1 : 0,
                 IsAutoCopy = isAutoCopy ? 1 : 0,
+                Sound = sound,
+                IsCall = isCall ? 1 : 0,
+                Group = group,
             };
             var stringContent = new StringContent(
                 JsonSerializer.Serialize(pushBarkData, JsonExtensions.GetJsonOptions(false)),
@@ -65,7 +74,7 @@ public static class PushExtensions
                 ? PushBarkResultType.Success
                 : PushBarkResultType.Failed;
         }
-        catch (Exception)
+        catch
         {
             // MEMO : 发起推送失败
             return PushBarkResultType.PushError;
@@ -77,13 +86,8 @@ public static class PushExtensions
     /// </summary>
     /// <param name="message">内容</param>
     /// <param name="title">标题</param>
+    /// <param name="group">分组名称</param>
     /// <returns>推送结果</returns>
-    public static async Task<PushBarkResultType> PushBarkMessageAsync(
-        string message,
-        string title)
-    {
-        return await PushBarkMessageAsync(
-            AppSettingExtensions.Get("barkkey"),
-            message, title);
-    }
+    public static Task<PushBarkResultType> PushBarkMessageAsync(string message, string title, string group = BOT_NAME)
+        => PushBarkMessageAsync(AppSettingExtensions.Get("barkkey"), message, title, group: group);
 }

@@ -54,7 +54,7 @@ public static partial class TaskProcess
                         if (customAlarm.IsBark)
                         {
                             await PushExtensions.PushBarkMessageAsync(
-                                userConfigs[targetId][UserConfigType.BarkKey], alarmMessage, PushExtensions.TITLE)
+                                userConfigs[targetId][UserConfigType.BarkKey], alarmMessage, PushExtensions.TITLE, group: BOT_NAME)
                                 .ConfigureAwait(false);
                         }
                         else
