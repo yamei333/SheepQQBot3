@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="WatsonWebsocket" Version="4.1.3" />
+    <PackageReference Include="WatsonWebsocket" Version="4.1.5" />
   </ItemGroup>
 
   <ItemGroup>
