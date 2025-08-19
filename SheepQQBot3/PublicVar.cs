@@ -111,7 +111,7 @@ public static class PublicVar
     /// <summary>
     /// 已记录的群消息(用于防止撤回)
     /// </summary>
-    public static ConcurrentDictionary<int, GroupMessage> SavedGroupMessages { get; set; } = new ConcurrentDictionary<int, GroupMessage>();
+    public static ConcurrentDictionary<int, GroupMessage> SavedGroupMessages { get; set; } = [];
 
     /// <summary>
     /// Jieba数据库

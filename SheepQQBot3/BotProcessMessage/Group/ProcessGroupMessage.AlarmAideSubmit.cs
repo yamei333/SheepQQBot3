@@ -94,18 +94,18 @@ public static partial class ProcessGroupMessage
                 // MEMO : 添加闹钟助手内容
                 var selectedSetConfig = Vm.SelectedSetConfig;
                 // MEMO : 当前选中的配置与目标一致时调用画面的追加方法
-                if (selectedSetConfig.TargetType == BotConfigTargetType.Group && selectedSetConfig.TargetId == groupId)
+                if (selectedSetConfig is { TargetType: BotConfigTargetType.Group } && selectedSetConfig.TargetId == groupId)
                     Vm.MainWindowAlarmAideViewModel.OnAddAlarmAideTest(alarmMessage);
                 else
                     alarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(alarmTexts.GetSequence(), alarmMessage);
 
                 // MEMO : 发送反馈
-                await BotServer.SendGroupForwardMessageAsync(groupId, new GroupForwardMessage[]
-                {
+                await BotServer.SendGroupForwardMessageAsync(groupId,
+                [
                     //new(groupMessage.MessageId),
-                    new(BOT_NAME, BotId, alarmMessage),
-                    new(BOT_NAME, BotId, "投稿成功!!"),
-                }).ConfigureAwait(false);
+                    new GroupForwardMessage(BOT_NAME, BotId, alarmMessage),
+                    new GroupForwardMessage(BOT_NAME, BotId, "投稿成功!!"),
+                ]).ConfigureAwait(false);
                 ConfigExtensions.SaveConfig();
                 return true;
             }
