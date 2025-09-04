@@ -33,6 +33,8 @@ public static class CommonExtensions
 
     public static string ToDayHHMM(this DateTime input) => input.ToString($"d{(input.DayOfWeek == DayOfWeek.Saturday ? "(六)" : string.Empty)}, HH:mm");
 
+    public static string ToYYYYMDDDDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d dddd HH:mm:ss");
+
     public static string ToYYYYMMDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-dd HH:mm:ss");
 
     public static string ToYYYYMMDDHHMM(this DateTime input) => input.ToString("yyyy-M-dd HH:mm");
@@ -40,6 +42,8 @@ public static class CommonExtensions
     public static string ToYYYYMDD(this DateTime input) => input.ToString("yyyy-M-dd");
 
     public static string ToYYYYMMDD(this DateTime input) => input.ToString("yyyy-MM-dd");
+
+    public static string ToYYYYMM(this DateTime input) => input.ToString("yyyy-MM");
 
     /// <summary>
     /// <see cref="DayOfWeek"/>转换为数字
@@ -87,9 +91,9 @@ public static class CommonExtensions
         var isBark = Replace($@"\{KH_LEFT}-bark{KH_RIGHT}", string.Empty);
         Replace($@"\{KH_LEFT}at-self{KH_RIGHT}", $"[CQ:at,qq={senderId}]");
         Replace($@"\{KH_LEFT}at-(?<str>[0-9]+?){KH_RIGHT}", "[CQ:at,qq=${str}]");
-        Replace($@"\{KH_LEFT}image-(?<str>.+?){KH_RIGHT}", "[CQ:image,File=${str}]");
-        Replace($@"\{KH_LEFT}play-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play,File=${str}]");
-        Replace($@"{KH_LEFT}play3-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play3,File=${str}]");
+        Replace($@"\{KH_LEFT}image-(?<str>.+?){KH_RIGHT}", "[CQ:image,file=${str}]");
+        Replace($@"\{KH_LEFT}play-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play,file=${str}]");
+        Replace($@"{KH_LEFT}play3-(?<str>.+?){KH_RIGHT}", "[CQ:ym_play3,file=${str}]");
         return (result, isNoAt, isNoReply, isLoop, isBark);
 
         bool Replace(string pattern, string replacement)

@@ -1,4 +1,5 @@
-﻿using System;
+﻿using SheepQQBot3.Model.Extension;
+using System;
 
 namespace SheepQQBot3.Model;
 
@@ -33,7 +34,7 @@ public class GroupMessage
         Anonymous = receiveData.Anonymous;
         Font = receiveData.Font;
         GroupId = receiveData.GroupId;
-        Message = receiveData.Message;
+        Message = CQCode.ReplaceCQImage(receiveData.Message);
         MessageId = receiveData.MessageId;
         Sender = receiveData.Sender;
     }

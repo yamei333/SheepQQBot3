@@ -1,9 +1,11 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Microsoft.VisualBasic.FileIO;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using System;
 using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
@@ -18,6 +20,9 @@ namespace SheepQQBot3.Extensions;
 public static class ConfigExtensions
 {
     public static readonly string ConfigPath = "config.json";
+    public static readonly string AIConfigPath = "aiConfig.json";
+    public static readonly string AICharacterPath = "aiCharacter.json";
+    public static readonly string AIDataPath = "aiData.json";
     private static readonly object _syncLock = new();
 
     /// <summary>
@@ -94,10 +99,68 @@ public static class ConfigExtensions
         }
     }
 
+    /// <summary>
+    /// 加载AI配置
+    /// </summary>
+    public static void LoadAIConfig()
+    {
+        if (!File.Exists(AIConfigPath))
+        {
+            PublicVar.AIConfig = new AIConfig();
+            return;
+        }
+
+        var jsonText = File.ReadAllText(AIConfigPath, Encoding.UTF8);
+        PublicVar.AIConfig = jsonText.JsonDeserialize<AIConfig>();
+    }
+
+    /// <summary>
+    /// 加载AI数据
+    /// </summary>
+    public static void LoadAIData()
+    {
+        if (!File.Exists(AIDataPath))
+        {
+            PublicVar.AIData = new AIData();
+            return;
+        }
+
+        var jsonText = File.ReadAllText(AIDataPath, Encoding.UTF8);
+        PublicVar.AIData = jsonText.JsonDeserialize<AIData>();
+    }
+
+    /// <summary>
+    /// 加载AI角色设定
+    /// </summary>
+    public static void LoadAIAICharacter()
+    {
+        if (!File.Exists(AICharacterPath))
+        {
+            PublicVar.AICharacter = new AICharacter
+            {
+                SystemInstruction = new Dictionary<string, string>
+                {
+                    {"人设", string.Empty},
+                    {"回复设定", string.Empty},
+                    {"接收消息格式", string.Empty},
+                    {"回复消息格式", string.Empty},
+                    {"表情包功能", string.Empty},
+                    {"好感度系统", string.Empty},
+                    {"群聊知识", string.Empty},
+                    {"其他信息", string.Empty},
+                },
+            };
+            return;
+        }
+
+        var jsonText = File.ReadAllText(AICharacterPath, Encoding.UTF8);
+        PublicVar.AICharacter = jsonText.JsonDeserialize<AICharacter>();
+    }
+
     private static void WriteJsonConfig(string jsonText)
     {
         var backFilePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\SheepQQBot3ConfigBak.txt";
-        File.WriteAllLines(backFilePath, new[] { jsonText }, Encoding.UTF8);
+        File.WriteAllLines(backFilePath, [jsonText], Encoding.UTF8);
     }
 
     /// <summary>
@@ -143,7 +206,10 @@ public static class ConfigExtensions
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
                 });
-                File.WriteAllText(ConfigPath, jsonText, Encoding.UTF8);
+                if (!string.IsNullOrEmpty(jsonText))
+                    File.WriteAllText(ConfigPath, jsonText, Encoding.UTF8);
+                else
+                    throw new ArgumentNullException(nameof(jsonText));
             }
             catch (Exception e)
             {
@@ -158,5 +224,65 @@ public static class ConfigExtensions
         //MessagePackSerializer.Serialize(fileStream, jsonConfig);
 
         focusControl?.Focus();
+    }
+
+    /// <summary>
+    /// 保存配置
+    /// </summary>
+    public static void SaveAIConfig()
+    {
+        if (!Vm.IsLoadComplete)
+            return;
+
+        lock (_syncLock)
+        {
+            try
+            {
+                File.WriteAllText(AIConfigPath, PublicVar.AIConfig.ToJsonIgnoreNull(), Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 保存AI存储数据
+    /// </summary>
+    public static void SaveAIData()
+    {
+        lock (_syncLock)
+        {
+            try
+            {
+                File.WriteAllText(AIDataPath, PublicVar.AIData.ToJsonIgnoreNull(), Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
+    }
+
+    /// <summary>
+    /// 保存配置
+    /// </summary>
+    public static void SaveAICharacter()
+    {
+        lock (_syncLock)
+        {
+            try
+            {
+                File.WriteAllText(AICharacterPath, PublicVar.AICharacter.ToJsonIgnoreNull(), Encoding.UTF8);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
     }
 }

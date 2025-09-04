@@ -37,11 +37,17 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
     public static partial Regex CmdStart();
 
-    [GeneratedRegex(@"\[CQ:image.+?\]")]
+    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?),.+,url=(?<url>.+?),.+?\]")]
     public static partial Regex CQImage();
 
     [GeneratedRegex(@"(?<=image,.+?)https://multimedia.+?(?=[,\]])")]
-    public static partial Regex CQImageUrl();
+    public static partial Regex CQImageUrl_multimedia();
+
+    [GeneratedRegex(@"(?<=image,.+?)https://gchat.+?(?=[,\]])")]
+    public static partial Regex CQImageUrl_gchat();
+
+    [GeneratedRegex(@"\[CQ:(?<tag>[a-z]+),.+?\]")]
+    public static partial Regex CQDeleteCQCode();
 
     [GeneratedRegex(@"""echo"":""(.+?)""")]
     public static partial Regex CQAPI_GetEcho();

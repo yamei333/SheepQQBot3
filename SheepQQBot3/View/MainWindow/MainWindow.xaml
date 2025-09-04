@@ -196,6 +196,12 @@
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowLiveAlarm />
                     </TabItem>
+                    <TabItem Header="AI设定"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding Path=SelectedSetBotFunctions[5].IsUsed,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowAiConfig />
+                    </TabItem>
                 </TabControl>
             </Grid>
         </TabItem>

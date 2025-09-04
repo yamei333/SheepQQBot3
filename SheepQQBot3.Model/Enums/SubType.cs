@@ -104,7 +104,12 @@ public enum SubType
     Leave,
 
     /// <summary>
-    /// 输入状态
+    /// 输入状态更新
     /// </summary>
     Input_Status,
+
+    /// <summary>
+    /// 资料点赞
+    /// </summary>
+    Profile_Like,
 }

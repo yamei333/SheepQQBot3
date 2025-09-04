@@ -46,15 +46,16 @@ public static class TargetTypeExtensions
     {
         return botConfigTargetType switch
         {
-            BotConfigTargetType.Common => new HashSet<BotFunctionType>
-            {
+            BotConfigTargetType.Common =>
+            [
                 BotFunctionType.Common_AlarmAide,
                 BotFunctionType.Common_BlackList,
                 BotFunctionType.Common_CustomAlarm,
                 BotFunctionType.Common_KeyConfig,
-            },
-            BotConfigTargetType.Group => new HashSet<BotFunctionType>
-            {
+                BotFunctionType.Common_AiConfig,
+            ],
+            BotConfigTargetType.Group =>
+            [
                 BotFunctionType.Common_AlarmAide,
                 BotFunctionType.Common_AlarmAideSubmit,
                 BotFunctionType.Common_CustomAlarm,
@@ -66,11 +67,12 @@ public static class TargetTypeExtensions
                 BotFunctionType.Group_SearchImageSource,
                 BotFunctionType.Group_Roll,
                 BotFunctionType.Group_ChatSummary,
-            },
-            BotConfigTargetType.Private => new HashSet<BotFunctionType>
-            {
+                BotFunctionType.Group_AiAide,
+            ],
+            BotConfigTargetType.Private =>
+            [
                 BotFunctionType.Private_AdminConfig,
-            },
+            ],
             _ => null,
         };
     }

@@ -77,4 +77,10 @@ public enum LogMessageType
     /// </summary>
     [Display(Name = "账号风控")]
     BlockedByServer,
+
+    /// <summary>
+    /// AI请求
+    /// </summary>
+    [Display(Name = "AI请求")]
+    AIRequest,
 }

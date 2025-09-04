@@ -3,6 +3,8 @@ using SheepQQBot3.Model.Extension;
 using System.Collections.Generic;
 using System.Windows;
 using System.Windows.Controls;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.JsonCard;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -59,12 +61,12 @@ public partial class MainWindowFunctionTest : UserControl
 
         if (long.TryParse(TxtTestSendJsonMessage1_GroupId.Text, out var groupId))
         {
-            var sendMessages = new List<GroupForwardMessage>
-            {
-                new("测试1", 10000, "test1"),
-                new("测试2", 10000, "test2"),
-            };
-            await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
+            //var sendMessages = new List<GroupForwardMessage>
+            //{
+            //    new("测试1", 10000, "test1"),
+            //    new("测试2", 10000, "test2"),
+            //};
+            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
 
             //// MEMO : markdown发送测试
             //var sendMessages = new List<GroupForwardMessage>
@@ -91,11 +93,11 @@ public partial class MainWindowFunctionTest : UserControl
             //    }
             //}).ConfigureAwait(false);
 
-            //var miniAppJson = await Vm.BotServer.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
-            //    "https://ragnarokonline.gungho.jp/gameguide/system/expand-item/images/glacier/map01_armor.png",
-            //    "https://www.bilibili.com/video/BV1GJ411x7h7/").ConfigureAwait(false);
-            //await Vm.BotServer.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
-            //    .ConfigureAwait(false);
+            var miniAppJson = await Vm.BotServer.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
+                "https://ragnarokonline.gungho.jp/gameguide/system/expand-item/images/glacier/map01_armor.png",
+                "https://www.bilibili.com/video/BV1GJ411x7h7/").ConfigureAwait(false);
+            await Vm.BotServer.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
+                .ConfigureAwait(false);
             //await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
             //    TxtTestSendJsonMessage1_Title.Text,
             //    TxtTestSendJsonMessage1_Content.Text,

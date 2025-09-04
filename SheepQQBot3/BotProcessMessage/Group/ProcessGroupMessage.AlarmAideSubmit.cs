@@ -82,6 +82,10 @@ public static partial class ProcessGroupMessage
 
         try
         {
+            // MEMO : 0.14.9.8 修复投稿内容开头有回车的问题
+            if (alarmMessage.StartsWith(ENTER))
+                alarmMessage = alarmMessage[1..];
+
             var alarmTexts = alarmAideConfig.AlarmTexts;
             if (alarmTexts.Values.Any(each => each == alarmMessage))
             {

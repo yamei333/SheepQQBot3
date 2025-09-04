@@ -201,7 +201,8 @@ public static class HttpExtensions
         if (response?.StatusCode != HttpStatusCode.OK)
             return (false, string.Empty);
 
-        var fileExtend = response.Content.Headers.ContentType?.MediaType switch
+        var mimeType = response.Content.Headers.ContentType?.MediaType;
+        var fileExtend = mimeType switch
         {
             "image/jpeg" => "jpg",
             "image/gif" => "gif",
@@ -234,6 +235,48 @@ public static class HttpExtensions
             }
 
             int GetRandom() => new[] { -1, -2, -3, 0, 1, 2, 3 }.Random();
+        }
+
+        return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
+    }
+
+    /// <summary>
+    /// http下载
+    /// </summary>
+    public static (bool Successed, string FileName) AIHttpDownloadImage(
+        string url, string path, string customTempFileName = null)
+    {
+        if (string.IsNullOrEmpty(url))
+            return (false, "[Url错误图片]");
+
+        var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
+        var response = HttpGet(url);
+        if (response?.StatusCode != HttpStatusCode.OK)
+            return (false, "[下载失败图片]");
+
+        var mimeType = response.Content.Headers.ContentType?.MediaType;
+        var fileExtend = mimeType switch
+        {
+            "image/jpeg" => "jpg",
+            "image/gif" => "gif",
+            _ => "png",
+        };
+
+        if (fileExtend == "gif")
+            return (false, "[Gif图片]");
+
+        CommonExtensions.CreatePath(path);
+        var stream = response.Content.ReadAsStream();
+        // MEMO : 超过200KB的图片不保存
+        if (stream.Length / 1024.0 > 500)
+            return (false, "[占用过大图片]");
+
+        var image = Image.Load(stream);
+        switch (fileExtend)
+        {
+            default:
+                image.SaveAsPng($"{path}/{tempFileName}.png");
+                break;
         }
 
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");

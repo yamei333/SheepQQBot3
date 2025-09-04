@@ -17,6 +17,7 @@ public class RunLogColorConverter : IValueConverter
         switch (logMessageType)
         {
             case LogMessageType.System_Info:
+            case LogMessageType.AIRequest:
                 return Brushes.DarkViolet;
             case LogMessageType.System_Error:
                 return Brushes.DarkRed;

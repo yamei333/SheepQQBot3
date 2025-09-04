@@ -160,6 +160,12 @@ partial class MainWindowViewModel
 
             StartTaskList(taskList, ChatSummaryConfig);
             void ChatSummaryConfig() => ProcessPrivateMessage.ChatSummaryConfigAsync(privateMessage);
+
+            GetSelectedCommonConfig(BotFunctionType.Common_AiConfig, config =>
+            {
+                StartTaskList(taskList, AiAide);
+                void AiAide() => ProcessPrivateMessage.AiAideAsync(privateMessage);
+            });
         }
 
         Task.WaitAll(taskList.ToArray());
@@ -168,6 +174,9 @@ partial class MainWindowViewModel
     private void OnGroupMessage(GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
+        //var messageId = groupMessage.MessageId;
+        //var message = groupMessage.Message;
+
         var setConfig = SetConfigs.Values.FirstOrDefault(each => each.TargetId == groupId);
         if (setConfig == null)
             return;
@@ -177,7 +186,7 @@ partial class MainWindowViewModel
             .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
         ConfigExtensions.SaveConfig();
 
-        //if (groupMessage.GroupId == 15873217)
+        //if (groupMessage.GroupId == PublicVar.TestGroupId)
         //{
         //    var regGetImage = new Regex(@"(?<=\[CQ:image.+url=).+(?=[,\]])");
         //    regGetImage.Matches(groupMessage.Message).ForEach(match =>
@@ -235,10 +244,10 @@ partial class MainWindowViewModel
             async void RandomSetu() => await ProcessGroupMessage.RandomSetuAsync(PublicVar.BotConfig, groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
-        {
-            StartTaskList(taskList, () => ProcessGroupMessage.RepeaterKiller(groupMessage));
-        });
+        //GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
+        //{
+        //    StartTaskList(taskList, () => ProcessGroupMessage.RepeaterKiller(groupMessage));
+        //});
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
         {
@@ -262,6 +271,13 @@ partial class MainWindowViewModel
         {
             StartTaskList(taskList, RepeatRevokeMessage);
             async void RepeatRevokeMessage() => await ProcessGroupMessage.RepeatRevokeMessageAsync(groupMessage).ConfigureAwait(false);
+        });
+
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_AiAide, config =>
+        {
+            //StartTaskList(taskList, AiAide);
+            //async void AiAide() => await ProcessGroupMessage.AiAideAsync(groupMessage).ConfigureAwait(false);
+            ProcessGroupMessage.AiAideAsync(groupMessage).ConfigureAwait(false);
         });
 
         Task.WaitAll(taskList.ToArray());

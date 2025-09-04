@@ -1,5 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
+using System.Diagnostics.CodeAnalysis;
+using System.Globalization;
 using System.Linq;
 using System.Text;
 using System.Text.RegularExpressions;
@@ -257,6 +260,46 @@ public static class MyStringExtensions
         => conditionStr.Any(each => str.EndsWith(each, stringComparison));
 
     /// <summary>
+    /// 移除开头的指定字符串
+    /// </summary>
+    /// <param name="str">对象字符串</param>
+    /// <param name="startString">查找字符串组</param>
+    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <returns>结果</returns>
+    public static string RemoveStart(
+        this string str,
+        string startString,
+        StringComparison stringComparison = StringComparison.CurrentCulture)
+    {
+        str.TryRemoveStart(startString, out var resultStr, stringComparison);
+        return resultStr;
+    }
+
+    /// <summary>
+    /// 移除开头的指定字符串(Try版本)
+    /// </summary>
+    /// <param name="str">对象字符串</param>
+    /// <param name="startString">查找字符串组</param>
+    /// <param name="resultStr">移除后的字符串</param>
+    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <returns>结果</returns>
+    public static bool TryRemoveStart(
+        this string str,
+        string startString,
+        out string resultStr,
+        StringComparison stringComparison = StringComparison.CurrentCulture)
+    {
+        if (!str.StartsWith(startString, stringComparison))
+        {
+            resultStr = str;
+            return false;
+        }
+
+        resultStr = str[startString.Length..];
+        return true;
+    }
+
+    /// <summary>
     /// 移除末尾的指定字符串
     /// </summary>
     /// <param name="str">对象字符串</param>
@@ -295,4 +338,14 @@ public static class MyStringExtensions
         resultStr = str[..^endString.Length];
         return true;
     }
+
+    /// <summary>
+    /// <see cref="String.Format(IFormatProvider, String, Object[])"/>をラップした拡張メソッドです。
+    /// <see cref="CultureInfo.CurrentUICulture"/>で実行されるので、UIに表示する文字列の場合に使用してください。
+    /// カルチャ未指定による静的解析エラーを回避することができます。
+    /// </summary>
+    /// <remarks>単純なラッパーメソッドなので単体テスト・コードカバレッジの対象から除外します。</remarks>
+    [ExcludeFromCodeCoverage]
+    [DebuggerStepThrough]
+    public static string CultureFormat(this string target, params object[] args) => string.Format(CultureInfo.CurrentUICulture, target, args);
 }

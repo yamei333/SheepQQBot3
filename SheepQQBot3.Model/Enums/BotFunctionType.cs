@@ -22,6 +22,9 @@ public enum BotFunctionType
     [Display(Name = "KEY配置")]
     Common_KeyConfig = 4,
 
+    [Display(Name = "AI配置")]
+    Common_AiConfig = 5,
+
     [Display(Name = "私聊配置")]
     Private_AdminConfig = 1000,
 
@@ -48,6 +51,9 @@ public enum BotFunctionType
 
     [Display(Name = "群聊总结")]
     Group_ChatSummary = 2008,
+
+    [Display(Name = "AI助手")]
+    Group_AiAide = 2009,
 }
 
 public static class BotFunctionTypeExtensions

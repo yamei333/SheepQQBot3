@@ -13,7 +13,8 @@
   
   <ItemGroup>
     <PackageReference Include="EntityFrameworkCore.Sqlite.NodaTime" Version="9.2.1" />
-    <PackageReference Include="Masuit.Tools.Core" Version="2025.4.6" />
+    <PackageReference Include="Google_GenerativeAI" Version="3.0.0" />
+    <PackageReference Include="Masuit.Tools.Core" Version="2025.5.0" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="MessagePackAnalyzer" Version="3.1.4">
       <PrivateAssets>all</PrivateAssets>

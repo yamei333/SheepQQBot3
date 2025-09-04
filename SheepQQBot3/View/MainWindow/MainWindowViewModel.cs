@@ -48,6 +48,10 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         IsLoadComplete = false;
         IsBarkUsed = !string.IsNullOrEmpty(AppSettingExtensions.Get("bark"));
 
+        ConfigExtensions.LoadConfig();
+        ConfigExtensions.LoadAIConfig();
+        ConfigExtensions.LoadAIData();
+        ConfigExtensions.LoadAIAICharacter();
         InitViewModel();
         AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
 
@@ -73,6 +77,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
         MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
         MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
+        MainWindowAiConfigModel = new MainWindowAiConfigModel();
     }
 
     public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -82,6 +87,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
     public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
     public MainWindowLiveAlarmViewModel MainWindowLiveAlarmViewModel { get; set; }
+    public MainWindowAiConfigModel MainWindowAiConfigModel { get; set; }
 
     public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 

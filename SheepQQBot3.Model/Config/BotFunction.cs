@@ -1,7 +1,7 @@
-﻿using System.Text.Json.Serialization;
-using Masuit.Tools.Systems;
+﻿using Masuit.Tools.Systems;
 using MessagePack;
 using SheepQQBot3.Model.Enums;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 

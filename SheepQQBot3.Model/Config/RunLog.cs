@@ -1,7 +1,8 @@
-﻿using System;
-using System.Text.Json.Serialization;
+﻿using GenerativeAI.Types;
 using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
+using System;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -10,7 +11,7 @@ namespace SheepQQBot3.Model.Config;
 /// </summary>
 public class RunLog
 {
-    private const string DefaultColor = "Black";
+    //private const string DefaultColor = "Black";
     private const string SystemSenderId = "系统";
 
     [JsonIgnore]
@@ -40,9 +41,14 @@ public class RunLog
     public string TargetId { get; set; }
 
     /// <summary>
-    /// 其他ID
+    /// 其他内容
     /// </summary>
-    public string OtherId { get; set; }
+    public string OtherContent { get; set; }
+
+    /// <summary>
+    /// AI回复
+    /// </summary>
+    public GenerateContentResponse AIResponse { get; set; }
 
     public string MessageId { get; set; }
     public string Content { get; set; }
@@ -50,26 +56,27 @@ public class RunLog
 
     private readonly DateTime _logDate;
 
-    /// <summary>
-    /// 消息颜色
-    /// </summary>
-    public string MessageColor
-        => LogMessageType switch
-        {
-            LogMessageType.MetaData => DefaultColor,
-            LogMessageType.GroupMessage => DefaultColor,
-            LogMessageType.GroupRevokeMessage => DefaultColor,
-            LogMessageType.GroupPoke => DefaultColor,
-            LogMessageType.System_Info => DefaultColor,
-            LogMessageType.BotBackground_Info => DefaultColor,
-            LogMessageType.AlarmAide => DefaultColor,
-            LogMessageType.FundHelper => DefaultColor,
-            LogMessageType.LiveAlarm => DefaultColor,
-            LogMessageType.System_Error => "Red",
-            LogMessageType.System_Warning => "Blue",
-            LogMessageType.BlockedByServer => "Blue",
-            _ => throw new ArgumentOutOfRangeException(),
-        };
+    ///// <summary>
+    ///// 消息颜色
+    ///// </summary>
+    //public string MessageColor
+    //    => LogMessageType switch
+    //    {
+    //        LogMessageType.MetaData => DefaultColor,
+    //        LogMessageType.GroupMessage => DefaultColor,
+    //        LogMessageType.GroupRevokeMessage => DefaultColor,
+    //        LogMessageType.GroupPoke => DefaultColor,
+    //        LogMessageType.System_Info => DefaultColor,
+    //        LogMessageType.BotBackground_Info => DefaultColor,
+    //        LogMessageType.AlarmAide => DefaultColor,
+    //        LogMessageType.FundHelper => DefaultColor,
+    //        LogMessageType.LiveAlarm => DefaultColor,
+    //        LogMessageType.System_Error => "Red",
+    //        LogMessageType.System_Warning => "Blue",
+    //        LogMessageType.BlockedByServer => "Blue",
+    //        LogMessageType.AIRequest => "Purple",
+    //        _ => throw new ArgumentOutOfRangeException(),
+    //    };
 
     /// <summary>
     /// 初始化
@@ -211,10 +218,10 @@ public class RunLog_FundHelper : RunLog
 public class RunLog_LiveAlarm : RunLog
 {
     /// <inheritdoc />
-    public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherId, long targetId, string content)
+    public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherContent, long targetId, string content)
         : base(LogMessageType.LiveAlarm, targetType, targetId, content)
     {
-        OtherId = otherId;
+        OtherContent = otherContent;
     }
 }
 
@@ -227,5 +234,24 @@ public class RunLog_BlockedByServer : RunLog
     public RunLog_BlockedByServer(string message)
         : base(LogMessageType.BlockedByServer, BotConfigTargetType.Common, message)
     {
+    }
+}
+
+/// <summary>
+/// 风控消息(发送被屏蔽)
+/// </summary>
+public class RunLog_AIRequest : RunLog
+{
+    /// <inheritdoc />
+    public RunLog_AIRequest(
+        long requestUserId,
+        bool isGroup,
+        string apiKey,
+        GenerateContentResponse response)
+        : base(LogMessageType.AIRequest, BotConfigTargetType.Common, $"哈基米AI请求({(isGroup ? $"群:{requestUserId}" : $"个人:{requestUserId}")})")
+    {
+        TargetId = requestUserId.ToString();
+        OperatorId = apiKey;
+        AIResponse = response;
     }
 }

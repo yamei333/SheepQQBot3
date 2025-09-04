@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.DbModel.JiebaDb;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
@@ -43,6 +44,16 @@ public static class PublicVar
     /// 系统ID
     /// </summary>
     public static readonly long SystemId = 10000;
+
+    /// <summary>
+    /// 测试QQID
+    /// </summary>
+    public static readonly long TestQQId = 205552607;
+
+    /// <summary>
+    /// 测试群号
+    /// </summary>
+    public static readonly long TestGroupId = 15873217;
 
     /// <summary>
     /// 管理员ID
@@ -90,6 +101,21 @@ public static class PublicVar
     public const string ENTER = "\r\n";
 
     /// <summary>
+    /// 最大重试次数
+    /// </summary>
+    public const int AI_MAX_RETRY_TIMES = 1;
+
+    /// <summary>
+    /// AI最短请求间隔, 群内at(30秒)
+    /// </summary>
+    public const int AI_REQUEST_INTERVAL_GROUP_PRIVATE = 30;
+
+    /// <summary>
+    /// AI最短请求间隔, 个人(20秒)
+    /// </summary>
+    public const int AI_REQUEST_INTERVAL_PRIVATE = 20;
+
+    /// <summary>
     /// <see cref="MainWindow"/>
     /// </summary>
     public static MainWindow MWindow { get; set; }
@@ -132,6 +158,36 @@ public static class PublicVar
     /// 节假日信息
     /// </summary>
     public static Dictionary<string, bool> HolidayInfo { get; set; }
+
+    /// <summary>
+    /// AIConfig
+    /// </summary>
+    public static AIConfig AIConfig { get; set; }
+
+    /// <summary>
+    /// AI数据
+    /// </summary>
+    public static AIData AIData { get; set; }
+
+    /// <summary>
+    /// AICharacter
+    /// </summary>
+    public static AICharacter AICharacter { get; set; }
+
+    /// <summary>
+    /// AI控制
+    /// </summary>
+    public static AIControl AIControl { get; set; }
+
+    /// <summary>
+    /// AI请求时间记录
+    /// </summary>
+    public static ConcurrentDictionary<string, DateTime> AILastRequestDates { get; set; } = [];
+
+    /// <summary>
+    /// AI用户信息(好感度描述等)
+    /// </summary>
+    public static ConcurrentDictionary<long, AIUserInfo> AIUserInfoDictionary { get; set; } = [];
 
     /// <summary>
     /// 初始化全局变量

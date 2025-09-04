@@ -481,11 +481,11 @@ partial class BotServer
     /// <param name="title">标题</param>
     /// <param name="content">内容</param>
     /// <param name="picUrl">图片Url</param>
-    /// <param name="webUrl">跳转网页Url</param>
+    /// <param name="jumpUrl">跳转网页Url</param>
     /// <param name="timeout">超时时间</param>
     /// <returns>小程序卡片Json</returns>
     public async Task<string> GetMiniAppJsonAsync(
-        MiniAppType miniAppType, string title, string content, string picUrl, string webUrl, double timeout = 5)
+        MiniAppType miniAppType, string title, string content, string picUrl, string jumpUrl, double timeout = 5)
     {
         var echo = Guid.NewGuid();
         await SendDataAsync("get_mini_app_ark", new ParamData
@@ -494,9 +494,8 @@ partial class BotServer
             Title = title,
             Content = content,
             PicUrl = picUrl,
-            WebUrl = webUrl,
-            JumpUrl = "Test",
-            IconUrl = QQExtensions.GetQQImageUrl(int.Parse(AppSettingExtensions.Get("selfId", "0"))),
+            JumpUrl = jumpUrl,
+            //IconUrl = QQExtensions.GetQQImageUrl(int.Parse(AppSettingExtensions.Get("selfId", "0"))),
         }, echo).ConfigureAwait(false);
 
         return GetReply(echo, jsonText =>

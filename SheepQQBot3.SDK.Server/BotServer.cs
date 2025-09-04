@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Enums;
@@ -104,7 +105,7 @@ public partial class BotServer : IDisposable
                 }
                 catch (Exception e)
                 {
-                    YameiLogExtensions.WriteLog(LogType.Error, $"ProcessReceiveData-{e.Message}\r\n{jsonText}");
+                    YameiLogExtensions.WriteLog(LogType.Error, $"_server.MessageReceived-{e.Message}\r\n{jsonText}");
                 }
             }
             else
@@ -179,7 +180,6 @@ public partial class BotServer : IDisposable
 
     private void ProcessMessage(ReceiveData receiveData)
     {
-        receiveData.Message = CQCode.ReplaceCQImage(receiveData.Message);
         switch (receiveData.MessageTargetType)
         {
             case MessageTargetType.Group:
@@ -210,6 +210,12 @@ public partial class BotServer : IDisposable
                         break;
                     case SubType.Honor:
                         // TODO : 群成员荣誉变更
+                        break;
+                    case SubType.Input_Status:
+                        // TODO : 输入状态变更
+                        break;
+                    case SubType.Profile_Like:
+                        // TODO : 资料点赞
                         break;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(receiveData.SubType), receiveData.SubType, "值不在正确范围内");
@@ -242,7 +248,7 @@ public partial class BotServer : IDisposable
         if (!Connected)
             return false;
 
-        var jsonText = JsonSerializer.Serialize(new SendData(actionType, paramData, echo == default ? null : echo.ToString()), JsonExtensions.DefaultJsonOptions);
+        var jsonText = new SendData(actionType, paramData, echo == Guid.Empty ? null : echo.ToString()).ToJsonIgnoreNull();
         await _server.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
         return true;
     }

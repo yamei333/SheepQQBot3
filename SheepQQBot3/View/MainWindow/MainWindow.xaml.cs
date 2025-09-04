@@ -3,6 +3,7 @@ using Masuit.Tools;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
@@ -35,12 +36,16 @@ public partial class MainWindow : Window
     private void MainWindow_OnInitialized(object sender, EventArgs e)
     {
         // MEMO : 界面初始化时读取配置
-        ConfigExtensions.LoadConfig();
+        //ConfigExtensions.LoadConfig();
+        //ConfigExtensions.LoadAIConfig();
+        //ConfigExtensions.LoadAIAICharacter();
         Vm.InitBotFunctions();
         MWindow = this;
 
         // MEMO : 获得节假日配置
         GetHolidayInfo();
+        // MEMO : 初始化AI设定
+        InitAIModel();
 
         async void GetHolidayInfo()
         {
@@ -68,7 +73,19 @@ public partial class MainWindow : Window
                     holidayInfo.Add(holidayInfoData.Date, holidayInfoData.Holiday);
             });
 
-            PublicVar.HolidayInfo = holidayInfo;
+            HolidayInfo = holidayInfo;
+        }
+
+        void InitAIModel()
+        {
+            if (PublicVar.AIConfig.ApiKeys?.Any() != true)
+            {
+                LogExtensions.AddRunLog(new RunLog_SystemWarning("AI配置 未配置"));
+                return;
+            }
+
+            LogExtensions.AddRunLog(new RunLog_SystemInfo("AI配置 初始化完成"));
+            PublicVar.AIControl = new AIControl(PublicVar.AIConfig, PublicVar.AICharacter);
         }
     }
 
@@ -263,7 +280,7 @@ public partial class MainWindow : Window
         {
             this.WindowStyle = WindowStyle.SingleBorderWindow;
             Width = 980;
-            Height = 482;
+            Height = 532;
             // 获取 DPI 缩放比例
             var matrix = PresentationSource.FromVisual(this)!.CompositionTarget!.TransformToDevice;
             var dpiFactor = 1 / matrix.M11;

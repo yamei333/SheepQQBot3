@@ -55,7 +55,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private static DateTime _chatSummaryRequestLastTime = DateTime.MinValue;
 
-    private static readonly Queue<string> _repeatSkipQueue = new();
+    private static readonly Queue<string> _repeatSkipQueue = [];
 
     /// <summary>
     /// 群聊总结

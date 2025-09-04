@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SheepQQBot3.Model.Enums;
+using System;
 using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Enums;
 using Yamei.Common;
 
 namespace SheepQQBot3.Model;

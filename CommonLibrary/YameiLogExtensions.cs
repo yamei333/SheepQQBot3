@@ -1,4 +1,7 @@
-﻿using System;
+﻿using GenerativeAI.Types;
+using Masuit.Tools;
+using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Text;
 
@@ -6,16 +9,17 @@ namespace CommonLibrary;
 
 public static class YameiLogExtensions
 {
+    private const string ENTER = "\r\n";
     private static readonly YameiLog yameiLog = new();
 
     public static void WriteLog(LogType logType, string logText)
         => yameiLog.WriteLog(logType, logText);
 
     public static void WriteJsonSerializeLog(Exception ex, string typeName, object obj)
-        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}\r\nType:{typeName}\r\nObject:{obj}");
+        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}{ENTER}Type:{typeName}{ENTER}Object:{obj}");
 
     public static void WriteJsonDeserializeLog(Exception ex, string typeName, string jsonText)
-        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}\r\nType:{typeName}\r\nJson:{jsonText}");
+        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}{ENTER}Type:{typeName}{ENTER}Json:{jsonText}");
 
     /// <summary>
     /// 写入错误日志
@@ -66,11 +70,30 @@ public static class YameiLogExtensions
                     LogType.Error => "×",
                     _ => "@",
                 };
-                sw.Write($"\r\n{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
+                sw.Write($"{ENTER}{dt:yyyy/MM/dd HH:mm:ss}-{typeStr} => {logText}");
                 sw.Close();
                 fs.Close();
             }
         }
+    }
+
+    public static void WriteLog(
+        string apiKey,
+        GenerateContentResponse response,
+        List<Content> thisRequestContentShortVer,
+        string aiStatusJson)
+    {
+        var usageMetadata = response.UsageMetadata!;
+        var message = $"哈基米请求: {ENTER}"
+            + $"ApiKey: {apiKey}{ENTER}"
+            + $"Token: 总量:{usageMetadata.TotalTokenCount}"
+            + $"(履历:{usageMetadata.CachedContentTokenCount}/"
+            + $"回复:{usageMetadata.PromptTokenCount}/"
+            + $"思考:{usageMetadata.ThoughtsTokenCount}){ENTER}"
+            + $"小助手状态: {aiStatusJson}{ENTER}"
+            + $"请求: {thisRequestContentShortVer.ToJsonIgnoreNull()}{ENTER}"
+            + $"回复: {response.Text}";
+        WriteLog(LogType.Info, message);
     }
 }
 

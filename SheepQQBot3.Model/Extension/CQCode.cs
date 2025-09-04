@@ -1,12 +1,12 @@
-﻿using Masuit.Tools;
-using System.Text.RegularExpressions;
+﻿using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.Model.Extension;
 
 public static class CQCode
 {
     private static Regex _regCQImage = RegexGenerator.CQImage();
-    private static Regex _regCQImageUrl = RegexGenerator.CQImageUrl();
+    private static Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
+    private static Regex _regCQImageUrl_gchat = RegexGenerator.CQImageUrl_gchat();
 
     public static string At(long targetId)
         => $"[CQ:at,qq={targetId}]";
@@ -14,8 +14,9 @@ public static class CQCode
     public static string AtAll()
         => $"[CQ:at,qq=all]";
 
-    public static string Image(string filePath, bool isBiaoQing = false, string summary = "")
-        => $"[CQ:image,file={filePath}"
+    public static string Image(string filePath, string fileName = "", bool isBiaoQing = false, string summary = "")
+        => $"[CQ:image,url={filePath}"
+            + $"{(!string.IsNullOrEmpty(fileName) ? $",file={fileName}" : string.Empty)}"
             + $"{(isBiaoQing ? ",sub_type=1" : string.Empty)}"
             + $"{(!string.IsNullOrEmpty(summary) ? $",summary={summary}" : string.Empty)}]";
 
@@ -50,11 +51,14 @@ public static class CQCode
     /// <returns></returns>
     public static string ReplaceCQImage(string message)
     {
-        var matches = _regCQImage.Matches(message);
-        matches.ForEach(match =>
+        message = _regCQImage.Replace(message, match =>
         {
-            var cqImageMessage = match.Value;
-            message = message.Replace(cqImageMessage, Image(GetImageUrl(cqImageMessage)));
+            var groupFileName = match.Groups["fileName"];
+            var fileName = groupFileName.Success ? groupFileName.Value : string.Empty;
+            var groupUrl = match.Groups["url"];
+            var url = groupUrl.Success ? groupUrl.Value : string.Empty;
+
+            return Image(url, fileName);
         });
 
         return message;
@@ -62,7 +66,20 @@ public static class CQCode
 
     public static string GetImageUrl(string message)
     {
-        var cqImageUrl = _regCQImageUrl.Match(message).Value;
-        return cqImageUrl.Replace("&amp;", "&");
+        var match = _regCQImageUrl_multimedia.Match(message);
+        if (match.Success)
+        {
+            var cqImageUrl = match.Value;
+            return cqImageUrl.Replace("&amp;", "&");
+        }
+
+        match = _regCQImageUrl_gchat.Match(message);
+        if (match.Success)
+        {
+            var cqImageUrl = match.Value;
+            return cqImageUrl.Replace("&amp;", "&").Replace("gchat.qpic.cn", "multimedia.nt.qq.com.cn");
+        }
+
+        return message;
     }
 }

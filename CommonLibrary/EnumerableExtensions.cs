@@ -832,17 +832,17 @@ public static class EnumerableExtensions
         }
     }
 
-    /// <summary>
-    /// <see cref="IEnumerable{T}"/>から<see cref="HashSet{T}"/>を作成します。
-    /// このメソッドが呼び出された段階で<see cref="IEnumerable{T}"/>に対する評価が行われます。
-    /// </summary>
-    /// <typeparam name="T">各要素の型</typeparam>
-    /// <param name="enumerable">処理を適用する<see cref="IEnumerable{T}"/>インスタンス</param>
-    /// <returns>作成されたハッシュセットを返却します。</returns>
-    public static HashSet<T> ToHashSet<T>(this IEnumerable<T> enumerable)
-    {
-        return new HashSet<T>(enumerable);
-    }
+    ///// <summary>
+    ///// <see cref="IEnumerable{T}"/>から<see cref="HashSet{T}"/>を作成します。
+    ///// このメソッドが呼び出された段階で<see cref="IEnumerable{T}"/>に対する評価が行われます。
+    ///// </summary>
+    ///// <typeparam name="T">各要素の型</typeparam>
+    ///// <param name="enumerable">処理を適用する<see cref="IEnumerable{T}"/>インスタンス</param>
+    ///// <returns>作成されたハッシュセットを返却します。</returns>
+    //public static HashSet<T> ToHashSet<T>(this IEnumerable<T> enumerable)
+    //{
+    //    return new HashSet<T>(enumerable);
+    //}
 
     /// <summary>
     /// <see cref="IEnumerable{T}"/>から<see cref="HashSet{T}"/>を作成します。
@@ -956,7 +956,7 @@ public static class EnumerableExtensions
     /// <param name="keySelector">各要素からキーを抽出する関数</param>
     /// <param name="valueSelector">各要素から値を抽出する関数</param>
     /// <returns>作成した<see cref="ConcurrentDictionary{TKey, TValue}"/></returns>
-    public static ConcurrentDictionary<TKey, TValue> ToConcurrentDictionary<TKey, TValue, TSource>
+    public static ConcurrentDictionary<TKey, TValue> ToConDictionary<TKey, TValue, TSource>
         (this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, Func<TSource, TValue> valueSelector)
         where TKey : notnull
     {
@@ -1327,7 +1327,7 @@ public static class EnumerableExtensions
         return new ConcurrentDictionary<int, TValue>(
             enumerable
                 .OrderBy(orderByFunc)
-                .ToConcurrentDictionary(each => index++, each => each.Value));
+                .ToConDictionary(_ => index++, each => each.Value));
     }
 
     /// <summary>

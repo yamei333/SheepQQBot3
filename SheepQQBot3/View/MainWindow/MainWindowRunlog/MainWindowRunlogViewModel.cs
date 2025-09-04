@@ -1,8 +1,8 @@
 ﻿using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Enums;
 using System;
 using System.Collections.Generic;
-using LogMessageType = SheepQQBot3.Model.Enums.LogMessageType;
 
 namespace SheepQQBot3.View;
 
@@ -102,6 +102,18 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
                 break;
             case LogMessageType.BlockedByServer:
                 result.Add(new RunLogMessage("来源: QQBotService"));
+                break;
+            case LogMessageType.AIRequest:
+                result.Add(new RunLogMessage($"请求用户: {runLog.TargetId}"));
+                result.Add(new RunLogMessage($"ApiKey: {runLog.OperatorId}"));
+                var response = runLog.AIResponse;
+                result.Add(new RunLogMessage($"回复内容: {response.Text}"));
+                var usageMetadata = response.UsageMetadata!;
+                result.Add(new RunLogMessage($"Token: 总量:{usageMetadata.TotalTokenCount}"
+                    + $"(履历:{usageMetadata.CachedContentTokenCount}/"
+                    + $"回复:{usageMetadata.PromptTokenCount}/"
+                    + $"思考:{usageMetadata.ThoughtsTokenCount})"));
+                result.Add(new RunLogMessage($"请求内容: {runLog.OtherContent}"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

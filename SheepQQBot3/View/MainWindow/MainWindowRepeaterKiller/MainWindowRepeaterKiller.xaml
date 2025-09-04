@@ -13,13 +13,16 @@
     </UserControl.DataContext>
     <Grid>
         <Grid.Resources>
-            <Style x:Key="RepeaterKillerDockPanelStyle" TargetType="DockPanel">
+            <Style x:Key="RepeaterKillerDockPanelStyle"
+                   TargetType="DockPanel">
                 <Setter Property="Margin" Value="0,4,0,0" />
             </Style>
-            <Style x:Key="RepeaterKillerTextBlockStyle" TargetType="TextBlock">
+            <Style x:Key="RepeaterKillerTextBlockStyle"
+                   TargetType="TextBlock">
                 <Setter Property="Margin" Value="2,0,0,0" />
             </Style>
-            <Style x:Key="RepeaterKillerTextBoxStyle" TargetType="TextBox">
+            <Style x:Key="RepeaterKillerTextBoxStyle"
+                   TargetType="TextBox">
                 <Setter Property="Margin" Value="0,0,4,0" />
                 <Setter Property="Width" Value="40" />
                 <Setter Property="TextAlignment" Value="Right" />
@@ -42,9 +45,11 @@
                 <StackPanel>
                     <DockPanel>
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="复读限制次数" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="复读限制次数" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
                             <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
                                      Text="{Binding RepeaterKillerConfig.RepeatLimit}"
                                      TextChanged="OnRepeatLimitChanged" />
@@ -52,10 +57,13 @@
                     </DockPanel>
                     <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="缓存消息条数" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="缓存消息条数" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
                         </Border>
                     </DockPanel>
                 </StackPanel>
@@ -67,26 +75,35 @@
                 <StackPanel>
                     <DockPanel>
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="相似度限值" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
-                        </Border>
-                    </DockPanel>
-                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
-                        <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值(Emoji)" />
-                        </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
                         </Border>
                     </DockPanel>
                     <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="相似度限值(图片)" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="相似度限值(Emoji)" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="相似度限值(图片)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
                         </Border>
                     </DockPanel>
                 </StackPanel>
@@ -98,38 +115,51 @@
                 <StackPanel>
                     <DockPanel>
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="基础禁言时间(秒)" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="基础禁言时间(秒)" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
-                        </Border>
-                    </DockPanel>
-                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
-                        <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="首个禁言时间(秒)" />
-                        </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.RepeatLimit}" />
                         </Border>
                     </DockPanel>
                     <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="加成方案" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="首个禁言时间(秒)" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <ComboBox Width="90" Margin="0,0,4,0" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
                         </Border>
                     </DockPanel>
                     <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
                         <Border VerticalAlignment="Center">
-                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}" Text="红包狂欢时间(秒)" />
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="加成方案" />
                         </Border>
-                        <Border HorizontalAlignment="Right" VerticalAlignment="Center">
-                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}" Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <ComboBox Width="90"
+                                      Margin="0,0,4,0" />
                         </Border>
                     </DockPanel>
                     <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
-                        <CheckBox HorizontalAlignment="Left" Content="禁言状态守护" />
+                        <Border VerticalAlignment="Center">
+                            <TextBlock Style="{StaticResource RepeaterKillerTextBlockStyle}"
+                                       Text="红包狂欢时间(秒)" />
+                        </Border>
+                        <Border HorizontalAlignment="Right"
+                                VerticalAlignment="Center">
+                            <TextBox Style="{StaticResource RepeaterKillerTextBoxStyle}"
+                                     Text="{Binding RepeaterKillerConfig.MaxCacheMessageCount}" />
+                        </Border>
+                    </DockPanel>
+                    <DockPanel Style="{StaticResource RepeaterKillerDockPanelStyle}">
+                        <CheckBox HorizontalAlignment="Left"
+                                  Content="禁言状态守护" />
                     </DockPanel>
                 </StackPanel>
             </GroupBox>
@@ -150,20 +180,25 @@
                     <ListView.ContextMenu>
                         <ContextMenu>
                             <MenuItem Header="新增" />
-                            <MenuItem Header="修改" Style="{StaticResource EditDeleteMenuItemStyle}" />
-                            <MenuItem Header="删除" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                            <MenuItem Header="修改"
+                                      Style="{StaticResource EditDeleteMenuItemStyle}" />
+                            <MenuItem Header="删除"
+                                      Style="{StaticResource EditDeleteMenuItemStyle}" />
                         </ContextMenu>
                     </ListView.ContextMenu>
                     <ListView.View>
                         <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                            <GridViewColumn Width="240" Header="正则表达式">
+                            <GridViewColumn Width="240"
+                                            Header="正则表达式">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
-                                        <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                        <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                                   Text="{Binding AlarmName}" />
                                     </DataTemplate>
                                 </GridViewColumn.CellTemplate>
                             </GridViewColumn>
-                            <GridViewColumn Width="60" Header="最大长度">
+                            <GridViewColumn Width="60"
+                                            Header="最大长度">
                                 <GridViewColumn.CellTemplate>
                                     <DataTemplate>
                                         <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
@@ -193,20 +228,25 @@
                         <ListView.ContextMenu>
                             <ContextMenu>
                                 <MenuItem Header="新增" />
-                                <MenuItem Header="修改" Style="{StaticResource EditDeleteMenuItemStyle}" />
-                                <MenuItem Header="删除" Style="{StaticResource EditDeleteMenuItemStyle}" />
+                                <MenuItem Header="修改"
+                                          Style="{StaticResource EditDeleteMenuItemStyle}" />
+                                <MenuItem Header="删除"
+                                          Style="{StaticResource EditDeleteMenuItemStyle}" />
                             </ContextMenu>
                         </ListView.ContextMenu>
                         <ListView.View>
                             <GridView ColumnHeaderContainerStyle="{StaticResource NoResizeHeaderStyle}">
-                                <GridViewColumn Width="110" Header="QQ号">
+                                <GridViewColumn Width="110"
+                                                Header="QQ号">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
-                                            <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}" Text="{Binding AlarmName}" />
+                                            <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
+                                                       Text="{Binding AlarmName}" />
                                         </DataTemplate>
                                     </GridViewColumn.CellTemplate>
                                 </GridViewColumn>
-                                <GridViewColumn Width="80" Header="上次禁言时间">
+                                <GridViewColumn Width="80"
+                                                Header="上次禁言时间">
                                     <GridViewColumn.CellTemplate>
                                         <DataTemplate>
                                             <TextBlock Style="{StaticResource AlarmAideTextBlockStyle}"
@@ -220,10 +260,14 @@
                         </ListView.View>
                     </ListView>
                     <StackPanel Grid.Column="1">
-                        <Button Margin="4,0,0,0" Content="测试按钮1" />
-                        <Button Margin="4,4,0,0" Content="测试按钮2" />
-                        <Button Margin="4,4,0,0" Content="测试按钮3" />
-                        <Button Margin="4,4,0,0" Content="测试按钮4" />
+                        <Button Margin="4,0,0,0"
+                                Content="测试按钮1" />
+                        <Button Margin="4,4,0,0"
+                                Content="测试按钮2" />
+                        <Button Margin="4,4,0,0"
+                                Content="测试按钮3" />
+                        <Button Margin="4,4,0,0"
+                                Content="测试按钮4" />
                     </StackPanel>
                 </Grid>
             </GroupBox>

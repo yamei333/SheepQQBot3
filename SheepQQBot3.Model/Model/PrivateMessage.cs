@@ -1,5 +1,6 @@
-﻿using System;
-using SheepQQBot3.Model.Enums;
+﻿using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
+using System;
 
 namespace SheepQQBot3.Model;
 
@@ -32,7 +33,7 @@ public class PrivateMessage
         DateTime = receiveData.DateTime;
         UserId = receiveData.UserId;
         Font = receiveData.Font;
-        Message = receiveData.Message;
+        Message = CQCode.ReplaceCQImage(receiveData.Message);
         MessageId = receiveData.MessageId;
         IsFriend = receiveData.SubType == SubType.Friend;
         Sender = receiveData.Sender;
