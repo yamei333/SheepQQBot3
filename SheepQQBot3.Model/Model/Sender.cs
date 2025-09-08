@@ -38,3 +38,17 @@ public class Sender
     [JsonPropertyName("group_id")]
     public long? GroupId { get; set; }
 }
+
+public static class SenderUtil
+{
+    public static Sender ToSender(this GroupMember groupMember)
+        => new()
+        {
+            GroupId = groupMember.GroupId,
+            NickName = groupMember.NickName,
+            Age = groupMember.Age,
+            Card = groupMember.Card,
+            UserId = groupMember.UserId,
+            Sex = groupMember.Sex,
+        };
+}

@@ -31,15 +31,15 @@ public static class CommonExtensions
     public static string ToConditionString(this DateTime input, Dictionary<string, bool> holidayInfo)
         => input.ToString($"yyyy-MM-dd-{DayOfWeek2Int(input.DayOfWeek)}-{(input.IsHoliday(holidayInfo) ? 1 : 0)} HH:mm:ss");
 
-    public static string ToDayHHMM(this DateTime input) => input.ToString($"d{(input.DayOfWeek == DayOfWeek.Saturday ? "(六)" : string.Empty)}, HH:mm");
+    //public static string ToDayHHMM(this DateTime input) => input.ToString($"d{(input.DayOfWeek == DayOfWeek.Saturday ? "(六)" : string.Empty)}, HH:mm");
 
     public static string ToYYYYMDDDDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d dddd HH:mm:ss");
 
-    public static string ToYYYYMMDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-dd HH:mm:ss");
+    public static string ToYYYYMDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d HH:mm:ss");
 
     public static string ToYYYYMMDDHHMM(this DateTime input) => input.ToString("yyyy-M-dd HH:mm");
 
-    public static string ToYYYYMDD(this DateTime input) => input.ToString("yyyy-M-dd");
+    public static string ToYYYYMD(this DateTime input) => input.ToString("yyyy-M-d");
 
     public static string ToYYYYMMDD(this DateTime input) => input.ToString("yyyy-MM-dd");
 

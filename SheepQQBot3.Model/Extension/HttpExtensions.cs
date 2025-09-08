@@ -1,9 +1,12 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using Masuit.Tools.Files;
 using Masuit.Tools.Media;
 using SheepQQBot3.Model.JsonCard;
 using SixLabors.ImageSharp;
+using SixLabors.ImageSharp.Formats.Png;
 using System;
+using System.IO;
 using System.Net;
 using System.Net.Http;
 using System.Net.Http.Json;
@@ -266,19 +269,15 @@ public static class HttpExtensions
             return (false, "[Gif图片]");
 
         CommonExtensions.CreatePath(path);
-        var stream = response.Content.ReadAsStream();
-        // MEMO : 超过200KB的图片不保存
-        if (stream.Length / 1024.0 > 500)
+        using var ms = new MemoryStream();
+        var image = Image.Load(response.Content.ReadAsStream());
+        image.Save(ms, new PngEncoder());
+        //YameiLogExtensions.WriteLog(LogType.Info, $"AIHttpDownloadImage: 哈莉下载了一张图片[{tempFileName}], 大小是{ms.Length}");
+        // MEMO : 超过一定大小的图片不保存
+        if (ms.Length / 1024.0 > 500)
             return (false, "[占用过大图片]");
 
-        var image = Image.Load(stream);
-        switch (fileExtend)
-        {
-            default:
-                image.SaveAsPng($"{path}/{tempFileName}.png");
-                break;
-        }
-
+        ms.SaveFile($"{path}/{tempFileName}.png");
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
     }
 }

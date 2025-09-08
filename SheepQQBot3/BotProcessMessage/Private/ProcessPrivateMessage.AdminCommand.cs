@@ -1,4 +1,5 @@
 ﻿using SheepQQBot3.Model;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Extension;
 using System;
 using System.Threading.Tasks;
@@ -22,6 +23,11 @@ public static partial class ProcessPrivateMessage
     /// 取得has剩余流量
     /// </summary>
     private const string COMMAND_ADMIN_HAS = "HAS";
+
+    /// <summary>
+    /// 取得has剩余流量
+    /// </summary>
+    private const string COMMAND_ADMIN_AI = "AI";
 
     /// <summary>
     /// Admin功能
@@ -66,6 +72,13 @@ public static partial class ProcessPrivateMessage
                 var hasMessage = $"流量剩余: {remainBand:0.0} GB{ENTER}重置日期: {nextResetDate.Day}号{ENTER}到期时间: {expireDate.ToYYYYMMDD()}"
                     + $"{ENTER}每天还能高强度使用 {remainBand / (resetDaysLeft + 1):0.0} GB!";
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
+                break;
+            case COMMAND_ADMIN_AI:
+                var moodIndex = PublicVar.AIData.AIStatusData.MoodIndexValue;
+                var aiStatusMessage = $"====哈莉状态===={ENTER}"
+                    + $"当前日程: {AIStatusUtil.GetSchedule()}{ENTER}"
+                    + $"心情指数: ({moodIndex}){moodIndex.ToMood()}";
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage).ConfigureAwait(true);
                 break;
             default:
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);

@@ -56,6 +56,11 @@ public static class PublicVar
     public static readonly long TestGroupId = 15873217;
 
     /// <summary>
+    /// 超级管理ID
+    /// </summary>
+    public static readonly long SuperId = 252961222;
+
+    /// <summary>
     /// 管理员ID
     /// </summary>
     public static readonly HashSet<long> AdminIds = AppSettingExtensions.Get("adminId").Split(',').ToHashSet(long.Parse);

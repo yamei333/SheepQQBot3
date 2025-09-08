@@ -1,15 +1,14 @@
-﻿using System;
-using System.Data;
-using System.Linq;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using Masuit.Tools;
+﻿using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using Yamei.Common;
+using System;
+using System.Data;
+using System.Linq;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage;
@@ -123,7 +122,7 @@ public static partial class ProcessMessage
                                     return true;
                                 }
 
-                                var addDateString = addAlarmDateTime.ToYYYYMMDDHHMMSS();
+                                var addDateString = addAlarmDateTime.ToYYYYMDHHMMSS();
                                 var customAlarm = customAlarmValues.FirstOrDefault(each => (each.AlarmDate - addAlarmDateTime).TotalSeconds == 0);
                                 if (customAlarm != null)
                                 {
@@ -176,7 +175,7 @@ public static partial class ProcessMessage
                                             $"({customGroupAlarm.Id})" +
                                             $"{(customGroupAlarm.IsBark ? "[推]" : string.Empty)}" +
                                             $"{(customGroupAlarm.IsLoop ? "[loop]" : string.Empty)}" +
-                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]{alarmMessage}";
+                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMDHHMMSS()}]{alarmMessage}";
                                     });
                             }
                             else
@@ -193,7 +192,7 @@ public static partial class ProcessMessage
                                             $"{(customGroupAlarm.IsGroup ? $"[群{customGroupAlarm.GroupId}]" : "[私]")}" +
                                             $"{(customGroupAlarm.IsBark ? "[推]" : string.Empty)}" +
                                             $"{(customGroupAlarm.IsLoop ? "[loop]" : string.Empty)}" +
-                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMMDDHHMMSS()}]{alarmMessage}";
+                                            $"[{customGroupAlarm.AlarmDate.ToYYYYMDHHMMSS()}]{alarmMessage}";
                                     });
                             }
 
@@ -212,7 +211,7 @@ public static partial class ProcessMessage
 
                     void DeleteUserAlarmCustomByDate(DateTime deleteDateTime)
                     {
-                        var deleteDateString = deleteDateTime.ToYYYYMMDDHHMMSS();
+                        var deleteDateString = deleteDateTime.ToYYYYMDHHMMSS();
                         var customAlarm = customAlarmValues.FirstOrDefault(each => (each.AlarmDate - deleteDateTime).TotalSeconds <= 1);
                         if (customAlarm != null)
                         {
@@ -266,7 +265,7 @@ public static partial class ProcessMessage
                 }
 
                 match = regCustomAlarmTime.Match(message);
-                if (match.Success && DateTime.TryParse($"{dateNow.ToYYYYMDD()} {match.Groups[1].Value}", out alarmDateTime))
+                if (match.Success && DateTime.TryParse($"{dateNow.ToYYYYMD()} {match.Groups[1].Value}", out alarmDateTime))
                 {
                     message = message.Replace(match.Value, string.Empty);
                     return true;

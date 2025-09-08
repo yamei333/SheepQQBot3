@@ -164,7 +164,7 @@ partial class MainWindowViewModel
             GetSelectedCommonConfig(BotFunctionType.Common_AiConfig, config =>
             {
                 StartTaskList(taskList, AiAide);
-                void AiAide() => ProcessPrivateMessage.AiAideAsync(privateMessage);
+                void AiAide() => ProcessPrivateMessage.AIAideAsync(privateMessage);
             });
         }
 

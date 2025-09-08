@@ -70,7 +70,7 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 深度思索内容
         /// </summary>
-        [Description("chain of thought")]
+        [Description("thinking")]
         [JsonPropertyName("think")]
         public string Think { get; set; }
 
@@ -80,6 +80,13 @@ namespace SheepQQBot3.Model.AI
         [Description("body language, The cat ears' movements also fall under this category.")]
         [JsonPropertyName("bodyLanguage")]
         public string Body { get; set; }
+
+        /// <summary>
+        /// 感官
+        /// </summary>
+        [Description("sight, hearing, smell, taste, touch")]
+        [JsonPropertyName("sensory")]
+        public string Sensory { get; set; }
 
         /// <summary>
         /// 心理描写

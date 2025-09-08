@@ -18,10 +18,17 @@ public static partial class ProcessPrivateMessage
     /// </summary>
     /// <param name="privateMessage"><see cref="PrivateMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> AiAideAsync(PrivateMessage privateMessage)
+    public static async Task<bool> AIAideAsync(PrivateMessage privateMessage)
     {
         var targetId = privateMessage.Sender.UserId;
         var message = privateMessage.Message;
+
+        // MEMO : 日程在深度睡眠时, 不回应
+        if (!BotExtensions.IsAdmin(targetId) && AIStatusUtil.GetSchedule() == "deep sleep time")
+        {
+            await BotServer.SendPrivateMessageAsync(targetId, "Zzz...").ConfigureAwait(false);
+            return true;
+        }
 
         var dateNow = DateTime.Now;
         if (dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)

@@ -23,6 +23,9 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
+        if (PublicVar.AIConfig.IsUseAI)
+            StartTask(TaskProcess.AIStatusRecover);
+
         // MEMO : 0.14.9.2 暂时禁用steam监控, 发送推送消息太频繁了
         //StartTask(TaskProcess.SteamMarketWatchAsync);
     }

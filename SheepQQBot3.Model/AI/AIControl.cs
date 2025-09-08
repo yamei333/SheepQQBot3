@@ -100,6 +100,7 @@ namespace SheepQQBot3.Model.AI
                     IncludeThoughts = false,
                     ThinkingBudget = 1024 * 5,
                 },
+                Temperature = 0.8,
             };
             var schemaProperties = chat.Config.ResponseSchema.Properties!;
             schemaProperties["date"].Nullable = false;

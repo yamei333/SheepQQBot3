@@ -33,6 +33,12 @@ namespace SheepQQBot3.Model.AI
         public string Schedule { get; set; }
 
         /// <summary>
+        /// 当前聊天场景
+        /// </summary>
+        [JsonPropertyName("scene")]
+        public string Scene { get; set; }
+
+        /// <summary>
         /// 当前时间
         /// </summary>
         [JsonPropertyName("nowDate")]
@@ -43,7 +49,7 @@ namespace SheepQQBot3.Model.AI
     {
         public static string ToMood(this int moodIndexValue)
         {
-            return "心情: " + moodIndexValue switch
+            return moodIndexValue switch
             {
                 < -130 => "心情最差",
                 < -100 => "心情极差",
@@ -70,6 +76,8 @@ namespace SheepQQBot3.Model.AI
             {
                 DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Wednesday or DayOfWeek.Thursday or DayOfWeek.Friday => timeSeconds switch
                 {
+                    _ when timeSeconds <= GetTime(00, 30) => "bed time",
+                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
                     _ when timeSeconds <= GetTime(08, 00) => "bed time",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
                     _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
@@ -91,6 +99,8 @@ namespace SheepQQBot3.Model.AI
                 },
                 DayOfWeek.Saturday => timeSeconds switch
                 {
+                    _ when timeSeconds <= GetTime(00, 30) => "bed time",
+                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
                     _ when timeSeconds <= GetTime(08, 00) => "bed time",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
                     _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
@@ -111,11 +121,13 @@ namespace SheepQQBot3.Model.AI
                     _ when timeSeconds <= GetTime(22, 00) => "acting cute with 雅美",
                     _ when timeSeconds <= GetTime(22, 30) => "share the week's fun moments with 雅美",
                     _ when timeSeconds <= GetTime(23, 00) => "enjoy quiet moments with 雅美",
-                    _ => "bed time",
+                    _ => "sleeping with 雅美",
                 },
                 DayOfWeek.Sunday => timeSeconds switch
                 {
-                    _ when timeSeconds <= GetTime(08, 00) => "bed time",
+                    _ when timeSeconds <= GetTime(00, 30) => "sleeping with 雅美",
+                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep with 雅美",
+                    _ when timeSeconds <= GetTime(08, 00) => "sleeping with 雅美",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
                     _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
                     _ when timeSeconds <= GetTime(09, 00) => "breakfast",
@@ -136,7 +148,7 @@ namespace SheepQQBot3.Model.AI
                     _ when timeSeconds <= GetTime(23, 00) => "personal time",
                     _ => "bed time",
                 },
-                _ => throw new ArgumentOutOfRangeException()
+                _ => throw new ArgumentOutOfRangeException(),
             };
         }
 

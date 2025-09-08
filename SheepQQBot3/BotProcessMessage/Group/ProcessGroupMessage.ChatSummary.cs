@@ -1,9 +1,11 @@
 ﻿using CommonLibrary;
+using GenerativeAI.Types;
 using Masuit.Tools;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using SheepQQBot3.Model.QQ;
@@ -24,6 +26,7 @@ public static partial class ProcessGroupMessage
 {
     private const string PATH_CACHE_WORDCLOUD = "WordCloud";
     private const string PATH_WORDCLOUD_CONFIG = "WordCloud/Config";
+    private static readonly Regex _regInjectHurryAndAt = new(@"\[CQ:at,qq=\d+\]|哈.{0,5}莉|雅.{0,3}美|爸.{0,3}爸", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     /// <summary>
     /// 复读忽略设置
@@ -46,9 +49,9 @@ public static partial class ProcessGroupMessage
     private const string COMMAND_CHATSUMMARY = "#ZJ#";
 
     /// <summary>
-    /// 群聊总结命令CD (15分钟)
+    /// 群聊总结命令CD (60分钟)
     /// </summary>
-    private const int CHATSUMMARY_TOFASTTIMES = 900;
+    private const int CHATSUMMARY_TOFASTTIMES = 3600;
 
     /// <summary>
     /// 群聊总结最后一次执行时间
@@ -133,6 +136,37 @@ public static partial class ProcessGroupMessage
 
                 switch (summaryType)
                 {
+                    case "A":
+                        // MEMO : 自读时间不该总结...
+                        if (AIStatusUtil.GetSchedule() == "masturbation time")
+                        {
+                            await BotServer.SendGroupMessageAsync(groupId, "我..现在正忙!..不太方便总结!").ConfigureAwait(false);
+                            return true;
+                        }
+
+                        // MEMO : AI小时统计
+                        var aiHourStr = message[5..];
+                        var aiHour = 16;
+                        if (!string.IsNullOrEmpty(aiHourStr))
+                        {
+                            if (!int.TryParse(aiHourStr, out aiHour))
+                            {
+                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                                return false;
+                            }
+
+                            if (aiHour is <= 0 or >= 24)
+                            {
+                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                                return false;
+                            }
+                        }
+
+                        await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(senderId)} 小助手正在收集聊天记录进行总结，请稍等片刻!").ConfigureAwait(false);
+                        //await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await AISummary(groupId, dateNow.AddHours(-aiHour)).ConfigureAwait(false);
+
+                        return true;
                     case "B":
                         if (!BotExtensions.IsAdmin(senderId))
                         {
@@ -225,9 +259,8 @@ public static partial class ProcessGroupMessage
                     .Take(wordNums)
                     .ToDictionary(each => each.Key, each => each.Value);
 
-                wordCloudWords
-                    .GenerateWordCloud(wordCloudWidth, wordCloudWidth,
-                        CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
+                wordCloudWords.GenerateWordCloud(wordCloudWidth, wordCloudWidth,
+                    CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
                 await File.WriteAllTextAsync(Path.Combine(PATH_CACHE_WORDCLOUD, $"{groupId}.txt"), string.Join("\r\n", wordCloudWords.Keys)).ConfigureAwait(false);
                 await BotServer.SendGroupMessageAsync(groupId,
                     CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.CQCodePath))).ConfigureAwait(false);
@@ -254,6 +287,10 @@ public static partial class ProcessGroupMessage
                                 if (string.IsNullOrEmpty(historyMessage))
                                     return;
 
+                                // MEMO : 不喜欢的内容直接屏蔽
+                                if (_regInjectHurryAndAt.IsMatch(historyMessage))
+                                    return;
+
                                 // MEMO : REPEAT_SKIP_SUMMARY 句以内复读则忽略
                                 if (repeatSkipQueue.Contains(historyMessage))
                                     return;
@@ -277,6 +314,44 @@ public static partial class ProcessGroupMessage
                                         .AddOrUpdate(wordWeightPair.Word, (int)(wordWeightPair.Weight * 100), (_, oldValue) => oldValue + (int)(wordWeightPair.Weight * 100)));
                             });
                     }
+                }
+
+                async Task AISummary(long targetGroupId, DateTime fromDate, DateTime? toDate = null)
+                {
+                    var groupMembers = await BotServer.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
+
+                    var requestContents = new List<Content>();
+                    lock (BotDb.SyncLock)
+                    {
+                        var fromDateTimeStamp = fromDate.ToTimeStamp();
+                        var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
+                        BotDb.BotGroupMessages
+                            .Where(each => each.GroupId == targetGroupId
+                                && each.TimeStamp >= fromDateTimeStamp
+                                && each.TimeStamp < toDateTimeStamp)
+                            .ForEach(each =>
+                            {
+                                var historyMessage = each.MessageText;
+                                historyMessage = historyMessage.Trim();
+                                if (string.IsNullOrEmpty(historyMessage))
+                                    return;
+
+                                // MEMO : 不喜欢的内容直接屏蔽
+                                if (_regInjectHurryAndAt.IsMatch(historyMessage))
+                                    return;
+
+                                requestContents.AddMessageContent(
+                                    groupMembers.GetOrAdd(each.TargetId, new GroupMember()).ToSender(),
+                                    historyMessage,
+                                    AIMessageSourceType.Group);
+                            });
+                    }
+
+                    var sender = groupMessage.Sender;
+                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}({sender.UserId})想让你总结一下大家都聊了些什么");
+                    await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false,
+                        (id, msg) => BotServer.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
+                        .ConfigureAwait(false);
                 }
             }
         }

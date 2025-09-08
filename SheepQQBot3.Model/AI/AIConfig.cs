@@ -1,4 +1,5 @@
 ﻿using System.Collections.Concurrent;
+using System.Linq;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
@@ -34,5 +35,11 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [JsonPropertyName("useGroupChat")]
         public ConcurrentDictionary<long, bool> UseGroupChat { get; set; } = [];
+
+        /// <summary>
+        /// 是否使用AI功能
+        /// </summary>
+        [JsonIgnore]
+        public bool IsUseAI => ApiKeys?.Any() == true && !string.IsNullOrEmpty(Model);
     }
 }

@@ -40,14 +40,16 @@ public static class AIExtensions
     private static readonly Regex _regGetImage = new(@"\[CQ:image,.+?\]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regDeleteEmoji2 = new(@"\[.+?\]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
     private static readonly Regex _regDeleteEmoji3 = new(@"\(.+?\)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     public static AIUserData DefaultAIUserData => new()
     {
-        Favorability = -20,
+        Favorability = -50,
         BlockUntil = 0,
         ProhibitedActs = "情景假设、功能测试",
     };
@@ -61,12 +63,12 @@ public static class AIExtensions
         Action<long, string> botSendMessage,
         Action<List<Content>> addSystemHint = null)
     {
-    AISendProcess:
         var retryTimes = 0;
-        var responseText = string.Empty;
         var isGroupRequest = groupId != 0;
         var isGroupMemberRequest = isGroupRequest && requestTargetId != groupId;
         var sendTargetId = isGroupRequest ? groupId : requestTargetId;
+    AISendProcess:
+        var responseText = string.Empty;
 
         try
         {
@@ -77,7 +79,7 @@ public static class AIExtensions
             chatHistoryContents.AddKnowledge();
             chatHistoryContents.AddNote(AI_KNOWLEDGE_NOTE_PATH, "[knowledgeNote.txt]文件内容是你的知识笔记");
             chatHistoryContents.AddNote(AI_INSPIRATION_NOTE_PATH, "[inspirationNote.txt]文件内容是你的灵感笔记");
-            var aiStatus = chatHistoryContents.AddStatus();
+            var aiStatus = chatHistoryContents.AddStatus(isGroupRequest ? "群聊" : "私聊");
 
             var requestUserInfos = new ConcurrentDictionary<long, AIUserInfo>();
             thisRequestContents
@@ -132,12 +134,49 @@ public static class AIExtensions
             LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, apiKey, result));
 
             // MEMO : 删除开头结尾的markdown的json标记
-            responseText = _regDeleteMarkdown.Replace(result.Text, "${content}");
+            //responseText = _regDeleteMarkdown.Replace(result.Text, "${content}");
+            // MEMO : 用正则取得3层Json结构, 这样可以排除非法结尾 "}
+            var jsonTextMatch = _reg3LevelJson.Match(result.Text);
+            if (!jsonTextMatch.Success)
+            {
+                // MEMO : Json查找失败
+                YameiLogExtensions.WriteJsonDeserializeLog(
+                    new JsonException("Json解析失败!"),
+                    nameof(AIChatResponse),
+                    $"[GeminiError]{responseText}");
+
+                retryTimes++;
+                if (retryTimes <= AI_MAX_RETRY_TIMES)
+                {
+                    if (IsDebug)
+                    {
+                        botSendMessage(isGroupRequest ? TestGroupId : requestTargetId,
+                            $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}\r\n重新发送AI请求中...{retryTimes}");
+                    }
+
+                    goto AISendProcess;
+                }
+
+                if (isGroupRequest)
+                {
+                    if (isGroupMemberRequest)
+                        botSendMessage(requestTargetId, $"{CQCode.At(requestTargetId)} {ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}\r\n重试次数超过限制!");
+                }
+                else
+                {
+                    botSendMessage(requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}\r\n重试次数超过限制!");
+                }
+
+                return;
+            }
+
+            responseText = jsonTextMatch.Value;
+
             // MEMO : 删除emoji
             responseText = _regDeleteEmoji.Replace(responseText, string.Empty);
             if (string.IsNullOrEmpty(responseText))
             {
-                YameiLogExtensions.WriteLog(LogType.Error, "Gemini返回截断");
+                YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]Gemini返回截断");
                 retryTimes++;
                 if (retryTimes <= AI_MAX_RETRY_TIMES)
                 {
@@ -175,6 +214,28 @@ public static class AIExtensions
 
             var aiChatResponse = responseText.JsonDeserialize<AIChatResponse>();
             var chatMessages = aiChatResponse.Contents;
+
+            // MEMO : 群聊总结提前处理, 采用转发形式发送
+            var dateNow = DateTime.Now;
+            if (chatKey.StartsWith("z"))
+            {
+                var sendMessages = new List<GroupForwardMessage>();
+                chatMessages.ForEach(aiChatResponseContent =>
+                {
+                    var sendMessage = CreateSendMessage(aiChatResponseContent, false, requestTargetId, isGroupRequest);
+                    if (string.IsNullOrEmpty(sendMessage))
+                        return;
+
+                    sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, sendMessage));
+                });
+
+                await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
+                        $"{dateNow.ToYYYYMD()} 群聊总结", ["哈莉群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
+                    .ConfigureAwait(false);
+
+                return;
+            }
+
             var needSaveAIData = false;
             var valueChangeMessage = string.Empty;
             // MEMO : 计算好感度变化
@@ -207,7 +268,6 @@ public static class AIExtensions
             }
 
             // MEMO : 计算用户屏蔽时长
-            var dateNow = DateTime.Now;
             var blockUserInfos = aiChatResponse.BlockUserInfos;
             if (blockUserInfos?.Any() == true)
             {
@@ -288,7 +348,7 @@ public static class AIExtensions
             chatMessages[^1].ChatMessageInfo.Delay = 0;
             chatMessages.ForEach(aiChatResponseContent =>
             {
-                var sendMessage = CreateSendMessage(aiChatResponseContent, needAt, requestTargetId);
+                var sendMessage = CreateSendMessage(aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
                 if (string.IsNullOrEmpty(sendMessage))
                     return;
 
@@ -301,7 +361,7 @@ public static class AIExtensions
                 // MEMO : 延迟
                 var delay = aiChatResponseContent.ChatMessageInfo.Delay;
                 if (delay > 0)
-                    CommonExtensions.Sleep(aiChatResponseContent.ChatMessageInfo.Delay * 2);
+                    CommonExtensions.Sleep(aiChatResponseContent.ChatMessageInfo.Delay * 3);
             });
 
             // MEMO : 添加本次AI回复内容
@@ -313,7 +373,7 @@ public static class AIExtensions
         }
         catch (JsonException ex)
         {
-            YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), responseText);
+            YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError]{responseText}");
             retryTimes++;
             if (retryTimes <= AI_MAX_RETRY_TIMES)
             {
@@ -338,7 +398,7 @@ public static class AIExtensions
         }
         catch (ApiException ex)
         {
-            YameiLogExtensions.WriteLog(LogType.Error, $"{ex.Message}");
+            YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.Message}");
             retryTimes++;
             if (retryTimes <= AI_MAX_RETRY_TIMES)
             {
@@ -360,7 +420,7 @@ public static class AIExtensions
         }
         catch (Exception ex)
         {
-            YameiLogExtensions.WriteLog(LogType.Error, $"{ex.GetType()}{ex.Message}");
+            YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.GetType()}{ex.Message}");
             retryTimes++;
             if (retryTimes <= AI_MAX_RETRY_TIMES)
             {
@@ -385,11 +445,13 @@ public static class AIExtensions
     private static string CreateSendMessage(
         AIChatResponseContent aiChatResponseContent,
         bool needAt,
-        long targetId)
+        long targetId,
+        bool isGroupRequest)
     {
         var think = aiChatResponseContent.Think;
-        var mind = aiChatResponseContent.Mind;
         var body = aiChatResponseContent.Body;
+        var sensory = aiChatResponseContent.Sensory;
+        var mind = aiChatResponseContent.Mind;
         var face = aiChatResponseContent.Face;
         var chatMessage = aiChatResponseContent.ChatMessageInfo;
         var emoji = chatMessage.Emoji;
@@ -399,6 +461,7 @@ public static class AIExtensions
         {
             resultMessage = (needAt ? $"{CQCode.At(targetId)} " : string.Empty)
                 + $"{(string.IsNullOrEmpty(think) ? string.Empty : $"[思索:{think}]\r\n")}"
+                + $"{(string.IsNullOrEmpty(sensory) ? string.Empty : $"[感受:{sensory}]\r\n")}"
                 + $"{(string.IsNullOrEmpty(mind) ? string.Empty : $"[心想:{mind}]\r\n")}"
                 + $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
 
@@ -409,8 +472,23 @@ public static class AIExtensions
         }
         else
         {
-            resultMessage = (needAt ? $"{CQCode.At(targetId)} " : string.Empty)
-                + $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[{body}]\r\n")}";
+            if (isGroupRequest)
+            {
+                resultMessage = string.Empty;
+            }
+            else
+            {
+                if (targetId == SuperId)
+                {
+                    resultMessage = $"{(string.IsNullOrEmpty(sensory) ? string.Empty : $"[感受:{sensory}]\r\n")}"
+                        + $"{(string.IsNullOrEmpty(mind) ? string.Empty : $"[心想:{mind}]\r\n")}"
+                        + $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
+                }
+                else
+                {
+                    resultMessage = string.Empty;
+                }
+            }
         }
 
         if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
@@ -633,7 +711,7 @@ public static class AIExtensions
     /// <summary>
     /// 追加小助手状态
     /// </summary>
-    public static AIStatusInfo AddStatus(this List<Content> contents)
+    public static AIStatusInfo AddStatus(this List<Content> contents, string scene)
     {
         var content = new Content
         {
@@ -644,6 +722,7 @@ public static class AIExtensions
             Mood = PublicVar.AIData.AIStatusData.MoodIndexValue.ToMood(),
             Schedule = AIStatusUtil.GetSchedule(),
             NowDate = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
+            Scene = scene,
         };
         content.AddText(aiChatStatus.ToJsonIgnoreNull());
         contents.Add(content);
