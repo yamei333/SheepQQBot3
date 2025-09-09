@@ -98,9 +98,9 @@ namespace SheepQQBot3.Model.AI
                 ThinkingConfig = new ThinkingConfig
                 {
                     IncludeThoughts = false,
-                    ThinkingBudget = 1024 * 5,
+                    ThinkingBudget = AIConfig.ThinkToken,
                 },
-                Temperature = 0.8,
+                Temperature = AIConfig.Temperature,
             };
             var schemaProperties = chat.Config.ResponseSchema.Properties!;
             schemaProperties["date"].Nullable = false;

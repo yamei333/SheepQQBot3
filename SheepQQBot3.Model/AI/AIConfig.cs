@@ -19,6 +19,18 @@ namespace SheepQQBot3.Model.AI
         public string Model { get; set; }
 
         /// <summary>
+        /// Model Think Token
+        /// </summary>
+        [JsonPropertyName("thinkToken")]
+        public int ThinkToken { get; set; }
+
+        /// <summary>
+        /// Model Temperature
+        /// </summary>
+        [JsonPropertyName("temperature")]
+        public double Temperature { get; set; }
+
+        /// <summary>
         /// 表情包路径
         /// </summary>
         [JsonPropertyName("facePath")]
