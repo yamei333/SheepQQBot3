@@ -1,11 +1,12 @@
-﻿using SheepQQBot3.Model.Extension;
+﻿using Masuit.Tools;
+using SheepQQBot3.Model.Extension;
 using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.DbModel;
 
 public partial class BotGroupMessage
 {
-    private static readonly Regex _regCQArea = RegexGenerator.GetCQArea();
+    private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
     private static readonly Regex _regCQCode = RegexGenerator.GetCQCode();
     private static readonly Regex _regCQImage = RegexGenerator.CQImage();
     private static readonly Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
@@ -27,17 +28,10 @@ public partial class BotGroupMessage
         MessageId = messageId;
         TimeStamp = timeStamp;
 
-        //var messageImage = string.Empty;
-        //_regCQArea.Matches(message).ForEach(each =>
-        //{
-        //    var cqCode = ReplaceCQImage(each.Value);
-        //    // MEMO : 一个表情重复发也只算1次
-        //    if (_regCQCode.Match(cqCode).Value == "image" && !messageImage.Contains(cqCode))
-        //        messageImage += cqCode;
-        //});
-        // MEMO : 清除所有CQ段
-        // MEMO : 0.14.4.4 字母默认大写
-        MessageText = _regCQArea.Replace(message, string.Empty).TrimStart().ToUpper();
+        // MEMO : 转换所有CQ段
+        // MEMO : 0.15.3.1 有AI总结再也不用大写了
+        MessageText = _regReplaceCQCode.Replace(message,
+            match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value)).TrimStart();
         // MEMO : 0.14.4.4 不再记录图片
         //MessageImage = messageImage;
         MessageImage = string.Empty;

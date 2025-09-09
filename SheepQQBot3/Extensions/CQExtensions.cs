@@ -23,4 +23,19 @@ public static class CQExtensions
     /// </summary>
     public static Task<string> JsonCard_TianxuanShareAsync(string title, string content, string url, string previewImage)
         => JsonCard_TianxuanShareAsync(title, content, PublicVar.BOT_NAME, url, previewImage, QQExtensions.GetQQImageUrl(PublicVar.BotId));
+
+    public static string CQCodeToMessageText(string cqCode)
+    {
+        return cqCode switch
+        {
+            "forward" => "[转发消息]",
+            "video" => "[视频]",
+            "record" => "[语音]",
+            "reply" => "[引用消息]",
+            "file" => "[文件]",
+            "face" => "[表情]",
+            "json" => "[APP卡片消息]",
+            _ => string.Empty,
+        };
+    }
 }

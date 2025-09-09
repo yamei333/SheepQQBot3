@@ -27,7 +27,6 @@ public static partial class ProcessGroupMessage
 {
     private const string PATH_CACHE_WORDCLOUD = "WordCloud";
     private const string PATH_WORDCLOUD_CONFIG = "WordCloud/Config";
-    private static readonly Regex _regInjectHurryAndAt = new(@"\[CQ:at,qq=\d+\]|哈.{0,5}莉|雅.{0,3}美|爸.{0,3}爸", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     /// <summary>
     /// 复读忽略设置
@@ -57,7 +56,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 群聊总结最后一次执行时间
     /// </summary>
-    private static ConcurrentDictionary<long, DateTime> _chatSummaryRequestLastTimes = [];
+    private static readonly ConcurrentDictionary<long, DateTime> _chatSummaryRequestLastTimes = [];
 
     private static readonly Queue<string> _repeatSkipQueue = [];
 
@@ -282,12 +281,12 @@ public static partial class ProcessGroupMessage
                             .ForEach(each =>
                             {
                                 var historyMessage = each.MessageText;
-                                historyMessage = historyMessage.Trim();
+                                historyMessage = historyMessage.Trim().ToUpper();
                                 if (string.IsNullOrEmpty(historyMessage))
                                     return;
 
                                 // MEMO : 不喜欢的内容直接屏蔽
-                                if (_regInjectHurryAndAt.IsMatch(historyMessage))
+                                if (_regInjectHurry.IsMatch(historyMessage))
                                     return;
 
                                 // MEMO : REPEAT_SKIP_SUMMARY 句以内复读则忽略
@@ -336,7 +335,7 @@ public static partial class ProcessGroupMessage
                                     return;
 
                                 // MEMO : 不喜欢的内容直接屏蔽
-                                if (_regInjectHurryAndAt.IsMatch(historyMessage))
+                                if (_regInjectHurry.IsMatch(historyMessage))
                                     return;
 
                                 requestContents.AddMessageContent(
@@ -361,9 +360,15 @@ public static partial class ProcessGroupMessage
         }
     }
 
+    /// <summary>
+    /// 不记录的群聊消息
+    /// </summary>
     private static bool NeedRecordMessage(string message)
     {
-        if (message.StartsWith("#"))
+        if (message.StartsWith("#") || message.ToUpper() == "R")
+            return false;
+
+        if (message.Contains($"[CQ:at,qq={BotId}]") || message.Contains($"[CQ:at,qq=3889001246]"))
             return false;
 
         if (message.Contains("色图") && message.BytesCount() <= 20)

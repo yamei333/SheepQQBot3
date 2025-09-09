@@ -16,8 +16,8 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline)]
     public static partial Regex GetCQCode();
 
-    [GeneratedRegex(@"\[CQ:at,qq=.+?\]")]
-    public static partial Regex CQCodeRemoveCQAt();
+    [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+),.+\]")]
+    public static partial Regex ReplaceCQCode();
 
     [GeneratedRegex(@"CQ:image,file=(.+?),url=(.+?)(?=[,\]])")]
     public static partial Regex CQCodeReplaceImage();

@@ -348,4 +348,19 @@ public static class MyStringExtensions
     [ExcludeFromCodeCoverage]
     [DebuggerStepThrough]
     public static string CultureFormat(this string target, params object[] args) => string.Format(CultureInfo.CurrentUICulture, target, args);
+
+    public static string CQCodeToMessageText(string cqCode)
+    {
+        return cqCode switch
+        {
+            "forward" => "[转发消息]",
+            "video" => "[视频]",
+            "record" => "[语音]",
+            "reply" => "[引用消息]",
+            "file" => "[文件]",
+            "face" => "[表情]",
+            "json" => "[APP卡片消息]",
+            _ => string.Empty,
+        };
+    }
 }
