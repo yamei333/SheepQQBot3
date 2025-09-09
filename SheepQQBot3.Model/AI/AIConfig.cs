@@ -31,6 +31,12 @@ namespace SheepQQBot3.Model.AI
         public string KnowledgePath { get; set; }
 
         /// <summary>
+        /// OpenWeatherMap Key
+        /// </summary>
+        [JsonPropertyName("openWeatherMapKey")]
+        public string OpenWeatherMapKey { get; set; }
+
+        /// <summary>
         /// 是否参与群聊
         /// </summary>
         [JsonPropertyName("useGroupChat")]

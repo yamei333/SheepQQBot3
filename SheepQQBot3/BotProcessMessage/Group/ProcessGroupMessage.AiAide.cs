@@ -85,7 +85,7 @@ public static partial class ProcessGroupMessage
         if (useGroupChat && !isPrivateChat)
         {
             // MEMO : 日程在深度睡眠时, 不接收消息
-            if (AIStatusUtil.GetSchedule() == "deep sleep time")
+            if (AIStatusUtil.GetSchedule().Contains("deep sleep"))
                 return true;
 
             // MEMO : 记录消息(添加到历史记录中)

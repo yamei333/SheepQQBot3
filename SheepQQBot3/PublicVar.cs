@@ -1,6 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
+using OpenWeatherMap.Standard;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.DbModel.JiebaDb;
 using SheepQQBot3.Model;
@@ -193,6 +194,11 @@ public static class PublicVar
     /// AI用户信息(好感度描述等)
     /// </summary>
     public static ConcurrentDictionary<long, AIUserInfo> AIUserInfoDictionary { get; set; } = [];
+
+    /// <summary>
+    /// OpenWeatherMap服务
+    /// </summary>
+    public static Current OpenWeatherMapService { get; set; }
 
     /// <summary>
     /// 初始化全局变量

@@ -79,7 +79,9 @@ public static class AIExtensions
             chatHistoryContents.AddKnowledge();
             chatHistoryContents.AddNote(AI_KNOWLEDGE_NOTE_PATH, "[knowledgeNote.txt]文件内容是你的知识笔记");
             chatHistoryContents.AddNote(AI_INSPIRATION_NOTE_PATH, "[inspirationNote.txt]文件内容是你的灵感笔记");
-            var aiStatus = chatHistoryContents.AddStatus(isGroupRequest ? "群聊" : "私聊");
+            var aiStatus = await chatHistoryContents.AddStatusAsync(
+                isGroupRequest ? AIMessageSourceType.Group : AIMessageSourceType.Private)
+                .ConfigureAwait(false);
 
             var requestUserInfos = new ConcurrentDictionary<long, AIUserInfo>();
             thisRequestContents
@@ -141,7 +143,7 @@ public static class AIExtensions
             {
                 // MEMO : Json查找失败
                 YameiLogExtensions.WriteJsonDeserializeLog(
-                    new JsonException("Json解析失败!"),
+                    new JsonException(ERROR_JSON_ERROR),
                     nameof(AIChatResponse),
                     $"[GeminiError]{responseText}");
 
@@ -711,18 +713,23 @@ public static class AIExtensions
     /// <summary>
     /// 追加小助手状态
     /// </summary>
-    public static AIStatusInfo AddStatus(this List<Content> contents, string scene)
+    public static async Task<AIStatusInfo> AddStatusAsync(this List<Content> contents, AIMessageSourceType messageSourceType)
     {
         var content = new Content
         {
             Role = USER_ROLE,
         };
+
+        var (weatherInfo, prevWeatherInfo, nextWeatherInfo) = await WeatherExtensions.AIGetWeatherInfoAsync().ConfigureAwait(false);
         var aiChatStatus = new AIStatusInfo
         {
             Mood = PublicVar.AIData.AIStatusData.MoodIndexValue.ToMood(),
             Schedule = AIStatusUtil.GetSchedule(),
             NowDate = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
-            Scene = scene,
+            Scene = messageSourceType.ToMessageSourceText(),
+            WeatherInfo = weatherInfo,
+            PrevWeatherInfo = prevWeatherInfo,
+            NextWeatherInfo = nextWeatherInfo,
         };
         content.AddText(aiChatStatus.ToJsonIgnoreNull());
         contents.Add(content);

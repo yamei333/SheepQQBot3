@@ -10,6 +10,7 @@ using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using SheepQQBot3.Model.QQ;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -56,7 +57,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 群聊总结最后一次执行时间
     /// </summary>
-    private static DateTime _chatSummaryRequestLastTime = DateTime.MinValue;
+    private static ConcurrentDictionary<long, DateTime> _chatSummaryRequestLastTimes = [];
 
     private static readonly Queue<string> _repeatSkipQueue = [];
 
@@ -113,13 +114,14 @@ public static partial class ProcessGroupMessage
                     return false;
 
                 var dateNow = DateTime.Now;
-                if (!BotExtensions.IsAdmin(senderId) && (dateNow - _chatSummaryRequestLastTime).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
+                if (!BotExtensions.IsAdmin(senderId) 
+                    && (dateNow - _chatSummaryRequestLastTimes.GetOrAdd(groupId, DateTime.MinValue)).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
                 {
                     await BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
                     return true;
                 }
 
-                _chatSummaryRequestLastTime = dateNow;
+                _chatSummaryRequestLastTimes.AddOrUpdate(groupId, dateNow, dateNow);
                 var summaryType = message.ToUpper().Substring(4, 1);
                 var summaryWords = new Dictionary<string, int>();
                 var wordCloudWidth = 1000;

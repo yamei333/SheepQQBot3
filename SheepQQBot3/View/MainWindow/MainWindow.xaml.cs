@@ -300,6 +300,7 @@ public partial class MainWindow : Window
         // MEMO : 0.14.0.1 结束时还是关闭, 暂时不处理中断时的历史消息
         BotExtensions.KillServerExe();
         BotExtensions.KillBarkExe();
+        ConfigExtensions.SaveConfig();
         Environment.Exit(0);
     }
 

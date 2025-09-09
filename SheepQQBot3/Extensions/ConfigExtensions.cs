@@ -1,6 +1,8 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Microsoft.VisualBasic.FileIO;
+using OpenWeatherMap.Standard;
+using OpenWeatherMap.Standard.Enums;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using System;
@@ -112,6 +114,11 @@ public static class ConfigExtensions
 
         var jsonText = File.ReadAllText(AIConfigPath, Encoding.UTF8);
         PublicVar.AIConfig = jsonText.JsonDeserialize<AIConfig>();
+        OpenWeatherMapService = new Current(PublicVar.AIConfig.OpenWeatherMapKey)
+        {
+            Languages = Languages.English,
+            Units = WeatherUnits.Metric,
+        };
     }
 
     /// <summary>

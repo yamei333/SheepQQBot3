@@ -87,9 +87,7 @@ public static class YameiLogExtensions
         var message = $"哈基米请求: {ENTER}"
             + $"ApiKey: {apiKey}{ENTER}"
             + $"Token: 总量:{usageMetadata.TotalTokenCount}"
-            + $"(履历:{usageMetadata.CachedContentTokenCount}/"
-            + $"回复:{usageMetadata.PromptTokenCount}/"
-            + $"思考:{usageMetadata.ThoughtsTokenCount}){ENTER}"
+            + $"(提示词:{usageMetadata.PromptTokenCount}/思考:{usageMetadata.ThoughtsTokenCount}){ENTER}"
             + $"小助手状态: {aiStatusJson}{ENTER}"
             + $"请求: {thisRequestContentShortVer.ToJsonIgnoreNull()}{ENTER}"
             + $"回复: {response.Text}";

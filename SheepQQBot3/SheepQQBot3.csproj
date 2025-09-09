@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.15.1.1</Version>
+    <Version>0.15.2.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>disable</Nullable>
@@ -63,9 +63,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="Google_GenerativeAI" Version="3.0.0" />
+    <PackageReference Include="Google_GenerativeAI" Version="3.1.1" />
     <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
     <PackageReference Include="Masuit.Tools.Core" Version="2025.5.0" />
+    <PackageReference Include="OpenWeatherMap.Standard" Version="3.0.91" />
   </ItemGroup>
 
   <ItemGroup>

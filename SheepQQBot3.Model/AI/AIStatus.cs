@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Text.Json.Serialization;
+using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SheepQQBot3.Model.AI
 {
@@ -39,10 +40,85 @@ namespace SheepQQBot3.Model.AI
         public string Scene { get; set; }
 
         /// <summary>
+        /// 当天天气
+        /// </summary>
+        [JsonPropertyName("weatherInfo")]
+        public AIWeatherInfo WeatherInfo { get; set; }
+
+        /// <summary>
+        /// 上个时间点天气预报
+        /// </summary>
+        [JsonPropertyName("prevWeatherInfo")]
+        public AIWeatherInfo PrevWeatherInfo { get; set; }
+
+        /// <summary>
+        /// 下个时间点天气预报
+        /// </summary>
+        [JsonPropertyName("nextWeatherInfo")]
+        public AIWeatherInfo NextWeatherInfo { get; set; }
+
+        /// <summary>
         /// 当前时间
         /// </summary>
         [JsonPropertyName("nowDate")]
         public string NowDate { get; set; }
+    }
+
+    public class AIWeatherInfo
+    {
+        /// <summary>
+        /// 天气预报时间(预报时使用)
+        /// </summary>
+        [JsonPropertyName("forecastDate")]
+        public string ForecastDate { get; set; }
+
+        /// <summary>
+        /// 当前天气
+        /// </summary>
+        [JsonPropertyName("currentWeather")]
+        public string CurrentWeather { get; set; }
+
+        /// <summary>
+        /// 平均温度
+        /// </summary>
+        [JsonPropertyName("temp")]
+        public string TempAvg { get; set; }
+
+        /// <summary>
+        /// 体感温度
+        /// </summary>
+        [JsonPropertyName("tempFeelLike")]
+        public string TempFeelLike { get; set; }
+
+        /// <summary>
+        /// 风速
+        /// </summary>
+        [JsonPropertyName("windSpeed")]
+        public string WindSpeed { get; set; }
+
+        /// <summary>
+        /// 降雨量(mm/h)
+        /// </summary>
+        [JsonPropertyName("precipitation")]
+        public string Precipitation { get; set; }
+
+        /// <summary>
+        /// 日出时间
+        /// </summary>
+        [JsonPropertyName("sunrise")]
+        public string Sunrise { get; set; }
+
+        /// <summary>
+        /// 日落时间
+        /// </summary>
+        [JsonPropertyName("sunset")]
+        public string Sunset { get; set; }
+
+        /// <summary>
+        /// 浑浊度
+        /// </summary>
+        [JsonPropertyName("cloudiness")]
+        public string Cloudiness { get; set; }
     }
 
     public static class AIStatusUtil

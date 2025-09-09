@@ -8,7 +8,7 @@ namespace SheepQQBot3.BotTask;
 
 public static partial class TaskProcess
 {
-    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|03|04|05|08|12|16|20):00:\d{2}");
+    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|06|12|18):00:\d{2}");
 
     /// <summary>
     /// AI状态恢复
@@ -24,14 +24,14 @@ public static partial class TaskProcess
                 var dateNowStr = dateNow.ToConditionString(PublicVar.HolidayInfo);
                 if (!_aiStatusRevocer.IsMatch(dateNowStr))
                 {
-                    CommonExtensions.SleepMinutes(5);
+                    CommonExtensions.SleepMinutes(1);
                     continue;
                 }
 
                 var moodIndexValue = PublicVar.AIData.AIStatusData.MoodIndexValue;
-                if (moodIndexValue is >= -5 and <= 5)
+                if (moodIndexValue == 0)
                 {
-                    CommonExtensions.SleepMinutes(5);
+                    CommonExtensions.SleepMinutes(1);
                     continue;
                 }
 
