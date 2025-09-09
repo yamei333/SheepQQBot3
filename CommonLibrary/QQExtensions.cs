@@ -39,6 +39,6 @@ public static class QQExtensions
     public static string ProcessAIRequestMessage(string message)
     {
         return _regReplaceCQCode.Replace(message,
-            match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value)).TrimStart();
+            match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value, match.Value)).TrimStart();
     }
 }

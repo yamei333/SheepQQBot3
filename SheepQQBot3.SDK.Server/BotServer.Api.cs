@@ -113,7 +113,7 @@ partial class BotServer
         async void ProcessYmBark(Element ymElement)
         {
             var elementData = ymElement.Data;
-            if (!string.IsNullOrEmpty(elementData.Data))
+            if (!elementData.Data.IsNullOrEmpty())
             {
                 await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content).ConfigureAwait(false);
             }
@@ -218,7 +218,7 @@ partial class BotServer
             {
                 if (groupMembers.TryGetValue(userId, out var groupMember))
                 {
-                    return string.IsNullOrEmpty(groupMember.Card)
+                    return groupMember.Card.IsNullOrEmpty()
                         ? $"{groupMember.NickName}({userId})"
                         : $"{groupMember.Card}({userId})";
                 }

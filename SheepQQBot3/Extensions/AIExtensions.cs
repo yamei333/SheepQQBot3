@@ -97,7 +97,7 @@ public static class AIExtensions
                 .Where(content => content.Role == "user")
                 .ForEach(content =>
                 {
-                    var part = content.Parts.FirstOrDefault(each => !string.IsNullOrEmpty(each.Text));
+                    var part = content.Parts.FirstOrDefault(each => !each.Text.IsNullOrEmpty());
                     if (part != null)
                     {
                         var qqId = part.Text.JsonDeserialize<AIChatRequest>().Sender.QQId;
@@ -185,7 +185,7 @@ public static class AIExtensions
 
             // MEMO : 删除emoji
             responseText = _regDeleteEmoji.Replace(responseText, string.Empty);
-            if (string.IsNullOrEmpty(responseText))
+            if (responseText.IsNullOrEmpty())
             {
                 YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]Gemini返回截断");
                 retryTimes++;
@@ -234,7 +234,7 @@ public static class AIExtensions
                 chatMessages.ForEach(aiChatResponseContent =>
                 {
                     var sendMessage = CreateSendMessage(aiChatResponseContent, false, requestTargetId, isGroupRequest);
-                    if (string.IsNullOrEmpty(sendMessage))
+                    if (sendMessage.IsNullOrEmpty())
                         return;
 
                     sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, sendMessage));
@@ -321,7 +321,7 @@ public static class AIExtensions
             }
 
             valueChangeMessage = valueChangeMessage.RemoveEnd(ENTER);
-            if (IsDebug && !string.IsNullOrEmpty(valueChangeMessage))
+            if (IsDebug && !valueChangeMessage.IsNullOrEmpty())
                 botSendMessage(TestGroupId, $"{valueChangeMessage}");
 
             // MEMO : 保存AI数据
@@ -330,7 +330,7 @@ public static class AIExtensions
 
             // MEMO : 保存知识笔记内容
             var knowledgeNote = aiChatResponse.KnowledgeNote;
-            if (knowledgeNote != null && !string.IsNullOrEmpty(knowledgeNote.Title) && !string.IsNullOrEmpty(knowledgeNote.Content))
+            if (knowledgeNote != null && !knowledgeNote.Title.IsNullOrEmpty() && !knowledgeNote.Content.IsNullOrEmpty())
             {
                 // MEMO : 写入知识笔记内容
                 WriteAINote(knowledgeNote);
@@ -343,7 +343,7 @@ public static class AIExtensions
 
             // MEMO : 保存灵感笔记内容
             var inspirationNote = aiChatResponse.InspirationNote;
-            if (inspirationNote != null && !string.IsNullOrEmpty(inspirationNote.Title) && !string.IsNullOrEmpty(inspirationNote.Content))
+            if (inspirationNote != null && !inspirationNote.Title.IsNullOrEmpty() && !inspirationNote.Content.IsNullOrEmpty())
             {
                 // MEMO : 写入灵感笔记内容
                 WriteAINote(inspirationNote);
@@ -360,7 +360,7 @@ public static class AIExtensions
             chatMessages.ForEach(aiChatResponseContent =>
             {
                 var sendMessage = CreateSendMessage(aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
-                if (string.IsNullOrEmpty(sendMessage))
+                if (sendMessage.IsNullOrEmpty())
                     return;
 
                 // MEMO : 只有第一句回复需要at
@@ -471,10 +471,10 @@ public static class AIExtensions
         if (IsDebug)
         {
             resultMessage = (needAt ? $"{CQCode.At(targetId)} " : string.Empty)
-                + $"{(string.IsNullOrEmpty(think) ? string.Empty : $"[思索:{think}]\r\n")}"
-                + $"{(string.IsNullOrEmpty(sensory) ? string.Empty : $"[感受:{sensory}]\r\n")}"
-                + $"{(string.IsNullOrEmpty(mind) ? string.Empty : $"[心想:{mind}]\r\n")}"
-                + $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
+                + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思索:{think}]\r\n")}"
+                + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]\r\n")}"
+                + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]\r\n")}"
+                + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
 
             if (Enum.TryParse<AIExpressionType>(face, out var expressionType))
                 resultMessage += $"{(expressionType == AIExpressionType.None ? string.Empty : $"[表情:{expressionType.GetDisplay()}]\r\n")}";
@@ -491,13 +491,13 @@ public static class AIExtensions
             {
                 if (targetId == SuperAdminId)
                 {
-                    resultMessage = $"{(string.IsNullOrEmpty(sensory) ? string.Empty : $"[感受:{sensory}]\r\n")}"
-                        + $"{(string.IsNullOrEmpty(mind) ? string.Empty : $"[心想:{mind}]\r\n")}"
-                        + $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
+                    resultMessage = $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]\r\n")}"
+                        + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]\r\n")}"
+                        + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
                 }
                 else
                 {
-                    resultMessage = $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
+                    resultMessage = $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
                 }
             }
         }
@@ -545,7 +545,7 @@ public static class AIExtensions
             var cqImageCode = match.Value;
             var imageFileName = _regGetImageFile.Match(cqImageCode).Value;
             var qqImageFilePath = GetQQImageFilePath(imageFileName);
-            if (!string.IsNullOrEmpty(qqImageFilePath))
+            if (!qqImageFilePath.IsNullOrEmpty())
             {
                 try
                 {

@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.DbModel.JiebaDb;
+﻿using Masuit.Tools;
+using SheepQQBot3.DbModel.JiebaDb;
 using System.Globalization;
 using System.IO;
 using System.Linq;
@@ -91,7 +92,7 @@ public static partial class ProcessGroupMessage
     {
         var startChar1 = 'Z';
         var startChar2 = 'Z';
-        var isNull = string.IsNullOrEmpty(input);
+        var isNull = input.IsNullOrEmpty();
         if (!isNull)
         {
             startChar1 = input[0];

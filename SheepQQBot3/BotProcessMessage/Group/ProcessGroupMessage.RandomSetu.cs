@@ -405,7 +405,7 @@ public static partial class ProcessGroupMessage
             {
                 if (groupMembers.TryGetValue(userId, out var groupMember))
                 {
-                    return string.IsNullOrEmpty(groupMember.Card)
+                    return groupMember.Card.IsNullOrEmpty()
                         ? $"{groupMember.NickName}({userId})"
                         : $"{groupMember.Card}({userId})";
                 }
@@ -485,7 +485,7 @@ public static partial class ProcessGroupMessage
         if (_tagDictionary.TryGetValue(tag.ToUpper(), out var changeTag))
             tag = changeTag;
 
-        var isSearchTag = !string.IsNullOrEmpty(tag);
+        var isSearchTag = !tag.IsNullOrEmpty();
         List<SetuSendHistory> targetSetuSendHistorys;
         lock (BotDb.SyncLock)
         {
@@ -496,7 +496,7 @@ public static partial class ProcessGroupMessage
 
         var lastHistory = Enumerable.MaxBy(targetSetuSendHistorys, each => each.TimeStamp);
         var lastKeyword = lastHistory?.SearchKeyword ?? string.Empty;
-        if (!string.IsNullOrEmpty(lastKeyword) && lastKeyword == sourceTag)
+        if (!lastKeyword.IsNullOrEmpty() && lastKeyword == sourceTag)
         {
             const int CHECK_TIMES = 2;
             // MEMO : 最后2次色图都有关键字
@@ -757,7 +757,7 @@ public static partial class ProcessGroupMessage
 
                 await BotDb.AddAsync(new SetuSendHistory(senderId, dateNow, sourceTag, false, false, false, false))
                     .ConfigureAwait(false);
-                if (!string.IsNullOrEmpty(sendMessage))
+                if (!sendMessage.IsNullOrEmpty())
                 {
                     await BotServer.SendGroupMessageAsync(groupId, sendMessage)
                         .ConfigureAwait(false);
@@ -1154,7 +1154,7 @@ public static partial class ProcessGroupMessage
                     addString += $",搜索{changeLvTag.ToSignString()}";
                 if (changeLvFast > 0)
                     addString += $",频率快{changeLvFast.ToSignString()}";
-                if (!string.IsNullOrEmpty(addString))
+                if (!addString.IsNullOrEmpty())
                     addString = addString[1..];
 
                 if (addSetuSenderLv != 0)

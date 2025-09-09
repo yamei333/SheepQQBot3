@@ -69,9 +69,9 @@ public static class MyStringExtensions
             return 0;
         }
 
-        if (string.IsNullOrEmpty(source))
+        if (source.IsNullOrEmpty())
         {
-            if (string.IsNullOrEmpty(target))
+            if (target.IsNullOrEmpty())
             {
                 similarity = 1;
                 return 0;
@@ -81,7 +81,7 @@ public static class MyStringExtensions
             return target.Length;
         }
 
-        if (string.IsNullOrEmpty(target))
+        if (target.IsNullOrEmpty())
         {
             similarity = 0;
             return source.Length;
@@ -141,7 +141,7 @@ public static class MyStringExtensions
         StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
     {
         findedStr = conditionStr.FirstOrDefault(each => str.Contains(each, stringComparison));
-        return !string.IsNullOrEmpty(findedStr);
+        return !findedStr.IsNullOrEmpty();
     }
 
     /// <summary>
@@ -349,10 +349,12 @@ public static class MyStringExtensions
     [DebuggerStepThrough]
     public static string CultureFormat(this string target, params object[] args) => string.Format(CultureInfo.CurrentUICulture, target, args);
 
-    public static string CQCodeToMessageText(string cqCode)
+    public static string CQCodeToMessageText(string cqCode, string cqArea)
     {
         return cqCode switch
         {
+            "at" => cqArea,
+            "image" => "[图片]",
             "forward" => "[转发消息]",
             "video" => "[视频]",
             "record" => "[语音]",

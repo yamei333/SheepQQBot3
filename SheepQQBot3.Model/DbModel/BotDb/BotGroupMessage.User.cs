@@ -31,7 +31,7 @@ public partial class BotGroupMessage
         // MEMO : 转换所有CQ段
         // MEMO : 0.15.3.1 有AI总结再也不用大写了
         MessageText = _regReplaceCQCode.Replace(message,
-            match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value)).TrimStart();
+            match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value, match.Value)).TrimStart();
         // MEMO : 0.14.4.4 不再记录图片
         //MessageImage = messageImage;
         MessageImage = string.Empty;

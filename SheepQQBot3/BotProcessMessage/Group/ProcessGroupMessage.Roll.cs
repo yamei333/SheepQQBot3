@@ -1,8 +1,9 @@
-﻿using System;
-using System.Text.RegularExpressions;
-using System.Threading.Tasks;
+﻿using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
+using System;
+using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -39,7 +40,7 @@ public static partial class ProcessGroupMessage
             return false;
 
         var contentMessage = message[3..];
-        if (string.IsNullOrEmpty(contentMessage))
+        if (contentMessage.IsNullOrEmpty())
         {
             await SendRollResult(100).ConfigureAwait(false);
             return true;

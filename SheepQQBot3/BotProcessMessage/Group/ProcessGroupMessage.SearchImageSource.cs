@@ -1,5 +1,5 @@
 ﻿using CommonLibrary;
-using SheepQQBot3.Extensions;
+using Masuit.Tools;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
 using System.Linq;
@@ -23,7 +23,7 @@ public static partial class ProcessGroupMessage
     public static async Task<bool> SearchImageSource(GroupMessage groupMessage)
     {
         var sauceNaoKey = AppSettingExtensions.Get("saucenaokey");
-        if (string.IsNullOrEmpty(sauceNaoKey))
+        if (sauceNaoKey.IsNullOrEmpty())
             return false;
 
         var groupId = groupMessage.GroupId;
@@ -35,7 +35,7 @@ public static partial class ProcessGroupMessage
 
         message = message[4..];
         var url = CQCode.GetImageUrl(message);
-        if (string.IsNullOrEmpty(url))
+        if (url.IsNullOrEmpty())
             return false;
 
         await BotServer.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);

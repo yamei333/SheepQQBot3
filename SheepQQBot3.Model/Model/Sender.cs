@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.Model.Enums;
+﻿using Masuit.Tools;
+using SheepQQBot3.Model.Enums;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model;
@@ -15,7 +16,7 @@ public class Sender
     public string Card { get; set; }
 
     [JsonIgnore]
-    public string CardName => string.IsNullOrEmpty(Card) ? NickName : Card;
+    public string CardName => Card.IsNullOrEmpty() ? NickName : Card;
 
     [JsonPropertyName("level")]
     public string Level { get; set; }

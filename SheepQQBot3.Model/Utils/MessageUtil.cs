@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Model.Extension;
 using System;
 using System.Collections.Generic;
@@ -53,7 +54,7 @@ public static class MessageUtil
     public static Element ProcessCQAreaMessage(string message)
     {
         var cqCode = _regGetCQCode.Match(message).Value;
-        if (string.IsNullOrEmpty(cqCode))
+        if (cqCode.IsNullOrEmpty())
             return new Element(ElementType.text, new ElementBaseData(message));
 
         var cqType = (ElementType)Enum.Parse(typeof(ElementType), cqCode, true);
@@ -112,8 +113,8 @@ public static class MessageUtil
             var xmlString = new Regex(@"data=\<\?xml.+\>", RegexOptions.Singleline).Match(subMessage).Value;
             subMessage = subMessage.Replace(xmlString, string.Empty);
             var subJsonContent = string.Join(",", subMessage.Split(',')
-                .Where(each => !string.IsNullOrEmpty(each)).ToArray()
-                .Select(eachSubData => string.Join(":", eachSubData.Split('=')
+                .Where(each => !each.IsNullOrEmpty()).ToArray()
+                .Select(eachSubData => string.Join(':', eachSubData.Split('=')
                     .Select(eachElement => $"\"{eachElement}\"")
                     .ToArray())));
             var elementBaseData = $"{{{subJsonContent}}}".JsonDeserialize<ElementBaseData>();

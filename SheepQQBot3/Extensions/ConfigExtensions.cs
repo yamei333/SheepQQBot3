@@ -213,7 +213,7 @@ public static class ConfigExtensions
                     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
                     WriteIndented = true,
                 });
-                if (!string.IsNullOrEmpty(jsonText))
+                if (!jsonText.IsNullOrEmpty())
                     File.WriteAllText(ConfigPath, jsonText, Encoding.UTF8);
                 else
                     throw new ArgumentNullException(nameof(jsonText));

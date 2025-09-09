@@ -135,7 +135,7 @@ public static class HttpExtensions
     {
         var httpMethod = method ?? HttpMethod.Get;
         var httpRequestMessage = new HttpRequestMessage(httpMethod, url);
-        httpRequestMessage.Content = string.IsNullOrEmpty(mediaType)
+        httpRequestMessage.Content = mediaType.IsNullOrEmpty()
             ? new StringContent(content, Encoding.UTF8)
             : new StringContent(content, Encoding.UTF8, mediaType);
         try
@@ -196,7 +196,7 @@ public static class HttpExtensions
     public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
         string url, string path, bool needResize, bool checkOnly = false, string customTempFileName = null)
     {
-        if (string.IsNullOrEmpty(url))
+        if (url.IsNullOrEmpty())
             return (false, string.Empty);
 
         var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
@@ -249,7 +249,7 @@ public static class HttpExtensions
     public static (bool Successed, string FileName) AIHttpDownloadImage(
         string url, string path, string customTempFileName = null)
     {
-        if (string.IsNullOrEmpty(url))
+        if (url.IsNullOrEmpty())
             return (false, "[Url错误图片]");
 
         var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();

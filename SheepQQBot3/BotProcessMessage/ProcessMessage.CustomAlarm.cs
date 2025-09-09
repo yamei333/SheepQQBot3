@@ -196,7 +196,7 @@ public static partial class ProcessMessage
                                     });
                             }
 
-                            if (string.IsNullOrEmpty(sendMessage))
+                            if (sendMessage.IsNullOrEmpty())
                                 sendMessage += $"{ENTER}无任何提醒记录!";
 
                             break;

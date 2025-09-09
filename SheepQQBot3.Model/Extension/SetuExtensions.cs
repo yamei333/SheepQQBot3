@@ -41,7 +41,7 @@ public static partial class SetuExtensions
         get
         {
             var url = AppSettingExtensions.Get("pixivReverseProxy");
-            return string.IsNullOrEmpty(url) ? "i.pixiv.re" : url;
+            return url.IsNullOrEmpty() ? "i.pixiv.re" : url;
         }
     }
 
@@ -61,7 +61,7 @@ public static partial class SetuExtensions
 
         var url = @$"https://api.lolicon.app/setu/v2?excludeAI=true&proxy={PixivReverseProxy}"
             + $"{GetUrlTagString()}{(r18 ? "&r18=1" : "&r18=0")}"
-            + (string.IsNullOrEmpty(tag) ? $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}" : string.Empty);
+            + (tag.IsNullOrEmpty() ? $"&dateAfter={DateTime.Now.AddYears(-3).ToTimeStamp()}" : string.Empty);
 
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_Lolicon>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
@@ -105,7 +105,7 @@ public static partial class SetuExtensions
 
         string GetUrlTagString()
         {
-            if (string.IsNullOrEmpty(tag))
+            if (tag.IsNullOrEmpty())
                 return GetDateString();
 
             return tag.Contains('|')
@@ -168,7 +168,7 @@ public static partial class SetuExtensions
 
         string GetUrlTagString()
         {
-            if (string.IsNullOrEmpty(tag))
+            if (tag.IsNullOrEmpty())
                 return string.Empty;
 
             return tag.Contains('|')
@@ -189,7 +189,7 @@ public static partial class SetuExtensions
         var setuResult = SetuResult.Successed;
         try
         {
-            var url = @$"https://setu.yuban10703.xyz/setu?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}";
+            var url = @$"https://setu.yuban10703.xyz/setu?num=1{(tag.IsNullOrEmpty() ? "" : $"&tags={tag}")}&r18={(r18 ? 1 : 0)}";
             var request = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
             if (request == null)
                 return new SetuInfo(SetuType.Yuban, SetuResult.ApiError);
@@ -235,7 +235,7 @@ public static partial class SetuExtensions
     {
         var setuData = new SetuData_NyanCatda();
         var setuResult = SetuResult.Successed;
-        var url = @$"https://sex.nyan.run/api/v2/?num=1{(string.IsNullOrEmpty(tag) ? "" : $"&keyword={tag}")}&r18={(r18 ? "true" : "false")}";
+        var url = @$"https://sex.nyan.run/api/v2/?num=1{(tag.IsNullOrEmpty() ? "" : $"&keyword={tag}")}&r18={(r18 ? "true" : "false")}";
         var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuResponse_NyanCatda>(url).ConfigureAwait(false);
         switch (httpResponse.Result)
         {
@@ -383,7 +383,7 @@ public static partial class SetuExtensions
         var temp = url
             .Replace(Pximg, PixivReverseProxy)
             .Replace(PximgRe, PixivReverseProxy)
-            .Replace("sex.nyan.run",PixivReverseProxy)
+            .Replace("sex.nyan.run", PixivReverseProxy)
             .Replace("img-original", "c/540x540_70/img-master");
         //.Replace("img-original", "img-master");
         var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);

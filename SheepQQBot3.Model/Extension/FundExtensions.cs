@@ -82,7 +82,7 @@ public static class FundExtensions
     /// <returns></returns>
     public static async Task<FundPostionData> GetFundPositionDataAsync(string fundId)
     {
-        if (string.IsNullOrEmpty(fundId))
+        if (fundId.IsNullOrEmpty())
             return null;
 
         var httpResponse = await HttpExtensions
@@ -123,8 +123,7 @@ public static class FundExtensions
                 if (!isExistZero && Math.Abs(growth) <= 0.1)
                     isExistZero = true;
 
-                //sb.AppendLine($"{(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}({fundData.Code}) {fundData.ExpectGrowthString}");
-                sb.AppendLine($"{fundData.Code}|{fundData.ExpectGrowthString} {(string.IsNullOrEmpty(fundRemark) ? fundData.Name : fundRemark)}");
+                sb.AppendLine($"{fundData.Code}|{fundData.ExpectGrowthString} {(fundRemark.IsNullOrEmpty() ? fundData.Name : fundRemark)}");
             });
 
         // MEMO : 日期错误, 今日不播报基金

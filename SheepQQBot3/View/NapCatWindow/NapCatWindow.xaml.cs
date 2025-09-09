@@ -1,4 +1,8 @@
-﻿using System;
+﻿using CommonLibrary;
+using Masuit.Tools;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model.Config;
+using System;
 using System.ComponentModel;
 using System.Diagnostics;
 using System.IO;
@@ -8,9 +12,6 @@ using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Documents;
 using System.Windows.Media;
-using CommonLibrary;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model.Config;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -43,7 +44,7 @@ public partial class NapCatWindow : Window
         var napCatPath = AppSettingExtensions.Get("napcat");
         var napCatBat = AppSettingExtensions.Get("napcatbat");
         // MEMO : 未配置Napcat则return
-        if (string.IsNullOrEmpty(napCatPath) || string.IsNullOrEmpty(napCatBat))
+        if (napCatPath.IsNullOrEmpty() || napCatBat.IsNullOrEmpty())
         {
             Vm.AddRunLog(new RunLog_SystemError("未正确配置 NapCat 路径"));
             return;
@@ -78,7 +79,7 @@ public partial class NapCatWindow : Window
             while (!napCat.StandardOutput.EndOfStream)
             {
                 var line = napCat.StandardOutput.ReadLine();
-                if (string.IsNullOrEmpty(line))
+                if (line.IsNullOrEmpty())
                     continue;
 
                 var result = _logLvReg.Replace(line!, "[${logLv}]");

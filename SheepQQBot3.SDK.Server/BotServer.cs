@@ -46,10 +46,10 @@ public partial class BotServer : IDisposable
         _botDb = botDb;
         var address = AppSettingExtensions.Get("serverAddress");
         var port = AppSettingExtensions.Get("serverPort");
-        _server = string.IsNullOrEmpty(address)
+        _server = address.IsNullOrEmpty()
             ? new WatsonWsServer(DEFAULT_IP_ADDRESS, DEFAULT_PORT)
             : new WatsonWsServer(address,
-                string.IsNullOrEmpty(port) ? DEFAULT_PORT : int.Parse(port));
+                port.IsNullOrEmpty() ? DEFAULT_PORT : int.Parse(port));
     }
 
     /// <inheritdoc />

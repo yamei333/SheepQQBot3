@@ -47,7 +47,7 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         var version = Assembly.GetExecutingAssembly().GetName().Version;
         Title = $"{BOT_NAME} - Ver {version}";
         IsLoadComplete = false;
-        IsBarkUsed = !string.IsNullOrEmpty(AppSettingExtensions.Get("bark"));
+        IsBarkUsed = !AppSettingExtensions.Get("bark").IsNullOrEmpty();
 
         ConfigExtensions.LoadConfig();
         ConfigExtensions.LoadAIConfig();

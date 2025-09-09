@@ -72,7 +72,7 @@ public static partial class ProcessPrivateMessage
                     return true;
                 }
 
-                if (string.IsNullOrEmpty(ipResult))
+                if (ipResult.IsNullOrEmpty())
                 {
                     await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
                     return true;
@@ -162,7 +162,7 @@ public static partial class ProcessPrivateMessage
                 File.Delete(each);
             });
             return BotServer.SendPrivateMessageAsync(senderId, groupId,
-                string.IsNullOrEmpty(sendMessage)
+                sendMessage.IsNullOrEmpty()
                     ? "没有历史记录需要删除!"
                     : $"{sendMessage}AI历史记录已删除!");
         }

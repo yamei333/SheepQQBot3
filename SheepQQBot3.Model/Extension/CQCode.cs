@@ -1,4 +1,5 @@
-﻿using System.Text.RegularExpressions;
+﻿using Masuit.Tools;
+using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.Model.Extension;
 
@@ -16,9 +17,9 @@ public static class CQCode
 
     public static string Image(string filePath, string fileName = "", bool isBiaoQing = false, string summary = "")
         => $"[CQ:image,url={filePath}"
-            + $"{(!string.IsNullOrEmpty(fileName) ? $",file={fileName}" : string.Empty)}"
+            + $"{(!fileName.IsNullOrEmpty() ? $",file={fileName}" : string.Empty)}"
             + $"{(isBiaoQing ? ",sub_type=1" : string.Empty)}"
-            + $"{(!string.IsNullOrEmpty(summary) ? $",summary={summary}" : string.Empty)}]";
+            + $"{(!summary.IsNullOrEmpty() ? $",summary={summary}" : string.Empty)}]";
 
     public static string Reply(long targetId, int messageId)
         => $"[CQ:reply,qq={targetId},id={messageId}]";

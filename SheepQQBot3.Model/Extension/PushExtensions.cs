@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Model.Enums;
 using System.Net.Http;
 using System.Text;
@@ -46,14 +47,14 @@ public static class PushExtensions
         try
         {
             var barkUrl = AppSettingExtensions.Get("barkurl");
-            if (string.IsNullOrEmpty(barkUrl))
+            if (barkUrl.IsNullOrEmpty())
                 return PushBarkResultType.UrlError;
 
             var pushBarkData = new PushBarkData
             {
                 Body = message,
-                Title = string.IsNullOrEmpty(title) ? null : title,
-                Icon = string.IsNullOrEmpty(icon)
+                Title = title.IsNullOrEmpty() ? null : title,
+                Icon = icon.IsNullOrEmpty()
                     ? $"https://q.qlogo.cn/headimg_dl?dst_uin={AppSettingExtensions.Get("selfId", "10000")}&spec=100"
                     : icon,
                 LinkUrl = url,

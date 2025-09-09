@@ -1,7 +1,8 @@
-﻿using System.Linq;
-using System.Windows;
+﻿using Masuit.Tools;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Model.Enums;
+using System.Linq;
+using System.Windows;
 
 namespace SheepQQBot3.View;
 
@@ -37,7 +38,7 @@ public partial class AddGroupDialog
         TargetId = Vm.TargetId;
         TargetType = Vm.SelectedGroupConfig.TargetType;
         var targetName = Vm.TargetName;
-        TargetName = string.IsNullOrEmpty(targetName) ? "未设定" : targetName;
+        TargetName = targetName.IsNullOrEmpty() ? "未设定" : targetName;
         DialogResult = true;
         Close();
     }

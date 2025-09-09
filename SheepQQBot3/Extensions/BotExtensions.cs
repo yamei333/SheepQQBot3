@@ -29,7 +29,7 @@ public static partial class BotExtensions
     {
         var napCatPath = AppSettingExtensions.Get("napcat");
         var napCatKill = AppSettingExtensions.Get("napcatkill");
-        if (!string.IsNullOrEmpty(napCatPath) && !string.IsNullOrEmpty(napCatKill))
+        if (!napCatPath.IsNullOrEmpty() && !napCatKill.IsNullOrEmpty())
         {
             new Process
             {

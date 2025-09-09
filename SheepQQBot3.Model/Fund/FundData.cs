@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Masuit.Tools;
+using System;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Fund;
@@ -74,7 +75,7 @@ public class FundData
     private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
 
     private static DateTime FormatDate(string dateString)
-        => string.IsNullOrEmpty(dateString)
+        => dateString.IsNullOrEmpty()
             ? DateTime.MinValue
             : DateTime.TryParse(dateString, out var dateValue)
                 ? dateValue

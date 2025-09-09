@@ -1,4 +1,5 @@
 ﻿using GenerativeAI.Types;
+using Masuit.Tools;
 using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Enums;
 using System;
@@ -27,7 +28,7 @@ public class RunLog
     /// 是否有GroudId
     /// </summary>
     [JsonIgnore]
-    public bool HasGroupId => !string.IsNullOrEmpty(GroupId);
+    public bool HasGroupId => !GroupId.IsNullOrEmpty();
 
     public LogMessageType LogMessageType { get; set; }
 

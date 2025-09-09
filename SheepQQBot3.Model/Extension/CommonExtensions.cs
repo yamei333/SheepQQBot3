@@ -166,7 +166,7 @@ public static class CommonExtensions
                 return Path.Combine(appPath, directoryName, fileName);
             case GetPathType.CQCodePath:
                 return $"file:///{appPath.Replace(@"\", "/")}"
-                    + $"{(string.IsNullOrEmpty(directoryName) ? string.Empty : $"/{directoryName}")}/{fileName}";
+                    + $"{(directoryName.IsNullOrEmpty() ? string.Empty : $"/{directoryName}")}/{fileName}";
             default:
                 throw new ArgumentOutOfRangeException(nameof(pathType), pathType, null);
         }

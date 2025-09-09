@@ -85,7 +85,7 @@ public static partial class ProcessPrivateMessage
                     var dictMessage = $"词典: {(dictSearchResult == null
                         ? "未找到"
                         : $"已包含[{(dictSearchResult.IsDefault.ToBool() ? "默认" : "用户")}]"
-                            + $"{(dictSearchResult.Freq > 0 && !string.IsNullOrEmpty(dictSearchResult.Tag)
+                            + $"{(dictSearchResult.Freq > 0 && !dictSearchResult.Tag.IsNullOrEmpty()
                                 ? $"{dictSearchResult.Freq},{dictSearchResult.Tag}"
                                 : string.Empty)}")}";
                     var idfSearchResult = JiebaDb.Idfs.Find(dataMessage);
@@ -97,16 +97,16 @@ public static partial class ProcessPrivateMessage
                 // MEMO : 增加停止词(stopwords)
                 case "S":
                     var stopWords = JiebaDb.StopWords;
-                    if (string.IsNullOrEmpty(dataMessage))
+                    if (dataMessage.IsNullOrEmpty())
                     {
                         AddMessage(BotExtensions.GetMessage_CommandTypeError(senderId, messageId));
                         return false;
                     }
 
                     var stopWord = dataMessage;
-                    if (dataMessage.Contains(","))
+                    if (dataMessage.Contains(','))
                     {
-                        var stopWordDatas = dataMessage.Split(",");
+                        var stopWordDatas = dataMessage.Split(',');
                         var similarStopWord = stopWordDatas[1];
                         if (stopWords.Find(similarStopWord) == null)
                         {

@@ -1,4 +1,5 @@
-﻿using SheepQQBot3.Enums;
+﻿using Masuit.Tools;
+using SheepQQBot3.Enums;
 using System;
 using System.ComponentModel;
 using System.Windows;
@@ -44,7 +45,7 @@ public class AddDialogWindowBase<T> : Window
         // MEMO : Load时设置标题
         Loaded += (sender, args) =>
         {
-            Title = $"{GetMenuHeader(menuItem)}{(string.IsNullOrEmpty(title) ? Title : title)}";
+            Title = $"{GetMenuHeader(menuItem)}{(title.IsNullOrEmpty() ? Title : title)}";
             OnLoaded(sender, args);
             MoveFocus(new TraversalRequest(FocusNavigationDirection.First));
         };

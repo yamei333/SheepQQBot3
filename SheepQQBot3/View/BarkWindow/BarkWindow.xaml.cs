@@ -83,7 +83,7 @@ public partial class BarkWindow
             while (!Bark.StandardOutput.EndOfStream)
             {
                 var line = Bark.StandardOutput.ReadLine();
-                if (string.IsNullOrEmpty(line))
+                if (line.IsNullOrEmpty())
                     continue;
 
                 var result = _regCmdStart.Replace(line!, string.Empty);

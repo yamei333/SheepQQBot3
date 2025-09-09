@@ -1,4 +1,5 @@
-﻿using System.Globalization;
+﻿using Masuit.Tools;
+using System.Globalization;
 
 namespace SheepQQBot3.BotProcessMessage;
 
@@ -17,7 +18,7 @@ public static partial class ProcessMessage
     {
         var startChar1 = 'Z';
         var startChar2 = 'Z';
-        var isNull = string.IsNullOrEmpty(input);
+        var isNull = input.IsNullOrEmpty();
         if (!isNull)
         {
             startChar1 = input[0];

@@ -1,4 +1,5 @@
-﻿using Masuit.Tools.Systems;
+﻿using Masuit.Tools;
+using Masuit.Tools.Systems;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using System;
@@ -76,7 +77,7 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
                 break;
             case LogMessageType.AlarmAide:
             case LogMessageType.FundHelper:
-                result.Add(string.IsNullOrEmpty(runLog.GroupId)
+                result.Add(runLog.GroupId.IsNullOrEmpty()
                     ? new RunLogMessage($"QQ号: {runLog.SenderId}")
                     : new RunLogMessage($"群号: {runLog.GroupId}"));
                 break;

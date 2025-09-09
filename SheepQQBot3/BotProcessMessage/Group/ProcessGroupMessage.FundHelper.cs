@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using Masuit.Tools;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
 using System;
@@ -47,7 +48,7 @@ public static partial class ProcessGroupMessage
                     break;
                 case 'C':
                     var fundId = changedMessage[1..];
-                    if (string.IsNullOrEmpty(fundId))
+                    if (fundId.IsNullOrEmpty())
                     {
                         sendMessage.Append($"{ENTER}查询失败, 参数有误");
                         break;

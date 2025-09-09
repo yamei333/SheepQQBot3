@@ -25,6 +25,7 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 
 public static partial class ProcessGroupMessage
 {
+    private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
     private const string PATH_CACHE_WORDCLOUD = "WordCloud";
     private const string PATH_WORDCLOUD_CONFIG = "WordCloud/Config";
 
@@ -100,7 +101,7 @@ public static partial class ProcessGroupMessage
                     if (botGroupMessage == null)
                     {
                         botGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
-                        if (!string.IsNullOrEmpty(botGroupMessage.MessageText) || !string.IsNullOrEmpty(botGroupMessage.MessageImage))
+                        if (!botGroupMessage.MessageText.IsNullOrEmpty() || !botGroupMessage.MessageImage.IsNullOrEmpty())
                             BotDb.AddAsync(botGroupMessage);
                     }
                 }
@@ -145,7 +146,7 @@ public static partial class ProcessGroupMessage
                         // MEMO : AI小时统计
                         var aiHourStr = message[5..];
                         var aiHour = 16;
-                        if (!string.IsNullOrEmpty(aiHourStr))
+                        if (!aiHourStr.IsNullOrEmpty())
                         {
                             if (!int.TryParse(aiHourStr, out aiHour))
                             {
@@ -173,7 +174,7 @@ public static partial class ProcessGroupMessage
                         }
 
                         var dataMessage = message[5..];
-                        if (string.IsNullOrEmpty(dataMessage))
+                        if (dataMessage.IsNullOrEmpty())
                         {
                             await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                             return false;
@@ -198,7 +199,7 @@ public static partial class ProcessGroupMessage
                         // MEMO : 小时统计
                         var hourStr = message[5..];
                         var hour = 12;
-                        if (!string.IsNullOrEmpty(hourStr))
+                        if (!hourStr.IsNullOrEmpty())
                         {
                             if (!int.TryParse(hourStr, out hour))
                             {
@@ -282,7 +283,7 @@ public static partial class ProcessGroupMessage
                             {
                                 var historyMessage = each.MessageText;
                                 historyMessage = historyMessage.Trim().ToUpper();
-                                if (string.IsNullOrEmpty(historyMessage))
+                                if (historyMessage.IsNullOrEmpty())
                                     return;
 
                                 // MEMO : 不喜欢的内容直接屏蔽
@@ -331,7 +332,7 @@ public static partial class ProcessGroupMessage
                             {
                                 var historyMessage = each.MessageText;
                                 historyMessage = historyMessage.Trim();
-                                if (string.IsNullOrEmpty(historyMessage))
+                                if (historyMessage.IsNullOrEmpty())
                                     return;
 
                                 // MEMO : 不喜欢的内容直接屏蔽
@@ -384,6 +385,10 @@ public static partial class ProcessGroupMessage
         {
             return false;
         }
+
+        // MEMO : 去除所有CQ码之后无任何内容的消息
+        if (_regReplaceCQCode.Replace(message, string.Empty).Trim().IsNullOrEmpty())
+            return false;
 
         return true;
     }
