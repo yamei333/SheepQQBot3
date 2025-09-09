@@ -272,7 +272,7 @@ public static class HttpExtensions
         using var ms = new MemoryStream();
         var image = Image.Load(response.Content.ReadAsStream());
         image.Save(ms, new PngEncoder());
-        //YameiLogExtensions.WriteLog(LogType.Info, $"AIHttpDownloadImage: 哈莉下载了一张图片[{tempFileName}], 大小是{ms.Length}");
+        //YameiLogExtensions.WriteLog(LogType.Info, $"AIHttpDownloadImage: {BOT_NICK_NAME}下载了一张图片[{tempFileName}], 大小是{ms.Length}");
         // MEMO : 超过一定大小的图片不保存
         if (ms.Length / 1024.0 > 500)
             return (false, "[占用过大图片]");

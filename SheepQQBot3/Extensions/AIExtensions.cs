@@ -29,7 +29,7 @@ public static class AIExtensions
     public const string ERROR_REASON = "(原因: {0})";
     public const string ERROR_JSON_ERROR = "Json解析失败";
     public const string ERROR_JSON_EMPTY = "返回截断";
-    private const string AI_HISTORY_PATH = "AICache/History/";
+    public const string AI_HISTORY_PATH = "AICache/History/";
     private const string AI_IMAGE_PATH = "AICache/Image/";
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
     public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
@@ -48,6 +48,13 @@ public static class AIExtensions
     private static readonly Regex _regDeleteEmoji3 = new(@"\(.+?\)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+
+    public static AIUserData SuperAdminAIUserData => new()
+    {
+        Favorability = 650,
+        BlockUntil = 0,
+        ProhibitedActs = "None",
+    };
 
     public static AIUserData DefaultAIUserData => new()
     {
@@ -234,7 +241,7 @@ public static class AIExtensions
                 });
 
                 await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
-                        $"{dateNow.ToYYYYMD()} 群聊总结", ["哈莉群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
+                        $"{dateNow.ToYYYYMD()} 群聊总结", [$"{BOT_NICK_NAME}群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
                     .ConfigureAwait(false);
 
                 return;

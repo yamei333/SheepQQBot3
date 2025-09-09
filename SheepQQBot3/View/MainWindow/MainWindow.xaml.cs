@@ -107,7 +107,7 @@ public partial class MainWindow : Window
             WindowStyle = WindowStyle.None,
         };
         PublicVar.BarkWindow.Show();
-        Vm.AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化完成"));
+        Vm.AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化完成"));
     }
 
     private void MainWindow_OnClosed(object sender, EventArgs e)

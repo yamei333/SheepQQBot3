@@ -10,6 +10,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 
@@ -41,10 +42,10 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     /// </summary>
     public MainWindowViewModel()
     {
-        PublicVar.InitPublicVar(this);
+        InitPublicVar(this);
         // 获取当前程序集的版本号
         var version = Assembly.GetExecutingAssembly().GetName().Version;
-        Title = $"助手哈莉 - Ver {version}";
+        Title = $"{BOT_NAME} - Ver {version}";
         IsLoadComplete = false;
         IsBarkUsed = !string.IsNullOrEmpty(AppSettingExtensions.Get("bark"));
 
@@ -53,9 +54,9 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         ConfigExtensions.LoadAIData();
         ConfigExtensions.LoadAIAICharacter();
         InitViewModel();
-        AddRunLog(new RunLog_SystemInfo("助手哈莉 初始化..."));
+        AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化..."));
 
-        PublicVar.JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
+        JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
         AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
 
 #if (!debug)

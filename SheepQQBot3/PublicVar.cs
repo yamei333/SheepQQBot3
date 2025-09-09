@@ -27,6 +27,11 @@ public static class PublicVar
     public const string BOT_NAME = "助手哈莉";
 
     /// <summary>
+    /// Bot昵称
+    /// </summary>
+    public const string BOT_NICK_NAME = "哈莉";
+
+    /// <summary>
     /// 随机数产生器
     /// </summary>
     public static Random Rand = new();
