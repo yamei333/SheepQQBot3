@@ -32,6 +32,8 @@ public static class AIExtensions
     private const string AI_HISTORY_PATH = "AICache/History/";
     private const string AI_IMAGE_PATH = "AICache/Image/";
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
+    public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
+    public const string MESSAGE_SLEEP = "Zzz...";
 
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
@@ -480,7 +482,7 @@ public static class AIExtensions
             }
             else
             {
-                if (targetId == SuperId)
+                if (targetId == SuperAdminId)
                 {
                     resultMessage = $"{(string.IsNullOrEmpty(sensory) ? string.Empty : $"[感受:{sensory}]\r\n")}"
                         + $"{(string.IsNullOrEmpty(mind) ? string.Empty : $"[心想:{mind}]\r\n")}"
@@ -488,7 +490,7 @@ public static class AIExtensions
                 }
                 else
                 {
-                    resultMessage = string.Empty;
+                    resultMessage = $"{(string.IsNullOrEmpty(body) ? string.Empty : $"[动作:{body}]\r\n")}";
                 }
             }
         }
@@ -734,6 +736,36 @@ public static class AIExtensions
         content.AddText(aiChatStatus.ToJsonIgnoreNull());
         contents.Add(content);
         return aiChatStatus;
+    }
+
+    /// <summary>
+    /// 是否不方便发送消息的时候
+    /// </summary>
+    public static bool IsCantSendMessage(
+        long requestTargetId,
+        Action<long, string> botSendMessage)
+    {
+        var schedule = AIStatusUtil.GetSchedule();
+        var isSendResponse = requestTargetId != 0;
+        // MEMO : 日程在深度睡眠时, 不回应
+        if (schedule.Contains("deep sleep"))
+        {
+            if (isSendResponse)
+                botSendMessage(requestTargetId, MESSAGE_SLEEP);
+
+            return true;
+        }
+
+        // MEMO : 自读时间不该回复...
+        if (schedule.Contains("masturbation"))
+        {
+            if (isSendResponse)
+                botSendMessage(requestTargetId, MESSAGE_BUSY);
+
+            return true;
+        }
+
+        return false;
     }
 
     /// <summary>

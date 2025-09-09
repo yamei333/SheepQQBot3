@@ -59,7 +59,7 @@ public static class PublicVar
     /// <summary>
     /// 超级管理ID
     /// </summary>
-    public static readonly long SuperId = 252961222;
+    public static readonly long SuperAdminId = 252961222;
 
     /// <summary>
     /// 管理员ID

@@ -32,7 +32,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> AiAideAsync(GroupMessage groupMessage)
+    public static async Task AiAideAsync(GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var targetId = groupMessage.Sender.UserId;
@@ -42,35 +42,35 @@ public static partial class ProcessGroupMessage
         if (!BotExtensions.IsAdmin(targetId) && _regDeleteCQCode.Replace(message, string.Empty).GetByteCount() > 90)
         {
             //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(字数太多): {message}");
-            return false;
+            return;
         }
 
         // MEMO : emoji数量超过一定数量, 忽略
         if (_regEmoji.Matches(message).Count >= 4)
         {
             YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(emoji太多): {message}");
-            return false;
+            return;
         }
 
         // MEMO : 注入攻击, 忽略
         if (!BotExtensions.IsAdmin(targetId) && _regInjectHurry.IsMatch(message))
         {
             YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(注入): {message}");
-            return false;
+            return;
         }
 
         var dateNow = DateTime.Now;
         if (dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
         {
             //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(拉黑): {message}");
-            return false;
+            return;
         }
 
         // MEMO : 开头是#表示Bot命令, 结尾是"色图"表示色图命令, 单"r"是roll点命令, 忽略
         if (message.StartsWith("#") || message.EndsWith("色图") || message.ToLower() == "r")
         {
             //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(bot命令): {message}");
-            return false;
+            return;
         }
 
         var chatKey = $"g{groupId}";
@@ -78,7 +78,7 @@ public static partial class ProcessGroupMessage
         if (isPrivateChat && (dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_GROUP_PRIVATE)
         {
             await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
-            return false;
+            return;
         }
 
         var useGroupChat = PublicVar.AIConfig.UseGroupChat.GetOrAdd(groupId, false);
@@ -86,7 +86,7 @@ public static partial class ProcessGroupMessage
         {
             // MEMO : 日程在深度睡眠时, 不接收消息
             if (AIStatusUtil.GetSchedule().Contains("deep sleep"))
-                return true;
+                return;
 
             // MEMO : 记录消息(添加到历史记录中)
             var historyContents = _historyContents.GetOrAdd(groupId, []);
@@ -112,11 +112,15 @@ public static partial class ProcessGroupMessage
 
             if (sendGroupChat)
             {
+                // MEMO : 某些时间不该发消息
+                if (AIExtensions.IsCantSendMessage(0, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+                    return;
+
                 // MEMO : 发送消息
                 await SendGroupAsync(historyContents).ConfigureAwait(false);
             }
 
-            return true;
+            return;
         }
 
         var removeAtMessage = message[_commandAI.Length..].TrimStart();
@@ -127,15 +131,12 @@ public static partial class ProcessGroupMessage
             {
                 //await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)} 暂时不对非管理开放at回复功能").ConfigureAwait(false);
                 await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
-                return true;
+                return;
             }
 
-            // MEMO : 日程在深度睡眠时, 不回应
-            if (AIStatusUtil.GetSchedule() == "deep sleep time")
-            {
-                await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Sleep).ConfigureAwait(false);
-                return true;
-            }
+            // MEMO : 某些时间不该发消息
+            if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+                return;
 
             await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Flash).ConfigureAwait(false);
 
@@ -151,7 +152,7 @@ public static partial class ProcessGroupMessage
                 (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
         }
 
-        return true;
+        return;
 
         Task SendGroupAsync(List<Content> groupChatHistoryContents)
         {

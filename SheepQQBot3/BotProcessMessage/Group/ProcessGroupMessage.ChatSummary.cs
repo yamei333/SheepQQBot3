@@ -114,7 +114,7 @@ public static partial class ProcessGroupMessage
                     return false;
 
                 var dateNow = DateTime.Now;
-                if (!BotExtensions.IsAdmin(senderId) 
+                if (!BotExtensions.IsAdmin(senderId)
                     && (dateNow - _chatSummaryRequestLastTimes.GetOrAdd(groupId, DateTime.MinValue)).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
                 {
                     await BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
@@ -133,18 +133,15 @@ public static partial class ProcessGroupMessage
                 if (File.Exists(chatSummaryGroupConfigFilePath))
                 {
                     var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-                    chatSummaryGroupConfig = JsonExtensions.JsonDeserialize<ChatSummaryGroupConfig>(jsonText);
+                    chatSummaryGroupConfig = jsonText.JsonDeserialize<ChatSummaryGroupConfig>();
                 }
 
                 switch (summaryType)
                 {
                     case "A":
-                        // MEMO : 自读时间不该总结...
-                        if (AIStatusUtil.GetSchedule() == "masturbation time")
-                        {
-                            await BotServer.SendGroupMessageAsync(groupId, "我..现在正忙!..不太方便总结!").ConfigureAwait(false);
+                        // MEMO : 某些时间不该发消息
+                        if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
                             return true;
-                        }
 
                         // MEMO : AI小时统计
                         var aiHourStr = message[5..];
