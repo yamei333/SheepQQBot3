@@ -40,12 +40,12 @@
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="37" />
-                    <ColumnDefinition Width="243" />
+                    <ColumnDefinition Width="263" />
                     <ColumnDefinition Width="*" />
                 </Grid.ColumnDefinitions>
                 <Grid Grid.ColumnSpan="2">
                     <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="150" />
+                        <ColumnDefinition Width="170" />
                         <ColumnDefinition Width="*" />
                     </Grid.ColumnDefinitions>
                     <Grid.RowDefinitions>
@@ -196,11 +196,17 @@
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
                         <local:MainWindowLiveAlarm />
                     </TabItem>
+                    <TabItem Header="AI助手"
+                             IsVisibleChanged="TabItem_IsVisibleChanged"
+                             Visibility="{Binding Path=SelectedSetBotFunctions[2009].IsUsed,
+                                                  Converter={StaticResource BooleanToVisibilityConverter}}">
+                        <local:MainWindowAIGroupConfig />
+                    </TabItem>
                     <TabItem Header="AI设定"
                              IsVisibleChanged="TabItem_IsVisibleChanged"
                              Visibility="{Binding Path=SelectedSetBotFunctions[5].IsUsed,
                                                   Converter={StaticResource BooleanToVisibilityConverter}}">
-                        <local:MainWindowAiConfig />
+                        <local:MainWindowAIConfig />
                     </TabItem>
                 </TabControl>
             </Grid>

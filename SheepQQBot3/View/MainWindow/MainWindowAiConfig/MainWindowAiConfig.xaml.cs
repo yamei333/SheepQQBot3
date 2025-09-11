@@ -6,16 +6,16 @@ namespace SheepQQBot3.View;
 /// <summary>
 /// MainWindowAiConfig.xaml 的交互逻辑
 /// </summary>
-public partial class MainWindowAiConfig
+public partial class MainWindowAIConfig
 {
-    private static MainWindowAiConfigModel _vm => PublicVar.Vm.MainWindowAiConfigModel;
+    private static MainWindowAIConfigModel _vm => PublicVar.Vm.MainWindowAIConfigModel;
 
-    public MainWindowAiConfig()
+    public MainWindowAIConfig()
     {
         InitializeComponent();
     }
 
-    private void MainWindowAiConfig_OnLoaded(object sender, RoutedEventArgs e)
+    private void MainWindowAIConfig_OnLoaded(object sender, RoutedEventArgs e)
     {
         //if (TabAiSystem.Items.Count <= 0)
         //{
@@ -28,7 +28,7 @@ public partial class MainWindowAiConfig
         //        TabAiSystem.Items.Add(tab);
         //    });
         //}
-        DataContext = PublicVar.Vm.MainWindowAiConfigModel;
+        DataContext = PublicVar.Vm.MainWindowAIConfigModel;
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         ListAiSystem.SelectedIndex = 0;
     }

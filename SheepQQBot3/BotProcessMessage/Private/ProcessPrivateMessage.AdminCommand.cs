@@ -97,8 +97,18 @@ public static partial class ProcessPrivateMessage
                 var moodIndex = PublicVar.AIData.AIStatusData.MoodIndexValue;
                 var aiStatusMessage = $"===={BOT_NICK_NAME}状态===={ENTER}"
                     + $"当前日程: {AIStatusUtil.GetSchedule()}{ENTER}"
-                    + $"心情指数: ({moodIndex}){moodIndex.ToMood()}";
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage).ConfigureAwait(true);
+                    + $"心情指数: ({moodIndex}){moodIndex.ToMood()}{ENTER}";
+                if (AIHistoryContents.Any())
+                {
+                    aiStatusMessage += $"====群消息记录数===={ENTER}";
+                    AIHistoryContents.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count} 条{ENTER}"; });
+                }
+                else
+                {
+                    aiStatusMessage += $"无群消息记录!{ENTER}";
+                }
+
+                await BotServer.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
                 break;
             case COMMAND_ADMIN_AI_RESET:
                 await ResetAIStatus().ConfigureAwait(false);

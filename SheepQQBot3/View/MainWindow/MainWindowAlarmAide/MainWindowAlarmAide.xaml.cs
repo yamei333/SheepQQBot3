@@ -19,7 +19,7 @@ namespace SheepQQBot3.View;
 /// <summary>
 /// MainWindowAlarmAide.xaml 的交互逻辑
 /// </summary>
-public partial class MainWindowAlarmAide : UserControl
+public partial class MainWindowAlarmAide
 {
     private static MainWindowAlarmAideViewModel _vm => PublicVar.Vm.MainWindowAlarmAideViewModel;
 
@@ -65,8 +65,8 @@ public partial class MainWindowAlarmAide : UserControl
         var newAlarmAideConfig = new AlarmAideConfig(
             addAlarmAideDialog.AlarmName,
             addAlarmAideDialog.Condition);
-        alarmAideConfigs.Add(newAlarmAideConfig.Id, newAlarmAideConfig);
-        selectedSetConfig.AlarmAideConfigs = new Dictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
+        alarmAideConfigs.AddOrUpdate(newAlarmAideConfig.Id, newAlarmAideConfig, newAlarmAideConfig);
+        selectedSetConfig.AlarmAideConfigs = new ConcurrentDictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         ConfigExtensions.SaveConfig();
         _vm.SelectedAlarmAideConfig = newAlarmAideConfig;
@@ -91,7 +91,7 @@ public partial class MainWindowAlarmAide : UserControl
         var selectAlarmAideConfig = alarmAideConfigs[selectedAlarmAideConfig.Id];
         selectAlarmAideConfig.AlarmName = addAlarmAideDialog.AlarmName;
         selectAlarmAideConfig.Condition = addAlarmAideDialog.Condition;
-        selectedSetConfig.AlarmAideConfigs = new Dictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
+        selectedSetConfig.AlarmAideConfigs = new ConcurrentDictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         ConfigExtensions.SaveConfig();
     }
@@ -106,10 +106,10 @@ public partial class MainWindowAlarmAide : UserControl
 
         var selectedSetConfig = _vm.SelectedSetConfig;
         var alarmAideConfigs = selectedSetConfig.AlarmAideConfigs;
-        alarmAideConfigs.Remove(_vm.SelectedAlarmAideConfig.Id);
-        selectedSetConfig.AlarmAideConfigs = new Dictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
+        alarmAideConfigs.TryRemove(_vm.SelectedAlarmAideConfig.Id, out _);
+        selectedSetConfig.AlarmAideConfigs = new ConcurrentDictionary<Guid, AlarmAideConfig>(alarmAideConfigs);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
-        _vm.SelectedAlarmAideConfig = default; ;
+        _vm.SelectedAlarmAideConfig = null;
         ConfigExtensions.SaveConfig();
     }
 

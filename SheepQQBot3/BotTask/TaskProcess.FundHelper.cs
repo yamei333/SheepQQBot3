@@ -37,7 +37,7 @@ public static partial class TaskProcess
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_FundHelper))
                         .ForEach(setConfig =>
                         {
-                            setConfig.FundAlarmConfigs.ToValueList().ForEach(SendFundAlarmMessage);
+                            setConfig.FundAlarmConfigs.Values.ForEach(SendFundAlarmMessage);
                             async void SendFundAlarmMessage(FundAlarmConfig fundAlarmConfig)
                             {
                                 if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))

@@ -279,7 +279,7 @@ public partial class MainWindow : Window
         if (this.Width <= 100)
         {
             this.WindowStyle = WindowStyle.SingleBorderWindow;
-            Width = 980;
+            Width = 1000;
             Height = 532;
             // 获取 DPI 缩放比例
             var matrix = PresentationSource.FromVisual(this)!.CompositionTarget!.TransformToDevice;

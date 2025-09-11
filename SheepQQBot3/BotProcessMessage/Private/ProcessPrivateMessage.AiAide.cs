@@ -61,7 +61,7 @@ public static partial class ProcessPrivateMessage
         // MEMO : 构建发送消息并发送
         var thisRequestContents = new List<Content>();
         thisRequestContents.AddMessageContent(privateMessage.Sender, message, AIMessageSourceType.Private);
-        await thisRequestContents.SendAsync(chatKey, targetId, 0, false,
+        await thisRequestContents.SendAsync(chatKey, targetId, 0, false, null,
             (id, msg) => _ = BotServer.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);
     }
 

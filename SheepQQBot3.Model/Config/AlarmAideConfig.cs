@@ -5,7 +5,7 @@ using System.Collections.Concurrent;
 namespace SheepQQBot3.Model.Config;
 
 /// <summary>
-/// 直播提醒配置
+/// 闹钟助手配置
 /// </summary>
 [MessagePackObject]
 public partial class AlarmAideConfig : NotifyPropertyChangedConfigBase
@@ -63,7 +63,7 @@ public partial class AlarmAideConfig : NotifyPropertyChangedConfigBase
         AlarmName = alarmName;
         Condition = condition;
         IsDefault = false;
-        AlarmTexts = new ConcurrentDictionary<int, string>();
+        AlarmTexts = [];
     }
 
     /// <inheritdoc />

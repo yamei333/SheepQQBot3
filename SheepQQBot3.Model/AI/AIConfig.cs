@@ -30,6 +30,24 @@ namespace SheepQQBot3.Model.AI
         [JsonPropertyName("temperature")]
         public double Temperature { get; set; }
 
+        ///// <summary>
+        ///// Model TopP
+        ///// </summary>
+        //[JsonPropertyName("topP")]
+        //public double TopP { get; set; }
+
+        ///// <summary>
+        ///// Model TopK
+        ///// </summary>
+        //[JsonPropertyName("topK")]
+        //public int TopK { get; set; }
+
+        ///// <summary>
+        ///// Model FrequencyPenalty
+        ///// </summary>
+        //[JsonPropertyName("frequencyPenalty")]
+        //public double FrequencyPenalty { get; set; }
+
         /// <summary>
         /// 表情包路径
         /// </summary>
@@ -47,12 +65,6 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [JsonPropertyName("openWeatherMapKey")]
         public string OpenWeatherMapKey { get; set; }
-
-        /// <summary>
-        /// 是否参与群聊
-        /// </summary>
-        [JsonPropertyName("useGroupChat")]
-        public ConcurrentDictionary<long, bool> UseGroupChat { get; set; } = [];
 
         /// <summary>
         /// 是否使用AI功能

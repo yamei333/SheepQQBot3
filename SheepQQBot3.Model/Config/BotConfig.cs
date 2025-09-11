@@ -1,10 +1,10 @@
-﻿using System;
+﻿using Masuit.Tools;
+using MessagePack;
+using SheepQQBot3.Model.Enums;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
-using Masuit.Tools;
-using MessagePack;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -46,7 +46,7 @@ public class BotConfig
     [Key(nameof(UserConfigs))]
     public Dictionary<long, Dictionary<UserConfigType, string>> UserConfigs
     {
-        get => _userConfigs ??= new Dictionary<long, Dictionary<UserConfigType, string>>();
+        get => _userConfigs ??= [];
         set => _userConfigs = value;
     }
 
@@ -60,7 +60,7 @@ public class BotConfig
     [Key(nameof(CustomAlarms))]
     public Dictionary<Guid, CustomAlarm> CustomAlarms
     {
-        get => _customAlarms ??= new Dictionary<Guid, CustomAlarm>();
+        get => _customAlarms ??= [];
         set => _customAlarms = value;
     }
 
@@ -69,7 +69,7 @@ public class BotConfig
     /// </summary>
     public BotConfig()
     {
-        CustomAlarms = new Dictionary<Guid, CustomAlarm>();
+        CustomAlarms = [];
     }
 
     /// <summary>

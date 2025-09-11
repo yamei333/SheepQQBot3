@@ -68,7 +68,7 @@ namespace SheepQQBot3.Model.AI
     public class AIChatResponseContent
     {
         /// <summary>
-        /// 深度思索内容
+        /// 思考内容
         /// </summary>
         [Description("thinking")]
         [JsonPropertyName("think")]

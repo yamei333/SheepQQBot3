@@ -78,7 +78,8 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
         MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
         MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
-        MainWindowAiConfigModel = new MainWindowAiConfigModel();
+        MainWindowAIConfigModel = new MainWindowAIConfigModel();
+        MainWindowAIGroupConfigModel = new MainWindowAIGroupConfigModel();
     }
 
     public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
@@ -88,7 +89,8 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     public MainWindowRepeaterKillerViewModel MainWindowRepeaterKillerViewModel { get; set; }
     public MainWindowBlackListViewModel MainWindowBlackListViewModel { get; set; }
     public MainWindowLiveAlarmViewModel MainWindowLiveAlarmViewModel { get; set; }
-    public MainWindowAiConfigModel MainWindowAiConfigModel { get; set; }
+    public MainWindowAIConfigModel MainWindowAIConfigModel { get; set; }
+    public MainWindowAIGroupConfigModel MainWindowAIGroupConfigModel { get; set; }
 
     public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 
@@ -104,12 +106,15 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         {
             _selectedSetConfig = value;
             OnPropertyChanged(nameof(SelectedSetConfig));
+            IsLoadComplete = false;
             MainWindowAlarmAideViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowAlarmAideSubmitViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowFundHelperViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowRepeaterKillerViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowBlackListViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
             MainWindowLiveAlarmViewModel?.OnPropertyChanged(nameof(SelectedSetConfig));
+            MainWindowAIGroupConfigModel?.OnPropertyChanged(nameof(SelectedSetConfig));
+            IsLoadComplete = true;
         }
     }
 

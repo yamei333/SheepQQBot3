@@ -7,6 +7,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -38,7 +39,7 @@ public static partial class ProcessGroupMessage
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
     public static async Task<bool> AlarmAideSubmit(
-        Dictionary<Guid, AlarmAideConfig> alarmAideConfigs,
+        ConcurrentDictionary<Guid, AlarmAideConfig> alarmAideConfigs,
         HashSet<long> alarmAideSubmitMembers,
         GroupMessage groupMessage)
     {

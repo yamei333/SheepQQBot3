@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Text.Json.Serialization;
-using static System.Runtime.InteropServices.JavaScript.JSType;
 
 namespace SheepQQBot3.Model.AI
 {
@@ -101,18 +100,6 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [JsonPropertyName("precipitation")]
         public string Precipitation { get; set; }
-
-        /// <summary>
-        /// 日出时间
-        /// </summary>
-        [JsonPropertyName("sunrise")]
-        public string Sunrise { get; set; }
-
-        /// <summary>
-        /// 日落时间
-        /// </summary>
-        [JsonPropertyName("sunset")]
-        public string Sunset { get; set; }
 
         /// <summary>
         /// 浑浊度

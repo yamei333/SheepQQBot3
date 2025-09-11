@@ -6,6 +6,7 @@ using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
+using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model.ChatSummaryConfig;
 using SheepQQBot3.Model.QQ;
@@ -66,7 +67,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> ChatSummaryAsync(GroupMessage groupMessage)
+    public static async Task<bool> ChatSummaryAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var senderId = groupMessage.Sender.UserId;
@@ -347,8 +348,8 @@ public static partial class ProcessGroupMessage
                     }
 
                     var sender = groupMessage.Sender;
-                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}({sender.UserId})想让你总结一下大家都聊了些什么");
-                    await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false,
+                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}({sender.UserId})想让你总结一下大家都聊了些什么，先对不同内容进行总结，最后再来一下汇总。");
+                    await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, aiGroupConfig,
                         (id, msg) => BotServer.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
                         .ConfigureAwait(false);
                 }
@@ -373,6 +374,10 @@ public static partial class ProcessGroupMessage
             return false;
 
         if (message.Contains("色图") && message.BytesCount() <= 20)
+            return false;
+
+        // MEMO : emoji数量超过一定数量
+        if (_regEmoji.Matches(message).Count >= 6)
             return false;
 
         var uMessage = message.ToUpper();

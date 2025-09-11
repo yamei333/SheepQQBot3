@@ -1,4 +1,5 @@
 ﻿using CommonLibrary;
+using GenerativeAI.Types;
 using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
 using OpenWeatherMap.Standard;
@@ -204,6 +205,11 @@ public static class PublicVar
     /// OpenWeatherMap服务
     /// </summary>
     public static Current OpenWeatherMapService { get; set; }
+
+    /// <summary>
+    /// AI记录的群历史消息
+    /// </summary>
+    public static readonly ConcurrentDictionary<long, List<Content>> AIHistoryContents = [];
 
     /// <summary>
     /// 初始化全局变量

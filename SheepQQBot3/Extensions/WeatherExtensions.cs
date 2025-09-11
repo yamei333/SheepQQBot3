@@ -29,7 +29,6 @@ namespace SheepQQBot3.Extensions
         private static AIWeatherInfo ToAIWeatherInfo(this WeatherData weatherData, bool setForecastDate)
         {
             var weatherDayInfo = weatherData.WeatherDayInfo;
-            var dayInfo = weatherData.DayInfo;
             return new AIWeatherInfo
             {
                 ForecastDate = setForecastDate ? weatherData.AcquisitionDateTime.ToYYYYMDHHMMSS() : string.Empty,
@@ -39,8 +38,6 @@ namespace SheepQQBot3.Extensions
                 Precipitation = $"{weatherData.Precipitation:0.0} mm/h",
                 WindSpeed = $"{weatherData.Wind.Speed} meter/sec",
                 Cloudiness = $"{weatherData.Clouds.All}%",
-                Sunrise = dayInfo.Sunrise.ToYYYYMDHHMMSS(),
-                Sunset = dayInfo.Sunset.ToYYYYMDHHMMSS(),
             };
         }
     }

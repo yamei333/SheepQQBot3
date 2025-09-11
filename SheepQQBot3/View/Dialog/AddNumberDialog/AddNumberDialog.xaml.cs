@@ -10,7 +10,6 @@ namespace SheepQQBot3.View;
 /// AddNumberDialog.xaml 的交互逻辑
 /// </summary>
 public partial class AddNumberDialog
-    : AddDialogWindowBase<AddNumberDialogViewModel>
 {
     private static readonly Regex _regex = RegexGenerator.Number();
 

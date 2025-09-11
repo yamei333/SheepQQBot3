@@ -9,7 +9,6 @@ namespace SheepQQBot3.View;
 /// AddLiveAlarmDialog.xaml 的交互逻辑
 /// </summary>
 public partial class AddLiveAlarmDialog
-    : AddDialogWindowBase<AddLiveAlarmDialogViewModel>
 {
     /// <summary>
     /// 直播间房间号

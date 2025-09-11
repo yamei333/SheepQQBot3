@@ -1,5 +1,4 @@
 ﻿using CommonLibrary;
-using Masuit.Tools;
 using SheepQQBot3.BotProcessMessage;
 using SheepQQBot3.BotProcessMessage.Group;
 using SheepQQBot3.BotProcessMessage.Private;
@@ -161,7 +160,7 @@ partial class MainWindowViewModel
             StartTaskList(taskList, ChatSummaryConfig);
             void ChatSummaryConfig() => ProcessPrivateMessage.ChatSummaryConfigAsync(privateMessage);
 
-            GetSelectedCommonConfig(BotFunctionType.Common_AiConfig, config =>
+            GetSelectedCommonConfig(BotFunctionType.Common_AIConfig, config =>
             {
                 StartTaskList(taskList, AiAide);
                 void AiAide() => ProcessPrivateMessage.AIAideAsync(privateMessage);
@@ -181,10 +180,11 @@ partial class MainWindowViewModel
         if (setConfig == null)
             return;
 
-        // MEMO : 保存已处理的MessageId
-        setConfig.ProcessedMessageIds = setConfig.ProcessedMessageIds
-            .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
-        ConfigExtensions.SaveConfig();
+        // MEMO : 0.15.4.0 先不保存处理过的消息ID了, 暂时不考虑添加错过的消息再起作用的功能
+        //// MEMO : 保存已处理的MessageId
+        //setConfig.ProcessedMessageIds = setConfig.ProcessedMessageIds
+        //    .CopyAddLimit(groupMessage.MessageId, MaxStoreProcessedMessageCount);
+        //ConfigExtensions.SaveConfig();
 
         //if (groupMessage.GroupId == PublicVar.TestGroupId)
         //{
@@ -220,11 +220,8 @@ partial class MainWindowViewModel
             return;
 
         var taskList = new List<Task>();
-        GetSelectedGroupConfig(groupId, BotFunctionType.Common_CustomAlarm, config =>
-        {
-            StartTaskList(taskList, CustomGroupAlarm);
-            void CustomGroupAlarm() => ProcessMessage.CustomGroupAlarmAsync(groupMessage);
-        });
+        GetSelectedGroupConfig(groupId, BotFunctionType.Common_CustomAlarm,
+            config => ProcessMessage.CustomGroupAlarmAsync(groupMessage));
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
         {
@@ -232,11 +229,8 @@ partial class MainWindowViewModel
             void AlarmAideSubmit() => ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_FundHelper, config =>
-        {
-            StartTaskList(taskList, FundHelper);
-            void FundHelper() => ProcessGroupMessage.FundHelper(groupMessage);
-        });
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_FundHelper,
+            config => _ = ProcessGroupMessage.FundHelperAsync(groupMessage));
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
         {
@@ -251,21 +245,14 @@ partial class MainWindowViewModel
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_SearchImageSource, config =>
         {
-            StartTaskList(taskList, SearchImageSource);
-            async void SearchImageSource() => await ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
+            ProcessGroupMessage.SearchImageSource(groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_Roll, config =>
-        {
-            StartTaskList(taskList, Roll);
-            async void Roll() => await ProcessGroupMessage.RollAsync(groupMessage).ConfigureAwait(false);
-        });
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_Roll,
+            config => ProcessGroupMessage.RollAsync(groupMessage).ConfigureAwait(false));
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_ChatSummary, config =>
-        {
-            StartTaskList(taskList, ChatSummary);
-            async void ChatSummary() => await ProcessGroupMessage.ChatSummaryAsync(groupMessage).ConfigureAwait(false);
-        });
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_ChatSummary,
+            config => ProcessGroupMessage.ChatSummaryAsync(config.AIGroupConfig, groupMessage).ConfigureAwait(false));
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, config =>
         {
@@ -273,11 +260,11 @@ partial class MainWindowViewModel
             async void RepeatRevokeMessage() => await ProcessGroupMessage.RepeatRevokeMessageAsync(groupMessage).ConfigureAwait(false);
         });
 
-        GetSelectedGroupConfig(groupId, BotFunctionType.Group_AiAide, config =>
+        GetSelectedGroupConfig(groupId, BotFunctionType.Group_AIAide, config =>
         {
             //StartTaskList(taskList, AiAide);
             //async void AiAide() => await ProcessGroupMessage.AiAideAsync(groupMessage).ConfigureAwait(false);
-            ProcessGroupMessage.AiAideAsync(groupMessage).ConfigureAwait(false);
+            ProcessGroupMessage.AIAideAsync(config.AIGroupConfig, groupMessage).ConfigureAwait(false);
         });
 
         Task.WaitAll(taskList.ToArray());

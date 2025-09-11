@@ -22,7 +22,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> FundHelper(GroupMessage groupMessage)
+    public static async Task<bool> FundHelperAsync(GroupMessage groupMessage)
     {
         var message = groupMessage.Message;
         // MEMO : 命令格式检查

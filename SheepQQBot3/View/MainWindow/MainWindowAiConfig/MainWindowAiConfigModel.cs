@@ -2,12 +2,12 @@
 
 namespace SheepQQBot3.View;
 
-public partial class MainWindowAiConfigModel : MainWindowViewModelBase
+public partial class MainWindowAIConfigModel : MainWindowViewModelBase
 {
     /// <summary>
     /// 初始化
     /// </summary>
-    public MainWindowAiConfigModel()
+    public MainWindowAIConfigModel()
     {
         ListItems = PublicVar.AICharacter?.SystemInstruction?.Keys.ToArray() ?? [];
         SelectedValue = PublicVar.AICharacter?.SystemInstruction?.First().Key;

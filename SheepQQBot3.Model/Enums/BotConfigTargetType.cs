@@ -27,12 +27,6 @@ public enum BotConfigTargetType
     /// </summary>
     [Display(Name = "私聊消息")]
     Private = 2,
-
-    /// <summary>
-    /// 后台
-    /// </summary>
-    [Display(Name = "Bot后台")]
-    Background = 3,
 }
 
 public static class TargetTypeExtensions
@@ -52,7 +46,7 @@ public static class TargetTypeExtensions
                 BotFunctionType.Common_BlackList,
                 BotFunctionType.Common_CustomAlarm,
                 BotFunctionType.Common_KeyConfig,
-                BotFunctionType.Common_AiConfig,
+                BotFunctionType.Common_AIConfig,
             ],
             BotConfigTargetType.Group =>
             [
@@ -67,7 +61,7 @@ public static class TargetTypeExtensions
                 BotFunctionType.Group_SearchImageSource,
                 BotFunctionType.Group_Roll,
                 BotFunctionType.Group_ChatSummary,
-                BotFunctionType.Group_AiAide,
+                BotFunctionType.Group_AIAide,
             ],
             BotConfigTargetType.Private =>
             [

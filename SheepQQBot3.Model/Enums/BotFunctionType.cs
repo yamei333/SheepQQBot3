@@ -23,7 +23,7 @@ public enum BotFunctionType
     Common_KeyConfig = 4,
 
     [Display(Name = "AI配置")]
-    Common_AiConfig = 5,
+    Common_AIConfig = 5,
 
     [Display(Name = "私聊配置")]
     Private_AdminConfig = 1000,
@@ -53,7 +53,7 @@ public enum BotFunctionType
     Group_ChatSummary = 2008,
 
     [Display(Name = "AI助手")]
-    Group_AiAide = 2009,
+    Group_AIAide = 2009,
 }
 
 public static class BotFunctionTypeExtensions
@@ -63,13 +63,14 @@ public static class BotFunctionTypeExtensions
     /// </summary>
     /// <returns></returns>
     public static HashSet<BotFunctionType> GetTabFunctions()
-        => new()
-        {
+        => [
             BotFunctionType.Common_AlarmAide,
             BotFunctionType.Common_AlarmAideSubmit,
             BotFunctionType.Common_BlackList,
             BotFunctionType.Group_RepeaterKiller,
             BotFunctionType.Group_FundHelper,
             BotFunctionType.Group_LiveAlarm,
-        };
+            BotFunctionType.Group_AIAide,
+            BotFunctionType.Common_AIConfig,
+        ];
 }

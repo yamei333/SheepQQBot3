@@ -69,6 +69,7 @@ public static class AIExtensions
         long requestTargetId,
         long groupId,
         bool isAt,
+        AIGroupConfig aiGroupConfig,
         Action<long, string> botSendMessage,
         Action<List<Content>> addSystemHint = null)
     {
@@ -181,10 +182,8 @@ public static class AIExtensions
                 return;
             }
 
-            responseText = jsonTextMatch.Value;
-
             // MEMO : 删除emoji
-            responseText = _regDeleteEmoji.Replace(responseText, string.Empty);
+            responseText = _regDeleteEmoji.Replace(jsonTextMatch.Value, string.Empty);
             if (responseText.IsNullOrEmpty())
             {
                 YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]Gemini返回截断");
@@ -233,7 +232,7 @@ public static class AIExtensions
                 var sendMessages = new List<GroupForwardMessage>();
                 chatMessages.ForEach(aiChatResponseContent =>
                 {
-                    var sendMessage = CreateSendMessage(aiChatResponseContent, false, requestTargetId, isGroupRequest);
+                    var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, false, requestTargetId, isGroupRequest);
                     if (sendMessage.IsNullOrEmpty())
                         return;
 
@@ -335,10 +334,7 @@ public static class AIExtensions
                 // MEMO : 写入知识笔记内容
                 WriteAINote(knowledgeNote);
                 if (IsDebug)
-                {
-                    botSendMessage(IsDebug ? TestGroupId : sendTargetId,
-                        $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
-                }
+                    botSendMessage(TestGroupId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
             }
 
             // MEMO : 保存灵感笔记内容
@@ -348,10 +344,7 @@ public static class AIExtensions
                 // MEMO : 写入灵感笔记内容
                 WriteAINote(inspirationNote);
                 if (IsDebug)
-                {
-                    botSendMessage(IsDebug ? TestGroupId : sendTargetId,
-                        $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
-                }
+                    botSendMessage(TestGroupId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
             }
 
             // MEMO : 构建回复消息
@@ -359,7 +352,7 @@ public static class AIExtensions
             chatMessages[^1].ChatMessageInfo.Delay = 0;
             chatMessages.ForEach(aiChatResponseContent =>
             {
-                var sendMessage = CreateSendMessage(aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
+                var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
                 if (sendMessage.IsNullOrEmpty())
                     return;
 
@@ -454,6 +447,7 @@ public static class AIExtensions
     }
 
     private static string CreateSendMessage(
+        AIGroupConfig aiGroupConfig,
         AIChatResponseContent aiChatResponseContent,
         bool needAt,
         long targetId,
@@ -471,13 +465,13 @@ public static class AIExtensions
         if (IsDebug)
         {
             resultMessage = (needAt ? $"{CQCode.At(targetId)} " : string.Empty)
-                + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思索:{think}]\r\n")}"
-                + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]\r\n")}"
-                + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]\r\n")}"
-                + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
+                + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}"
+                + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
+                + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
+                + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
 
             if (Enum.TryParse<AIExpressionType>(face, out var expressionType))
-                resultMessage += $"{(expressionType == AIExpressionType.None ? string.Empty : $"[表情:{expressionType.GetDisplay()}]\r\n")}";
+                resultMessage += $"{(expressionType == AIExpressionType.None ? string.Empty : $"[表情:{expressionType.GetDisplay()}]{ENTER}")}";
             else
                 aiChatResponseContent.Face = "None";
         }
@@ -486,26 +480,54 @@ public static class AIExtensions
             if (isGroupRequest)
             {
                 resultMessage = string.Empty;
+                if (aiGroupConfig.ShowThinking)
+                    resultMessage += $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}";
+
+                if (aiGroupConfig.ShowSensory)
+                    resultMessage += $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}";
+
+                if (aiGroupConfig.ShowPsychologicalDesc)
+                    resultMessage += $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}";
+
+                if (aiGroupConfig.ShowBodyLanguage)
+                {
+                    if (!aiGroupConfig.ShowThinking && !aiGroupConfig.ShowSensory && !aiGroupConfig.ShowPsychologicalDesc)
+                        resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
+                    else
+                        resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
+                }
+
+                if (aiGroupConfig.ShowEmojiImage)
+                {
+                    if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
+                        resultMessage += $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCode(emoji))}";
+                    else
+                        chatMessage.Emoji = "None";
+                }
+                else
+                {
+                    chatMessage.Emoji = "None";
+                }
             }
             else
             {
                 if (targetId == SuperAdminId)
                 {
-                    resultMessage = $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]\r\n")}"
-                        + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]\r\n")}"
-                        + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
+                    resultMessage = $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
+                        + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
+                        + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
                 }
                 else
                 {
-                    resultMessage = $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]\r\n")}";
+                    resultMessage = $"{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
                 }
+
+                if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
+                    resultMessage += $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCode(emoji))}";
+                else
+                    chatMessage.Emoji = "None";
             }
         }
-
-        if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
-            resultMessage += $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCode(emoji))}";
-        else
-            chatMessage.Emoji = "None";
 
         resultMessage += chatMessageText.DeleteCode() ?? "(无消息内容)";
         return resultMessage;

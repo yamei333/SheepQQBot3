@@ -4,10 +4,10 @@ using Masuit.Tools;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
+using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -20,9 +20,8 @@ public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
     private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
-    private static readonly Regex _regEmoji = new(@"\p{Cs}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉|雅.{0,3}美|爸.{0,3}爸", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly ConcurrentDictionary<long, List<Content>> _historyContents = [];
+    private static readonly Regex _regEmoji = new(@"\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，来参与群聊吧(随机1~3句话)";
     private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话，回复一下吧(随机1~3句话)";
@@ -30,13 +29,16 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// AI助手
     /// </summary>
+    /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
-    /// <returns></returns>
-    public static async Task AiAideAsync(GroupMessage groupMessage)
+    public static async Task AIAideAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var targetId = groupMessage.Sender.UserId;
         var message = groupMessage.Message;
+
+        if (aiGroupConfig.BlackListIds.Contains(targetId))
+            return;
 
         // MEMO : 字节数超过一定数量(设定数字/3), 忽略
         if (!BotExtensions.IsAdmin(targetId) && _regDeleteCQCode.Replace(message, string.Empty).GetByteCount() > 90)
@@ -45,8 +47,8 @@ public static partial class ProcessGroupMessage
             return;
         }
 
-        // MEMO : emoji数量超过一定数量, 忽略
-        if (_regEmoji.Matches(message).Count >= 4)
+        // MEMO : emoji数量超过一定数量
+        if (_regEmoji.Matches(message).Count >= 6)
         {
             YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(emoji太多): {message}");
             return;
@@ -81,36 +83,18 @@ public static partial class ProcessGroupMessage
             return;
         }
 
-        var useGroupChat = PublicVar.AIConfig.UseGroupChat.GetOrAdd(groupId, false);
-        if (useGroupChat && !isPrivateChat)
+        if (aiGroupConfig.JoinGroupChat && !isPrivateChat)
         {
             // MEMO : 日程在深度睡眠时, 不接收消息
             if (AIStatusUtil.GetSchedule().Contains("deep sleep"))
                 return;
 
             // MEMO : 记录消息(添加到历史记录中)
-            var historyContents = _historyContents.GetOrAdd(groupId, []);
+            var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
             historyContents.AddMessageContent(groupMessage.Sender, message, AIMessageSourceType.Group);
-            var count = historyContents.Count;
-            var sendGroupChat = false;
-            //YameiLogExtensions.WriteLog(LogType.Info, $"记录群消息: 当前记录数量{count}, 内容:{message}.");
-            if (IsDebug && (count >= 7 || (groupId == TestGroupId && count >= 3)))
-            {
-                sendGroupChat = true;
-            }
-            else
-            {
-                sendGroupChat = count switch
-                {
-                    >= 50 => Rand.Next(100) >= 50,
-                    >= 35 => Rand.Next(100) >= 75,
-                    >= 25 => Rand.Next(100) >= 80,
-                    >= 15 => Rand.Next(100) >= 90,
-                    _ => false,
-                };
-            }
 
-            if (sendGroupChat)
+            //YameiLogExtensions.WriteLog(LogType.Info, $"群({groupId})消息记录数: {historyContents.Count}");
+            if (CanSendGroupChat(aiGroupConfig, historyContents.Count))
             {
                 // MEMO : 某些时间不该发消息
                 if (AIExtensions.IsCantSendMessage(0, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
@@ -124,10 +108,10 @@ public static partial class ProcessGroupMessage
         }
 
         var removeAtMessage = message[_commandAI.Length..].TrimStart();
-        if (isPrivateChat)
+        if (isPrivateChat && aiGroupConfig.UseAtResponse)
         {
-            // MEMO : 暂时只给管理用
-            if (!BotExtensions.IsAdmin(targetId))
+            // MEMO : 是否只给管理用
+            if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {
                 //await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)} 暂时不对非管理开放at回复功能").ConfigureAwait(false);
                 await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
@@ -142,13 +126,13 @@ public static partial class ProcessGroupMessage
 
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
-            var historyContents = _historyContents.GetOrAdd(groupId, []);
+            var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
             var sender = groupMessage.Sender;
             // MEMO : 构建发送消息并发送
             historyContents.AddMessageContent(sender, removeAtMessage, AIMessageSourceType.Group);
             historyContents.AddSystemHint($"{sender.NickName}(QQId:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
             await historyContents.SendAsync(
-                chatKey, targetId, groupId, true,
+                chatKey, targetId, groupId, true, aiGroupConfig,
                 (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
         }
 
@@ -157,12 +141,31 @@ public static partial class ProcessGroupMessage
         Task SendGroupAsync(List<Content> groupChatHistoryContents)
         {
             // MEMO : 清空消息
-            _historyContents.AddOrUpdate(groupId, _ => [], (_, __) => []);
+            AIHistoryContents.AddOrUpdate(groupId, _ => [], (_, __) => []);
             // MEMO : 发送消息
             return groupChatHistoryContents.SendAsync(
-                chatKey, groupId, groupId, false,
-                (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg),
-                contents => contents.AddSystemHint(GROUP_CHAT_HINT));
+                chatKey, groupId, groupId, false, aiGroupConfig,
+                (id, msg) => _ = BotServer.SendGroupMessageAsync(
+                    aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
+                addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT));
         }
+    }
+
+    private static bool CanSendGroupChat(AIGroupConfig aiGroupConfig, int count)
+    {
+        if (count >= aiGroupConfig.GroupChatResponseLimit100)
+            return true;
+        if (count >= aiGroupConfig.GroupChatResponseLimit50)
+            return Rand.CheckPercent(50);
+        if (count >= aiGroupConfig.GroupChatResponseLimit35)
+            return Rand.CheckPercent(35);
+        if (count >= aiGroupConfig.GroupChatResponseLimit20)
+            return Rand.CheckPercent(20);
+        if (count >= aiGroupConfig.GroupChatResponseLimit10)
+            return Rand.CheckPercent(10);
+        if (count >= aiGroupConfig.GroupChatResponseLimit5)
+            return Rand.CheckPercent(5);
+
+        return false;
     }
 }

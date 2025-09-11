@@ -76,6 +76,8 @@ public static class ConfigExtensions
                         .Where(eachBotFunction => !botFunctionTypes.Contains(eachBotFunction.BotFunctionType))
                         .ForEach(eachBotFunction => botFunctions.Add(eachBotFunction));
                 }
+
+                each.AIGroupConfig ??= new AIGroupConfig();
             });
             botConfig.InitBotFunctionIsEnabled();
             PrepareData(botConfig);

@@ -116,7 +116,7 @@ public class RunLog_BotBackgroundInfo : RunLog
 {
     /// <inheritdoc />
     public RunLog_BotBackgroundInfo(string content)
-        : base(LogMessageType.BotBackground_Info, BotConfigTargetType.Background, content)
+        : base(LogMessageType.BotBackground_Info, BotConfigTargetType.Common, content)
     {
         SenderId = "NapCat";
     }

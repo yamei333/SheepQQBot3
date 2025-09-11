@@ -60,7 +60,7 @@ public class SetConfig
     /// 闹钟助手配置
     /// </summary>
     [Key(nameof(AlarmAideConfigs))]
-    public Dictionary<Guid, AlarmAideConfig> AlarmAideConfigs { get; set; }
+    public ConcurrentDictionary<Guid, AlarmAideConfig> AlarmAideConfigs { get; set; }
 
     /// <summary>
     /// 闹钟助手允许投稿成员ID配置
@@ -78,41 +78,47 @@ public class SetConfig
     /// 基金播报配置
     /// </summary>
     [Key(nameof(FundAlarmConfigs))]
-    public Dictionary<Guid, FundAlarmConfig> FundAlarmConfigs { get; set; }
+    public ConcurrentDictionary<Guid, FundAlarmConfig> FundAlarmConfigs { get; set; }
 
     /// <summary>
     /// 基金阈值观测配置
     /// </summary>
     [Key(nameof(FundLimitObserveConfigs))]
-    public Dictionary<Guid, FundLimitObserveConfig> FundLimitObserveConfigs { get; set; }
+    public ConcurrentDictionary<Guid, FundLimitObserveConfig> FundLimitObserveConfigs { get; set; }
 
     /// <summary>
     /// 复读机杀手配置
     /// </summary>
     [Key(nameof(RepeaterKillerConfigs))]
-    public Dictionary<Guid, RepeaterKillerConfig> RepeaterKillerConfigs { get; set; }
+    public ConcurrentDictionary<Guid, RepeaterKillerConfig> RepeaterKillerConfigs { get; set; }
 
     /// <summary>
     /// 直播提醒配置
     /// </summary>
     [Key(nameof(LiveAlarmConfigs))]
-    public Dictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
+    public ConcurrentDictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
+
+    /// <summary>
+    /// AI群响应配置
+    /// </summary>
+    [Key(nameof(AIGroupConfig))]
+    public AIGroupConfig AIGroupConfig { get; set; }
 
     #region 已执行内容的保存
 
-    [JsonIgnore]
-    [IgnoreMember]
-    private List<int> _processedMessageIds;
+    //[JsonIgnore]
+    //[IgnoreMember]
+    //private List<int> _processedMessageIds;
 
-    /// <summary>
-    /// 保存已处理的消息ID
-    /// </summary>
-    [Key(nameof(ProcessedMessageIds))]
-    public List<int> ProcessedMessageIds
-    {
-        get => _processedMessageIds ??= new List<int>();
-        set => _processedMessageIds = value;
-    }
+    ///// <summary>
+    ///// 保存已处理的消息ID
+    ///// </summary>
+    //[Key(nameof(ProcessedMessageIds))]
+    //public List<int> ProcessedMessageIds
+    //{
+    //    get => _processedMessageIds ??= [];
+    //    set => _processedMessageIds = value;
+    //}
 
     [JsonIgnore]
     [IgnoreMember]
@@ -124,7 +130,7 @@ public class SetConfig
     [Key(nameof(AlarmAideAlarmedList))]
     public Dictionary<Guid, DateTime> AlarmAideAlarmedList
     {
-        get => _alarmAideAlarmedList ??= new Dictionary<Guid, DateTime>();
+        get => _alarmAideAlarmedList ??= [];
         set => _alarmAideAlarmedList = value;
     }
 
@@ -138,7 +144,7 @@ public class SetConfig
     [Key(nameof(FundAlarmedList))]
     public ConcurrentDictionary<Guid, DateTime> FundAlarmedList
     {
-        get => _fundAlarmedList ??= new ConcurrentDictionary<Guid, DateTime>();
+        get => _fundAlarmedList ??= [];
         set => _fundAlarmedList = value;
     }
 
@@ -152,7 +158,7 @@ public class SetConfig
     [Key(nameof(FundLimitObservedList))]
     public ConcurrentDictionary<Guid, DateTime> FundLimitObservedList
     {
-        get => _fundLimitObservedList ??= new ConcurrentDictionary<Guid, DateTime>();
+        get => _fundLimitObservedList ??= [];
         set => _fundLimitObservedList = value;
     }
 
@@ -167,7 +173,7 @@ public class SetConfig
     [IgnoreMember]
     public Dictionary<Guid, DateTime> LiveAlarmedList
     {
-        get => _liveAlarmedList ??= new Dictionary<Guid, DateTime>();
+        get => _liveAlarmedList ??= [];
         set => _liveAlarmedList = value;
     }
 
@@ -206,16 +212,17 @@ public class SetConfig
         TargetId = targetId;
         TargetName = targetName ?? throw new ArgumentNullException(nameof(targetName));
         BotFunctions = CommonExtensions.Clone(DefaultBotFunctions);
-        AlarmAideConfigs = new Dictionary<Guid, AlarmAideConfig>();
-        AlarmAideSubmitMemberIds = new HashSet<long>();
-        AlarmAideAlarmedList = new Dictionary<Guid, DateTime>();
-        FundAlarmConfigs = new Dictionary<Guid, FundAlarmConfig>();
-        FundLimitObserveConfigs = new Dictionary<Guid, FundLimitObserveConfig>();
-        FundAlarmedList = new ConcurrentDictionary<Guid, DateTime>();
-        FundLimitObservedList = new ConcurrentDictionary<Guid, DateTime>();
-        LiveAlarmedList = new Dictionary<Guid, DateTime>();
-        RepeaterKillerConfigs = new Dictionary<Guid, RepeaterKillerConfig>();
-        LiveAlarmConfigs = new Dictionary<Guid, LiveAlarmConfig>();
+        AlarmAideConfigs = [];
+        AlarmAideSubmitMemberIds = [];
+        AlarmAideAlarmedList = [];
+        FundAlarmConfigs = [];
+        FundLimitObserveConfigs = [];
+        FundAlarmedList = [];
+        FundLimitObservedList = [];
+        LiveAlarmedList = [];
+        RepeaterKillerConfigs = [];
+        LiveAlarmConfigs = [];
+        AIGroupConfig = new AIGroupConfig();
         InitBotFunctionIsEnabled();
 #if (!debug)
 #else
@@ -251,34 +258,4 @@ public class SetConfig
         var allowFunctions = TargetType.GetAllowFunctions();
         BotFunctions.ForEach(each => each.IsEnabled = allowFunctions.Contains(each.BotFunctionType));
     }
-
-    ///// <summary>
-    ///// 通过URL取得图标
-    ///// </summary>
-    ///// <param name="url">URL地址</param>
-    ///// <returns><see cref="BitmapImage"/></returns>
-    //private static BitmapImage GetHttpIcon(string url)
-    //{
-    //    var image = new BitmapImage();
-    //    const int bytesToRead = 100;
-
-    //    var response = HttpExtensions.SendHttpResponse(url);
-    //    var responseStream = response.Content.ReadAsStream();
-
-    //    var reader = new BinaryReader(responseStream);
-    //    var memoryStream = new MemoryStream();
-    //    var bytebuffer = new byte[bytesToRead];
-    //    var bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
-    //    while (bytesRead > 0)
-    //    {
-    //        memoryStream.Write(bytebuffer, 0, bytesRead);
-    //        bytesRead = reader.Read(bytebuffer, 0, bytesToRead);
-    //    }
-
-    //    image.BeginInit();
-    //    memoryStream.Seek(0, SeekOrigin.Begin);
-    //    image.StreamSource = memoryStream;
-    //    image.EndInit();
-    //    return image;
-    //}
 }
