@@ -4,18 +4,6 @@ using System.Text.Json.Serialization;
 namespace SheepQQBot3.Model.AI
 {
     /// <summary>
-    /// 小助手状态(保存用)
-    /// </summary>
-    public class AIStatusData
-    {
-        /// <summary>
-        /// 心情指数
-        /// </summary>
-        [JsonPropertyName("mood")]
-        public int MoodIndexValue { get; set; }
-    }
-
-    /// <summary>
     /// 小助手状态(请求用)
     /// </summary>
     public class AIStatusInfo
@@ -39,31 +27,43 @@ namespace SheepQQBot3.Model.AI
         public string Scene { get; set; }
 
         /// <summary>
-        /// 当天天气
+        /// 当前天气
         /// </summary>
         [JsonPropertyName("weatherInfo")]
         public AIWeatherInfo WeatherInfo { get; set; }
 
         /// <summary>
-        /// 上个时间点天气预报
-        /// </summary>
-        [JsonPropertyName("prevWeatherInfo")]
-        public AIWeatherInfo PrevWeatherInfo { get; set; }
-
-        /// <summary>
-        /// 下个时间点天气预报
-        /// </summary>
-        [JsonPropertyName("nextWeatherInfo")]
-        public AIWeatherInfo NextWeatherInfo { get; set; }
-
-        /// <summary>
         /// 当前时间
         /// </summary>
-        [JsonPropertyName("nowDate")]
+        [JsonPropertyName("date")]
         public string NowDate { get; set; }
     }
 
     public class AIWeatherInfo
+    {
+        /// <summary>
+        /// 当前天气
+        /// </summary>
+        [JsonPropertyName("weatherData")]
+        public AIWeatherData WeatherData { get; set; }
+
+        /// <summary>
+        /// 上个时间点天气预报
+        /// </summary>
+        [JsonPropertyName("prevWeatherData")]
+        public AIWeatherData PrevWeatherData { get; set; }
+
+        /// <summary>
+        /// 下个时间点天气预报
+        /// </summary>
+        [JsonPropertyName("nextWeatherData")]
+        public AIWeatherData NextWeatherData { get; set; }
+    }
+
+    /// <summary>
+    /// AI天气信息
+    /// </summary>
+    public class AIWeatherData
     {
         /// <summary>
         /// 天气预报时间(预报时使用)
@@ -74,8 +74,8 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 当前天气
         /// </summary>
-        [JsonPropertyName("currentWeather")]
-        public string CurrentWeather { get; set; }
+        [JsonPropertyName("weather")]
+        public string Weather { get; set; }
 
         /// <summary>
         /// 平均温度
@@ -86,8 +86,8 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 体感温度
         /// </summary>
-        [JsonPropertyName("tempFeelLike")]
-        public string TempFeelLike { get; set; }
+        [JsonPropertyName("feelLike")]
+        public string FeelLike { get; set; }
 
         /// <summary>
         /// 风速
@@ -102,7 +102,7 @@ namespace SheepQQBot3.Model.AI
         public string Precipitation { get; set; }
 
         /// <summary>
-        /// 浑浊度
+        /// 云层覆盖率
         /// </summary>
         [JsonPropertyName("cloudiness")]
         public string Cloudiness { get; set; }
@@ -143,11 +143,13 @@ namespace SheepQQBot3.Model.AI
                     _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
                     _ when timeSeconds <= GetTime(08, 00) => "bed time",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 00) => "breakfast",
+                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
                     _ when timeSeconds <= GetTime(11, 00) => "小助手 time",
                     _ when timeSeconds <= GetTime(11, 30) => "lunch",
                     _ when timeSeconds <= GetTime(12, 30) => "nap",
+                    _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
                     _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
                     _ when timeSeconds <= GetTime(17, 00) => "小助手 time",
                     _ when timeSeconds <= GetTime(17, 30) => "dinner",
@@ -166,13 +168,16 @@ namespace SheepQQBot3.Model.AI
                     _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
                     _ when timeSeconds <= GetTime(08, 00) => "bed time",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 00) => "breakfast",
+                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
                     _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
                     _ when timeSeconds <= GetTime(10, 30) => "hair care",
                     _ when timeSeconds <= GetTime(11, 00) => "short rest",
                     _ when timeSeconds <= GetTime(11, 30) => "lunch",
                     _ when timeSeconds <= GetTime(12, 00) => "nap",
+                    _ when timeSeconds <= GetTime(12, 10) => "use the restroom",
+                    _ when timeSeconds <= GetTime(12, 20) => "sleep inertia",
                     _ when timeSeconds <= GetTime(16, 30) => "spending time with 雅美",
                     _ when timeSeconds <= GetTime(17, 00) => "time for 雅美 to clean my ears",
                     _ when timeSeconds <= GetTime(17, 30) => "dinner",
@@ -192,12 +197,14 @@ namespace SheepQQBot3.Model.AI
                     _ when timeSeconds <= GetTime(07, 30) => "deep sleep with 雅美",
                     _ when timeSeconds <= GetTime(08, 00) => "sleeping with 雅美",
                     _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 30) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 00) => "breakfast",
+                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
                     _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
                     _ when timeSeconds <= GetTime(11, 00) => "strolling",
                     _ when timeSeconds <= GetTime(11, 30) => "lunch",
                     _ when timeSeconds <= GetTime(12, 30) => "nap",
+                    _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
                     _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
                     _ when timeSeconds <= GetTime(15, 00) => "shopping out",
                     _ when timeSeconds <= GetTime(17, 00) => "do housework",

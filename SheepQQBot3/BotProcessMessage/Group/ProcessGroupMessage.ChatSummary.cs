@@ -5,7 +5,6 @@ using SheepQQBot3.DbModel;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
-using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model.ChatSummaryConfig;
@@ -318,8 +317,6 @@ public static partial class ProcessGroupMessage
 
                 async Task AISummary(long targetGroupId, DateTime fromDate, DateTime? toDate = null)
                 {
-                    var groupMembers = await BotServer.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
-
                     var requestContents = new List<Content>();
                     lock (BotDb.SyncLock)
                     {
@@ -341,15 +338,17 @@ public static partial class ProcessGroupMessage
                                     return;
 
                                 requestContents.AddMessageContent(
-                                    groupMembers.GetOrAdd(each.TargetId, new GroupMember()).ToSender(),
-                                    historyMessage,
-                                    AIMessageSourceType.Group);
+                                    each.TargetId,
+                                    //groupMembers.GetOrAdd(each.TargetId, new GroupMember()).ToSender(),
+                                    historyMessage);
                             });
                     }
 
+                    var groupMembers = await BotServer.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
                     var sender = groupMessage.Sender;
-                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}({sender.UserId})想让你总结一下大家都聊了些什么，先对不同内容进行总结，最后再来一下汇总。");
-                    await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, aiGroupConfig,
+
+                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}(QQ:{sender.UserId})想让你总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。");
+                    await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
                         (id, msg) => BotServer.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
                         .ConfigureAwait(false);
                 }

@@ -23,8 +23,8 @@ public static partial class ProcessGroupMessage
     private static readonly Regex _regEmoji = new(@"\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
-    private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，来参与群聊吧(随机1~3句话)";
-    private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话，回复一下吧(随机1~3句话)";
+    private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
+    private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";
 
     /// <summary>
     /// AI助手
@@ -91,7 +91,7 @@ public static partial class ProcessGroupMessage
 
             // MEMO : 记录消息(添加到历史记录中)
             var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
-            historyContents.AddMessageContent(groupMessage.Sender, message, AIMessageSourceType.Group);
+            historyContents.AddMessageContent(targetId, message);
 
             //YameiLogExtensions.WriteLog(LogType.Info, $"群({groupId})消息记录数: {historyContents.Count}");
             if (CanSendGroupChat(aiGroupConfig, historyContents.Count))
@@ -127,27 +127,30 @@ public static partial class ProcessGroupMessage
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
             var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
-            var sender = groupMessage.Sender;
+            //var sender = groupMessage.Sender;
             // MEMO : 构建发送消息并发送
-            historyContents.AddMessageContent(sender, removeAtMessage, AIMessageSourceType.Group);
-            historyContents.AddSystemHint($"{sender.NickName}(QQId:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
+            historyContents.AddMessageContent(targetId, removeAtMessage);
+            historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
+            //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
+            var groupMembers = await BotServer.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             await historyContents.SendAsync(
-                chatKey, targetId, groupId, true, aiGroupConfig,
+                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(), aiGroupConfig,
                 (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
         }
 
         return;
 
-        Task SendGroupAsync(List<Content> groupChatHistoryContents)
+        async Task SendGroupAsync(List<Content> groupChatHistoryContents)
         {
             // MEMO : 清空消息
             AIHistoryContents.AddOrUpdate(groupId, _ => [], (_, __) => []);
+            var groupMembers = await BotServer.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             // MEMO : 发送消息
-            return groupChatHistoryContents.SendAsync(
-                chatKey, groupId, groupId, false, aiGroupConfig,
+            await groupChatHistoryContents.SendAsync(
+                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
                 (id, msg) => _ = BotServer.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
-                addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT));
+                addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT)).ConfigureAwait(false);
         }
     }
 

@@ -106,7 +106,7 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
                 break;
             case LogMessageType.AIRequest:
                 result.Add(new RunLogMessage($"请求用户: {runLog.TargetId}"));
-                result.Add(new RunLogMessage($"ApiKey: {runLog.OperatorId}"));
+                //result.Add(new RunLogMessage($"ApiKey: {runLog.OperatorId}"));
                 var response = runLog.AIResponse;
                 result.Add(new RunLogMessage($"回复内容: {response.Text}"));
                 var usageMetadata = response.UsageMetadata!;

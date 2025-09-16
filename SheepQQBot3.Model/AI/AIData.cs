@@ -4,6 +4,9 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
 {
+    /// <summary>
+    /// AI信息(保存用)
+    /// </summary>
     public class AIData
     {
         /// <summary>
@@ -17,6 +20,18 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [JsonPropertyName("aiStatus")]
         public AIStatusData AIStatusData { get; set; }
+    }
+
+    /// <summary>
+    /// 小助手状态(保存用)
+    /// </summary>
+    public class AIStatusData
+    {
+        /// <summary>
+        /// 心情指数
+        /// </summary>
+        [JsonPropertyName("mood")]
+        public int MoodIndexValue { get; set; }
     }
 
     public class AIUserData

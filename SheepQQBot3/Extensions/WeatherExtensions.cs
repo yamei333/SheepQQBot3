@@ -13,7 +13,7 @@ namespace SheepQQBot3.Extensions
         public const double LAT = 31.2222;
         public const string TEMPERATURE_UNITS = "Celsius";
 
-        public static async Task<(AIWeatherInfo, AIWeatherInfo, AIWeatherInfo)> AIGetWeatherInfoAsync(string cityName = "shanghai")
+        public static async Task<(AIWeatherData, AIWeatherData, AIWeatherData)> AIGetWeatherDataAsync(string cityName = "shanghai")
         {
             var weatherData = await OpenWeatherMapService.GetWeatherDataByCityNameAsync(cityName).ConfigureAwait(false);
 
@@ -23,18 +23,18 @@ namespace SheepQQBot3.Extensions
             var nextWeatherData = forecastWeatherDatas.First(each => each.AcquisitionDateTime > dateNow);
             var prevWeatherData = forecastWeatherDatas.Last(each => each.AcquisitionDateTime < dateNow);
 
-            return (weatherData.ToAIWeatherInfo(false), prevWeatherData.ToAIWeatherInfo(true), nextWeatherData.ToAIWeatherInfo(true));
+            return (weatherData.ToAIWeatherData(false), prevWeatherData.ToAIWeatherData(true), nextWeatherData.ToAIWeatherData(true));
         }
 
-        private static AIWeatherInfo ToAIWeatherInfo(this WeatherData weatherData, bool setForecastDate)
+        private static AIWeatherData ToAIWeatherData(this WeatherData weatherData, bool setForecastDate)
         {
             var weatherDayInfo = weatherData.WeatherDayInfo;
-            return new AIWeatherInfo
+            return new AIWeatherData
             {
                 ForecastDate = setForecastDate ? weatherData.AcquisitionDateTime.ToYYYYMDHHMMSS() : string.Empty,
-                CurrentWeather = string.Join(',', weatherData.Weathers.Select(each => each.Description)),
+                Weather = string.Join(',', weatherData.Weathers.Select(each => each.Description)),
                 TempAvg = $"{weatherDayInfo.Temperature:0.0} {TEMPERATURE_UNITS}",
-                TempFeelLike = $"{weatherDayInfo.FeelsLike:0.0} {TEMPERATURE_UNITS}",
+                FeelLike = $"{weatherDayInfo.FeelsLike:0.0} {TEMPERATURE_UNITS}",
                 Precipitation = $"{weatherData.Precipitation:0.0} mm/h",
                 WindSpeed = $"{weatherData.Wind.Speed} meter/sec",
                 Cloudiness = $"{weatherData.Clouds.All}%",

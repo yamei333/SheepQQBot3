@@ -34,6 +34,7 @@ public static class AIExtensions
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
     public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
     public const string MESSAGE_SLEEP = "Zzz...";
+    public const string SEND_A_IMAGE = "发送一张图片";
 
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
@@ -46,7 +47,7 @@ public static class AIExtensions
     private static readonly Regex _regDeleteEmoji2 = new(@"\[.+?\]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     private static readonly Regex _regDeleteEmoji3 = new(@"\(.+?\)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regDeleteEmoji = new(@"\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
 
     public static AIUserData SuperAdminAIUserData => new()
@@ -69,6 +70,7 @@ public static class AIExtensions
         long requestTargetId,
         long groupId,
         bool isAt,
+        ConcurrentDictionary<long, AIChatSender> aiChatSenders,
         AIGroupConfig aiGroupConfig,
         Action<long, string> botSendMessage,
         Action<List<Content>> addSystemHint = null)
@@ -101,24 +103,32 @@ public static class AIExtensions
                     var part = content.Parts.FirstOrDefault(each => !each.Text.IsNullOrEmpty());
                     if (part != null)
                     {
-                        var qqId = part.Text.JsonDeserialize<AIChatRequest>().Sender.QQId;
+                        var qqId = part.Text.JsonDeserialize<AIChatRequest>().SenderId;
                         if (qqId != CommonId)
                         {
                             var userData = PublicVar.AIData.UserDatas.GetOrAdd(qqId, _ => DefaultAIUserData);
                             requestUserInfos.GetOrAdd(qqId,
                                 AIUserInfoDictionary.GetOrAdd(qqId, new AIUserInfo
                                 {
-                                    TargetId = qqId,
-                                    FavorabilityText = userData.Favorability.ToFavorability(),
-                                    ProhibitedActs = userData.ProhibitedActs,
+                                    UserInfo = aiChatSenders.GetOrAdd(qqId, new AIChatSender
+                                    {
+                                        QQId = qqId,
+                                        Name = "unknown people",
+                                        Identity = "unknown",
+                                    }),
+                                    UserOtherInfo = new AIUserOtherInfo
+                                    {
+                                        FavorabilityText = userData.Favorability.ToFavorability(),
+                                        ProhibitedActs = userData.ProhibitedActs,
+                                    },
                                 }));
                         }
                     }
                 });
 
-            // MEMO : 插入本次请求的群聊用户信息(好感度信息等)
+            // MEMO : 插入本次请求的群聊用户信息
             var userInfoContent = new Content { Role = USER_ROLE };
-            userInfoContent.AddText(requestUserInfos.Values.ToArray().ToJsonIgnoreNull());
+            userInfoContent.AddText(requestUserInfos.Values.ToJsonIgnoreNull());
             chatHistoryContents.Add(userInfoContent);
 
             chat.History = chatHistoryContents;
@@ -468,18 +478,16 @@ public static class AIExtensions
                 + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}"
                 + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
                 + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
+                + GetExpressionText(true)
                 + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
 
-            if (Enum.TryParse<AIExpressionType>(face, out var expressionType))
-                resultMessage += $"{(expressionType == AIExpressionType.None ? string.Empty : $"[表情:{expressionType.GetDisplay()}]{ENTER}")}";
-            else
-                aiChatResponseContent.Face = "None";
+            resultMessage += GetEmojiCode();
         }
         else
         {
+            resultMessage = string.Empty;
             if (isGroupRequest)
             {
-                resultMessage = string.Empty;
                 if (aiGroupConfig.ShowThinking)
                     resultMessage += $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}";
 
@@ -489,67 +497,86 @@ public static class AIExtensions
                 if (aiGroupConfig.ShowPsychologicalDesc)
                     resultMessage += $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}";
 
-                if (aiGroupConfig.ShowBodyLanguage)
+                if (!aiGroupConfig.ShowThinking && !aiGroupConfig.ShowSensory && !aiGroupConfig.ShowPsychologicalDesc)
                 {
-                    if (!aiGroupConfig.ShowThinking && !aiGroupConfig.ShowSensory && !aiGroupConfig.ShowPsychologicalDesc)
-                        resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
-                    else
+                    resultMessage += $"{(aiGroupConfig.ShowExpression ? GetExpressionText(false) : string.Empty)}"
+                        + $"{(aiGroupConfig.ShowBodyLanguage ? (body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}") : string.Empty)}";
+                }
+                else
+                {
+                    if (aiGroupConfig.ShowExpression)
+                        resultMessage += GetExpressionText(true);
+
+                    if (aiGroupConfig.ShowBodyLanguage)
                         resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
                 }
 
                 if (aiGroupConfig.ShowEmojiImage)
-                {
-                    if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
-                        resultMessage += $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCode(emoji))}";
-                    else
-                        chatMessage.Emoji = "None";
-                }
+                    resultMessage += GetEmojiCode();
                 else
-                {
                     chatMessage.Emoji = "None";
-                }
             }
             else
             {
                 if (targetId == SuperAdminId)
                 {
-                    resultMessage = $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
+                    resultMessage += $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
                         + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
-                        + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
+                        + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}"
+                        + GetExpressionText(true);
                 }
                 else
                 {
-                    resultMessage = $"{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
+                    resultMessage += $"{GetExpressionText(false)}{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
                 }
 
-                if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
-                    resultMessage += $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCode(emoji))}";
-                else
-                    chatMessage.Emoji = "None";
+                resultMessage += GetEmojiCode();
             }
         }
 
-        resultMessage += chatMessageText.DeleteCode() ?? "(无消息内容)";
+        resultMessage += chatMessageText.DeleteCode() ?? string.Empty;
         return resultMessage;
 
-        string GetEmojiCode(string emojiCode)
-           => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
+        string GetExpressionText(bool useTitle)
+        {
+            if (Enum.TryParse<AIExpressionType>(face, out var expressionType))
+            {
+                return $"{(expressionType == AIExpressionType.None
+                    ? string.Empty
+                    : $"[{(useTitle ? "表情:" : string.Empty)}{expressionType.GetDisplay()}]{(useTitle ? ENTER : string.Empty)}")}";
+            }
+
+            aiChatResponseContent.Face = "None";
+            return string.Empty;
+        }
+
+        string GetEmojiCode()
+        {
+            if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
+                return $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCQCode(emoji))}";
+
+            chatMessage.Emoji = "None";
+            return string.Empty;
+
+            string GetEmojiCQCode(string emojiCode)
+               => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
+        }
     }
 
     public static void AddMessageContent(
         this List<Content> contents,
-        Sender sender,
-        string messageText,
-        AIMessageSourceType messageSourceType)
+        long senderId,
+        string messageText)
     {
         var message = _regReplaceAt.Replace(messageText, "[at:${qqId}]");
         var content = new Content
         {
             Role = USER_ROLE,
         };
-        var deleteImageMessage = content.AddImage(message);
-        // MEMO : 空消息也加, 他可以表示是谁发的
-        content.AddText(sender, deleteImageMessage, messageSourceType);
+        var deleteImageMessage = content.AddImage(senderId, message);
+        if (!deleteImageMessage.IsNullOrEmpty())
+            content.AddText(senderId, deleteImageMessage);
+
         if (content.Parts.Count > 0)
             contents.Add(content);
     }
@@ -558,9 +585,10 @@ public static class AIExtensions
     /// 添加图片
     /// </summary>
     /// <param name="content"><see cref="GenerateContentRequest"/></param>
+    /// <param name="senderId">发送者QQID</param>
     /// <param name="message">消息内容</param>
     /// <returns>删除图片后的消息</returns>
-    public static string AddImage(this Content content, string message)
+    public static string AddImage(this Content content, long senderId, string message)
     {
         return _regGetImage.Replace(message, match =>
         {
@@ -572,6 +600,7 @@ public static class AIExtensions
                 try
                 {
                     content.AddInlineFile(qqImageFilePath, USER_ROLE);
+                    content.AddText(senderId, SEND_A_IMAGE);
                 }
                 catch (Exception e)
                 {
@@ -588,6 +617,7 @@ public static class AIExtensions
             if (successed)
             {
                 content.AddInlineFile(Path.Combine(AI_IMAGE_PATH, fileName), USER_ROLE);
+                content.AddText(SEND_A_IMAGE);
                 return string.Empty;
             }
 
@@ -599,18 +629,16 @@ public static class AIExtensions
     /// 添加文字内容
     /// </summary>
     /// <param name="content"><see cref="Content"/></param>
-    /// <param name="sender">发送者信息</param>
+    /// <param name="senderId">发送者QQID</param>
     /// <param name="message">消息内容</param>
-    /// <param name="messageSourceType"><see cref="AIMessageSourceType"/></param>
     public static void AddText(
         this Content content,
-        Sender sender,
-        string message,
-        AIMessageSourceType messageSourceType)
+        long senderId,
+        string message)
     {
         var aiChatRequest = new AIChatRequest
         {
-            Sender = sender.ToAIChatSender(messageSourceType),
+            SenderId = senderId,
             Date = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
             Message = QQExtensions.ProcessAIRequestMessage(message),
         };
@@ -637,13 +665,14 @@ public static class AIExtensions
     {
         var aiChatRequest = new AIChatRequest
         {
-            Sender = new AIChatSender
-            {
-                Name = "系统",
-                QQId = CommonId,
-                Identity = AIMessageSourceTypeUtil.SYSTEM,
-                Source = AIMessageSourceTypeUtil.SYSTEM,
-            },
+            //SenderId = new AIChatSender
+            //{
+            //    Name = "系统",
+            //    QQId = CommonId,
+            //    Identity = AIMessageSourceTypeUtil.SYSTEM,
+            //    Source = AIMessageSourceTypeUtil.SYSTEM,
+            //},
+            SenderId = CommonId,
             Date = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
             Message = systemHint,
         };
@@ -657,7 +686,7 @@ public static class AIExtensions
     {
         var aiChatRequest = new AIChatRequest
         {
-            Sender = messageRequest.Sender,
+            SenderId = messageRequest.SenderId,
             Date = messageRequest.Date,
             Message = "[过期图片]",
         };
@@ -711,20 +740,6 @@ public static class AIExtensions
         }
     }
 
-    public static AIChatSender ToAIChatSender(this Sender sender, AIMessageSourceType messageSourceType)
-    {
-        var userId = sender.UserId;
-        return new AIChatSender
-        {
-            Name = sender.NickName,
-            Gander = sender.Sex,
-            BName = sender.CardName == sender.NickName ? null : sender.CardName,
-            QQId = userId,
-            Identity = userId == 252961222 ? "至亲" : "群友",
-            Source = messageSourceType.ToMessageSourceText(),
-        };
-    }
-
     ///// <summary>
     ///// 追加人物其他信息(好感度)
     ///// </summary>
@@ -751,16 +766,19 @@ public static class AIExtensions
             Role = USER_ROLE,
         };
 
-        var (weatherInfo, prevWeatherInfo, nextWeatherInfo) = await WeatherExtensions.AIGetWeatherInfoAsync().ConfigureAwait(false);
+        var (weatherData, prevWeatherData, nextWeatherData) = await WeatherExtensions.AIGetWeatherDataAsync().ConfigureAwait(false);
         var aiChatStatus = new AIStatusInfo
         {
             Mood = PublicVar.AIData.AIStatusData.MoodIndexValue.ToMood(),
             Schedule = AIStatusUtil.GetSchedule(),
             NowDate = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
             Scene = messageSourceType.ToMessageSourceText(),
-            WeatherInfo = weatherInfo,
-            PrevWeatherInfo = prevWeatherInfo,
-            NextWeatherInfo = nextWeatherInfo,
+            WeatherInfo = new AIWeatherInfo
+            {
+                WeatherData = weatherData,
+                PrevWeatherData = prevWeatherData,
+                NextWeatherData = nextWeatherData,
+            },
         };
         content.AddText(aiChatStatus.ToJsonIgnoreNull());
         contents.Add(content);

@@ -50,6 +50,11 @@ public static partial class ProcessPrivateMessage
     private const string COMMAND_ADMIN_AI_CLEAR = "AICLEAR";
 
     /// <summary>
+    /// 清除AI默认好感的值
+    /// </summary>
+    private const string COMMAND_ADMIN_AI_CLEAR_DEFAULT = "AICLEARDEFAULT";
+
+    /// <summary>
     /// Admin功能
     /// </summary>
     public static async Task<bool> AdminCommandAsync(PrivateMessage privateMessage)
@@ -110,6 +115,9 @@ public static partial class ProcessPrivateMessage
 
                 await BotServer.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
                 break;
+            case COMMAND_ADMIN_AI_CLEAR_DEFAULT:
+                await ClearDefaultAIStatus().ConfigureAwait(false);
+                break;
             case COMMAND_ADMIN_AI_RESET:
                 await ResetAIStatus().ConfigureAwait(false);
                 break;
@@ -148,16 +156,19 @@ public static partial class ProcessPrivateMessage
 
         return true;
 
+        Task ClearDefaultAIStatus()
+        {
+            var defaultFavorability = DefaultAIUserData.Favorability;
+            PublicVar.AIData.UserDatas.RemoveWhere(each => each.Value.Favorability == defaultFavorability);
+
+            ConfigExtensions.SaveAIData();
+            return BotServer.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已清理!");
+        }
+
         Task ResetAIStatus()
         {
-            var userIds = PublicVar.AIData.UserDatas.Keys.ToArray();
-            userIds.ForEach(userId =>
-            {
-                if (userId == SuperAdminId)
-                    PublicVar.AIData.UserDatas.AddOrUpdate(userId, SuperAdminAIUserData, SuperAdminAIUserData);
-                else
-                    PublicVar.AIData.UserDatas.AddOrUpdate(userId, DefaultAIUserData, DefaultAIUserData);
-            });
+            PublicVar.AIData.UserDatas = [];
+            PublicVar.AIData.UserDatas.AddOrUpdate(SuperAdminId, SuperAdminAIUserData, SuperAdminAIUserData);
 
             ConfigExtensions.SaveAIData();
             return BotServer.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已重置!");

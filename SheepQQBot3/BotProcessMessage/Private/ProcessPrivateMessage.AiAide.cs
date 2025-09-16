@@ -4,6 +4,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -60,11 +61,12 @@ public static partial class ProcessPrivateMessage
 
         // MEMO : 构建发送消息并发送
         var thisRequestContents = new List<Content>();
-        thisRequestContents.AddMessageContent(privateMessage.Sender, message, AIMessageSourceType.Private);
-        await thisRequestContents.SendAsync(chatKey, targetId, 0, false, null,
+        thisRequestContents.AddMessageContent(targetId, message);
+
+        var aiChatSenders = new ConcurrentDictionary<long, AIChatSender>();
+        aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender());
+
+        await thisRequestContents.SendAsync(chatKey, targetId, 0, false, aiChatSenders, null,
             (id, msg) => _ = BotServer.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);
     }
-
-    private static string GetEmojiCode(string emojiCode)
-        => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
 }

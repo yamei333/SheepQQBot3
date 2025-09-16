@@ -3,26 +3,8 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
 {
-    /// <summary>
-    /// 小助手状态(保存用)
-    /// </summary>
-    public class AIUserInfoRequest
+    public class AIUserOtherInfo
     {
-        /// <summary>
-        /// 用户好感信息
-        /// </summary>
-        [JsonPropertyName("userInfo")]
-        public AIUserInfo[] UserInfos { get; set; }
-    }
-
-    public class AIUserInfo
-    {
-        /// <summary>
-        /// QQID
-        /// </summary>
-        [JsonPropertyName("targetId")]
-        public long TargetId { get; set; }
-
         /// <summary>
         /// 好感度描述
         /// </summary>
@@ -37,11 +19,26 @@ namespace SheepQQBot3.Model.AI
         public string ProhibitedActs { get; set; }
     }
 
+    public class AIUserInfo
+    {
+        /// <summary>
+        /// 用户信息
+        /// </summary>
+        [JsonPropertyName("userInfo")]
+        public AIChatSender UserInfo { get; set; }
+
+        /// <summary>
+        /// 用户其他信息
+        /// </summary>
+        [JsonPropertyName("otherInfo")]
+        public AIUserOtherInfo UserOtherInfo { get; set; }
+    }
+
     public static class AIUserInfoRequestUtil
     {
         public static string ToFavorability(this int favorabilityValue)
         {
-            return "好感: " + favorabilityValue switch
+            return favorabilityValue switch
             {
                 < -500 => "恨之入骨，恨不得生啖其肉",
                 < -400 => "杀父仇人，手刃仇敌方快哉",

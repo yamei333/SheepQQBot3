@@ -115,12 +115,12 @@ public static class PublicVar
     /// <summary>
     /// 最大重试次数
     /// </summary>
-    public const int AI_MAX_RETRY_TIMES = 1;
+    public const int AI_MAX_RETRY_TIMES = 2;
 
     /// <summary>
     /// AI最短请求间隔, 群内at(30秒)
     /// </summary>
-    public const int AI_REQUEST_INTERVAL_GROUP_PRIVATE = 30;
+    public const int AI_REQUEST_INTERVAL_GROUP_PRIVATE = 45;
 
     /// <summary>
     /// AI最短请求间隔, 个人(20秒)

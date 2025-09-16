@@ -5,10 +5,10 @@ namespace SheepQQBot3.Model.AI
     public class AIChatRequest
     {
         /// <summary>
-        /// 消息发送者身份
+        /// 消息发送者QQID
         /// </summary>
-        [JsonPropertyName("sender")]
-        public AIChatSender Sender { get; set; }
+        [JsonPropertyName("senderQQId")]
+        public long SenderId { get; set; }
 
         /// <summary>
         /// 发送时间
@@ -54,11 +54,5 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [JsonPropertyName("sf")]
         public string Identity { get; set; }
-
-        /// <summary>
-        /// 消息来源 (Source: Group chat/Private chat)
-        /// </summary>
-        [JsonPropertyName("src")]
-        public string Source { get; set; }
     }
 }

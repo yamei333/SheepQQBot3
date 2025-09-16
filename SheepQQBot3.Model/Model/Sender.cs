@@ -1,5 +1,8 @@
 ﻿using Masuit.Tools;
+using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Enums;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model;
@@ -52,4 +55,46 @@ public static class SenderUtil
             UserId = groupMember.UserId,
             Sex = groupMember.Sex,
         };
+
+    public static AIChatSender ToAIChatSender(this GroupMember groupMember)
+    {
+        var userId = groupMember.UserId;
+        var name = groupMember.NickName;
+        var otherName = groupMember.Card;
+        return new AIChatSender
+        {
+            Name = name,
+            Gander = groupMember.Sex,
+            BName = otherName.IsNullOrEmpty() || otherName == name ? null : otherName,
+            QQId = userId,
+            Identity = userId == 252961222 ? "至亲" : "群友",
+        };
+    }
+
+    public static AIChatSender ToAIChatSender(this Sender sender)
+    {
+        var userId = sender.UserId;
+        var name = sender.NickName;
+        var cardName = sender.CardName;
+        return new AIChatSender
+        {
+            Name = name,
+            Gander = sender.Sex,
+            BName = cardName.IsNullOrEmpty() || cardName == name ? null : cardName,
+            QQId = userId,
+            Identity = userId == 252961222 ? "至亲" : "群友",
+        };
+    }
+
+    public static ConcurrentDictionary<long, AIChatSender> ToSenderDictionary(this Dictionary<long, GroupMember> groupMembers)
+    {
+        var senders = groupMembers.ToConcurrentDictionary(each => each.Key, each => each.Value.ToAIChatSender());
+        senders.GetOrAdd(22222, new AIChatSender
+        {
+            Name = "System",
+            QQId = 22222,
+            Identity = AIMessageSourceTypeUtil.SYSTEM,
+        });
+        return senders;
+    }
 }
