@@ -133,7 +133,7 @@ namespace SheepQQBot3.Model.AI
         /// </summary>
         [Description("next message interval")]
         [JsonPropertyName("msgInterval")]
-        public int Delay { get; set; }
+        public int? Delay { get; set; }
     }
 
     public class AIFavorabilityChangeInfo

@@ -167,6 +167,7 @@ public static partial class ProcessPrivateMessage
 
         Task ResetAIStatus()
         {
+            PublicVar.AIData.AIStatusData.MoodIndexValue = 0;
             PublicVar.AIData.UserDatas = [];
             PublicVar.AIData.UserDatas.AddOrUpdate(SuperAdminId, SuperAdminAIUserData, SuperAdminAIUserData);
 

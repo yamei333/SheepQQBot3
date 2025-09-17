@@ -373,13 +373,14 @@ public static class AIExtensions
                 botSendMessage(sendTargetId, $"{sendMessage}");
 
                 // MEMO : 延迟
-                var delay = aiChatResponseContent.ChatMessageInfo.Delay;
+                var delay = aiChatResponseContent.ChatMessageInfo.Delay.GetValueOrDefault();
                 if (delay > 0)
-                    CommonExtensions.Sleep(aiChatResponseContent.ChatMessageInfo.Delay * 3);
+                    CommonExtensions.Sleep(delay * 3);
             });
 
             // MEMO : 添加本次AI回复内容
             var responseContent = new Content { Role = "model" };
+            aiChatResponse.DeleteOtherInfo();
             responseContent.AddText(aiChatResponse.ToJsonIgnoreNull());
             loadedHistory.Add(responseContent);
             // MEMO : 保存历史记录
@@ -898,5 +899,31 @@ public static class AIExtensions
             + $"{inspirationNote.Content}{ENTER}※Date: {DateTime.Now.ToYYYYMDDDDDHHMMSS()}{ENTER}{ENTER}");
         sw.Close();
         fs.Close();
+    }
+
+    /// <summary>
+    /// 删除AI回复中的其他信息, 只保留文字内容
+    /// <remarks>
+    /// 额外的信息保留可能导致AI每次都重复引用
+    /// </remarks>
+    /// </summary>
+    /// <param name="aiChatResponse"></param>
+    private static void DeleteOtherInfo(this AIChatResponse aiChatResponse)
+    {
+        aiChatResponse.Contents.ForEach(content =>
+        {
+            content.Think = null;
+            content.Sensory = null;
+            content.Body = null;
+            content.Face = null;
+            content.Mind = null;
+            content.ChatMessageInfo.Delay = null;
+            content.ChatMessageInfo.Emoji = null;
+        });
+        aiChatResponse.FavorabilityChangeInfos = null;
+        aiChatResponse.StatusChangeInfo = null;
+        aiChatResponse.BlockUserInfos = null;
+        aiChatResponse.KnowledgeNote = null;
+        aiChatResponse.InspirationNote = null;
     }
 }
