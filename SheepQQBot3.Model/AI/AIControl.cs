@@ -78,8 +78,8 @@ namespace SheepQQBot3.Model.AI
             {
                 var key = each.Key;
                 var ai = new GoogleAi(key);
-                var generativeModel = ai.CreateGenerativeModel(model);
-                AIChatSessions.GetOrAdd(key, generativeModel.StartChat());
+                var geminiModel = ai.CreateGeminiModel(model);
+                AIChatSessions.GetOrAdd(key, geminiModel.StartChat());
             });
 
             HistoryCaches = [];

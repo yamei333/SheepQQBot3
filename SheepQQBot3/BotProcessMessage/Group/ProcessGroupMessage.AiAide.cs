@@ -48,7 +48,7 @@ public static partial class ProcessGroupMessage
         }
 
         // MEMO : emoji数量超过一定数量
-        if (_regEmoji.Matches(message).Count >= 6)
+        if (_regEmoji.Matches(message).Count >= 4)
         {
             YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(emoji太多): {message}");
             return;
