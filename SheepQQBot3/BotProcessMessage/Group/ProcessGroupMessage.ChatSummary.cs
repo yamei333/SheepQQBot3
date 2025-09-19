@@ -117,7 +117,7 @@ public static partial class ProcessGroupMessage
                 if (!BotExtensions.IsAdmin(senderId)
                     && (dateNow - _chatSummaryRequestLastTimes.GetOrAdd(groupId, DateTime.MinValue)).TotalSeconds < CHATSUMMARY_TOFASTTIMES)
                 {
-                    await BotServer.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
+                    await BotClient.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
                     return true;
                 }
 
@@ -140,7 +140,7 @@ public static partial class ProcessGroupMessage
                 {
                     case "A":
                         // MEMO : 某些时间不该发消息
-                        if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+                        if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
                             return true;
 
                         // MEMO : AI小时统计
@@ -150,18 +150,18 @@ public static partial class ProcessGroupMessage
                         {
                             if (!int.TryParse(aiHourStr, out aiHour))
                             {
-                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                                await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                                 return false;
                             }
 
                             if (aiHour is <= 0 or >= 24)
                             {
-                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                                await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
                                 return false;
                             }
                         }
 
-                        await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(senderId)} 小助手正在收集聊天记录进行总结，请稍等片刻!").ConfigureAwait(false);
+                        await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(senderId)} 小助手正在收集聊天记录进行总结，请稍等片刻!").ConfigureAwait(false);
                         //await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         await AISummary(groupId, dateNow.AddHours(-aiHour)).ConfigureAwait(false);
 
@@ -169,31 +169,31 @@ public static partial class ProcessGroupMessage
                     case "B":
                         if (!BotExtensions.IsAdmin(senderId))
                         {
-                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
+                            await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
                             return false;
                         }
 
                         var dataMessage = message[5..];
                         if (dataMessage.IsNullOrEmpty())
                         {
-                            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                            await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                             return false;
                         }
 
                         if (JiebaDb.StopWords.Find(dataMessage) != null)
                         {
-                            await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
+                            await BotClient.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
                             return false;
                         }
 
                         if (!chatSummaryGroupConfig.ExcludeWords.Add(dataMessage))
                         {
-                            await BotServer.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于群配置").ConfigureAwait(false);
+                            await BotClient.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于群配置").ConfigureAwait(false);
                             return false;
                         }
 
                         await File.WriteAllTextAsync(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, JsonExtensions.DefaultJsonOptions)).ConfigureAwait(false);
-                        await BotServer.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
+                        await BotClient.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
                         return true;
                     case "H":
                         // MEMO : 小时统计
@@ -203,52 +203,52 @@ public static partial class ProcessGroupMessage
                         {
                             if (!int.TryParse(hourStr, out hour))
                             {
-                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                                await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                                 return false;
                             }
 
                             if (hour is <= 0 or >= 24)
                             {
-                                await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                                await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
                                 return false;
                             }
                         }
 
-                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         CalcWordCloud(groupId, dateNow.AddHours(-hour));
                         wordCloudWidth = 1200;
                         wordNums = 200;
                         break;
                     case "D":
                         // MEMO : 日统计
-                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         CalcWordCloud(groupId, dateNow.AddDays(-1));
                         wordCloudWidth = 1500;
                         wordNums = 250;
                         break;
                     case "W":
                         // MEMO : 周统计
-                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         CalcWordCloud(groupId, dateNow.AddDays(-7));
                         wordCloudWidth = 1800;
                         wordNums = 300;
                         break;
                     case "M":
                         // MEMO : 月统计
-                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         CalcWordCloud(groupId, dateNow.AddMonths(-1));
                         wordCloudWidth = 2400;
                         wordNums = 400;
                         break;
                     case "Y":
                         // MEMO : 年统计
-                        await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
                         CalcWordCloud(414774779, dateNow.AddYears(-1));
                         wordCloudWidth = 3000;
                         wordNums = 500;
                         break;
                     default:
-                        await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                        await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
                         return false;
                 }
 
@@ -261,10 +261,10 @@ public static partial class ProcessGroupMessage
                 wordCloudWords.GenerateWordCloud(wordCloudWidth, wordCloudWidth,
                     CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.Normal), true, maskFilePath);
                 await File.WriteAllTextAsync(Path.Combine(PATH_CACHE_WORDCLOUD, $"{groupId}.txt"), string.Join("\r\n", wordCloudWords.Keys)).ConfigureAwait(false);
-                await BotServer.SendGroupMessageAsync(groupId,
+                await BotClient.SendGroupMessageAsync(groupId,
                     CQCode.Image(CommonExtensions.GetPath(PATH_CACHE_WORDCLOUD, wordCloudImage, GetPathType.CQCodePath))).ConfigureAwait(false);
                 if (IsDebug)
-                    await BotServer.SendGroupMessageAsync(groupId, "聊天记录统计已发送!").ConfigureAwait(false);
+                    await BotClient.SendGroupMessageAsync(groupId, "聊天记录统计已发送!").ConfigureAwait(false);
 
                 return true;
 
@@ -317,6 +317,13 @@ public static partial class ProcessGroupMessage
 
                 async Task AISummary(long targetGroupId, DateTime fromDate, DateTime? toDate = null)
                 {
+                    var groupMembers = await BotClient.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
+                    if (groupMembers == null)
+                    {
+                        await BotClient.SendGroupMessageAsync(targetGroupId, "群成员信息获取失败!").ConfigureAwait(false);
+                        return;
+                    }
+
                     var requestContents = new List<Content>();
                     lock (BotDb.SyncLock)
                     {
@@ -344,12 +351,11 @@ public static partial class ProcessGroupMessage
                             });
                     }
 
-                    var groupMembers = await BotServer.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
                     var sender = groupMessage.Sender;
 
                     requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}(QQ:{sender.UserId})想让你总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。");
                     await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
-                        (id, msg) => BotServer.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
+                        (id, msg) => BotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
                         .ConfigureAwait(false);
                 }
             }

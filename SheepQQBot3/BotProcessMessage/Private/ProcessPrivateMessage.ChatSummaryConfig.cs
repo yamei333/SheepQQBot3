@@ -42,7 +42,7 @@ public static partial class ProcessPrivateMessage
 
         if (!BotExtensions.IsAdmin(senderId))
         {
-            await BotServer.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
+            await BotClient.SendPrivateMessageAsync(senderId, groupId, BotExtensions.GetMessage_CanOnlyAdminUseError(senderId, messageId)).ConfigureAwait(false);
             return false;
         }
 
@@ -61,7 +61,7 @@ public static partial class ProcessPrivateMessage
         var dataMessage = message[5..];
         var sendMessage = string.Empty;
         var result = await GetResultAsync().ConfigureAwait(false);
-        await BotServer.SendPrivateMessageAsync(senderId, groupId, sendMessage.RemoveEnd(ENTER)).ConfigureAwait(false);
+        await BotClient.SendPrivateMessageAsync(senderId, groupId, sendMessage.RemoveEnd(ENTER)).ConfigureAwait(false);
         return result;
 
         void AddMessage(string messageStr) => sendMessage += $"{messageStr}{ENTER}";

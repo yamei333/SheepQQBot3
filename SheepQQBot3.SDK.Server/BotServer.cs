@@ -1,15 +1,12 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
 using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
 using System.Text.Json;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using WatsonWebsocket;
 
@@ -20,8 +17,6 @@ public partial class BotServer : IDisposable
     private WatsonWsServer _server;
 
     private Guid _clientGuid;
-
-    private readonly Regex _regGetEcho = RegexGenerator.CQAPI_GetEcho();
 
     /// <summary>
     /// 默认端口
@@ -41,9 +36,8 @@ public partial class BotServer : IDisposable
     /// <summary>
     /// 默认构造函数
     /// </summary>
-    public BotServer(BotDbContext botDb)
+    public BotServer()
     {
-        _botDb = botDb;
         var address = AppSettingExtensions.Get("serverAddress");
         var port = AppSettingExtensions.Get("serverPort");
         _server = address.IsNullOrEmpty()
@@ -89,15 +83,6 @@ public partial class BotServer : IDisposable
                         // MEMO : 使用了不支持的API
                         YameiLogExtensions.WriteLog(LogType.Error, $"MessageReceived-不支持的api\r\n{jsonText}");
                     }
-                    else if (_regGetEcho.IsMatch(jsonText))
-                    {
-                        var match = _regGetEcho.Match(jsonText);
-                        var echo = Guid.Parse(match.Groups[1].Value);
-                        if (echo == Guid.Empty)
-                            ProcessClientReceiveData(GetClientReceiveData(jsonText));
-                        else
-                            _interaciveJsons.AddOrUpdate(echo, jsonText, (_, __) => jsonText);
-                    }
                     else
                     {
                         ProcessReceiveData(GetReceiveData(jsonText));
@@ -117,46 +102,8 @@ public partial class BotServer : IDisposable
         _server.Start();
         return;
 
-        ClientReceiveData GetClientReceiveData(string jsonInfo)
-            => jsonInfo.JsonDeserialize<ClientReceiveData>();
-
         ReceiveData GetReceiveData(string jsonInfo)
             => jsonInfo.JsonDeserialize<ReceiveData>();
-    }
-
-    private void ProcessClientReceiveData(ClientReceiveData receiveData)
-    {
-        if (!receiveData.IsSuccessed)
-        {
-            switch (receiveData.Message)
-            {
-                case "SEND_MSG_API_ERROR":
-                    OnSendMessageError?.Invoke(null, receiveData);
-                    break;
-                default:
-                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {receiveData.Message}-{receiveData.Wording}");
-                    break;
-            }
-            return;
-        }
-
-        var data = receiveData.Data;
-        switch (data.MessageType)
-        {
-            case null:
-                if (receiveData.Data != null && receiveData.Data?.MessageId != 0)
-                {
-                    // MEMO : 发送消息的反馈, 不处理
-                }
-                else
-                {
-                    YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: [MessageTargetType:null]{receiveData.Message}-{receiveData.Wording}");
-                }
-                break;
-            default:
-                YameiLogExtensions.WriteLog(LogType.Quest, $"未知自身上报数据: {data.MessageType}-{receiveData.Message}-{receiveData.Wording}");
-                break;
-        }
     }
 
     private void ProcessReceiveData(ReceiveData receiveData)
@@ -241,26 +188,5 @@ public partial class BotServer : IDisposable
             default:
                 throw new ArgumentOutOfRangeException(nameof(receiveData.NoticeType), receiveData.NoticeType, "值不在正确范围内");
         }
-    }
-
-    private async Task<bool> SendDataAsync(string actionType, ParamData paramData, Guid echo = default)
-    {
-        if (!Connected)
-            return false;
-
-        var jsonText = new SendData(actionType, paramData, echo == Guid.Empty ? null : echo.ToString()).ToJsonIgnoreNull();
-        await _server.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
-        return true;
-    }
-
-    private async Task<bool> SendDataAsync(string actionType, GroupForwardMessageParamData paramData, Guid echo = default)
-    {
-        if (!Connected)
-            return false;
-
-        var jsonText = JsonSerializer.Serialize(new SendGroupForwardMessageData(actionType, paramData, echo == default ? null : echo.ToString()),
-            JsonExtensions.DefaultJsonOptions);
-        await _server.SendAsync(_clientGuid, jsonText).ConfigureAwait(false);
-        return true;
     }
 }

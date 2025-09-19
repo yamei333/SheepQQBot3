@@ -30,14 +30,14 @@ public static partial class ProcessPrivateMessage
         if (!isSuperAdmin && dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
         {
             if (IsDebug)
-                await BotServer.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
+                await BotClient.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
 
             return;
         }
 
         // MEMO : 不该发消息时, 发送不回应消息
         if (!isAdmin
-            && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+            && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
         {
             return;
         }
@@ -53,7 +53,7 @@ public static partial class ProcessPrivateMessage
         var chatKey = $"p{targetId}";
         if ((dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_PRIVATE)
         {
-            await BotServer.SendPrivateMessageAsync(targetId, "请求间隔过短!").ConfigureAwait(false);
+            await BotClient.SendPrivateMessageAsync(targetId, "请求间隔过短!").ConfigureAwait(false);
             return;
         }
 
@@ -67,6 +67,6 @@ public static partial class ProcessPrivateMessage
         aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender());
 
         await thisRequestContents.SendAsync(chatKey, targetId, 0, false, aiChatSenders, null,
-            (id, msg) => _ = BotServer.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);
+            (id, msg) => _ = BotClient.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);
     }
 }

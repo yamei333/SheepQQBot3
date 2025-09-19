@@ -61,13 +61,13 @@ public static partial class TaskProcess
                         {
                             if (customAlarm.IsGroup)
                             {
-                                await BotServer.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
+                                await BotClient.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
                                     $"{(customAlarm.IsAtTarget ? $"{CQCode.At(customAlarm.TargetId)}{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
                             else
                             {
-                                await BotServer.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
+                                await BotClient.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
                                     $"{(customAlarm.IsAtTarget ? $"{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }

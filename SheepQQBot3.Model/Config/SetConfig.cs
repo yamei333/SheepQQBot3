@@ -44,7 +44,7 @@ public class SetConfig
     [IgnoreMember]
     public BitmapFrame Icon => TargetType switch
     {
-        BotConfigTargetType.Common => QQExtensions.GetQQImage(int.Parse(AppSettingExtensions.Get("selfId", "0"))),
+        BotConfigTargetType.Common => QQExtensions.GetQQImage(AppSettingExtensions.Get("selfId", 0L)),
         BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
         BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
         _ => QQExtensions.GetQQImage(10000),

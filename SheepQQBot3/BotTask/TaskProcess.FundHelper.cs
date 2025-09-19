@@ -128,12 +128,12 @@ public static partial class TaskProcess
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
-                    LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
+                    await BotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                    AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
-                    await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
-                    LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
+                    await BotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                    AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:
                 default:
@@ -195,11 +195,11 @@ public static partial class TaskProcess
         switch (setConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotServer.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                await BotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await BotServer.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                await BotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                 break;
             case BotConfigTargetType.Common:

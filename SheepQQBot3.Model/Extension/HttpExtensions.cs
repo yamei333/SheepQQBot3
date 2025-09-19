@@ -62,10 +62,10 @@ public static class HttpExtensions
     /// <param name="jsonCardTianxuanShare">天选JsonCard对象</param>
     /// <returns>JsonCard的CQ格式字符串</returns>
     public static async Task<string> GetSignedArkAsync(
-        Func<string, double, Task<string>> getCookieAsync,
+        Func<string, Task<string>> getCookieAsync,
         JsonCard_TianxuanShare jsonCardTianxuanShare)
     {
-        var cookiesJson = await getCookieAsync("act.qzone.qq.com", 5D).ConfigureAwait(false);
+        var cookiesJson = await getCookieAsync("act.qzone.qq.com").ConfigureAwait(false);
         var ntCookies = cookiesJson.JsonDeserialize<NTQQCookies>();
         var cookies = ntCookies.Data.Cookies;
         var psKey = _regGetPsKey.Match(cookies).Value;

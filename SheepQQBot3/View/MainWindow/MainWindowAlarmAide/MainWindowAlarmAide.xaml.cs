@@ -130,10 +130,10 @@ public partial class MainWindowAlarmAide
         switch (selectedSetConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotServer.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
+                await BotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Private:
-                await BotServer.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
+                await BotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Common:
             default:
@@ -235,10 +235,10 @@ public partial class MainWindowAlarmAide
         switch (selectedSetConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotServer.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
+                await BotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Private:
-                await BotServer.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
+                await BotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Common:
             default:

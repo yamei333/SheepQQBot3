@@ -8,6 +8,7 @@ using SheepQQBot3.DbModel.JiebaDb;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
 using System;
@@ -75,7 +76,7 @@ public static class PublicVar
     /// <summary>
     /// BotID
     /// </summary>
-    public static readonly long BotId = long.Parse(AppSettingExtensions.Get("selfId", "0"));
+    public static readonly long BotId = AppSettingExtensions.Get("selfId", 0L);
 
     /// <summary>
     /// 色图斗士信息缓存
@@ -141,6 +142,11 @@ public static class PublicVar
     /// <see cref="SDK.Server.BotServer"/>
     /// </summary>
     public static BotServer BotServer => Vm.BotServer;
+
+    /// <summary>
+    /// <see cref="SDK.Client.BotClient"/>
+    /// </summary>
+    public static BotClient BotClient => Vm.BotClient;
 
     public static NapCatWindow NapCatWindow;
     public static Process Bark;

@@ -1,0 +1,51 @@
+﻿using System.Diagnostics;
+using System.Runtime.InteropServices;
+
+namespace SheepQQBot3.SDK.Client.Utils;
+
+public static class CommonUtil
+{
+    [DllImport("User32.dll")]
+    private static extern bool GetLastInputInfo(ref LASTINPUTINFO dummy);
+
+    [DllImport("Kernel32.dll")]
+    private static extern uint GetLastError();
+
+    private struct LASTINPUTINFO
+    {
+        public uint CbSize;
+        public uint DwTime;
+    }
+
+    /// <summary>
+    /// 获取计算机是否闲置状态
+    /// </summary>
+    /// <param name="overTime"></param>
+    /// <returns></returns>
+    public static bool GetIsNotIdle(int overTime)
+    {
+        var processNames = Process.GetProcesses().Select(each => each.ProcessName).ToHashSet();
+        var specialProcessNames = new HashSet<string> { "DouyuLive" };
+
+        return GetIdleTime() <= overTime
+               || specialProcessNames.Any(each => processNames.Contains(each));
+    }
+
+    public static uint GetIdleTime()
+    {
+        var lastUserAction = new LASTINPUTINFO();
+        lastUserAction.CbSize = (uint)Marshal.SizeOf(lastUserAction);
+        GetLastInputInfo(ref lastUserAction);
+        return (uint)Environment.TickCount - lastUserAction.DwTime;
+    }
+
+    private static long GetLastInputTime()
+    {
+        var lastUserAction = new LASTINPUTINFO();
+        lastUserAction.CbSize = (uint)Marshal.SizeOf(lastUserAction);
+        if (!GetLastInputInfo(ref lastUserAction))
+            throw new Exception(GetLastError().ToString());
+
+        return lastUserAction.DwTime;
+    }
+}

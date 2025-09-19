@@ -1,7 +1,7 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <Version>0.15.4.3</Version>
+    <Version>0.15.5.0</Version>
     <OutputType>WinExe</OutputType>
     <TargetFramework>net8.0-windows7.0</TargetFramework>
     <Nullable>disable</Nullable>
@@ -72,6 +72,7 @@
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
+    <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj" />
     <ProjectReference Include="..\SheepQQBot3.SDK.WebApi\SheepQQBot3.SDK.WebApi.csproj" />
   </ItemGroup>

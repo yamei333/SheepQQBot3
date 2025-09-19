@@ -55,7 +55,7 @@ public static partial class ProcessRevokeGroupMessage
             // MEMO : 0.14.3.8 不发送嘲讽消息
             //new(BOT_NAME, BotId, _repeatSllhh.Random()),
         };
-        await BotServer.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages).ConfigureAwait(false);
+        await BotClient.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages).ConfigureAwait(false);
         return true;
     }
 }

@@ -9,7 +9,7 @@ public static partial class WebApiProcess
 {
     private static void AddRoute_SendMessage()
     {
-        // MEMO : Steam市场状态上报时使用的POST
+        // MEMO : 外部调用API发送消息
         _webServer.AddStaticRoute(HttpMethod.POST, "/SendMessage/", async context =>
         {
             var jsonText = context.Request.DataAsString;
@@ -18,7 +18,7 @@ public static partial class WebApiProcess
                 var apiSendMessage = jsonText.JsonDeserialize<WebApi_SendMessage>();
                 if (apiSendMessage?.SheepQQBot3 == TOKEN)
                 {
-                    await PublicVar.BotServer.SendMessageAsync(
+                    await PublicVar.BotClient.SendMessageAsync(
                         apiSendMessage.IsGroup ? MessageTargetType.Group : MessageTargetType.Private,
                         apiSendMessage.TargetId,
                         apiSendMessage.Message).ConfigureAwait(false);

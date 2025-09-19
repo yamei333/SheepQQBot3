@@ -73,17 +73,17 @@ public static partial class ProcessPrivateMessage
             case COMMAND_ADMIN_IP:
                 if (!RouterExtension.TryGetIPAddress(out var ipResult))
                 {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
+                    await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
                     return true;
                 }
 
                 if (ipResult.IsNullOrEmpty())
                 {
-                    await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
+                    await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
                     return true;
                 }
 
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
+                await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
                 break;
             //case COMMAND_ADMIN_HAS:
             //    if (!RouterExtension.TryGetClashInfo(out var clashInfoResult, out var remainBand, out var resetDaysLeft, out var expireDate))
@@ -113,7 +113,7 @@ public static partial class ProcessPrivateMessage
                     aiStatusMessage += $"无群消息记录!{ENTER}";
                 }
 
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
+                await BotClient.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
                 break;
             case COMMAND_ADMIN_AI_CLEAR_DEFAULT:
                 await ClearDefaultAIStatus().ConfigureAwait(false);
@@ -141,7 +141,7 @@ public static partial class ProcessPrivateMessage
                     default:
                         if (!int.TryParse(clearCommand, out var userId))
                         {
-                            await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
+                            await BotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
                             return false;
                         }
 
@@ -150,7 +150,7 @@ public static partial class ProcessPrivateMessage
                 }
 
             default:
-                await BotServer.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
+                await BotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
                 return false;
         }
 
@@ -162,7 +162,7 @@ public static partial class ProcessPrivateMessage
             PublicVar.AIData.UserDatas.RemoveWhere(each => each.Value.Favorability == defaultFavorability);
 
             ConfigExtensions.SaveAIData();
-            return BotServer.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已清理!");
+            return BotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已清理!");
         }
 
         Task ResetAIStatus()
@@ -172,7 +172,7 @@ public static partial class ProcessPrivateMessage
             PublicVar.AIData.UserDatas.AddOrUpdate(SuperAdminId, SuperAdminAIUserData, SuperAdminAIUserData);
 
             ConfigExtensions.SaveAIData();
-            return BotServer.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已重置!");
+            return BotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已重置!");
         }
 
         Task DeleteAIHistory(string searchPattern)
@@ -183,7 +183,7 @@ public static partial class ProcessPrivateMessage
                 sendMessage += $"{each.Split('/')[^1]}{ENTER}";
                 File.Delete(each);
             });
-            return BotServer.SendPrivateMessageAsync(senderId, groupId,
+            return BotClient.SendPrivateMessageAsync(senderId, groupId,
                 sendMessage.IsNullOrEmpty()
                     ? "没有历史记录需要删除!"
                     : $"{sendMessage}AI历史记录已删除!");

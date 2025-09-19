@@ -1,16 +1,15 @@
-﻿using CommonLibrary;
-using SheepQQBot3.BotProcessMessage;
+﻿using SheepQQBot3.BotProcessMessage;
 using SheepQQBot3.BotProcessMessage.Group;
 using SheepQQBot3.BotProcessMessage.Private;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.Json;
 using System.Threading.Tasks;
 
 namespace SheepQQBot3.View;
@@ -28,7 +27,9 @@ partial class MainWindowViewModel
 
     private void InitServer()
     {
-        BotServer = new BotServer(PublicVar.BotDb);
+        BotServer = new BotServer();
+        BotClient = new BotClient(PublicVar.BotDb);
+
         var botServer = BotServer;
         AddRunLog(new RunLog_SystemInfo("SERVER 开始监听"));
         botServer.ClientConnected += (o, args) =>
@@ -36,7 +37,7 @@ partial class MainWindowViewModel
             AddRunLog(new RunLog_SystemInfo("SERVER 连接成功"));
             if (PublicVar.IsDebug)
             {
-                botServer.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
+                BotClient.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
 
                 //var message = new List<GroupForwardMessage>
                 //{
@@ -77,28 +78,28 @@ partial class MainWindowViewModel
         {
             AddRunLog(new RunLog_SystemWarning("SERVER 连接断开!!"));
         };
-        botServer.OnSendMessageError += (o, clientReceiveData) =>
-        {
-            var dateNow = DateTime.Now;
-            if (clientReceiveData.Wording == "send group message failed: blocked by server")
-            {
-                if ((dateNow - _lastBlockedTime).TotalMicroseconds > 2000)
-                {
-                    LogExtensions.AddRunLog(new RunLog_BlockedByServer("账号已被风控!"));
-                    _lastBlockedTime = dateNow;
-                }
-                else
-                {
-                    // MEMO : 不处理重复发送的风控消息
-                }
-            }
-            else
-            {
-                YameiLogExtensions.WriteLog(
-                    LogType.Quest,
-                    $"发送消息失败, 未知错误 {JsonSerializer.Serialize(clientReceiveData)}");
-            }
-        };
+        //botServer.OnSendMessageError += (o, clientReceiveData) =>
+        //{
+        //    var dateNow = DateTime.Now;
+        //    if (clientReceiveData.Wording == "send group message failed: blocked by server")
+        //    {
+        //        if ((dateNow - _lastBlockedTime).TotalMicroseconds > 2000)
+        //        {
+        //            LogExtensions.AddRunLog(new RunLog_BlockedByServer("账号已被风控!"));
+        //            _lastBlockedTime = dateNow;
+        //        }
+        //        else
+        //        {
+        //            // MEMO : 不处理重复发送的风控消息
+        //        }
+        //    }
+        //    else
+        //    {
+        //        YameiLogExtensions.WriteLog(
+        //            LogType.Quest,
+        //            $"发送消息失败, 未知错误 {JsonSerializer.Serialize(clientReceiveData)}");
+        //    }
+        //};
 
         botServer.OnGroupPoke += (o, groupPoke) =>
         {

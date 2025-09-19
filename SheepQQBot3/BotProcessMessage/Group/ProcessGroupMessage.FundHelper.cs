@@ -78,7 +78,7 @@ public static partial class ProcessGroupMessage
                     break;
             }
 
-            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}").ConfigureAwait(false);
+            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}").ConfigureAwait(false);
         }
         catch (Exception e)
         {

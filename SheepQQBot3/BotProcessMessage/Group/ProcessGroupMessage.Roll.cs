@@ -53,7 +53,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            await BotServer.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(targetId, messageId))
+            await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(targetId, messageId))
                 .ConfigureAwait(false);
         }
 
@@ -63,7 +63,7 @@ public static partial class ProcessGroupMessage
 
         Task SendRollResult(int maxRollNumber)
         {
-            return BotServer.SendGroupMessageAsync(groupId,
+            return BotClient.SendGroupMessageAsync(groupId,
                 $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
         }
     }

@@ -59,7 +59,7 @@ public static partial class ProcessGroupMessage
         var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
         if (alarmAideConfig == null)
         {
-            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
+            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!");
             return false;
         }
 
@@ -91,7 +91,7 @@ public static partial class ProcessGroupMessage
             if (alarmTexts.Values.Any(each => each == alarmMessage))
             {
                 // MEMO : 已存在则不添加, 发送反馈
-                await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!");
+                await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!").ConfigureAwait(false);
                 return false;
             }
             else
@@ -105,7 +105,7 @@ public static partial class ProcessGroupMessage
                     alarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(alarmTexts.GetSequence(), alarmMessage);
 
                 // MEMO : 发送反馈
-                await BotServer.SendGroupForwardMessageAsync(groupId,
+                await BotClient.SendGroupForwardMessageAsync(groupId,
                 [
                     //new(groupMessage.MessageId),
                     new GroupForwardMessage(BOT_NAME, BotId, alarmMessage),
@@ -117,7 +117,7 @@ public static partial class ProcessGroupMessage
         }
         catch (Exception)
         {
-            await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
+            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
             YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
             return false;
         }

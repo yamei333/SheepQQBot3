@@ -79,7 +79,7 @@ public static partial class ProcessGroupMessage
         var isPrivateChat = message.StartsWith(_commandAI, StringComparison.CurrentCultureIgnoreCase);
         if (isPrivateChat && (dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_GROUP_PRIVATE)
         {
-            await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
+            await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
             return;
         }
 
@@ -97,7 +97,7 @@ public static partial class ProcessGroupMessage
             if (CanSendGroupChat(aiGroupConfig, historyContents.Count))
             {
                 // MEMO : 某些时间不该发消息
-                if (AIExtensions.IsCantSendMessage(0, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+                if (AIExtensions.IsCantSendMessage(0, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
                     return;
 
                 // MEMO : 发送消息
@@ -114,15 +114,15 @@ public static partial class ProcessGroupMessage
             if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {
                 //await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)} 暂时不对非管理开放at回复功能").ConfigureAwait(false);
-                await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
+                await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
                 return;
             }
 
             // MEMO : 某些时间不该发消息
-            if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)))
+            if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
                 return;
 
-            await BotServer.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Flash).ConfigureAwait(false);
+            await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Flash).ConfigureAwait(false);
 
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
@@ -132,10 +132,10 @@ public static partial class ProcessGroupMessage
             historyContents.AddMessageContent(targetId, removeAtMessage);
             historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
             //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
-            var groupMembers = await BotServer.GetGroupMembersAsync(groupId).ConfigureAwait(false);
+            var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             await historyContents.SendAsync(
                 chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(), aiGroupConfig,
-                (id, msg) => _ = BotServer.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
+                (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
         }
 
         return;
@@ -144,11 +144,11 @@ public static partial class ProcessGroupMessage
         {
             // MEMO : 清空消息
             AIHistoryContents.AddOrUpdate(groupId, _ => [], (_, __) => []);
-            var groupMembers = await BotServer.GetGroupMembersAsync(groupId).ConfigureAwait(false);
+            var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             // MEMO : 发送消息
             await groupChatHistoryContents.SendAsync(
                 chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
-                (id, msg) => _ = BotServer.SendGroupMessageAsync(
+                (id, msg) => _ = BotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
                 addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT)).ConfigureAwait(false);
         }

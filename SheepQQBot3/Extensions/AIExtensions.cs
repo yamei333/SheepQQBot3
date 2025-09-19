@@ -249,7 +249,7 @@ public static class AIExtensions
                     sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, sendMessage));
                 });
 
-                await BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
+                await BotClient.SendGroupForwardMessageAsync(groupId, sendMessages,
                         $"{dateNow.ToYYYYMD()} 群聊总结", [$"{BOT_NICK_NAME}群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
                     .ConfigureAwait(false);
 

@@ -1,5 +1,5 @@
-﻿using System;
-using SheepQQBot3.Model;
+﻿using SheepQQBot3.Model;
+using System;
 using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Server;
@@ -16,10 +16,10 @@ public partial class BotServer
     /// </summary>
     public event EventHandler<DisconnectionEventArgs> ClientDisconnected;
 
-    /// <summary>
-    /// 收到发送消息失败事件
-    /// </summary>
-    public event EventHandler<ClientReceiveData> OnSendMessageError;
+    ///// <summary>
+    ///// 收到发送消息失败事件
+    ///// </summary>
+    //public event EventHandler<ClientReceiveData> OnSendMessageError;
 
     public event EventHandler<GroupMessage> OnGroupMessage;
 

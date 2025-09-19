@@ -101,11 +101,11 @@ public static partial class TaskProcess
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await BotServer.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs).ConfigureAwait(false);
+                    await BotClient.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Group, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Private:
-                    await BotServer.SendPrivateMessageAsync(targetId, alarmText).ConfigureAwait(false);
+                    await BotClient.SendPrivateMessageAsync(targetId, alarmText).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Private, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Common:

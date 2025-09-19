@@ -5,6 +5,7 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
+using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
 using System;
 using System.Collections.Generic;
@@ -28,6 +29,11 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
     /// 监听消息用 <see cref="SDK.Server.BotServer"/>
     /// </summary>
     public BotServer BotServer { get; set; }
+
+    /// <summary>
+    /// 监听消息用 <see cref="SDK.Client.BotClient"/>
+    /// </summary>
+    public BotClient BotClient { get; set; }
 
     /// <summary>
     /// 释放资源

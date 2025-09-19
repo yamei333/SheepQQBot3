@@ -1,9 +1,8 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Threading.Tasks;
-using SheepQQBot3.Extensions;
+﻿using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Enums;
+using System;
+using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage;
@@ -37,17 +36,17 @@ public static partial class ProcessMessage
         if (contentMessage.StartsWith(COMMAND_CONFIG_BARK, StringComparison.CurrentCultureIgnoreCase))
         {
             var barkKey = contentMessage[COMMAND_CONFIG_BARK.Length..];
-            BotConfig.UserConfigs.TryAdd(targetId, new Dictionary<UserConfigType, string>());
+            BotConfig.UserConfigs.TryAdd(targetId, []);
             var isUpdate = BotConfig.UserConfigs[targetId].ContainsKey(UserConfigType.BarkKey);
             BotConfig.UserConfigs[targetId][UserConfigType.BarkKey] = barkKey;
             ConfigExtensions.SaveConfig();
-            await BotServer.SendPrivateMessageAsync(targetId, groupId,
+            await BotClient.SendPrivateMessageAsync(targetId, groupId,
                 $"BarkKey已{(isUpdate ? "更新" : "配置")}")
                 .ConfigureAwait(false);
             return true;
         }
 
-        await BotServer.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!")
+        await BotClient.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!")
             .ConfigureAwait(false);
         // 暂不处理
         return true;
