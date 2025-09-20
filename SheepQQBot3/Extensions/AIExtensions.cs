@@ -331,7 +331,7 @@ public static class AIExtensions
 
             valueChangeMessage = valueChangeMessage.RemoveEnd(ENTER);
             if (IsDebug && !valueChangeMessage.IsNullOrEmpty())
-                botSendMessage(TestGroupId, $"{valueChangeMessage}");
+                botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{valueChangeMessage}");
 
             // MEMO : 保存AI数据
             if (needSaveAIData)
@@ -344,7 +344,7 @@ public static class AIExtensions
                 // MEMO : 写入知识笔记内容
                 WriteAINote(knowledgeNote);
                 if (IsDebug)
-                    botSendMessage(TestGroupId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
+                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
             }
 
             // MEMO : 保存灵感笔记内容
@@ -354,7 +354,7 @@ public static class AIExtensions
                 // MEMO : 写入灵感笔记内容
                 WriteAINote(inspirationNote);
                 if (IsDebug)
-                    botSendMessage(TestGroupId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
+                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
             }
 
             // MEMO : 构建回复消息
@@ -618,7 +618,7 @@ public static class AIExtensions
             if (successed)
             {
                 content.AddInlineFile(Path.Combine(AI_IMAGE_PATH, fileName), USER_ROLE);
-                content.AddText(SEND_A_IMAGE);
+                content.AddText(senderId, SEND_A_IMAGE);
                 return string.Empty;
             }
 
