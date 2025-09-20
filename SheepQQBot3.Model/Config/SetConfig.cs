@@ -122,13 +122,13 @@ public class SetConfig
 
     [JsonIgnore]
     [IgnoreMember]
-    private Dictionary<Guid, DateTime> _alarmAideAlarmedList;
+    private ConcurrentDictionary<Guid, DateTime> _alarmAideAlarmedList;
 
     /// <summary>
     /// 保存已提醒闹钟列表
     /// </summary>
     [Key(nameof(AlarmAideAlarmedList))]
-    public Dictionary<Guid, DateTime> AlarmAideAlarmedList
+    public ConcurrentDictionary<Guid, DateTime> AlarmAideAlarmedList
     {
         get => _alarmAideAlarmedList ??= [];
         set => _alarmAideAlarmedList = value;

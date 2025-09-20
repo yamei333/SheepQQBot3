@@ -31,7 +31,9 @@ namespace SheepQQBot3.SDK.Client
         public BotClient(BotDbContext botDb)
         {
             _botDb = botDb;
-            HttpClient = new HttpClient();
+            var httpClient = new HttpClient();
+            httpClient.Timeout = TimeSpan.FromMilliseconds(5000);
+            HttpClient = httpClient;
             IpAddress = AppSettingExtensions.Get("clientAddress", DEFAULT_IP_ADDRESS);
             Port = AppSettingExtensions.Get("clientPort", DEFAULT_PORT);
             Token = AppSettingExtensions.Get("clientToken", string.Empty);

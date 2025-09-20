@@ -116,7 +116,7 @@ public static partial class TaskProcess
             }
 
             // MEMO : 追加到已发送列表
-            setConfig.AlarmAideAlarmedList.Add(alarmInfoKey, now);
+            setConfig.AlarmAideAlarmedList.AddOrUpdate(alarmInfoKey, now, now);
         }
     }
 }
