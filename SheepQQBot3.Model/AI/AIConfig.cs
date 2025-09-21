@@ -55,12 +55,6 @@ namespace SheepQQBot3.Model.AI
         public string FacePath { get; set; }
 
         /// <summary>
-        /// 知识库路径
-        /// </summary>
-        [JsonPropertyName("knowledge")]
-        public string KnowledgePath { get; set; }
-
-        /// <summary>
         /// OpenWeatherMap Key
         /// </summary>
         [JsonPropertyName("openWeatherMapKey")]

@@ -33,8 +33,10 @@ public static partial class TaskProcess
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Common_AlarmAide))
                         .ForEach(setConfig =>
                         {
-                            setConfig.AlarmAideConfigs.ToValueList().ForEach(DeleteExpiredDataAction);
-                            async void DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
+                            setConfig.AlarmAideConfigs.ToValueList().ForeachAsync(DeleteExpiredDataAction);
+                            return;
+
+                            async Task DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
                             {
                                 if (!alarmAidesConfig.IsActive)
                                     return;

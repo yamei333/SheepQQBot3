@@ -64,6 +64,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 群聊总结
     /// </summary>
+    /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
     public static async Task<bool> ChatSummaryAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
@@ -325,6 +326,7 @@ public static partial class ProcessGroupMessage
                     }
 
                     var requestContents = new List<Content>();
+                    requestContents.AddSystemHint($"[以下是今天的群聊内容]");
                     lock (BotDb.SyncLock)
                     {
                         var fromDateTimeStamp = fromDate.ToTimeStamp();
@@ -353,7 +355,7 @@ public static partial class ProcessGroupMessage
 
                     var sender = groupMessage.Sender;
 
-                    requestContents.AddSystemHint($"这些是今天的群聊内容，{sender.NickName}(QQ:{sender.UserId})想让你总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。");
+                    requestContents.AddSystemHint($"[群聊内容到此为止] {sender.NickName}(QQ:{sender.UserId})想让你总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。");
                     await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
                         (id, msg) => BotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
                         .ConfigureAwait(false);

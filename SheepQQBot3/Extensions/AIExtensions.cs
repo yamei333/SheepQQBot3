@@ -36,6 +36,8 @@ public static class AIExtensions
     public const string MESSAGE_SLEEP = "Zzz...";
     public const string SEND_A_IMAGE = "发送一张图片";
 
+    private const string AI_KNOWLEDGE_PATH = "AICache/knowledge.txt";
+    private const string AI_USER_INFO_PATH = "AICache/userInfo.txt";
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
@@ -89,8 +91,7 @@ public static class AIExtensions
             var loadedHistory = LoadAIHistory(chatKey);
             var chatHistoryContents = new List<Content>(loadedHistory);
             chatHistoryContents.AddKnowledge();
-            chatHistoryContents.AddNote(AI_KNOWLEDGE_NOTE_PATH, "[knowledgeNote.txt]文件内容是你的知识笔记");
-            chatHistoryContents.AddNote(AI_INSPIRATION_NOTE_PATH, "[inspirationNote.txt]文件内容是你的灵感笔记");
+
             var aiStatus = await chatHistoryContents.AddStatusAsync(
                 isGroupRequest ? AIMessageSourceType.Group : AIMessageSourceType.Private)
                 .ConfigureAwait(false);
@@ -127,9 +128,12 @@ public static class AIExtensions
                 });
 
             // MEMO : 插入本次请求的群聊用户信息
-            var userInfoContent = new Content { Role = USER_ROLE };
-            userInfoContent.AddText(requestUserInfos.Values.ToJsonIgnoreNull());
-            chatHistoryContents.Add(userInfoContent);
+            if (requestUserInfos.Any())
+            {
+                var userInfoContent = new Content { Role = USER_ROLE };
+                userInfoContent.AddText(requestUserInfos.Values.ToJsonIgnoreNull());
+                chatHistoryContents.Add(userInfoContent);
+            }
 
             chat.History = chatHistoryContents;
 
@@ -708,36 +712,30 @@ public static class AIExtensions
     /// </summary>
     public static void AddKnowledge(this List<Content> contents)
     {
-        var knowledgePath = PublicVar.AIConfig.KnowledgePath;
-        if (File.Exists(knowledgePath))
+        if (File.Exists(AI_KNOWLEDGE_PATH))
         {
             // MEMO : 插入外置知识库
             var content = new Content
             {
                 Role = USER_ROLE,
             };
-            content.AddInlineFile(knowledgePath, USER_ROLE);
-            content.AddText(CreateSystemHintJsonText("[knowledge.txt]文件内容是你的信息库"));
-            contents.Add(content);
+            AddNote(content, AI_KNOWLEDGE_PATH);
+            AddNote(content, AI_USER_INFO_PATH);
+            var hasKnowledgeNote = AddNote(content, AI_KNOWLEDGE_NOTE_PATH);
+            var hasInspirationNote = AddNote(content, AI_INSPIRATION_NOTE_PATH);
+            //content.AddText($"[知识库]是你的信息库{ENTER}"
+            //    + (hasKnowledgeNote ? $"[knowledgeNote]是你的知识笔记{ENTER}" : string.Empty)
+            //    + (hasInspirationNote ? $"[inspirationNote]文件内容是你的灵感笔记{ENTER}" : string.Empty));
+            //contents.Add(content);
         }
-    }
 
-    /// <summary>
-    /// 追加AI笔记
-    /// </summary>
-    public static void AddNote(this List<Content> contents, string filePath, string hintText)
-    {
-        var notePath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath);
-        if (File.Exists(notePath))
+        bool AddNote(Content content, string filePath)
         {
-            // MEMO : 插入AI笔记
-            var content = new Content
-            {
-                Role = USER_ROLE,
-            };
+            if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath)))
+                return false;
+
             content.AddInlineFile(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath), USER_ROLE);
-            content.AddText(CreateSystemHintJsonText(hintText));
-            contents.Add(content);
+            return true;
         }
     }
 

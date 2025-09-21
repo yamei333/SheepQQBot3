@@ -156,6 +156,9 @@
                               Content="心想"
                               IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowPsychologicalDesc}" />
                     <CheckBox Click="CheckBox_OnClick"
+                              Content="表情"
+                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowExpression}" />
+                    <CheckBox Click="CheckBox_OnClick"
                               Content="动作"
                               IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowBodyLanguage}" />
                     <CheckBox Click="CheckBox_OnClick"
