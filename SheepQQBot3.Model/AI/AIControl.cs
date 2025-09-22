@@ -199,7 +199,7 @@ namespace SheepQQBot3.Model.AI
         private void CheckFaceCode(AICharacter aiCharacter)
         {
             var responseFormat = aiCharacter.SystemInstruction["Response Format"];
-            var regex = new Regex(@"(?<=## available expression values\r\n\r\n)[\s\S]+?(?=\r\n\r\n)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var regex = new Regex(@"(?<=## available expression values\r\n\r\n)[\s\S]+?(?=\r\n\r\n)");
             var aiFaceCodes = regex.Match(responseFormat).Value.Split("\r\n").Select(each => each.Split(':')[0]).OrderBy(each => each).ToHashSet();
             var codeFaceCodes = Enum.GetNames(typeof(AIExpressionType)).OrderBy(each => each).ToHashSet();
 

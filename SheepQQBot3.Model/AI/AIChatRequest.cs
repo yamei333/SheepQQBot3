@@ -7,7 +7,7 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 消息发送者QQID
         /// </summary>
-        [JsonPropertyName("senderQQId")]
+        [JsonPropertyName("qq")]
         public long SenderId { get; set; }
 
         /// <summary>

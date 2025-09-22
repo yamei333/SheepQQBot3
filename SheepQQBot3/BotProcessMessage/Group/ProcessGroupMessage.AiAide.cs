@@ -20,8 +20,8 @@ public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
     private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
-    private static readonly Regex _regEmoji = new(@"\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regEmoji = new("\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]");
+    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
     private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";

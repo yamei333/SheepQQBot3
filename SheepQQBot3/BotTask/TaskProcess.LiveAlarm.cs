@@ -19,7 +19,7 @@ namespace SheepQQBot3.BotTask;
 
 public static partial class TaskProcess
 {
-    private static readonly Regex _regLiveRoomData = new(@"{\""title"".+?}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regLiveRoomData = new(@"{\""title"".+?}", RegexOptions.IgnoreCase);
 
     /// <summary>
     /// 直播提醒

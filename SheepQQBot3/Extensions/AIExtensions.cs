@@ -41,16 +41,18 @@ public static class AIExtensions
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
-    private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regGetImage = new(@"\[CQ:image,.+?\]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
+    private static readonly Regex _regGetImage = new(@"\[CQ:image,.+?\]");
+    private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase);
+    private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase);
     //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regDeleteEmoji2 = new(@"\[.+?\]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regDeleteErrorEmoji = new(@"\[emoji:(?<emojiCode>.+?)\]|\[\[emoji:(?<emojiCode>.+?)\]\]|\[\[\[emoji:(?<emojiCode>.+?)\]\]\]", RegexOptions.IgnoreCase);
 
-    private static readonly Regex _regDeleteEmoji3 = new(@"\(.+?\)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _regDeleteEmoji = new(@"\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+    private static readonly Regex _regDeleteErrorEmoji2 = new(@"\[.+?\]|\[\[.+?\]\]|\[\[\[.+?\]\]\]");
+
+    private static readonly Regex _regDeleteErrorEmoji3 = new(@"\(.+?\)|\(\(.+?\)\)|\(\(.+?\)\)");
+    private static readonly Regex _regDeleteEmoji = new("\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]");
+    private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}");
 
     public static AIUserData SuperAdminAIUserData => new()
     {
@@ -363,6 +365,8 @@ public static class AIExtensions
 
             // MEMO : 构建回复消息
             var needAt = isAt;
+            // MEMO : 排除消息为空的内容
+            chatMessages = chatMessages.Where(each => each.ChatMessageInfo != null).ToArray();
             chatMessages[^1].ChatMessageInfo.Delay = 0;
             chatMessages.ForEach(aiChatResponseContent =>
             {
@@ -474,8 +478,6 @@ public static class AIExtensions
         var mind = aiChatResponseContent.Mind;
         var face = aiChatResponseContent.Face;
         var chatMessage = aiChatResponseContent.ChatMessageInfo;
-        var emoji = chatMessage.Emoji;
-        var chatMessageText = chatMessage.Text;
         string resultMessage;
         if (IsDebug)
         {
@@ -486,7 +488,7 @@ public static class AIExtensions
                 + GetExpressionText(true)
                 + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
 
-            resultMessage += GetEmojiCode();
+            resultMessage += chatMessage.DeleteCode(true);
         }
         else
         {
@@ -516,10 +518,7 @@ public static class AIExtensions
                         resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
                 }
 
-                if (aiGroupConfig.ShowEmojiImage)
-                    resultMessage += GetEmojiCode();
-                else
-                    chatMessage.Emoji = "None";
+                resultMessage += chatMessage.DeleteCode(aiGroupConfig.ShowEmojiImage);
             }
             else
             {
@@ -535,11 +534,10 @@ public static class AIExtensions
                     resultMessage += $"{GetExpressionText(false)}{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
                 }
 
-                resultMessage += GetEmojiCode();
+                resultMessage += chatMessage.DeleteCode(true);
             }
         }
 
-        resultMessage += chatMessageText.DeleteCode() ?? string.Empty;
         return resultMessage;
 
         string GetExpressionText(bool useTitle)
@@ -554,18 +552,25 @@ public static class AIExtensions
             aiChatResponseContent.Face = "None";
             return string.Empty;
         }
+    }
 
-        string GetEmojiCode()
+    private static string GetEmojiCode(AIChatMessage aiChatMessage, bool showEmojiImage)
+    {
+        if (!showEmojiImage)
         {
-            if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
-                return $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCQCode(emoji))}";
-
-            chatMessage.Emoji = "None";
+            aiChatMessage.Emoji = "None";
             return string.Empty;
-
-            string GetEmojiCQCode(string emojiCode)
-               => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
         }
+
+        var emoji = aiChatMessage.Emoji;
+        if (Enum.TryParse<AIEmojiType>(emoji, out var emojiType))
+            return $"{(emojiType == AIEmojiType.None ? string.Empty : GetEmojiCQCode(emoji))}";
+
+        aiChatMessage.Emoji = "None";
+        return string.Empty;
+
+        string GetEmojiCQCode(string emojiCode)
+           => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
     }
 
     public static void AddMessageContent(
@@ -723,9 +728,9 @@ public static class AIExtensions
             AddNote(content, AI_USER_INFO_PATH);
             var hasKnowledgeNote = AddNote(content, AI_KNOWLEDGE_NOTE_PATH);
             var hasInspirationNote = AddNote(content, AI_INSPIRATION_NOTE_PATH);
-            //content.AddText($"[知识库]是你的信息库{ENTER}"
-            //    + (hasKnowledgeNote ? $"[knowledgeNote]是你的知识笔记{ENTER}" : string.Empty)
-            //    + (hasInspirationNote ? $"[inspirationNote]文件内容是你的灵感笔记{ENTER}" : string.Empty));
+            content.AddText($"识别对象时优先使用[人物信息]中的信息, 如不存在再使用发送字段的内容");
+            //+ (hasKnowledgeNote ? $"[knowledgeNote]是你的知识笔记{ENTER}" : string.Empty)
+            //+ (hasInspirationNote ? $"[inspirationNote]文件内容是你的灵感笔记{ENTER}" : string.Empty));
             //contents.Add(content);
         }
 
@@ -817,39 +822,59 @@ public static class AIExtensions
     /// <summary>
     /// 删除AI不该出现在聊天中的Code
     /// </summary>
-    /// <param name="input">输入内容</param>
+    /// <param name="aiChatMessage"><see cref="AIChatMessage"/></param>
     /// <returns>替换结果</returns>
-    public static string DeleteCode(this string input)
+    public static string DeleteCode(this AIChatMessage aiChatMessage, bool showEmojiImage)
     {
-        var result = input ?? string.Empty;
-        Replace(@"\[emojiCode:.+?\]", string.Empty);
+        var emojiCode = aiChatMessage.Emoji;
+        var result = aiChatMessage.Text ?? string.Empty;
+        //Replace(@"\[emojiCode:.+?\]", string.Empty);
 
-        result = _regDeleteEmoji2.Replace(result, match =>
+        result = _regDeleteErrorEmoji.Replace(result, match =>
         {
             var matchValue = match.Value;
-            if (Enum.TryParse(typeof(AIEmojiType), matchValue, true, out _))
+            var emojiCodeMatch = match.Groups["emojiCode"].Value;
+            if (Enum.TryParse(typeof(AIEmojiType), emojiCodeMatch, true, out _))
+            {
+                if (emojiCode.IsNullOrEmpty())
+                    emojiCode = emojiCodeMatch;
+
                 return string.Empty;
+            }
 
             return $"[{matchValue}]";
         });
-        result = _regDeleteEmoji3.Replace(result, match =>
+
+        result = _regDeleteErrorEmoji2.Replace(result, match =>
         {
             var matchValue = match.Value;
             if (Enum.TryParse(typeof(AIEmojiType), matchValue, true, out _))
+            {
+                if (emojiCode.IsNullOrEmpty())
+                    emojiCode = matchValue;
+
                 return string.Empty;
+            }
+
+            return $"[{matchValue}]";
+        });
+
+        result = _regDeleteErrorEmoji3.Replace(result, match =>
+        {
+            var matchValue = match.Value;
+            if (Enum.TryParse(typeof(AIEmojiType), matchValue, true, out _))
+            {
+                if (emojiCode.IsNullOrEmpty())
+                    emojiCode = matchValue;
+
+                return string.Empty;
+            }
 
             return $"({matchValue})";
         });
 
-        return result;
-
-        bool Replace(string pattern, string replacement)
-        {
-            var newResult = Regex.Replace(result, pattern, replacement);
-            var isMatch = newResult != result;
-            result = newResult;
-            return isMatch;
-        }
+        aiChatMessage.Emoji = emojiCode;
+        return GetEmojiCode(aiChatMessage, showEmojiImage) + result;
     }
 
     public static AIUserData GetAIUserData(long targetId) => PublicVar.AIData.UserDatas.GetOrAdd(targetId, DefaultAIUserData);

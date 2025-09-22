@@ -10,9 +10,9 @@ namespace SheepQQBot3.Model.Extension
 {
     public static class RouterExtension
     {
-        private static readonly Regex _regGetClashRemainBand = new(@"(?<=\- )[\d\. G\|].+$", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static readonly Regex _regGetClashTrafficReset = new(@"(?<=\- Traffic Reset：)\d+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-        private static readonly Regex _regGetClashExpireDate = new(@"(?<=\- 🏳️‍🌈 Expire Date：)[\d/]+", RegexOptions.IgnoreCase | RegexOptions.Multiline);
+        private static readonly Regex _regGetClashRemainBand = new(@"(?<=\- )[\d\. G\|].+$");
+        private static readonly Regex _regGetClashTrafficReset = new(@"(?<=\- Traffic Reset：)\d+");
+        private static readonly Regex _regGetClashExpireDate = new(@"(?<=\- 🏳️‍🌈 Expire Date：)[\d/]+");
         private const string SSH_CONFIG = "ssh.json";
 
         /// <summary>

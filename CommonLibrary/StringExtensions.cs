@@ -151,17 +151,17 @@ public static class MyStringExtensions
     /// <param name="str">对象字符串</param>
     /// <param name="conditionStr">查找字符串组</param>
     /// <param name="findedStr">找到的字符串</param>
-    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <param name="ignoreCase">是否忽略大小写</param>
     /// <returns>结果</returns>
     public static bool ContainsAny(
         this string str,
         IEnumerable<string> conditionStr,
         out string findedStr,
-        StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+        bool ignoreCase = false)
     {
         foreach (var regStr in conditionStr)
         {
-            var regex = new Regex(regStr, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var regex = new Regex(regStr, ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
             var match = regex.Match(str);
             if (match.Success)
             {
@@ -181,18 +181,18 @@ public static class MyStringExtensions
     /// <param name="str">对象字符串</param>
     /// <param name="conditionDictionary">查找字典</param>
     /// <param name="findedValue">找到结果对应的值</param>
-    /// <param name="stringComparison"><see cref="StringComparison"/></param>
+    /// <param name="ignoreCase">是否忽略大小写</param>
     /// <returns>结果</returns>
     public static bool ContainsAny<T>(
         this string str,
         Dictionary<string, T> conditionDictionary,
         out T findedValue,
-        StringComparison stringComparison = StringComparison.CurrentCultureIgnoreCase)
+        bool ignoreCase = false)
         where T : notnull
     {
         foreach (var keyValue in conditionDictionary)
         {
-            var regex = new Regex(keyValue.Key, RegexOptions.IgnoreCase | RegexOptions.Multiline);
+            var regex = new Regex(keyValue.Key, ignoreCase ? RegexOptions.IgnoreCase : RegexOptions.None);
             var match = regex.Match(str);
             if (match.Success)
             {
