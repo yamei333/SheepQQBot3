@@ -16,7 +16,7 @@ namespace SheepQQBot3.SDK.Client
                 MessageId = messageId.ToString(),
             }, jsonInfo =>
             {
-                var clientReceiveData = jsonInfo.JsonDeserialize<ClientReceiveData>();
+                var clientReceiveData = jsonInfo.FromJson<ClientReceiveData>();
                 return new GroupMessage(clientReceiveData.Data);
             });
         }
@@ -32,7 +32,7 @@ namespace SheepQQBot3.SDK.Client
                 GroupId = groupId.ToString(),
             }, jsonText =>
             {
-                var clientReceiveData = jsonText.JsonDeserialize<ClientReceiveData_HistoryMessages>();
+                var clientReceiveData = jsonText.FromJson<ClientReceiveData_HistoryMessages>();
                 return clientReceiveData.Data.Messages;
             });
         }
@@ -115,7 +115,7 @@ namespace SheepQQBot3.SDK.Client
                 NoCache = false,
             }, jsonText =>
             {
-                var clientData = jsonText.JsonDeserialize<ClientReceiveData_GroupMember>();
+                var clientData = jsonText.FromJson<ClientReceiveData_GroupMember>();
                 return clientData.Data.ToDictionary(each => each.UserId, each => each);
             });
         }

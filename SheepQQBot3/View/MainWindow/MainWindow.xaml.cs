@@ -68,7 +68,7 @@ public partial class MainWindow : Window
             var holidayInfo = new Dictionary<string, bool>();
             regHolidayInfo.Matches(holidayInfoJson).ForEach(each =>
             {
-                var holidayInfoData = each.Value.JsonDeserialize<HolidayInfoData>();
+                var holidayInfoData = each.Value.FromJson<HolidayInfoData>();
                 if (holidayInfoData != null)
                     holidayInfo.Add(holidayInfoData.Date, holidayInfoData.Holiday);
             });

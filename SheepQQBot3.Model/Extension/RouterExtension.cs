@@ -29,7 +29,7 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var jsonText = File.ReadAllText(SSH_CONFIG, Encoding.UTF8);
-                var ipConfig = jsonText.JsonDeserialize<SSHConfig>();
+                var ipConfig = jsonText.FromJson<SSHConfig>();
                 var client = new SshClient(ipConfig.Host, ipConfig.Id, ipConfig.Password);
                 client.Connect();
                 var cmd = client.RunCommand(ipConfig.CommandGetIP);
@@ -62,7 +62,7 @@ namespace SheepQQBot3.Model.Extension
             try
             {
                 var jsonText = File.ReadAllText(SSH_CONFIG, Encoding.UTF8);
-                var ipConfig = jsonText.JsonDeserialize<SSHConfig>();
+                var ipConfig = jsonText.FromJson<SSHConfig>();
                 var client = new SshClient(ipConfig.Host, ipConfig.Id, ipConfig.Password);
                 client.Connect();
                 var cmd = client.RunCommand(ipConfig.CommandGetClashInfo);

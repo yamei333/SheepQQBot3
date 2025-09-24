@@ -64,7 +64,7 @@ public static class ConfigExtensions
                 jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
             }
 
-            var botConfig = jsonText.JsonDeserialize<BotConfig>();
+            var botConfig = jsonText.FromJson<BotConfig>();
             var defaultBotFunctions = SetConfig.DefaultBotFunctions;
             botConfig.SetConfigs.Values.ForEach(each =>
             {
@@ -115,7 +115,7 @@ public static class ConfigExtensions
         }
 
         var jsonText = File.ReadAllText(AIConfigPath, Encoding.UTF8);
-        PublicVar.AIConfig = jsonText.JsonDeserialize<AIConfig>();
+        PublicVar.AIConfig = jsonText.FromJson<AIConfig>();
         OpenWeatherMapService = new Current(PublicVar.AIConfig.OpenWeatherMapKey)
         {
             Languages = Languages.English,
@@ -135,7 +135,7 @@ public static class ConfigExtensions
         }
 
         var jsonText = File.ReadAllText(AIDataPath, Encoding.UTF8);
-        PublicVar.AIData = jsonText.JsonDeserialize<AIData>();
+        PublicVar.AIData = jsonText.FromJson<AIData>();
     }
 
     /// <summary>
@@ -163,7 +163,7 @@ public static class ConfigExtensions
         }
 
         var jsonText = File.ReadAllText(AICharacterPath, Encoding.UTF8);
-        PublicVar.AICharacter = jsonText.JsonDeserialize<AICharacter>();
+        PublicVar.AICharacter = jsonText.FromJson<AICharacter>();
     }
 
     private static void WriteJsonConfig(string jsonText)

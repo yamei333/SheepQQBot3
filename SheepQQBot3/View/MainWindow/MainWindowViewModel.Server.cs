@@ -227,7 +227,7 @@ partial class MainWindowViewModel
         GetSelectedGroupConfig(groupId, BotFunctionType.Common_AlarmAideSubmit, config =>
         {
             StartTaskList(taskList, AlarmAideSubmit);
-            void AlarmAideSubmit() => ProcessGroupMessage.AlarmAideSubmit(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
+            void AlarmAideSubmit() => _ = ProcessGroupMessage.AlarmAideSubmitAsync(config.AlarmAideConfigs, config.AlarmAideSubmitMemberIds, groupMessage);
         });
 
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_FundHelper,
@@ -236,7 +236,7 @@ partial class MainWindowViewModel
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
         {
             StartTaskList(taskList, RandomSetu);
-            async void RandomSetu() => await ProcessGroupMessage.RandomSetuAsync(PublicVar.BotConfig, groupMessage).ConfigureAwait(false);
+            void RandomSetu() => _ = ProcessGroupMessage.RandomSetuAsync(PublicVar.BotConfig, groupMessage);
         });
 
         //GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>

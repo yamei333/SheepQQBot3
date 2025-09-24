@@ -66,7 +66,7 @@ public static class HttpExtensions
         JsonCard_TianxuanShare jsonCardTianxuanShare)
     {
         var cookiesJson = await getCookieAsync("act.qzone.qq.com").ConfigureAwait(false);
-        var ntCookies = cookiesJson.JsonDeserialize<NTQQCookies>();
+        var ntCookies = cookiesJson.FromJson<NTQQCookies>();
         var cookies = ntCookies.Data.Cookies;
         var psKey = _regGetPsKey.Match(cookies).Value;
         var gtk = QQExtensions.GetGtk(psKey);

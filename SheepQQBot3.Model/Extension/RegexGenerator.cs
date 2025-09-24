@@ -37,8 +37,11 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
     public static partial Regex CmdStart();
 
-    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?),.+,url=(?<url>.+?),.+?\]")]
+    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?\.[a-z]{3}).*?\]")]
     public static partial Regex CQImage();
+
+    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?),.+?,url=(?<url>.+?),.+?\]")]
+    public static partial Regex CQImageFileUrl();
 
     [GeneratedRegex(@"(?<=image,.+?)https://multimedia.+?(?=[,\]])")]
     public static partial Regex CQImageUrl_multimedia();
@@ -48,9 +51,6 @@ public static partial class RegexGenerator
 
     [GeneratedRegex(@"\[CQ:(?<tag>[a-z]+),.+?\]")]
     public static partial Regex CQDeleteCQCode();
-
-    [GeneratedRegex(@"""echo"":""(.+?)""")]
-    public static partial Regex CQAPI_GetEcho();
 
     [GeneratedRegex(@"#(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2})#")]
     public static partial Regex CustomAlarm_DateTime();

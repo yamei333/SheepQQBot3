@@ -5,7 +5,7 @@ namespace SheepQQBot3.Model.Extension;
 
 public static class CQCode
 {
-    private static Regex _regCQImage = RegexGenerator.CQImage();
+    private static Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
     private static Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
     private static Regex _regCQImageUrl_gchat = RegexGenerator.CQImageUrl_gchat();
 
@@ -52,7 +52,7 @@ public static class CQCode
     /// <returns></returns>
     public static string ReplaceCQImage(string message)
     {
-        message = _regCQImage.Replace(message, match =>
+        message = _regCQImageFileUrl.Replace(message, match =>
         {
             var groupFileName = match.Groups["fileName"];
             var fileName = groupFileName.Success ? groupFileName.Value : string.Empty;

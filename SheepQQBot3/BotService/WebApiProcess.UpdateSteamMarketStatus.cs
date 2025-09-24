@@ -20,7 +20,7 @@ public static partial class WebApiProcess
             var jsonText = context.Request.DataAsString;
             try
             {
-                var steamMarketStatus = jsonText.JsonDeserialize<WebApi_SteamMarketStatus>();
+                var steamMarketStatus = jsonText.FromJson<WebApi_SteamMarketStatus>();
                 if (steamMarketStatus?.SheepQQBot3 == TOKEN)
                 {
                     LastUpdateSteamMarketStatusDate = DateTime.Now;

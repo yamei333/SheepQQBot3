@@ -6,8 +6,6 @@ using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
-using System.Text.Json;
-using System.Threading.Tasks;
 using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Server;
@@ -85,7 +83,7 @@ public partial class BotServer : IDisposable
                     }
                     else
                     {
-                        ProcessReceiveData(GetReceiveData(jsonText));
+                        ProcessReceiveData(jsonText.FromJson<ReceiveData>(JsonExtensions.DefaultJsonOptions));
                     }
                 }
                 catch (Exception e)
@@ -101,9 +99,6 @@ public partial class BotServer : IDisposable
 
         _server.Start();
         return;
-
-        ReceiveData GetReceiveData(string jsonInfo)
-            => jsonInfo.JsonDeserialize<ReceiveData>();
     }
 
     private void ProcessReceiveData(ReceiveData receiveData)

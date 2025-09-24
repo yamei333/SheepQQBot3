@@ -1,10 +1,10 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.Model;
 using SheepQQBot3.Model.QQ;
 using SheepQQBot3.SDK.Client.Utils;
 using Yamei.Common;
@@ -276,7 +276,7 @@ namespace SheepQQBot3.SDK.Client
                 Title = title,
             }, jsonText =>
             {
-                callBack?.Invoke(jsonText.JsonDeserialize<ClientReceiveData>());
+                callBack?.Invoke(jsonText.FromJson<ClientReceiveData>());
                 return true;
             });
         }
@@ -315,6 +315,18 @@ namespace SheepQQBot3.SDK.Client
                 MessageId = messageId.ToString(),
                 EmojiId = ((int)emoji).ToString(),
             });
+        }
+
+        /// <summary>
+        /// 取得图片信息
+        /// </summary>
+        /// <param name="fileId">文件名</param>
+        public Task<ImageReceiveData> GetImageAsync(string fileId)
+        {
+            return SendAsync("get_image", new ParamData
+            {
+                FileId = fileId,
+            }, jsonText => jsonText.FromJson<ImageReceiveData>());
         }
     }
 }

@@ -15,7 +15,7 @@ public static partial class WebApiProcess
             var jsonText = context.Request.DataAsString;
             try
             {
-                var apiSendMessage = jsonText.JsonDeserialize<WebApi_SendMessage>();
+                var apiSendMessage = jsonText.FromJson<WebApi_SendMessage>();
                 if (apiSendMessage?.SheepQQBot3 == TOKEN)
                 {
                     await PublicVar.BotClient.SendMessageAsync(

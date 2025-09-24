@@ -48,7 +48,7 @@ public static partial class TaskProcess
                                 {
                                     var matchValue = match.Value;
                                     condition = condition.Replace(matchValue, string.Empty);
-                                    var extendCondition = matchValue.Replace("$", string.Empty).JsonDeserialize<AlarmAideExtendCondition>();
+                                    var extendCondition = matchValue.Replace("$", string.Empty).FromJson<AlarmAideExtendCondition>();
                                     if (extendCondition.DayOfMonthOffset.HasValue)
                                     {
                                         var dayOfMonthOffsetValue = extendCondition.DayOfMonthOffset.GetValueOrDefault();

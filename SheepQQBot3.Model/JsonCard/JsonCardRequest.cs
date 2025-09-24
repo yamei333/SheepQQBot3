@@ -1,5 +1,4 @@
-﻿using CommonLibrary;
-using System.Text.Json;
+﻿using Masuit.Tools;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.JsonCard;
@@ -22,6 +21,6 @@ public class JsonCardRequest
 
     public JsonCardRequest(JsonCard_TianxuanShare jsonCard)
     {
-        Ark = JsonSerializer.Serialize(jsonCard, JsonExtensions.DefaultJsonOptions);
+        Ark = jsonCard.ToJsonIgnoreNull();
     }
 }

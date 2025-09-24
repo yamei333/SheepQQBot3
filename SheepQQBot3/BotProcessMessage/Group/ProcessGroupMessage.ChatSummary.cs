@@ -14,8 +14,6 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
-using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -129,13 +127,8 @@ public static partial class ProcessGroupMessage
                 var wordNums = 100;
 
                 var chatSummaryGroupConfigFilePath = Path.Combine(PATH_WORDCLOUD_CONFIG, $"{groupId}.json");
-                var chatSummaryGroupConfig = (ChatSummaryGroupConfig)null;
+                var chatSummaryGroupConfig = JsonExtensions.FromJsonFile<ChatSummaryGroupConfig>(chatSummaryGroupConfigFilePath);
                 var regNumber = new Regex("[0-9]+");
-                if (File.Exists(chatSummaryGroupConfigFilePath))
-                {
-                    var jsonText = await File.ReadAllTextAsync(chatSummaryGroupConfigFilePath, Encoding.UTF8).ConfigureAwait(false);
-                    chatSummaryGroupConfig = jsonText.JsonDeserialize<ChatSummaryGroupConfig>();
-                }
 
                 switch (summaryType)
                 {
@@ -181,7 +174,7 @@ public static partial class ProcessGroupMessage
                             return false;
                         }
 
-                        if (JiebaDb.StopWords.Find(dataMessage) != null)
+                        if (await JiebaDb.StopWords.FindAsync(dataMessage).ConfigureAwait(false) != null)
                         {
                             await BotClient.SendGroupMessageAsync(groupId, $"关键字[{dataMessage}]已存在于StopWords").ConfigureAwait(false);
                             return false;
@@ -193,7 +186,7 @@ public static partial class ProcessGroupMessage
                             return false;
                         }
 
-                        await File.WriteAllTextAsync(chatSummaryGroupConfigFilePath, JsonSerializer.Serialize(chatSummaryGroupConfig, JsonExtensions.DefaultJsonOptions)).ConfigureAwait(false);
+                        await File.WriteAllTextAsync(chatSummaryGroupConfigFilePath, chatSummaryGroupConfig.ToJsonIgnoreNull()).ConfigureAwait(false);
                         await BotClient.SendGroupMessageAsync(groupId, $"已添加统计屏蔽词[{dataMessage}]").ConfigureAwait(false);
                         return true;
                     case "H":
@@ -346,7 +339,7 @@ public static partial class ProcessGroupMessage
                                 if (_regInjectHurry.IsMatch(historyMessage))
                                     return;
 
-                                requestContents.AddMessageContent(
+                                _ = requestContents.AddMessageContentAsync(
                                     each.TargetId,
                                     //groupMembers.GetOrAdd(each.TargetId, new GroupMember()).ToSender(),
                                     historyMessage);

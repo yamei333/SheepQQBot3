@@ -34,7 +34,7 @@ public static class AIExtensions
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
     public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
     public const string MESSAGE_SLEEP = "Zzz...";
-    public const string SEND_A_IMAGE = "发送一张图片";
+    public const string SEND_SOME_IMAGES = "发送了图片";
 
     private const string AI_KNOWLEDGE_PATH = "AICache/knowledge.txt";
     private const string AI_USER_INFO_PATH = "AICache/userInfo.txt";
@@ -42,7 +42,7 @@ public static class AIExtensions
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
-    private static readonly Regex _regGetImage = new(@"\[CQ:image,.+?\]");
+    private static readonly Regex _regGetImage = RegexGenerator.CQImage();
     private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase);
     private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase);
     //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
@@ -51,7 +51,7 @@ public static class AIExtensions
     private static readonly Regex _regDeleteErrorEmoji2 = new(@"\[.+?\]|\[\[.+?\]\]|\[\[\[.+?\]\]\]");
 
     private static readonly Regex _regDeleteErrorEmoji3 = new(@"\(.+?\)|\(\(.+?\)\)|\(\(.+?\)\)");
-    private static readonly Regex _regDeleteEmoji = new("\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]");
+    private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}");
     private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}");
 
     public static AIUserData SuperAdminAIUserData => new()
@@ -106,7 +106,7 @@ public static class AIExtensions
                     var part = content.Parts.FirstOrDefault(each => !each.Text.IsNullOrEmpty());
                     if (part != null)
                     {
-                        var qqId = part.Text.JsonDeserialize<AIChatRequest>().SenderId;
+                        var qqId = part.Text.FromJson<AIChatRequest>().SenderId;
                         if (qqId != CommonId)
                         {
                             var userData = PublicVar.AIData.UserDatas.GetOrAdd(qqId, _ => DefaultAIUserData);
@@ -228,7 +228,7 @@ public static class AIExtensions
                     if (partCount == 2)
                     {
                         parts[0] = new Part(CreateHistoryImageMessage(
-                            parts[1].Text.JsonDeserialize<AIChatRequest>()));
+                            parts[1].Text.FromJson<AIChatRequest>()));
                     }
                 });
 
@@ -238,7 +238,7 @@ public static class AIExtensions
             // MEMO : 写入log
             YameiLogExtensions.WriteLog(apiKey, result, thisRequestContentShortVer, aiStatus.ToJsonIgnoreNull());
 
-            var aiChatResponse = responseText.JsonDeserialize<AIChatResponse>();
+            var aiChatResponse = responseText.FromJson<AIChatResponse>();
             var chatMessages = aiChatResponse.Contents;
 
             // MEMO : 群聊总结提前处理, 采用转发形式发送
@@ -573,7 +573,7 @@ public static class AIExtensions
            => $"[CQ:image,file=file:///{PublicVar.AIConfig.FacePath}{emojiCode}.png]";
     }
 
-    public static void AddMessageContent(
+    public static async Task AddMessageContentAsync(
         this List<Content> contents,
         long senderId,
         string messageText)
@@ -583,7 +583,7 @@ public static class AIExtensions
         {
             Role = USER_ROLE,
         };
-        var deleteImageMessage = content.AddImage(senderId, message);
+        var deleteImageMessage = await content.AddImageAsync(senderId, message).ConfigureAwait(false);
         if (!deleteImageMessage.IsNullOrEmpty())
             content.AddText(senderId, deleteImageMessage);
 
@@ -598,41 +598,49 @@ public static class AIExtensions
     /// <param name="senderId">发送者QQID</param>
     /// <param name="message">消息内容</param>
     /// <returns>删除图片后的消息</returns>
-    public static string AddImage(this Content content, long senderId, string message)
+    public static async Task<string> AddImageAsync(this Content content, long senderId, string message)
     {
-        return _regGetImage.Replace(message, match =>
+        var processedMessage = message;
+        var isAddImage = false;
+        var matches = _regGetImage.Matches(message);
+        await matches.ForeachAsync(async match =>
         {
-            var cqImageCode = match.Value;
-            var imageFileName = _regGetImageFile.Match(cqImageCode).Value;
-            var qqImageFilePath = GetQQImageFilePath(imageFileName);
-            if (!qqImageFilePath.IsNullOrEmpty())
+            var replaceContent = match.Value;
+            var fileId = match.Groups["fileName"].Value;
+            var imageReceiveData = await BotClient.GetImageAsync(fileId).ConfigureAwait(false);
+            if (imageReceiveData.IsSuccessed)
             {
-                try
+                var filePath = imageReceiveData.Data.File;
+                if (File.Exists(filePath))
                 {
-                    content.AddInlineFile(qqImageFilePath, USER_ROLE);
-                    content.AddText(senderId, SEND_A_IMAGE);
+                    content.AddInlineFile(filePath, USER_ROLE);
+                    isAddImage = true;
                 }
-                catch (Exception e)
+                else
                 {
-                    return string.Empty;
+                    var picUrl = imageReceiveData.Data.Url;
+                    var (isSuccessed, fileName) = await HttpExtensions
+                        .HttpDownloadAsync(picUrl, AI_IMAGE_PATH, false)
+                        .ConfigureAwait(false);
+                    if (isSuccessed)
+                    {
+                        content.AddInlineFile(Path.Combine(AI_IMAGE_PATH, fileName), USER_ROLE);
+                        isAddImage = true;
+                    }
+                    else
+                    {
+                        content.AddText(senderId, fileName);
+                    }
                 }
-
-                return string.Empty;
             }
 
-            var imageUrl = _regGetImageUrl.Match(cqImageCode).Value
-                .Replace("&amp;", "&")
-                .Replace("gchat.qpic.cn", "multimedia.nt.qq.com.cn");
-            var (successed, fileName) = HttpExtensions.AIHttpDownloadImage(imageUrl, AI_IMAGE_PATH);
-            if (successed)
-            {
-                content.AddInlineFile(Path.Combine(AI_IMAGE_PATH, fileName), USER_ROLE);
-                content.AddText(senderId, SEND_A_IMAGE);
-                return string.Empty;
-            }
+            processedMessage = processedMessage.Replace(replaceContent, string.Empty);
+        }).ConfigureAwait(false);
 
-            return fileName;
-        });
+        if (isAddImage)
+            content.AddText(senderId, SEND_SOME_IMAGES);
+
+        return processedMessage;
     }
 
     /// <summary>
@@ -704,13 +712,13 @@ public static class AIExtensions
     }
 
     public static void SaveAIHistory(this List<Content> contents, string key)
-        => contents.JsonSerializeToFile(GetAIHistoryPath(key));
+        => contents.ToJsonFile(GetAIHistoryPath(key));
 
     /// <summary>
     /// 读取历史记录
     /// </summary>
     public static List<Content> LoadAIHistory(string key)
-        => JsonExtensions.JsonDeserializeFromFile<List<Content>>(GetAIHistoryPath(key)) ?? [];
+        => JsonExtensions.FromJsonFile<List<Content>>(GetAIHistoryPath(key)) ?? [];
 
     /// <summary>
     /// 追加外置知识库

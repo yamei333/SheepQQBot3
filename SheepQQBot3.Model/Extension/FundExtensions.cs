@@ -48,7 +48,7 @@ public static class FundExtensions
                 var url = $"https://fundgz.1234567.com.cn/js/{fundId}.js";
                 var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
                 var fundJson = _regGetFundJson.Match(await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false)).Value;
-                return fundJson.JsonDeserialize<FundData>();
+                return fundJson.FromJson<FundData>();
             }
             catch (Exception e)
             {

@@ -84,7 +84,7 @@ public static class MessageUtil
         ElementBaseData GetElementBaseData()
         {
             var subJson = GetSubJson();
-            var jsonData = subJson.JsonDeserialize<ElementBaseData>();
+            var jsonData = subJson.FromJson<ElementBaseData>();
             return jsonData;
         }
 
@@ -117,7 +117,7 @@ public static class MessageUtil
                 .Select(eachSubData => string.Join(':', eachSubData.Split('=')
                     .Select(eachElement => $"\"{eachElement}\"")
                     .ToArray())));
-            var elementBaseData = $"{{{subJsonContent}}}".JsonDeserialize<ElementBaseData>();
+            var elementBaseData = $"{{{subJsonContent}}}".FromJson<ElementBaseData>();
             elementBaseData.Data = xmlString[5..];
             return elementBaseData;
         }

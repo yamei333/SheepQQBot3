@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Collections.Specialized;
 using System.Diagnostics;
 using System.Linq;
 
@@ -1409,4 +1410,12 @@ public static class EnumerableExtensions
 
         return tryTimes < maxTryTimes;
     }
+
+    /// <summary>
+    /// <see cref="NameValueCollection"/>转Dictionary
+    /// </summary>
+    /// <param name="nvc"></param>
+    /// <returns></returns>
+    public static Dictionary<string, string> ToDictionary(this NameValueCollection nvc)
+        => nvc.AllKeys.ToDictionary(k => k, k => nvc[k]);
 }

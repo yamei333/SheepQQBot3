@@ -20,7 +20,7 @@ public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
     private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
-    private static readonly Regex _regEmoji = new("\u00a9|\u00ae|[\u2000-\u3300]|\ud83c[\ud000-\udfff]|\ud83d[\ud000-\udfff]|\ud83e[\ud000-\udfff]");
+    private static readonly Regex _regEmoji = new(@"\p{Cs}");
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
@@ -91,7 +91,7 @@ public static partial class ProcessGroupMessage
 
             // MEMO : 记录消息(添加到历史记录中)
             var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
-            historyContents.AddMessageContent(targetId, message);
+            await historyContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
 
             //YameiLogExtensions.WriteLog(LogType.Info, $"群({groupId})消息记录数: {historyContents.Count}");
             if (CanSendGroupChat(aiGroupConfig, historyContents.Count))
@@ -129,7 +129,7 @@ public static partial class ProcessGroupMessage
             var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
             //var sender = groupMessage.Sender;
             // MEMO : 构建发送消息并发送
-            historyContents.AddMessageContent(targetId, removeAtMessage);
+            await historyContents.AddMessageContentAsync(targetId, removeAtMessage).ConfigureAwait(false);
             historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
             //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
             var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);

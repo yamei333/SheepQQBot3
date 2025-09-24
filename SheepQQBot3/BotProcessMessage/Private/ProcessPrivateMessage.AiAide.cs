@@ -61,7 +61,7 @@ public static partial class ProcessPrivateMessage
 
         // MEMO : 构建发送消息并发送
         var thisRequestContents = new List<Content>();
-        thisRequestContents.AddMessageContent(targetId, message);
+        await thisRequestContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
 
         var aiChatSenders = new ConcurrentDictionary<long, AIChatSender>();
         aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender());

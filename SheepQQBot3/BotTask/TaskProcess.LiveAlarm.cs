@@ -93,7 +93,7 @@ public static partial class TaskProcess
                 return;
             }
 
-            var liveRoomData = jsonText.JsonDeserialize<LiveRoomData>();
+            var liveRoomData = jsonText.FromJson<LiveRoomData>();
             if (liveRoomData == null)
             {
                 AddRunLog(new RunLog_SystemError($"B站直播提醒出错! 用户ID[{liveUserId}], Json解析结果为null"));
