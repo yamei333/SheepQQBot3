@@ -1,5 +1,6 @@
 ﻿using Masuit.Tools;
 using System.IO;
+using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -31,10 +32,11 @@ public static class JsonExtensions
     /// <typeparam name="T">目标类型</typeparam>
     /// <param name="obj"></param>
     /// <param name="filePath">文件路径</param>
+    /// <param name="options"><see cref="JsonSerializerOptions"/></param>
     /// <returns>结果</returns>
-    public static bool ToJsonFile<T>(this T obj, string filePath)
+    public static bool ToJsonFile<T>(this T obj, string filePath, JsonSerializerOptions options = null)
     {
-        File.WriteAllText(filePath, obj.ToJsonIgnoreNull());
+        File.WriteAllText(filePath, obj.ToJsonString(options ?? DefaultJsonOptions), Encoding.UTF8);
         return true;
     }
 

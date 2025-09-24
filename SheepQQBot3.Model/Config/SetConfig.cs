@@ -1,5 +1,5 @@
 ﻿using CommonLibrary;
-using MessagePack;
+using Masuit.Tools;
 using SheepQQBot3.Model.Enums;
 using System;
 using System.Collections.Concurrent;
@@ -13,7 +13,6 @@ namespace SheepQQBot3.Model.Config;
 /// <summary>
 /// 配置类
 /// </summary>
-[MessagePackObject]
 public class SetConfig
 {
     /// <summary>
@@ -27,13 +26,13 @@ public class SetConfig
     /// <summary>
     /// 配置中的功能
     /// </summary>
-    [Key(nameof(BotFunctions))]
+    [JsonPropertyName(nameof(BotFunctions))]
     public List<BotFunction> BotFunctions { get; set; }
 
     /// <summary>
     /// 配置ID
     /// </summary>
-    [Key(nameof(Id))]
+    [JsonPropertyName(nameof(Id))]
     public Guid Id { get; set; }
 
     /// <summary>
@@ -41,7 +40,6 @@ public class SetConfig
     /// 头像大图链接 https://q1.qlogo.cn/g?b=qq&nk={QQ号}252961222}&s=640
     /// </summary>
     [JsonIgnore]
-    [IgnoreMember]
     public BitmapFrame Icon => TargetType switch
     {
         BotConfigTargetType.Common => QQExtensions.GetQQImage(AppSettingExtensions.Get("selfId", 0L)),
@@ -53,137 +51,61 @@ public class SetConfig
     /// <summary>
     /// 对象类型
     /// </summary>
-    [Key(nameof(TargetType))]
+    [JsonPropertyName(nameof(TargetType))]
     public BotConfigTargetType TargetType { get; set; }
 
     /// <summary>
     /// 闹钟助手配置
     /// </summary>
-    [Key(nameof(AlarmAideConfigs))]
+    [JsonPropertyName(nameof(AlarmAideConfigs))]
     public ConcurrentDictionary<Guid, AlarmAideConfig> AlarmAideConfigs { get; set; }
 
     /// <summary>
     /// 闹钟助手允许投稿成员ID配置
     /// </summary>
-    [Key(nameof(AlarmAideSubmitMemberIds))]
+    [JsonPropertyName(nameof(AlarmAideSubmitMemberIds))]
     public HashSet<long> AlarmAideSubmitMemberIds { get; set; }
 
     /// <summary>
     /// 黑名单ID配置
     /// </summary>
-    [Key(nameof(BlackListIds))]
+    [JsonPropertyName(nameof(BlackListIds))]
     public HashSet<long> BlackListIds { get; set; }
 
     /// <summary>
     /// 基金播报配置
     /// </summary>
-    [Key(nameof(FundAlarmConfigs))]
+    [JsonPropertyName(nameof(FundAlarmConfigs))]
     public ConcurrentDictionary<Guid, FundAlarmConfig> FundAlarmConfigs { get; set; }
 
     /// <summary>
     /// 基金阈值观测配置
     /// </summary>
-    [Key(nameof(FundLimitObserveConfigs))]
+    [JsonPropertyName(nameof(FundLimitObserveConfigs))]
     public ConcurrentDictionary<Guid, FundLimitObserveConfig> FundLimitObserveConfigs { get; set; }
 
     /// <summary>
     /// 复读机杀手配置
     /// </summary>
-    [Key(nameof(RepeaterKillerConfigs))]
+    [JsonPropertyName(nameof(RepeaterKillerConfigs))]
     public ConcurrentDictionary<Guid, RepeaterKillerConfig> RepeaterKillerConfigs { get; set; }
 
     /// <summary>
     /// 直播提醒配置
     /// </summary>
-    [Key(nameof(LiveAlarmConfigs))]
+    [JsonPropertyName(nameof(LiveAlarmConfigs))]
     public ConcurrentDictionary<Guid, LiveAlarmConfig> LiveAlarmConfigs { get; set; }
 
     /// <summary>
     /// AI群响应配置
     /// </summary>
-    [Key(nameof(AIGroupConfig))]
+    [JsonPropertyName(nameof(AIGroupConfig))]
     public AIGroupConfig AIGroupConfig { get; set; }
-
-    #region 已执行内容的保存
-
-    //[JsonIgnore]
-    //[IgnoreMember]
-    //private List<int> _processedMessageIds;
-
-    ///// <summary>
-    ///// 保存已处理的消息ID
-    ///// </summary>
-    //[Key(nameof(ProcessedMessageIds))]
-    //public List<int> ProcessedMessageIds
-    //{
-    //    get => _processedMessageIds ??= [];
-    //    set => _processedMessageIds = value;
-    //}
-
-    [JsonIgnore]
-    [IgnoreMember]
-    private ConcurrentDictionary<Guid, DateTime> _alarmAideAlarmedList;
-
-    /// <summary>
-    /// 保存已提醒闹钟列表
-    /// </summary>
-    [Key(nameof(AlarmAideAlarmedList))]
-    public ConcurrentDictionary<Guid, DateTime> AlarmAideAlarmedList
-    {
-        get => _alarmAideAlarmedList ??= [];
-        set => _alarmAideAlarmedList = value;
-    }
-
-    [JsonIgnore]
-    [IgnoreMember]
-    private ConcurrentDictionary<Guid, DateTime> _fundAlarmedList;
-
-    /// <summary>
-    /// 保存已执行基金播报任务
-    /// </summary>
-    [Key(nameof(FundAlarmedList))]
-    public ConcurrentDictionary<Guid, DateTime> FundAlarmedList
-    {
-        get => _fundAlarmedList ??= [];
-        set => _fundAlarmedList = value;
-    }
-
-    [JsonIgnore]
-    [IgnoreMember]
-    private ConcurrentDictionary<Guid, DateTime> _fundLimitObservedList;
-
-    /// <summary>
-    /// 保存已执行基金观测任务
-    /// </summary>
-    [Key(nameof(FundLimitObservedList))]
-    public ConcurrentDictionary<Guid, DateTime> FundLimitObservedList
-    {
-        get => _fundLimitObservedList ??= [];
-        set => _fundLimitObservedList = value;
-    }
-
-    [JsonIgnore]
-    [IgnoreMember]
-    private Dictionary<Guid, DateTime> _liveAlarmedList;
-
-    /// <summary>
-    /// 保存已执行直播提醒任务 (不缓存)
-    /// </summary>
-    [JsonIgnore]
-    [IgnoreMember]
-    public Dictionary<Guid, DateTime> LiveAlarmedList
-    {
-        get => _liveAlarmedList ??= [];
-        set => _liveAlarmedList = value;
-    }
-
-    #endregion 已执行内容的保存
 
     /// <summary>
     /// 显示文字
     /// </summary>
     [JsonIgnore]
-    [IgnoreMember]
     public string DisplayId =>
         TargetType switch
         {
@@ -196,13 +118,13 @@ public class SetConfig
     /// <summary>
     /// 对象ID(群号/个人QQ号)
     /// </summary>
-    [Key(nameof(TargetId))]
+    [JsonPropertyName(nameof(TargetId))]
     public long TargetId { get; set; }
 
     /// <summary>
     /// 名称
     /// </summary>
-    [Key(nameof(TargetName))]
+    [JsonPropertyName(nameof(TargetName))]
     public string TargetName { get; set; }
 
     public SetConfig(Guid id, BotConfigTargetType targetType, long targetId, string targetName)
@@ -211,15 +133,12 @@ public class SetConfig
         TargetType = targetType;
         TargetId = targetId;
         TargetName = targetName ?? throw new ArgumentNullException(nameof(targetName));
-        BotFunctions = CommonExtensions.Clone(DefaultBotFunctions);
+        BotFunctions = DefaultBotFunctions.DeepClone();
         AlarmAideConfigs = [];
+        BlackListIds = [];
         AlarmAideSubmitMemberIds = [];
-        AlarmAideAlarmedList = [];
         FundAlarmConfigs = [];
         FundLimitObserveConfigs = [];
-        FundAlarmedList = [];
-        FundLimitObservedList = [];
-        LiveAlarmedList = [];
         RepeaterKillerConfigs = [];
         LiveAlarmConfigs = [];
         AIGroupConfig = new AIGroupConfig();

@@ -1,5 +1,4 @@
 ﻿using Masuit.Tools;
-using MessagePack;
 using SheepQQBot3.Enums;
 using System.Collections.Generic;
 using System.IO;
@@ -15,18 +14,6 @@ public static class CommonExtensions
 
     public static bool CheckPercent(this Random rand, int percent)
         => rand.Next(100) + 1 <= percent;
-
-    /// <summary>
-    /// 基于MessagePackObject的深拷贝
-    /// </summary>
-    /// <param name="obj">对象</param>
-    /// <typeparam name="T">对象类型</typeparam>
-    /// <returns>深拷贝后的对象</returns>
-    public static T Clone<T>(T obj)
-    {
-        var raw = MessagePackSerializer.Serialize(obj);
-        return MessagePackSerializer.Deserialize<T>(raw);
-    }
 
     public static string ToConditionString(this DateTime input, Dictionary<string, bool> holidayInfo)
         => input.ToString($"yyyy-MM-dd-{DayOfWeek2Int(input.DayOfWeek)}-{(input.IsHoliday(holidayInfo) ? 1 : 0)} HH:mm:ss");

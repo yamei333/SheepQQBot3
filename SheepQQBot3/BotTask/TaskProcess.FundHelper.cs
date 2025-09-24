@@ -6,7 +6,6 @@ using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Fund;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -43,8 +42,6 @@ public static partial class TaskProcess
                                 if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))
                                     return;
 
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.FundAlarmedList, dateNow);
                                 // 发送基金播报消息
                                 await SendFundAlarmMessageAsync(setConfig, fundAlarmConfig, dateNow).ConfigureAwait(false);
                             }
@@ -76,22 +73,6 @@ public static partial class TaskProcess
     }
 
     /// <summary>
-    /// 删除过期发送内容
-    /// </summary>
-    private static void DeleteExpiredData<T>(
-        IDictionary<T, DateTime> dateTimelist,
-        DateTime now,
-        int totalSecond = 120)
-        where T : unmanaged
-    {
-        var deleteKeys = dateTimelist
-            .Where(each => (now - each.Value).TotalSeconds > totalSecond)
-            .Select(each => each.Key)
-            .ToArray();
-        deleteKeys.ForEach(each => dateTimelist.Remove(each));
-    }
-
-    /// <summary>
     /// 发送基金红绿播报消息
     /// </summary>
     public static async Task SendFundAlarmMessageAsync(
@@ -102,9 +83,12 @@ public static partial class TaskProcess
     {
         try
         {
-            var configId = fundAlarmConfig.Id;
-            if (!forceSend && setConfig.FundAlarmedList.ContainsKey(configId))
+            if ((now - fundAlarmConfig.LastExecuteDate).TotalSeconds <= MIN_REPEAT_EXECUTE_SECONDS && !forceSend)
                 return;
+
+            // MEMO : 设定执行时间
+            if (!forceSend)
+                fundAlarmConfig.LastExecuteDate = now;
 
             var alarmFundConfigs = fundAlarmConfig.AlarmFundConfigs;
             var fundIds = alarmFundConfigs.Values
@@ -139,15 +123,6 @@ public static partial class TaskProcess
                 default:
                     throw new ArgumentOutOfRangeException(setConfig.TargetType.ToString());
             }
-
-            // MEMO : 追加到已发送列表
-            if (!forceSend)
-            {
-                setConfig.FundAlarmedList.AddOrUpdate(
-                    configId,
-                    now,
-                    (_, __) => now);
-            }
         }
         catch (Exception e)
         {
@@ -164,10 +139,11 @@ public static partial class TaskProcess
         DateTime now,
         bool forceSend = false)
     {
-        var configId = fundLimitObserveConfig.Id;
-        if (!forceSend && setConfig.FundLimitObservedList.ContainsKey(configId))
+        if ((now - fundLimitObserveConfig.LastExecuteDate).TotalSeconds <= MIN_REPEAT_EXECUTE_SECONDS && !forceSend)
             return;
 
+        // MEMO : 设定执行时间
+        fundLimitObserveConfig.LastExecuteDate = now;
         var activeFundLimitObserveConfigs = fundLimitObserveConfig
             .LimitObserveFundConfigs.Values
             .Where(each => each.IsActive)
@@ -205,15 +181,6 @@ public static partial class TaskProcess
             case BotConfigTargetType.Common:
             default:
                 throw new ArgumentOutOfRangeException(setConfig.TargetType.ToString());
-        }
-
-        // MEMO : 追加到已发送列表
-        if (!forceSend)
-        {
-            setConfig.FundLimitObservedList.AddOrUpdate(
-                configId,
-                now,
-                (_, __) => now);
         }
     }
 }

@@ -1,5 +1,4 @@
-﻿using MessagePack;
-using SheepQQBot3.Model.Enums;
+﻿using SheepQQBot3.Model.Enums;
 using System;
 using System.Collections.Concurrent;
 using System.Text.Json.Serialization;
@@ -9,28 +8,27 @@ namespace SheepQQBot3.Model.Config;
 /// <summary>
 /// 基金阈值观测配置
 /// </summary>
-[MessagePackObject]
 public partial class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 阈值观测名称
     /// </summary>
-    [Key(nameof(LimitObserveName))]
+    [JsonPropertyName(nameof(LimitObserveName))]
     public string LimitObserveName { get; set; }
 
     /// <summary>
     /// 正则表达式条件
     /// </summary>
-    [Key(nameof(Condition))]
+    [JsonPropertyName(nameof(Condition))]
     public string Condition { get; set; }
 
-    [Key(nameof(_limitObserveFundConfigs))]
+    [JsonIgnore]
     private ConcurrentDictionary<int, LimitObserveFundConfig> _limitObserveFundConfigs;
 
     /// <summary>
     /// 阈值观测基金配置
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(LimitObserveFundConfigs))]
     public ConcurrentDictionary<int, LimitObserveFundConfig> LimitObserveFundConfigs
     {
         get => _limitObserveFundConfigs;
@@ -40,6 +38,12 @@ public partial class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
             OnPropertyChanged(nameof(LimitObserveFundConfigs));
         }
     }
+
+    /// <summary>
+    /// 最后一次执行时间
+    /// </summary>
+    [JsonPropertyName(nameof(LastExecuteDate))]
+    public DateTime LastExecuteDate { get; set; } = DateTime.MinValue;
 
     /// <summary>
     /// 默认构造函数
@@ -52,48 +56,45 @@ public partial class FundLimitObserveConfig : NotifyPropertyChangedConfigBase
         Id = id;
         LimitObserveName = limitObserveName;
         Condition = condition;
-        _limitObserveFundConfigs = new ConcurrentDictionary<int, LimitObserveFundConfig>();
+        _limitObserveFundConfigs = [];
     }
 }
 
 /// <summary>
 /// 阈值观测基金配置
 /// </summary>
-[MessagePackObject]
 public class LimitObserveFundConfig
 {
     /// <summary>
     /// 基金编号
     /// </summary>
-    [Key(nameof(FundId))]
+    [JsonPropertyName(nameof(FundId))]
     public string FundId { get; set; }
 
     /// <summary>
     /// 观察类型
     /// </summary>
-    [Key(nameof(FundObserveType))]
+    [JsonPropertyName(nameof(FundObserveType))]
     public FundObserveType FundObserveType { get; set; }
 
     /// <summary>
     /// 播报阈值
     /// </summary>
-    [Key(nameof(AlertLimit))]
+    [JsonPropertyName(nameof(AlertLimit))]
     public float AlertLimit { get; set; }
 
     /// <summary>
     /// 是否启用
     /// </summary>
-    [Key(nameof(IsActive))]
+    [JsonPropertyName(nameof(IsActive))]
     public bool IsActive { get; set; }
 
     /// <summary>
     /// 播报阈值
     /// </summary>
-    [IgnoreMember]
     [JsonIgnore]
     public string AlertLimitString => $"{AlertLimit:0.00}";
 
-    [IgnoreMember]
     [JsonIgnore]
     public string FundObserveTypeString =>
         FundObserveType switch
@@ -105,6 +106,12 @@ public class LimitObserveFundConfig
             FundObserveType.Year => "年",
             _ => throw new ArgumentOutOfRangeException(),
         };
+
+    /// <summary>
+    /// 最后一次执行时间
+    /// </summary>
+    [JsonPropertyName(nameof(LastExecuteDate))]
+    public DateTime LastExecuteDate { get; set; } = DateTime.MinValue;
 
     /// <summary>
     /// 默认构造函数

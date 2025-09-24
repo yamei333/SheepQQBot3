@@ -11,8 +11,6 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
 using System.Windows;
 using System.Windows.Controls;
 using static SheepQQBot3.PublicVar;
@@ -210,15 +208,7 @@ public static class ConfigExtensions
         {
             try
             {
-                var jsonText = JsonSerializer.Serialize(PublicVar.BotConfig, new JsonSerializerOptions
-                {
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
-                    WriteIndented = true,
-                });
-                if (!jsonText.IsNullOrEmpty())
-                    File.WriteAllText(ConfigPath, jsonText, Encoding.UTF8);
-                else
-                    throw new ArgumentNullException(nameof(jsonText));
+                PublicVar.BotConfig.ToJsonFile(ConfigPath, JsonExtensions.GetJsonOptions(true, true));
             }
             catch (Exception e)
             {
@@ -226,11 +216,6 @@ public static class ConfigExtensions
                 throw;
             }
         }
-
-        // MEMO : OldVersion
-        //var jsonConfig = new JsonConfig(jsonText);
-        //using var fileStream = new FileStream(ConfigPath, FileMode.OpenOrCreate, FileAccess.ReadWrite);
-        //MessagePackSerializer.Serialize(fileStream, jsonConfig);
 
         focusControl?.Focus();
     }

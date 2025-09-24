@@ -16,6 +16,11 @@ namespace SheepQQBot3.BotTask;
 public static partial class TaskProcess
 {
     /// <summary>
+    /// 最短重复执行间隔(秒)
+    /// </summary>
+    private static int MIN_REPEAT_EXECUTE_SECONDS = 120;
+
+    /// <summary>
     /// 闹钟助手
     /// </summary>
     public static void AlarmAides()
@@ -33,15 +38,14 @@ public static partial class TaskProcess
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Common_AlarmAide))
                         .ForEach(setConfig =>
                         {
-                            setConfig.AlarmAideConfigs.ToValueList().ForeachAsync(DeleteExpiredDataAction);
+                            setConfig.AlarmAideConfigs.ToValueList()
+                                .Where(each => each.IsActive && (dateNow - each.LastExecuteDate).TotalSeconds > MIN_REPEAT_EXECUTE_SECONDS)
+                                .ForeachAsync(SendAction);
                             return;
 
-                            async Task DeleteExpiredDataAction(AlarmAideConfig alarmAidesConfig)
+                            async Task SendAction(AlarmAideConfig alarmAideConfig)
                             {
-                                if (!alarmAidesConfig.IsActive)
-                                    return;
-
-                                var condition = alarmAidesConfig.Condition;
+                                var condition = alarmAideConfig.Condition;
                                 var jsonCondition = RegexGenerator.ConditionJsonText();
                                 var match = jsonCondition.Match(condition);
                                 if (match.Success)
@@ -69,10 +73,10 @@ public static partial class TaskProcess
                                 if (!condition.IsMatch(dateNowStr))
                                     return;
 
-                                // 删除过期发送内容
-                                DeleteExpiredData(setConfig.AlarmAideAlarmedList, dateNow);
-                                // 发送闹钟助手消息
-                                await SendAlarmAsync(setConfig, alarmAidesConfig, dateNow).ConfigureAwait(false);
+                                // MEMO : 设置最终执行时间
+                                alarmAideConfig.LastExecuteDate = dateNow;
+                                // MEMO : 发送闹钟助手消息
+                                await SendAlarmAsync(setConfig, alarmAideConfig).ConfigureAwait(false);
                             }
                         });
                 }
@@ -89,12 +93,8 @@ public static partial class TaskProcess
     /// <summary>
     /// 发送闹钟助手消息
     /// </summary>
-    private static async Task SendAlarmAsync(SetConfig setConfig, AlarmAideConfig alarmAideConfig, DateTime now)
+    private static async Task SendAlarmAsync(SetConfig setConfig, AlarmAideConfig alarmAideConfig)
     {
-        var alarmInfoKey = alarmAideConfig.Id;
-        if (setConfig.AlarmAideAlarmedList.ContainsKey(alarmInfoKey))
-            return;
-
         var alarmTexts = alarmAideConfig.AlarmTexts;
         if (!alarmTexts.IsEmpty)
         {
@@ -116,9 +116,6 @@ public static partial class TaskProcess
                         $"{nameof(SendAlarmAsync)}.{nameof(setConfig.TargetType)}",
                         setConfig.TargetType.ToString());
             }
-
-            // MEMO : 追加到已发送列表
-            setConfig.AlarmAideAlarmedList.AddOrUpdate(alarmInfoKey, now, now);
         }
     }
 }

@@ -38,16 +38,14 @@ public static partial class TaskProcess
                         .Where(each => each.BotFunctions.IsUsed(BotFunctionType.Group_LiveAlarm))
                         .ForEach(setConfig =>
                         {
-                            setConfig.LiveAlarmConfigs?.ToValueList().ForEach(DeleteExpiredDataAction);
+                            setConfig.LiveAlarmConfigs?.ToValueList()
+                                .Where(each => (dateNow - each.LastExecuteDate).TotalSeconds > MIN_REPEAT_EXECUTE_SECONDS && each.IsActive)
+                                .ForeachAsync(SendAction);
                             return;
 
-                            async void DeleteExpiredDataAction(LiveAlarmConfig liveAlarmConfig)
+                            async Task SendAction(LiveAlarmConfig liveAlarmConfig)
                             {
-                                if (!liveAlarmConfig.IsActive)
-                                    return;
-
-                                // 删除过期记录
-                                DeleteExpiredData(setConfig.LiveAlarmedList, dateNow);
+                                liveAlarmConfig.LastExecuteDate = dateNow;
                                 // 发送直播提醒消息
                                 await SendLiveAlarmMessageAsync(setConfig, liveAlarmConfig, dateNow).ConfigureAwait(false);
                             }
@@ -74,9 +72,12 @@ public static partial class TaskProcess
     {
         try
         {
-            var configId = liveAlarmConfig.Id;
-            if (!forceSend && setConfig.LiveAlarmedList.ContainsKey(configId))
+            if ((now - liveAlarmConfig.LastExecuteDate).TotalSeconds <= MIN_REPEAT_EXECUTE_SECONDS && !forceSend)
                 return;
+
+            // MEMO : 设定执行时间
+            if (!forceSend)
+                liveAlarmConfig.LastExecuteDate = now;
 
             var liveUserId = liveAlarmConfig.LiveRoomId;
             var httpRequestMessage = new HttpRequestMessage(HttpMethod.Get, $"https://api.live.bilibili.com/room/v1/Room/get_status_info_by_uids?uids[]={liveUserId}");
@@ -135,10 +136,6 @@ public static partial class TaskProcess
                         $"{nameof(SendLiveAlarmMessageAsync)}.{nameof(setConfig.TargetType)}",
                         setConfig.TargetType.ToString());
             }
-
-            // MEMO : 追加到已发送列表
-            if (!forceSend)
-                setConfig.LiveAlarmedList.Add(configId, now);
         }
         catch (Exception e)
         {

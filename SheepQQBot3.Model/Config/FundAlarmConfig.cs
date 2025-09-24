@@ -1,34 +1,33 @@
-﻿using MessagePack;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
 /// <summary>
 /// 基金播报配置
 /// </summary>
-[MessagePackObject]
 public partial class FundAlarmConfig : NotifyPropertyChangedConfigBase
 {
     /// <summary>
     /// 播报名称
     /// </summary>
-    [Key(nameof(AlarmName))]
+    [JsonPropertyName(nameof(AlarmName))]
     public string AlarmName { get; set; }
 
     /// <summary>
     /// 正则表达式条件
     /// </summary>
-    [Key(nameof(Condition))]
+    [JsonPropertyName(nameof(Condition))]
     public string Condition { get; set; }
 
-    [Key(nameof(_alarmFundConfigs))]
+    [JsonIgnore]
     private ConcurrentDictionary<int, AlarmFundConfig> _alarmFundConfigs;
 
     /// <summary>
     /// 播报基金配置
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(AlarmFundConfigs))]
     public ConcurrentDictionary<int, AlarmFundConfig> AlarmFundConfigs
     {
         get => _alarmFundConfigs;
@@ -38,6 +37,12 @@ public partial class FundAlarmConfig : NotifyPropertyChangedConfigBase
             OnPropertyChanged(nameof(AlarmFundConfigs));
         }
     }
+
+    /// <summary>
+    /// 最后一次执行时间
+    /// </summary>
+    [JsonPropertyName(nameof(LastExecuteDate))]
+    public DateTime LastExecuteDate { get; set; } = DateTime.MinValue;
 
     /// <summary>
     /// 默认构造函数
@@ -50,14 +55,13 @@ public partial class FundAlarmConfig : NotifyPropertyChangedConfigBase
         Id = id;
         AlarmName = alarmName;
         Condition = condition;
-        _alarmFundConfigs = new ConcurrentDictionary<int, AlarmFundConfig>();
+        _alarmFundConfigs = [];
     }
 }
 
 /// <summary>
 /// 播报基金配置
 /// </summary>
-[MessagePackObject]
 public class AlarmFundConfig
 {
     /// <summary>
@@ -76,18 +80,18 @@ public class AlarmFundConfig
     /// <summary>
     /// 基金编号
     /// </summary>
-    [Key(nameof(FundId))]
+    [JsonPropertyName(nameof(FundId))]
     public string FundId { get; set; }
 
     /// <summary>
     /// 基金备注
     /// </summary>
-    [Key(nameof(FundRemark))]
+    [JsonPropertyName(nameof(FundRemark))]
     public string FundRemark { get; set; }
 
     /// <summary>
     /// 是否启用
     /// </summary>
-    [Key(nameof(IsActive))]
+    [JsonPropertyName(nameof(IsActive))]
     public bool IsActive { get; set; }
 }

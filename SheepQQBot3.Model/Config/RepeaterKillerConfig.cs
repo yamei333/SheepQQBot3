@@ -7,10 +7,8 @@ using System.Text.Json.Serialization;
 namespace SheepQQBot3.Model.Config;
 
 /// <summary>
-/// 闹钟助手配置
+/// 复读机杀手配置
 /// </summary>
-[Serializable]
-[MessagePackObject]
 public partial class RepeaterKillerConfig : INotifyPropertyChanged
 {
     [field: IgnoreMember]
@@ -20,13 +18,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
     protected void OnPropertyChanged(string propertyName)
         => PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
 
-    [Key(nameof(_repeatLimit))]
+    [JsonIgnore]
     private int? _repeatLimit;
 
     /// <summary>
     /// 复读限制次数
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(RepeatLimit))]
     public int? RepeatLimit
     {
         get => _repeatLimit;
@@ -37,13 +35,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         }
     }
 
-    [Key(nameof(_maxCacheMessageCount))]
+    [JsonIgnore]
     private int? _maxCacheMessageCount;
 
     /// <summary>
     /// 复读限制次数
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(MaxCacheMessageCount))]
     public int? MaxCacheMessageCount
     {
         get => _maxCacheMessageCount;
@@ -54,13 +52,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         }
     }
 
-    [Key(nameof(_similarityLimit))]
+    [JsonIgnore]
     private double _similarityLimit;
 
     /// <summary>
     /// 相似度限值
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(SimilarityLimit))]
     public double SimilarityLimit
     {
         get => _similarityLimit;
@@ -71,13 +69,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         }
     }
 
-    [Key(nameof(_similarityLimitEmoji))]
+    [JsonIgnore]
     private double _similarityLimitEmoji;
 
     /// <summary>
     /// 相似度限值(默认表情)
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(SimilarityLimitEmoji))]
     public double SimilarityLimitEmoji
     {
         get => _similarityLimitEmoji;
@@ -88,13 +86,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         }
     }
 
-    [Key(nameof(_similarityLimitImage))]
+    [JsonIgnore]
     private double _similarityLimitImage;
 
     /// <summary>
     /// 相似度限值(带图片)
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(SimilarityLimitImage))]
     public double SimilarityLimitImage
     {
         get => _similarityLimitImage;
@@ -105,13 +103,13 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         }
     }
 
-    [Key(nameof(_filterList))]
+    [JsonIgnore]
     private ConcurrentDictionary<string, int> _filterList;
 
     /// <summary>
     /// 过滤列表
     /// </summary>
-    [IgnoreMember]
+    [JsonPropertyName(nameof(FilterList))]
     public ConcurrentDictionary<string, int> FilterList
     {
         get => _filterList;
@@ -129,6 +127,6 @@ public partial class RepeaterKillerConfig : INotifyPropertyChanged
         SimilarityLimit = 0.75d;
         SimilarityLimitEmoji = 0.93d;
         SimilarityLimitImage = 0.98d;
-        FilterList = new ConcurrentDictionary<string, int>();
+        FilterList = [];
     }
 }

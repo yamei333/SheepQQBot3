@@ -1,5 +1,4 @@
 ﻿using Masuit.Tools.Systems;
-using MessagePack;
 using SheepQQBot3.Model.Enums;
 using System.Text.Json.Serialization;
 
@@ -8,30 +7,27 @@ namespace SheepQQBot3.Model.Config;
 /// <summary>
 /// 功能配置
 /// </summary>
-[MessagePackObject]
 public class BotFunction
 {
     /// <summary>
     /// 获得BotFunctionType的Display属性
     /// </summary>
     [JsonIgnore]
-    [IgnoreMember]
     public string DisplayName => BotFunctionType.GetDisplay();
 
-    [Key(nameof(BotFunctionType))]
+    [JsonPropertyName(nameof(BotFunctionType))]
     public BotFunctionType BotFunctionType { get; }
 
     /// <summary>
     /// 是否使用中
     /// </summary>
-    [Key(nameof(IsUsed))]
+    [JsonPropertyName(nameof(IsUsed))]
     public bool IsUsed { get; set; }
 
     /// <summary>
     /// 是否允许使用
     /// </summary>
     [JsonIgnore]
-    [IgnoreMember]
     public bool IsEnabled { get; set; }
 
     /// <summary>

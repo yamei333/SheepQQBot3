@@ -1,114 +1,113 @@
-﻿using MessagePack;
-using System.Collections.Generic;
+﻿using System.Collections.Generic;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
 /// <summary>
 /// AI群内回应设置
 /// </summary>
-[MessagePackObject]
 public partial class AIGroupConfig : NotifyPropertyChangedBase
 {
     /// <summary>
     /// 是否参与群聊
     /// </summary>
-    [Key(nameof(JoinGroupChat))]
+    [JsonPropertyName(nameof(JoinGroupChat))]
     public bool JoinGroupChat { get; set; }
 
     /// <summary>
     /// 是否参与群聊
     /// </summary>
-    [Key(nameof(JoinGroupChatSendToTestGroup))]
+    [JsonPropertyName(nameof(JoinGroupChatSendToTestGroup))]
     public bool JoinGroupChatSendToTestGroup { get; set; }
 
     /// <summary>
     /// 群聊响应限值(5%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit5))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit5))]
     public int GroupChatResponseLimit5 { get; set; }
 
     /// <summary>
     /// 群聊响应限值(10%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit10))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit10))]
     public int GroupChatResponseLimit10 { get; set; }
 
     /// <summary>
     /// 群聊响应限值(20%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit20))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit20))]
     public int GroupChatResponseLimit20 { get; set; }
 
     /// <summary>
     /// 群聊响应限值(35%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit35))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit35))]
     public int GroupChatResponseLimit35 { get; set; }
 
     /// <summary>
     /// 群聊响应限值(50%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit50))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit50))]
     public int GroupChatResponseLimit50 { get; set; }
 
     /// <summary>
     /// 群聊响应限值(100%)
     /// </summary>
-    [Key(nameof(GroupChatResponseLimit100))]
+    [JsonPropertyName(nameof(GroupChatResponseLimit100))]
     public int GroupChatResponseLimit100 { get; set; }
 
     /// <summary>
     /// AI收集消息黑名单
     /// </summary>
-    [Key(nameof(BlackListIds))]
+    [JsonPropertyName(nameof(BlackListIds))]
     public HashSet<long> BlackListIds { get; set; }
 
     /// <summary>
     /// 是否启用At响应
     /// </summary>
-    [Key(nameof(UseAtResponse))]
+    [JsonPropertyName(nameof(UseAtResponse))]
     public bool UseAtResponse { get; set; }
 
     /// <summary>
     /// At响应是否仅管理员可用
     /// </summary>
-    [Key(nameof(AtResponseAdminOnly))]
+    [JsonPropertyName(nameof(AtResponseAdminOnly))]
     public bool AtResponseAdminOnly { get; set; }
 
     /// <summary>
     /// 是否显示思考
     /// </summary>
-    [Key(nameof(ShowThinking))]
+    [JsonPropertyName(nameof(ShowThinking))]
     public bool ShowThinking { get; set; }
 
     /// <summary>
     /// 是否显示感官
     /// </summary>
-    [Key(nameof(ShowSensory))]
+    [JsonPropertyName(nameof(ShowSensory))]
     public bool ShowSensory { get; set; }
 
     /// <summary>
     /// 是否显示心理描写
     /// </summary>
-    [Key(nameof(ShowPsychologicalDesc))]
+    [JsonPropertyName(nameof(ShowPsychologicalDesc))]
     public bool ShowPsychologicalDesc { get; set; }
 
     /// <summary>
     /// 是否显示面部表情
     /// </summary>
-    [Key(nameof(ShowExpression))]
+    [JsonPropertyName(nameof(ShowExpression))]
     public bool ShowExpression { get; set; }
 
     /// <summary>
     /// 是否显示动作
     /// </summary>
-    [Key(nameof(ShowBodyLanguage))]
+    [JsonPropertyName(nameof(ShowBodyLanguage))]
     public bool ShowBodyLanguage { get; set; }
 
     /// <summary>
     /// 是否显示表情包
     /// </summary>
-    [Key(nameof(ShowEmojiImage))]
+    [JsonPropertyName(nameof(ShowEmojiImage))]
     public bool ShowEmojiImage { get; set; }
 
     /// <summary>

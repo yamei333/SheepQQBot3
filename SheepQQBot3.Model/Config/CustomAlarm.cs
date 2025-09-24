@@ -1,42 +1,41 @@
 ﻿using System;
-using MessagePack;
+using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
 /// <summary>
 /// 自定义提醒
 /// </summary>
-[MessagePackObject]
 public class CustomAlarm
 {
-    [Key(nameof(Id))]
+    [JsonPropertyName(nameof(Id))]
     public Guid Id { get; set; }
 
-    [Key(nameof(TargetId))]
+    [JsonPropertyName(nameof(TargetId))]
     public long TargetId { get; set; }
 
     /// <summary>
     /// 是否是群提醒
     /// </summary>
-    [Key(nameof(IsGroup))]
+    [JsonPropertyName(nameof(IsGroup))]
     public bool IsGroup { get; set; }
 
-    [Key(nameof(GroupId))]
+    [JsonPropertyName(nameof(GroupId))]
     public long? GroupId { get; set; }
 
-    [Key(nameof(IsAtTarget))]
+    [JsonPropertyName(nameof(IsAtTarget))]
     public bool IsAtTarget { get; set; }
 
-    [Key(nameof(IsLoop))]
+    [JsonPropertyName(nameof(IsLoop))]
     public bool IsLoop { get; set; }
 
-    [Key(nameof(IsBark))]
+    [JsonPropertyName(nameof(IsBark))]
     public bool IsBark { get; set; }
 
-    [Key(nameof(AlarmDate))]
+    [JsonPropertyName(nameof(AlarmDate))]
     public DateTime AlarmDate { get; set; }
 
-    [Key(nameof(AlarmMessage))]
+    [JsonPropertyName(nameof(AlarmMessage))]
     public string AlarmMessage { get; set; }
 
     /// <summary>
