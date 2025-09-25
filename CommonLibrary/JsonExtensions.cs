@@ -45,15 +45,16 @@ public static class JsonExtensions
     /// </summary>
     /// <typeparam name="T">目标类型</typeparam>
     /// <param name="filePath">文件路径</param>
+    /// <param name="options"><see cref="JsonSerializerOptions"/></param>
     /// <returns>结果</returns>
-    public static T FromJsonFile<T>(string filePath)
+    public static T FromJsonFile<T>(string filePath, JsonSerializerOptions options = null)
     {
         if (!File.Exists(filePath))
             return default;
 
         using var sr = File.OpenText(filePath);
         var jsonText = sr.ReadToEnd();
-        return jsonText.FromJson<T>(GetJsonOptions());
+        return jsonText.FromJson<T>(options ?? GetJsonOptions());
     }
 
     public static T FromJson<T>(this string jsonText)

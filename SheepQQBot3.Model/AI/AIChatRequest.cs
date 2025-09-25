@@ -47,12 +47,18 @@ namespace SheepQQBot3.Model.AI
         /// QQ号
         /// </summary>
         [JsonPropertyName("qq")]
-        public long QQId { get; set; }
+        public long QQ { get; set; }
 
         /// <summary>
-        /// 身份
+        /// 生日
         /// </summary>
-        [JsonPropertyName("sf")]
-        public string Identity { get; set; }
+        [JsonPropertyName("birthday")]
+        public string Birthday { get; set; }
+
+        /// <summary>
+        /// 其他信息
+        /// </summary>
+        [JsonPropertyName("other")]
+        public string Other { get; set; }
     }
 }

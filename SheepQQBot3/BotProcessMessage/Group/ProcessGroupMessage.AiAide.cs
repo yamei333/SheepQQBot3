@@ -107,13 +107,12 @@ public static partial class ProcessGroupMessage
             return;
         }
 
-        var removeAtMessage = message[_commandAI.Length..].TrimStart();
+        //var removeAtMessage = message[_commandAI.Length..].TrimStart();
         if (isPrivateChat && aiGroupConfig.UseAtResponse)
         {
             // MEMO : 是否只给管理用
             if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {
-                //await BotServer.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)} 暂时不对非管理开放at回复功能").ConfigureAwait(false);
                 await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
                 return;
             }
@@ -129,12 +128,12 @@ public static partial class ProcessGroupMessage
             var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
             //var sender = groupMessage.Sender;
             // MEMO : 构建发送消息并发送
-            await historyContents.AddMessageContentAsync(targetId, removeAtMessage).ConfigureAwait(false);
-            historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
+            await historyContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
+            //historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
             //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
             var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             await historyContents.SendAsync(
-                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(), aiGroupConfig,
+                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
                 (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
         }
 
@@ -147,7 +146,7 @@ public static partial class ProcessGroupMessage
             var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
             // MEMO : 发送消息
             await groupChatHistoryContents.SendAsync(
-                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(), aiGroupConfig,
+                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
                 (id, msg) => _ = BotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
                 addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT)).ConfigureAwait(false);

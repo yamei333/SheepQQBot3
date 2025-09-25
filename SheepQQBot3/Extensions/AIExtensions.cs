@@ -37,14 +37,13 @@ public static class AIExtensions
     public const string SEND_SOME_IMAGES = "发送了图片";
 
     private const string AI_KNOWLEDGE_PATH = "AICache/knowledge.txt";
-    private const string AI_USER_INFO_PATH = "AICache/userInfo.txt";
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regGetImage = RegexGenerator.CQImage();
-    private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase);
-    private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase);
+    //private static readonly Regex _regGetImageUrl = new(@"(?<=,url=).+?(?=[,\]])", RegexOptions.IgnoreCase);
+    //private static readonly Regex _regGetImageFile = new(@"(?<=,file=).+?(?=[,\]])", RegexOptions.IgnoreCase);
     //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     private static readonly Regex _regDeleteErrorEmoji = new(@"\[emoji:(?<emojiCode>.+?)\]|\[\[emoji:(?<emojiCode>.+?)\]\]|\[\[\[emoji:(?<emojiCode>.+?)\]\]\]", RegexOptions.IgnoreCase);
 
@@ -53,6 +52,7 @@ public static class AIExtensions
     private static readonly Regex _regDeleteErrorEmoji3 = new(@"\(.+?\)|\(\(.+?\)\)|\(\(.+?\)\)");
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}");
     private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}");
+    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     public static AIUserData SuperAdminAIUserData => new()
     {
@@ -77,7 +77,8 @@ public static class AIExtensions
         ConcurrentDictionary<long, AIChatSender> aiChatSenders,
         AIGroupConfig aiGroupConfig,
         Action<long, string> botSendMessage,
-        Action<List<Content>> addSystemHint = null)
+        Action<List<Content>> addSystemHint = null,
+        bool saveHistory = true)
     {
         var retryTimes = 0;
         var isGroupRequest = groupId != 0;
@@ -95,7 +96,8 @@ public static class AIExtensions
             chatHistoryContents.AddKnowledge();
 
             var aiStatus = await chatHistoryContents.AddStatusAsync(
-                isGroupRequest ? AIMessageSourceType.Group : AIMessageSourceType.Private)
+                isGroupRequest ? AIMessageSourceType.Group : AIMessageSourceType.Private,
+                sendTargetId)
                 .ConfigureAwait(false);
 
             var requestUserInfos = new ConcurrentDictionary<long, AIUserInfo>();
@@ -115,9 +117,8 @@ public static class AIExtensions
                                 {
                                     UserInfo = aiChatSenders.GetOrAdd(qqId, new AIChatSender
                                     {
-                                        QQId = qqId,
+                                        QQ = qqId,
                                         Name = "unknown people",
-                                        Identity = "unknown",
                                     }),
                                     UserOtherInfo = new AIUserOtherInfo
                                     {
@@ -239,10 +240,11 @@ public static class AIExtensions
             YameiLogExtensions.WriteLog(apiKey, result, thisRequestContentShortVer, aiStatus.ToJsonIgnoreNull());
 
             var aiChatResponse = responseText.FromJson<AIChatResponse>();
+            var dateNow = DateTime.Now;
+            aiChatResponse.Date = dateNow;
             var chatMessages = aiChatResponse.Contents;
 
             // MEMO : 群聊总结提前处理, 采用转发形式发送
-            var dateNow = DateTime.Now;
             if (chatKey.StartsWith("z"))
             {
                 var sendMessages = new List<GroupForwardMessage>();
@@ -368,6 +370,7 @@ public static class AIExtensions
             // MEMO : 排除消息为空的内容
             chatMessages = chatMessages.Where(each => each.ChatMessageInfo != null).ToArray();
             chatMessages[^1].ChatMessageInfo.Delay = 0;
+            // MEMO : 处理消息回复
             chatMessages.ForEach(aiChatResponseContent =>
             {
                 var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
@@ -392,7 +395,58 @@ public static class AIExtensions
             responseContent.AddText(aiChatResponse.ToJsonIgnoreNull());
             loadedHistory.Add(responseContent);
             // MEMO : 保存历史记录
-            loadedHistory.SaveAIHistory(chatKey);
+            if (saveHistory)
+                loadedHistory.SaveAIHistory(chatKey);
+
+            // MEMO : 方法请求处理
+            var infoRequest = aiChatResponse.InfoRequest;
+            if (infoRequest != null)
+            {
+                if (infoRequest.Name == "GetTodayGroupChat")
+                {
+                    if (long.TryParse(infoRequest.Param, out var paramId))
+                    {
+                        var groupMembers = await BotClient.GetGroupMembersAsync(paramId).ConfigureAwait(false);
+                        if (groupMembers == null)
+                        {
+                            await BotClient.SendGroupMessageAsync(sendTargetId, "群成员信息获取失败!").ConfigureAwait(false);
+                            return;
+                        }
+
+                        var requestContents = new List<Content>();
+                        requestContents.AddSystemHint($"[以下是今天的群聊内容]");
+                        var fromDate = dateNow.AddHours(-16);
+                        lock (BotDb.SyncLock)
+                        {
+                            var fromDateTimeStamp = fromDate.ToTimeStamp();
+                            var toDateTimeStamp = (dateNow).ToTimeStamp();
+                            BotDb.BotGroupMessages
+                                .Where(each => each.GroupId == paramId
+                                    && each.TimeStamp >= fromDateTimeStamp
+                                    && each.TimeStamp < toDateTimeStamp)
+                                .ForEach(each =>
+                                {
+                                    var historyMessage = each.MessageText;
+                                    historyMessage = historyMessage.Trim();
+                                    if (historyMessage.IsNullOrEmpty())
+                                        return;
+
+                                    // MEMO : 不喜欢的内容直接屏蔽
+                                    if (_regInjectHurry.IsMatch(historyMessage))
+                                        return;
+
+                                    _ = requestContents.AddMessageContentAsync(
+                                        each.TargetId,
+                                        historyMessage);
+                                });
+                        }
+
+                        requestContents.AddSystemHint($"[群聊内容到此为止]");
+                        //await requestContents.SendAsync($"z{paramId}", requestTargetId, groupId, isAt, aiChatSenders, aiGroupConfig, botSendMessage, addSystemHint).ConfigureAwait(false);
+                        await requestContents.SendAsync(chatKey, requestTargetId, groupId, isAt, aiChatSenders, aiGroupConfig, botSendMessage, addSystemHint, false).ConfigureAwait(false);
+                    }
+                }
+            }
         }
         catch (JsonException ex)
         {
@@ -481,14 +535,13 @@ public static class AIExtensions
         string resultMessage;
         if (IsDebug)
         {
-            resultMessage = (needAt ? $"{CQCode.At(targetId)} " : string.Empty)
-                + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}"
+            resultMessage = $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}"
                 + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
                 + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
                 + GetExpressionText(true)
                 + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
 
-            resultMessage += chatMessage.DeleteCode(true);
+            resultMessage += chatMessage.DeleteCode(true, needAt, targetId);
         }
         else
         {
@@ -518,7 +571,7 @@ public static class AIExtensions
                         resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
                 }
 
-                resultMessage += chatMessage.DeleteCode(aiGroupConfig.ShowEmojiImage);
+                resultMessage += chatMessage.DeleteCode(aiGroupConfig.ShowEmojiImage, needAt, targetId);
             }
             else
             {
@@ -534,7 +587,7 @@ public static class AIExtensions
                     resultMessage += $"{GetExpressionText(false)}{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
                 }
 
-                resultMessage += chatMessage.DeleteCode(true);
+                resultMessage += chatMessage.DeleteCode(true, false);
             }
         }
 
@@ -578,7 +631,14 @@ public static class AIExtensions
         long senderId,
         string messageText)
     {
-        var message = _regReplaceAt.Replace(messageText, "[at:${qqId}]");
+        var message = _regReplaceAt.Replace(messageText, match =>
+        {
+            var qqId = long.Parse(match.Groups["qqId"].Value);
+            if (IsDebug && qqId == SuperAdminId)
+                return $"[at:1366869256]";
+
+            return $"[at:{qqId}]";
+        });
         var content = new Content
         {
             Role = USER_ROLE,
@@ -733,10 +793,9 @@ public static class AIExtensions
                 Role = USER_ROLE,
             };
             AddNote(content, AI_KNOWLEDGE_PATH);
-            AddNote(content, AI_USER_INFO_PATH);
             var hasKnowledgeNote = AddNote(content, AI_KNOWLEDGE_NOTE_PATH);
             var hasInspirationNote = AddNote(content, AI_INSPIRATION_NOTE_PATH);
-            content.AddText($"识别对象时优先使用[人物信息]中的信息, 如不存在再使用发送字段的内容");
+            //content.AddText($"识别对象时优先使用[人物信息]中的信息, 如不存在再使用发送字段的内容");
             //+ (hasKnowledgeNote ? $"[knowledgeNote]是你的知识笔记{ENTER}" : string.Empty)
             //+ (hasInspirationNote ? $"[inspirationNote]文件内容是你的灵感笔记{ENTER}" : string.Empty));
             //contents.Add(content);
@@ -771,7 +830,10 @@ public static class AIExtensions
     /// <summary>
     /// 追加小助手状态
     /// </summary>
-    public static async Task<AIStatusInfo> AddStatusAsync(this List<Content> contents, AIMessageSourceType messageSourceType)
+    public static async Task<AIStatusInfo> AddStatusAsync(
+        this List<Content> contents,
+        AIMessageSourceType messageSourceType,
+        long targetId = 0)
     {
         var content = new Content
         {
@@ -784,7 +846,7 @@ public static class AIExtensions
             Mood = PublicVar.AIData.AIStatusData.MoodIndexValue.ToMood(),
             Schedule = AIStatusUtil.GetSchedule(),
             NowDate = DateTime.Now.ToYYYYMDDDDDHHMMSS(),
-            Scene = messageSourceType.ToMessageSourceText(),
+            Scene = messageSourceType.ToMessageSourceText(targetId),
             WeatherInfo = new AIWeatherInfo
             {
                 WeatherData = weatherData,
@@ -831,8 +893,11 @@ public static class AIExtensions
     /// 删除AI不该出现在聊天中的Code
     /// </summary>
     /// <param name="aiChatMessage"><see cref="AIChatMessage"/></param>
+    /// <param name="showEmojiImage">是否显示表示</param>
+    /// <param name="needAt">是否文字开头加at</param>
+    /// <param name="targetId">at对象QQ号</param>
     /// <returns>替换结果</returns>
-    public static string DeleteCode(this AIChatMessage aiChatMessage, bool showEmojiImage)
+    public static string DeleteCode(this AIChatMessage aiChatMessage, bool showEmojiImage, bool needAt, long targetId = 0)
     {
         var emojiCode = aiChatMessage.Emoji;
         var result = aiChatMessage.Text ?? string.Empty;
@@ -882,33 +947,33 @@ public static class AIExtensions
         });
 
         aiChatMessage.Emoji = emojiCode;
-        return GetEmojiCode(aiChatMessage, showEmojiImage) + result;
+        return GetEmojiCode(aiChatMessage, showEmojiImage) + (needAt ? $"{CQCode.At(targetId)} " : string.Empty) + result;
     }
 
     public static AIUserData GetAIUserData(long targetId) => PublicVar.AIData.UserDatas.GetOrAdd(targetId, DefaultAIUserData);
 
-    private static string GetQQImageFilePath(string fileName)
-    {
-        var qqDataPath = AppSettingExtensions.Get("qqDataPath");
-        var date = DateTime.Now.ToYYYYMM();
-        // MEMO : 收藏表情
-        var emojiFilePath = Path.Combine(qqDataPath, $"Emoji\\emoji-recv\\{date}\\Ori\\{fileName}");
-        if (File.Exists(emojiFilePath))
-            return emojiFilePath;
+    //private static string GetQQImageFilePath(string fileName)
+    //{
+    //    var qqDataPath = AppSettingExtensions.Get("qqDataPath");
+    //    var date = DateTime.Now.ToYYYYMM();
+    //    // MEMO : 收藏表情
+    //    var emojiFilePath = Path.Combine(qqDataPath, $"Emoji\\emoji-recv\\{date}\\Ori\\{fileName}");
+    //    if (File.Exists(emojiFilePath))
+    //        return emojiFilePath;
 
-        // MEMO : 外部文件图片(小)
-        var picFilePath = Path.Combine(qqDataPath, $"Pic\\{date}\\Ori\\{fileName}");
-        if (File.Exists(picFilePath))
-            return picFilePath;
+    //    // MEMO : 外部文件图片(小)
+    //    var picFilePath = Path.Combine(qqDataPath, $"Pic\\{date}\\Ori\\{fileName}");
+    //    if (File.Exists(picFilePath))
+    //        return picFilePath;
 
-        // MEMO : 外部文件图片(大)
-        var fileNames = fileName.Split('.');
-        picFilePath = Path.Combine(qqDataPath, $"Pic\\{date}\\Thumb\\{fileNames[0]}_720.{fileNames[1]}");
-        if (File.Exists(picFilePath))
-            return picFilePath;
+    //    // MEMO : 外部文件图片(大)
+    //    var fileNames = fileName.Split('.');
+    //    picFilePath = Path.Combine(qqDataPath, $"Pic\\{date}\\Thumb\\{fileNames[0]}_720.{fileNames[1]}");
+    //    if (File.Exists(picFilePath))
+    //        return picFilePath;
 
-        return string.Empty;
-    }
+    //    return string.Empty;
+    //}
 
     private static string GetAIHistoryPath(string key) => Path.Combine(AI_HISTORY_PATH, $"{key}.json");
 

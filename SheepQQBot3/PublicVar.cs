@@ -15,6 +15,7 @@ using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 
 namespace SheepQQBot3;
 
@@ -218,11 +219,20 @@ public static class PublicVar
     public static readonly ConcurrentDictionary<long, List<Content>> AIHistoryContents = [];
 
     /// <summary>
+    /// AI知识库-用户信息
+    /// </summary>
+    public static ConcurrentDictionary<long, AIChatSender> GroupMemberInfos;
+
+    /// <summary>
     /// 初始化全局变量
     /// </summary>
     /// <param name="vm"><see cref="MainWindowViewModel"/></param>
     public static void InitPublicVar(MainWindowViewModel vm)
     {
         Vm = vm;
+        var aiUserInfoPath = "AICache/userInfo.json";
+        GroupMemberInfos = File.Exists(aiUserInfoPath)
+            ? JsonExtensions.FromJsonFile<GroupMemberInfo>(aiUserInfoPath).UserInfos
+            : [];
     }
 }

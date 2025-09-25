@@ -23,7 +23,7 @@ namespace SheepQQBot3.Model.AI
 
         public static AIChatResponse ExampleAIChatResponse = new()
         {
-            Date = "2025-8-1 10:11:12",
+            Date = new DateTime(2025, 8, 1, 10, 11, 12),
             Contents = [
                 new AIChatResponseContent
                 {
@@ -103,7 +103,6 @@ namespace SheepQQBot3.Model.AI
                 Temperature = AIConfig.Temperature,
             };
             var schemaProperties = chat.Config.ResponseSchema.Properties!;
-            schemaProperties["date"].Nullable = false;
             schemaProperties["contents"].Nullable = false;
             schemaProperties["contents"].Items.Properties["chatMessageInfo"].Nullable = false;
             schemaProperties["contents"].Items.Properties["chatMessageInfo"].Properties["text"].Nullable = false;

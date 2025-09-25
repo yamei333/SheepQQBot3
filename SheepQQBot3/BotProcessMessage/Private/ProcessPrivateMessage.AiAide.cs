@@ -64,7 +64,7 @@ public static partial class ProcessPrivateMessage
         await thisRequestContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
 
         var aiChatSenders = new ConcurrentDictionary<long, AIChatSender>();
-        aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender());
+        aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender(GroupMemberInfos));
 
         await thisRequestContents.SendAsync(chatKey, targetId, 0, false, aiChatSenders, null,
             (id, msg) => _ = BotClient.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);

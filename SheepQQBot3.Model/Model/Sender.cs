@@ -45,56 +45,50 @@ public class Sender
 
 public static class SenderUtil
 {
-    public static Sender ToSender(this GroupMember groupMember)
-        => new()
-        {
-            GroupId = groupMember.GroupId,
-            NickName = groupMember.NickName,
-            Age = groupMember.Age,
-            Card = groupMember.Card,
-            UserId = groupMember.UserId,
-            Sex = groupMember.Sex,
-        };
-
-    public static AIChatSender ToAIChatSender(this GroupMember groupMember)
+    public static AIChatSender ToAIChatSender(
+        this GroupMember groupMember,
+        ConcurrentDictionary<long, AIChatSender> cachedSenders)
     {
         var userId = groupMember.UserId;
-        var name = groupMember.NickName;
-        var otherName = groupMember.Card;
+        var cachedSender = cachedSenders.GetValueOrDefault(userId);
+        var name = cachedSender?.Name ?? groupMember.NickName;
+        var otherName = cachedSender?.BName ?? groupMember.Card;
         return new AIChatSender
         {
+            QQ = userId,
             Name = name,
-            Gander = groupMember.Sex,
             BName = otherName.IsNullOrEmpty() || otherName == name ? null : otherName,
-            QQId = userId,
-            Identity = userId == 252961222 ? "至亲" : "群友",
+            Gander = cachedSender?.Gander ?? groupMember.Sex,
+            Birthday = cachedSender?.Birthday,
+            Other = cachedSender?.Other,
         };
     }
 
-    public static AIChatSender ToAIChatSender(this Sender sender)
+    public static AIChatSender ToAIChatSender(
+        this Sender sender,
+        ConcurrentDictionary<long, AIChatSender> cachedSenders)
     {
         var userId = sender.UserId;
-        var name = sender.NickName;
-        var cardName = sender.CardName;
+        var cachedSender = cachedSenders.GetValueOrDefault(userId);
+        var name = cachedSender?.Name ?? sender.NickName;
+        var otherName = cachedSender?.BName ?? sender.CardName;
         return new AIChatSender
         {
+            QQ = userId,
             Name = name,
-            Gander = sender.Sex,
-            BName = cardName.IsNullOrEmpty() || cardName == name ? null : cardName,
-            QQId = userId,
-            Identity = userId == 252961222 ? "至亲" : "群友",
+            BName = otherName.IsNullOrEmpty() || otherName == name ? null : otherName,
+            Gander = cachedSender?.Gander ?? sender.Sex,
+            Birthday = cachedSender?.Birthday,
+            Other = cachedSender?.Other,
         };
     }
 
-    public static ConcurrentDictionary<long, AIChatSender> ToSenderDictionary(this Dictionary<long, GroupMember> groupMembers)
+    public static ConcurrentDictionary<long, AIChatSender> ToSenderDictionary(
+        this Dictionary<long, GroupMember> groupMembers,
+        ConcurrentDictionary<long, AIChatSender> cachedSenders)
     {
-        var senders = groupMembers.ToConcurrentDictionary(each => each.Key, each => each.Value.ToAIChatSender());
-        senders.GetOrAdd(22222, new AIChatSender
-        {
-            Name = "System",
-            QQId = 22222,
-            Identity = AIMessageSourceTypeUtil.SYSTEM,
-        });
-        return senders;
+        return groupMembers.ToConcurrentDictionary(
+            each => each.Key,
+            each => each.Value.ToAIChatSender(cachedSenders));
     }
 }

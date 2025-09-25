@@ -1,5 +1,4 @@
-﻿using Masuit.Tools;
-using System;
+﻿using System;
 using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
@@ -12,15 +11,8 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 消息回复时间
         /// </summary>
-        [Description("response date")]
         [JsonPropertyName("date")]
-        public string Date { get; set; }
-
-        /// <summary>
-        /// 日志的值类型
-        /// </summary>
-        [JsonIgnore]
-        public DateTime DateValue => Date.ToDateTime();
+        public DateTime Date;
 
         /// <summary>
         /// 回复信息内容
@@ -63,6 +55,12 @@ namespace SheepQQBot3.Model.AI
         [Description("other status change info")]
         [JsonPropertyName("statusChangeInfo")]
         public AIStatusChangeInfo StatusChangeInfo { get; set; }
+
+        /// <summary>
+        /// 调用获取函数的方法信息
+        /// </summary>
+        [JsonPropertyName("infoRequest")]
+        public AIInfoRequest InfoRequest { get; set; }
     }
 
     public class AIChatResponseContent
@@ -221,5 +219,17 @@ namespace SheepQQBot3.Model.AI
         [Description("note content")]
         [JsonPropertyName("content")]
         public string Content { get; set; }
+    }
+
+    /// <summary>
+    /// AI获取信息调用函数的信息
+    /// </summary>
+    public class AIInfoRequest
+    {
+        [JsonPropertyName("requestName")]
+        public string Name { get; set; }
+
+        [JsonPropertyName("requestParam")]
+        public string Param { get; set; }
     }
 }

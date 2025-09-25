@@ -1,10 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-
-namespace SheepQQBot3.Model.AI
+﻿namespace SheepQQBot3.Model.AI
 {
     public enum AIMessageSourceType
     {
@@ -16,16 +10,14 @@ namespace SheepQQBot3.Model.AI
     public static class AIMessageSourceTypeUtil
     {
         public const string SYSTEM = "System hint";
-        public const string GROUP = "Group chat";
-        public const string PRIVATE = "Private chat";
 
-        public static string ToMessageSourceText(this AIMessageSourceType messageSourceType)
+        public static string ToMessageSourceText(this AIMessageSourceType messageSourceType, long targetId = 0)
         {
             return messageSourceType switch
             {
                 AIMessageSourceType.System => SYSTEM,
-                AIMessageSourceType.Group => GROUP,
-                AIMessageSourceType.Private => PRIVATE,
+                AIMessageSourceType.Group => $"Group chat({targetId})",
+                AIMessageSourceType.Private => $"Private chat({targetId})",
                 _ => "None",
             };
         }
