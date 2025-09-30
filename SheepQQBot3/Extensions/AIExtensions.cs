@@ -247,7 +247,10 @@ public static class AIExtensions
             // MEMO : 群聊总结提前处理, 采用转发形式发送
             if (chatKey.StartsWith("z"))
             {
-                var sendMessages = new List<GroupForwardMessage>();
+                var sendMessages = new List<GroupForwardMessage>
+                {
+                    new(BOT_NAME, BotId, $"总结消息数: {thisRequestContents.Count - 2}"),
+                };
                 chatMessages.ForEach(aiChatResponseContent =>
                 {
                     var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, false, requestTargetId, isGroupRequest);

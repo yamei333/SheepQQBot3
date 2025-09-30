@@ -54,6 +54,7 @@ public static class JsonExtensions
 
         using var sr = File.OpenText(filePath);
         var jsonText = sr.ReadToEnd();
+        sr.Close();
         return jsonText.FromJson<T>(options ?? GetJsonOptions());
     }
 

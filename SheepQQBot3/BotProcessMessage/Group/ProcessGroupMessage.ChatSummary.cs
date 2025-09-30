@@ -155,8 +155,8 @@ public static partial class ProcessGroupMessage
                             }
                         }
 
-                        await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(senderId)} 小助手正在收集聊天记录进行总结，请稍等片刻!").ConfigureAwait(false);
-                        //await BotServer.SendMessageEmojiAsync(messageId, Emoji.E_OK).ConfigureAwait(false);
+                        //await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(senderId)} 小助手正在收集聊天记录进行总结，请稍等片刻!").ConfigureAwait(false);
+                        await BotClient.SendMessageEmojiAsync(messageId, Emoji.E_Flash).ConfigureAwait(false);
                         await AISummary(groupId, dateNow.AddHours(-aiHour)).ConfigureAwait(false);
 
                         return true;
@@ -273,6 +273,7 @@ public static partial class ProcessGroupMessage
                             .Where(each => each.GroupId == targetGroupId
                                 && each.TimeStamp >= fromDateTimeStamp
                                 && each.TimeStamp < toDateTimeStamp)
+                            .AsEnumerable()
                             .ForEach(each =>
                             {
                                 var historyMessage = each.MessageText;
