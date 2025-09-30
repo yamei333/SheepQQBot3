@@ -329,6 +329,7 @@ public static partial class ProcessGroupMessage
                             .Where(each => each.GroupId == targetGroupId
                                 && each.TimeStamp >= fromDateTimeStamp
                                 && each.TimeStamp < toDateTimeStamp)
+                            .AsEnumerable()
                             .ForEach(each =>
                             {
                                 var historyMessage = each.MessageText;
@@ -348,8 +349,9 @@ public static partial class ProcessGroupMessage
 
                     var sender = groupMessage.Sender;
 
-                    requestContents.AddSystemHint($"[群聊内容到此为止]");
-                    await requestContents.AddMessageContentAsync(sender.UserId, $"{CQCode.At(BotId)} 总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。").ConfigureAwait(false);
+                    //requestContents.AddSystemHint($"[群聊内容到此为止]");
+                    //await requestContents.AddMessageContentAsync(sender.UserId, $"{CQCode.At(BotId)} 总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述。").ConfigureAwait(false);
+                    requestContents.AddSystemHint($"[群聊内容到此为止] {sender.NickName}(QQ:{sender.UserId}) 想让你总结一下大家都聊了些什么，先对不同内容进行总结，最后再简短的一句话描述。");
                     await requestContents.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
                         (id, msg) => BotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false))
                         .ConfigureAwait(false);

@@ -55,12 +55,6 @@ namespace SheepQQBot3.Model.AI
         [Description("other status change info")]
         [JsonPropertyName("statusChangeInfo")]
         public AIStatusChangeInfo StatusChangeInfo { get; set; }
-
-        /// <summary>
-        /// 调用获取函数的方法信息
-        /// </summary>
-        [JsonPropertyName("infoRequest")]
-        public AIInfoRequest InfoRequest { get; set; }
     }
 
     public class AIChatResponseContent
@@ -219,17 +213,5 @@ namespace SheepQQBot3.Model.AI
         [Description("note content")]
         [JsonPropertyName("content")]
         public string Content { get; set; }
-    }
-
-    /// <summary>
-    /// AI获取信息调用函数的信息
-    /// </summary>
-    public class AIInfoRequest
-    {
-        [JsonPropertyName("requestName")]
-        public string Name { get; set; }
-
-        [JsonPropertyName("requestParam")]
-        public string Param { get; set; }
     }
 }

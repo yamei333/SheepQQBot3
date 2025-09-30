@@ -397,56 +397,6 @@ public static class AIExtensions
             // MEMO : 保存历史记录
             if (saveHistory)
                 loadedHistory.SaveAIHistory(chatKey);
-
-            // MEMO : 方法请求处理
-            var infoRequest = aiChatResponse.InfoRequest;
-            if (infoRequest != null)
-            {
-                if (infoRequest.Name == "GetTodayGroupChat")
-                {
-                    if (long.TryParse(infoRequest.Param, out var paramId))
-                    {
-                        var groupMembers = await BotClient.GetGroupMembersAsync(paramId).ConfigureAwait(false);
-                        if (groupMembers == null)
-                        {
-                            await BotClient.SendGroupMessageAsync(sendTargetId, "群成员信息获取失败!").ConfigureAwait(false);
-                            return;
-                        }
-
-                        var requestContents = new List<Content>();
-                        requestContents.AddSystemHint($"[以下是今天的群聊内容]");
-                        var fromDate = dateNow.AddHours(-16);
-                        lock (BotDb.SyncLock)
-                        {
-                            var fromDateTimeStamp = fromDate.ToTimeStamp();
-                            var toDateTimeStamp = (dateNow).ToTimeStamp();
-                            BotDb.BotGroupMessages
-                                .Where(each => each.GroupId == paramId
-                                    && each.TimeStamp >= fromDateTimeStamp
-                                    && each.TimeStamp < toDateTimeStamp)
-                                .ForEach(each =>
-                                {
-                                    var historyMessage = each.MessageText;
-                                    historyMessage = historyMessage.Trim();
-                                    if (historyMessage.IsNullOrEmpty())
-                                        return;
-
-                                    // MEMO : 不喜欢的内容直接屏蔽
-                                    if (_regInjectHurry.IsMatch(historyMessage))
-                                        return;
-
-                                    _ = requestContents.AddMessageContentAsync(
-                                        each.TargetId,
-                                        historyMessage);
-                                });
-                        }
-
-                        requestContents.AddSystemHint($"[群聊内容到此为止]");
-                        //await requestContents.SendAsync($"z{paramId}", requestTargetId, groupId, isAt, aiChatSenders, aiGroupConfig, botSendMessage, addSystemHint).ConfigureAwait(false);
-                        await requestContents.SendAsync(chatKey, requestTargetId, groupId, isAt, aiChatSenders, aiGroupConfig, botSendMessage, addSystemHint, false).ConfigureAwait(false);
-                    }
-                }
-            }
         }
         catch (JsonException ex)
         {
