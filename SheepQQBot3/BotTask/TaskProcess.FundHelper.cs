@@ -37,6 +37,8 @@ public static partial class TaskProcess
                         .ForEach(setConfig =>
                         {
                             setConfig.FundAlarmConfigs.Values.ForEach(SendFundAlarmMessage);
+                            return;
+
                             async void SendFundAlarmMessage(FundAlarmConfig fundAlarmConfig)
                             {
                                 if (!fundAlarmConfig.IsActive || !fundAlarmConfig.Condition.IsMatch(dateNowStr))

@@ -45,7 +45,6 @@ public static partial class TaskProcess
 
                             async Task SendAction(LiveAlarmConfig liveAlarmConfig)
                             {
-                                liveAlarmConfig.LastExecuteDate = dateNow;
                                 // 发送直播提醒消息
                                 await SendLiveAlarmMessageAsync(setConfig, liveAlarmConfig, dateNow).ConfigureAwait(false);
                             }
