@@ -9,7 +9,7 @@ public static class CQCode
     private static Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
     private static Regex _regCQImageUrl_gchat = RegexGenerator.CQImageUrl_gchat();
 
-    public static string At(long targetId)
+    public static string At(string targetId)
         => $"[CQ:at,qq={targetId}]";
 
     public static string AtAll()
@@ -21,7 +21,7 @@ public static class CQCode
             + $"{(isBiaoQing ? ",sub_type=1" : string.Empty)}"
             + $"{(!summary.IsNullOrEmpty() ? $",summary={summary}" : string.Empty)}]";
 
-    public static string Reply(long targetId, int messageId)
+    public static string Reply(string targetId, string messageId)
         => $"[CQ:reply,qq={targetId},id={messageId}]";
 
     public static string Json(string signedJson)

@@ -7,15 +7,13 @@ namespace SheepQQBot3.DbModel;
 
 public partial class BotGroupMessage
 {
-    public long GroupId { get; set; }
+    public string GroupId { get; set; }
 
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
-    public int MessageId { get; set; }
+    public string MessageId { get; set; }
 
     public long TimeStamp { get; set; }
 
     public string MessageText { get; set; }
-
-    public string MessageImage { get; set; }
 }

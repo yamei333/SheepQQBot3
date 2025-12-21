@@ -10,17 +10,17 @@ public class GroupMessage
 {
     public DateTime DateTime { get; set; }
 
-    public long UserId { get; set; }
+    public string UserId { get; set; }
 
     public string Anonymous { get; set; }
 
     public int Font { get; set; }
 
-    public long GroupId { get; set; }
+    public string GroupId { get; set; }
 
     public string Message { get; set; }
 
-    public int MessageId { get; set; }
+    public string MessageId { get; set; }
 
     public Sender Sender { get; set; }
 
@@ -30,12 +30,12 @@ public class GroupMessage
     public GroupMessage(ReceiveData receiveData)
     {
         DateTime = receiveData.DateTime;
-        UserId = receiveData.UserId;
+        UserId = receiveData.UserId.ToString();
         Anonymous = receiveData.Anonymous;
         Font = receiveData.Font;
-        GroupId = receiveData.GroupId;
+        GroupId = receiveData.GroupId.ToString();
         Message = CQCode.ReplaceCQImage(receiveData.Message);
-        MessageId = receiveData.MessageId;
+        MessageId = receiveData.MessageId.ToString();
         Sender = receiveData.Sender;
     }
 

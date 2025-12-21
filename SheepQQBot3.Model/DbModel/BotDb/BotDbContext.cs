@@ -27,8 +27,6 @@ public partial class BotDbContext : DbContext
             entity.HasKey(e => e.TargetId);
 
             entity.HasIndex(e => e.TargetId, "KEY_TargetId").IsUnique();
-
-            entity.Property(e => e.TargetId).ValueGeneratedNever();
         });
 
         modelBuilder.Entity<SetuSendHistory>(entity =>

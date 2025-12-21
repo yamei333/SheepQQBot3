@@ -13,7 +13,7 @@ namespace SheepQQBot3.Model.AI
         /// 用户信息
         /// </summary>
         [JsonPropertyName("userDatas")]
-        public ConcurrentDictionary<long, AIUserData> UserDatas { get; set; } = [];
+        public ConcurrentDictionary<string, AIUserData> UserDatas { get; set; } = [];
 
         /// <summary>
         /// 小助手状态
@@ -37,10 +37,10 @@ namespace SheepQQBot3.Model.AI
     public class AIUserData
     {
         /// <summary>
-        /// 好感度
+        /// 关系
         /// </summary>
-        [JsonPropertyName("favorability")]
-        public int Favorability { get; set; }
+        [JsonPropertyName("relation")]
+        public AIRelationData Relation { get; set; }
 
         /// <summary>
         /// 拉黑持续至(时间)
@@ -51,8 +51,29 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 禁止行为
         /// </summary>
-        [JsonPropertyName("prohibitedActs")]
-        [Description("Prohibited Acts")]
-        public string ProhibitedActs { get; set; }
+        [JsonPropertyName("allowed_acts")]
+        [Description("Allowed Acts")]
+        public string AllowedActs { get; set; }
+    }
+
+    public class AIRelationData
+    {
+        /// <summary>
+        /// 亲密度 (Intimacy) —— 社交距离与防备心理
+        /// </summary>
+        [JsonPropertyName("intimacy")]
+        public int Intimacy { get; set; }
+
+        /// <summary>
+        /// 认可度 (Respect) —— 地位感与意志服从
+        /// </summary>
+        [JsonPropertyName("respect")]
+        public int Respect { get; set; }
+
+        /// <summary>
+        /// 好感度 (Affection) —— 情感底色与包容限度
+        /// </summary>
+        [JsonPropertyName("affection")]
+        public int Affection { get; set; }
     }
 }

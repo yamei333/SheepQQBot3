@@ -20,6 +20,9 @@ public class GroupMember
     [JsonPropertyName("group_id")]
     public long GroupId { get; set; }
 
+    [JsonPropertyName("user_id")]
+    public long UserId { get; set; }
+
     [JsonPropertyName("join_time")]
     public long JoinTime { get; set; }
 
@@ -49,7 +52,4 @@ public class GroupMember
 
     [JsonPropertyName("unfriendly")]
     public bool Unfriendly { get; set; }
-
-    [JsonPropertyName("user_id")]
-    public long UserId { get; set; }
 }

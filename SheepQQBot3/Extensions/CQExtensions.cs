@@ -14,7 +14,7 @@ public static class CQExtensions
         string title, string content, string tag,
         string url, string previewImage, string tagIcon = null)
         => await HttpExtensions.GetSignedArkAsync(
-            PublicVar.BotClient.GetCookiesAsync,
+            PublicVar.GlobalBotClient.GetCookiesAsync,
             new JsonCard_TianxuanShare(PublicVar.BotId, title, content, tag, url, previewImage,
                 tagIcon ?? QQExtensions.GetQQImageUrl(PublicVar.BotId))).ConfigureAwait(false);
 

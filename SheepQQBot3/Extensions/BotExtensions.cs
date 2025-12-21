@@ -70,14 +70,14 @@ public static partial class BotExtensions
     /// <summary>
     /// 是否有用户函数
     /// </summary>
-    public static bool HasUserConfig(long targetId, UserConfigType userConfigType)
+    public static bool HasUserConfig(string targetId, UserConfigType userConfigType)
     {
-        var userConfigs = PublicVar.BotConfig.UserConfigs;
+        var userConfigs = PublicVar.GlobalBotConfig.UserConfigs;
         return userConfigs != null
             && userConfigs.TryGetValue(targetId, out var userConfig)
             && userConfig != null
             && userConfig.ContainsKey(userConfigType);
     }
 
-    public static bool IsAdmin(long targetId) => PublicVar.AdminIds.Contains(targetId);
+    public static bool IsAdmin(string targetId) => PublicVar.AdminIds.Contains(targetId);
 }

@@ -7,7 +7,7 @@ namespace SheepQQBot3.DbModel;
 
 public partial class SetuDoushiInfo
 {
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
     public long SetuDoushiLv { get; set; }
 

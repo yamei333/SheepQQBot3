@@ -354,7 +354,7 @@ public static class MyStringExtensions
         return cqCode switch
         {
             "at" => cqArea,
-            "image" => "[图片]",
+            "image" => cqArea,
             "forward" => "[转发消息]",
             "video" => "[视频]",
             "record" => "[语音]",

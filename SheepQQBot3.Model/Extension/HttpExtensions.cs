@@ -23,10 +23,10 @@ public static class HttpExtensions
 {
     private static readonly Regex _regGetPsKey = new(@"(?<=p_skey\=).+", RegexOptions.Multiline);
 
-    ///// <summary>
-    ///// Http请求通用
-    ///// </summary>
-    //public static readonly HttpClient HttpClient;
+    /// <summary>
+    /// Http请求通用
+    /// </summary>
+    public static readonly HttpClient HttpClient;
 
     /// <summary>
     /// QQ专用(发送json卡片消息用)
@@ -44,15 +44,15 @@ public static class HttpExtensions
         //HttpClient = new HttpClient();
         //HttpClient.Timeout = TimeSpan.FromSeconds(15);
         HttpClient_QQJsonCard = new HttpClient(new HttpClientHandler { UseCookies = false });
-    }
-
-    public static HttpClient CreateHttpClient(int timeout = 10000, int connectTimeout = 3000)
-    {
-        var socketsHttpHandler = new SocketsHttpHandler();
-        socketsHttpHandler.ConnectTimeout = TimeSpan.FromMilliseconds(connectTimeout);
-        var httpClient = new HttpClient();
-        httpClient.Timeout = TimeSpan.FromMilliseconds(timeout);
-        return httpClient;
+        var handler = new HttpClientHandler
+        {
+            AutomaticDecompression = DecompressionMethods.GZip | DecompressionMethods.Deflate,
+        };
+        HttpClient = new HttpClient(handler);
+        HttpClient.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/143.0.0.0 Safari/537.36");
+        HttpClient.DefaultRequestHeaders.Add("Accept", "application/json, text/plain, */*");
+        HttpClient.DefaultRequestHeaders.Add("Accept-Language", "zh-CN,zh;q=0.9,en;q=0.8");
+        HttpClient.Timeout = TimeSpan.FromSeconds(10); // 设置超时，防止请求卡死线程
     }
 
     /// <summary>
@@ -93,8 +93,7 @@ public static class HttpExtensions
     {
         try
         {
-            var httpClient = CreateHttpClient();
-            var data = await httpClient.GetFromJsonAsync<T>(url, JsonExtensions.DefaultJsonOptions)
+            var data = await HttpClient.GetFromJsonAsync<T>(url, JsonExtensions.DefaultJsonOptions)
                 .ConfigureAwait(false);
             return new HttpResponse<T>(HttpResponseResult.Successed, data);
         }
@@ -140,8 +139,7 @@ public static class HttpExtensions
             : new StringContent(content, Encoding.UTF8, mediaType);
         try
         {
-            var httpClient = CreateHttpClient();
-            return httpClient.Send(httpRequestMessage);
+            return HttpClient.Send(httpRequestMessage);
         }
         catch (TaskCanceledException)
         {
@@ -158,8 +156,7 @@ public static class HttpExtensions
     {
         try
         {
-            var httpClient = CreateHttpClient();
-            return await httpClient.GetAsync(url).ConfigureAwait(false);
+            return await HttpClient.GetAsync(url).ConfigureAwait(false);
         }
         catch (TaskCanceledException)
         {
@@ -176,8 +173,7 @@ public static class HttpExtensions
     {
         try
         {
-            var httpClient = CreateHttpClient();
-            return httpClient.GetAsync(url).Result;
+            return HttpClient.GetAsync(url).Result;
         }
         catch (TaskCanceledException)
         {

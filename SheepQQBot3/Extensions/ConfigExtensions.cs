@@ -35,7 +35,7 @@ public static class ConfigExtensions
             var botConfig = new BotConfig();
             botConfig.InitBotFunctionIsEnabled();
 
-            PublicVar.BotConfig = botConfig;
+            PublicVar.GlobalBotConfig = botConfig;
             Vm.SetConfigs = botConfig.SetConfigs;
             Vm.IsLoadComplete = true;
             return;
@@ -80,7 +80,7 @@ public static class ConfigExtensions
             botConfig.InitBotFunctionIsEnabled();
             PrepareData(botConfig);
 
-            PublicVar.BotConfig = botConfig;
+            PublicVar.GlobalBotConfig = botConfig;
             Vm.SetConfigs = botConfig.SetConfigs;
             Vm.IsLoadComplete = true;
             if (PublicVar.IsDebug)
@@ -108,13 +108,13 @@ public static class ConfigExtensions
     {
         if (!File.Exists(AIConfigPath))
         {
-            PublicVar.AIConfig = new AIConfig();
+            PublicVar.GlobalAIConfig = new AIConfig();
             return;
         }
 
         var jsonText = File.ReadAllText(AIConfigPath, Encoding.UTF8);
-        PublicVar.AIConfig = jsonText.FromJson<AIConfig>();
-        OpenWeatherMapService = new Current(PublicVar.AIConfig.OpenWeatherMapKey)
+        PublicVar.GlobalAIConfig = jsonText.FromJson<AIConfig>();
+        OpenWeatherMapService = new Current(PublicVar.GlobalAIConfig.OpenWeatherMapKey)
         {
             Languages = Languages.English,
             Units = WeatherUnits.Metric,
@@ -128,12 +128,12 @@ public static class ConfigExtensions
     {
         if (!File.Exists(AIDataPath))
         {
-            PublicVar.AIData = new AIData();
+            GlobalAIData = new AIData();
             return;
         }
 
         var jsonText = File.ReadAllText(AIDataPath, Encoding.UTF8);
-        PublicVar.AIData = jsonText.FromJson<AIData>();
+        GlobalAIData = jsonText.FromJson<AIData>();
     }
 
     /// <summary>
@@ -143,7 +143,7 @@ public static class ConfigExtensions
     {
         if (!File.Exists(AICharacterPath))
         {
-            PublicVar.AICharacter = new AICharacter
+            GlobalAICharacter = new AICharacter
             {
                 SystemInstruction = new Dictionary<string, string>
                 {
@@ -161,7 +161,7 @@ public static class ConfigExtensions
         }
 
         var jsonText = File.ReadAllText(AICharacterPath, Encoding.UTF8);
-        PublicVar.AICharacter = jsonText.FromJson<AICharacter>();
+        GlobalAICharacter = jsonText.FromJson<AICharacter>();
     }
 
     private static void WriteJsonConfig(string jsonText)
@@ -208,7 +208,7 @@ public static class ConfigExtensions
         {
             try
             {
-                PublicVar.BotConfig.ToJsonFile(ConfigPath, JsonExtensions.GetJsonOptions(true, true));
+                GlobalBotConfig.ToJsonFile(ConfigPath, JsonExtensions.GetJsonOptions(true, true));
             }
             catch (Exception e)
             {
@@ -220,27 +220,27 @@ public static class ConfigExtensions
         focusControl?.Focus();
     }
 
-    /// <summary>
-    /// 保存配置
-    /// </summary>
-    public static void SaveAIConfig()
-    {
-        if (!Vm.IsLoadComplete)
-            return;
+    ///// <summary>
+    ///// 保存配置
+    ///// </summary>
+    //public static void SaveAIConfig()
+    //{
+    //    if (!Vm.IsLoadComplete)
+    //        return;
 
-        lock (_syncLock)
-        {
-            try
-            {
-                File.WriteAllText(AIConfigPath, PublicVar.AIConfig.ToJsonIgnoreNull(), Encoding.UTF8);
-            }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
-        }
-    }
+    //    lock (_syncLock)
+    //    {
+    //        try
+    //        {
+    //            File.WriteAllText(AIConfigPath, PublicVar.AIConfig.ToJsonIgnoreNull(), Encoding.UTF8);
+    //        }
+    //        catch (Exception e)
+    //        {
+    //            Console.WriteLine(e);
+    //            throw;
+    //        }
+    //    }
+    //}
 
     /// <summary>
     /// 保存AI存储数据
@@ -251,7 +251,7 @@ public static class ConfigExtensions
         {
             try
             {
-                File.WriteAllText(AIDataPath, PublicVar.AIData.ToJsonIgnoreNull(), Encoding.UTF8);
+                File.WriteAllText(AIDataPath, GlobalAIData.ToJsonIgnoreNull(), Encoding.UTF8);
             }
             catch (Exception e)
             {
@@ -270,7 +270,7 @@ public static class ConfigExtensions
         {
             try
             {
-                File.WriteAllText(AICharacterPath, PublicVar.AICharacter.ToJsonIgnoreNull(), Encoding.UTF8);
+                File.WriteAllText(AICharacterPath, GlobalAICharacter.ToJsonIgnoreNull(), Encoding.UTF8);
             }
             catch (Exception e)
             {

@@ -50,12 +50,12 @@ public static partial class ProcessRevokeGroupMessage
             //new(BOT_NAME, BotId, $"{sender.NickName}({sender.UserId})"),
             //new(BOT_NAME, BotId, CQCode.ReplaceCQImage(revokeMessage.Message)),
             // MEMO : 0.14.9.7 调整撤回复读, 使用伪装发送
-            new($"{sender.NickName}({sender.UserId})", sender.UserId, CQCode.ReplaceCQImage(revokeMessage.Message)),
+            new($"{sender.NickName}({sender.UserId})", sender.UserId.ToString(), CQCode.ReplaceCQImage(revokeMessage.Message)),
             new(BOT_NAME, BotId, "有人撤回了一条消息!"),
             // MEMO : 0.14.3.8 不发送嘲讽消息
             //new(BOT_NAME, BotId, _repeatSllhh.Random()),
         };
-        await BotClient.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages).ConfigureAwait(false);
+        await GlobalBotClient.SendGroupForwardMessageAsync(groupRevokeMessage.GroupId, sendMessages).ConfigureAwait(false);
         return true;
     }
 }

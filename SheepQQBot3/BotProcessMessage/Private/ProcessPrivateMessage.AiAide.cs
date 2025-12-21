@@ -1,11 +1,12 @@
-﻿using GenerativeAI.Types;
-using Masuit.Tools;
+﻿using Masuit.Tools;
+using OpenRouter.NET.Models;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
@@ -21,7 +22,8 @@ public static partial class ProcessPrivateMessage
     /// <returns></returns>
     public static async Task AIAideAsync(PrivateMessage privateMessage)
     {
-        var targetId = privateMessage.Sender.UserId;
+        var sender = privateMessage.Sender;
+        var targetId = sender.UserId.ToString();
         var message = privateMessage.Message;
         var isAdmin = BotExtensions.IsAdmin(targetId);
         var isSuperAdmin = targetId == SuperAdminId;
@@ -30,17 +32,14 @@ public static partial class ProcessPrivateMessage
         if (!isSuperAdmin && dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
         {
             if (IsDebug)
-                await BotClient.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
+                await GlobalBotClient.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
 
             return;
         }
 
         // MEMO : 不该发消息时, 发送不回应消息
-        if (!isAdmin
-            && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
-        {
+        if (!isAdmin && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
             return;
-        }
 
         // MEMO : debug时只准测试号测试
         if (IsDebug && targetId != TestQQId)
@@ -53,20 +52,25 @@ public static partial class ProcessPrivateMessage
         var chatKey = $"p{targetId}";
         if ((dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_PRIVATE)
         {
-            await BotClient.SendPrivateMessageAsync(targetId, "请求间隔过短!").ConfigureAwait(false);
+            await GlobalBotClient.SendPrivateMessageAsync(targetId, "请求间隔过短!").ConfigureAwait(false);
             return;
         }
 
         AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
 
+        // MEMO : 判断使用模型(开头是/image)
+        var useModelImage = message.StartsWith("/image", StringComparison.CurrentCultureIgnoreCase);
+        message = Regex.Replace(message, @"^/image\s*", "", RegexOptions.IgnoreCase);
+
         // MEMO : 构建发送消息并发送
-        var thisRequestContents = new List<Content>();
-        await thisRequestContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
+        var thisRequestContentParts = new List<ContentPart>();
+        await thisRequestContentParts.AddQQChatMessageAsync(sender, message, null).ConfigureAwait(false);
 
-        var aiChatSenders = new ConcurrentDictionary<long, AIChatSender>();
-        aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender(GroupMemberInfos));
+        var aiChatSenders = new ConcurrentDictionary<string, AIChatSender>();
+        aiChatSenders.GetOrAdd(targetId, privateMessage.Sender.ToAIChatSender(AIUserInfos));
 
-        await thisRequestContents.SendAsync(chatKey, targetId, 0, false, aiChatSenders, null,
-            (id, msg) => _ = BotClient.SendPrivateMessageAsync(targetId, msg)).ConfigureAwait(false);
+        await thisRequestContentParts.SendAsync(chatKey, targetId, string.Empty, false, aiChatSenders, null,
+            (id, msg) => _ = GlobalBotClient.SendPrivateMessageAsync(targetId, msg),
+            useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat).ConfigureAwait(false);
     }
 }

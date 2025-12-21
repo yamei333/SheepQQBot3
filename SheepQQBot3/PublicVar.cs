@@ -1,10 +1,10 @@
 ﻿using CommonLibrary;
-using GenerativeAI.Types;
 using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
+using OpenRouter.NET;
+using OpenRouter.NET.Models;
 using OpenWeatherMap.Standard;
 using SheepQQBot3.DbModel;
-using SheepQQBot3.DbModel.JiebaDb;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
@@ -47,42 +47,47 @@ public static class PublicVar
     /// <summary>
     /// 管理员ID
     /// </summary>
-    public static readonly long CommonId = 22222;
-
-    /// <summary>
-    /// 系统ID
-    /// </summary>
-    public static readonly long SystemId = 10000;
-
-    /// <summary>
-    /// 测试QQID
-    /// </summary>
-    public static readonly long TestQQId = 205552607;
-
-    /// <summary>
-    /// 测试群号
-    /// </summary>
-    public static readonly long TestGroupId = 15873217;
-
-    /// <summary>
-    /// 超级管理ID
-    /// </summary>
-    public static readonly long SuperAdminId = 252961222;
+    public static readonly string AISystemId = "22222";
 
     /// <summary>
     /// 管理员ID
     /// </summary>
-    public static readonly HashSet<long> AdminIds = AppSettingExtensions.Get("adminId").Split(',').ToHashSet(long.Parse);
+    public static readonly string AISystemHintName = "系统提示";
+
+    /// <summary>
+    /// 系统ID
+    /// </summary>
+    public static readonly string SystemId = "10000";
+
+    /// <summary>
+    /// 测试QQID
+    /// </summary>
+    public static readonly string TestQQId = "205552607";
+
+    /// <summary>
+    /// 测试群号
+    /// </summary>
+    public static readonly string TestGroupId = "15873217";
+
+    /// <summary>
+    /// 超级管理ID
+    /// </summary>
+    public static readonly string SuperAdminId = "252961222";
+
+    /// <summary>
+    /// 管理员ID
+    /// </summary>
+    public static readonly HashSet<string> AdminIds = AppSettingExtensions.Get("adminId").Split(',').ToHashSet(each => each.ToString());
 
     /// <summary>
     /// BotID
     /// </summary>
-    public static readonly long BotId = AppSettingExtensions.Get("selfId", 0L);
+    public static readonly string BotId = AppSettingExtensions.Get("selfId", string.Empty);
 
     /// <summary>
     /// 色图斗士信息缓存
     /// </summary>
-    public static readonly ConcurrentDictionary<long, SetuDoushiInfo> SetuDoushiInfoCache = [];
+    public static readonly ConcurrentDictionary<string, SetuDoushiInfo> SetuDoushiInfoCache = [];
 
     /// <summary>
     /// 半角逗号
@@ -117,7 +122,7 @@ public static class PublicVar
     /// <summary>
     /// 最大重试次数
     /// </summary>
-    public const int AI_MAX_RETRY_TIMES = 2;
+    public const int AI_MAX_RETRY_TIMES = 1;
 
     /// <summary>
     /// AI最短请求间隔, 群内at(30秒)
@@ -132,7 +137,7 @@ public static class PublicVar
     /// <summary>
     /// <see cref="MainWindow"/>
     /// </summary>
-    public static MainWindow MWindow { get; set; }
+    public static MainWindow GlobalMainWindow { get; set; }
 
     /// <summary>
     /// <see cref="MainWindowViewModel"/>
@@ -142,26 +147,26 @@ public static class PublicVar
     /// <summary>
     /// <see cref="SDK.Server.BotServer"/>
     /// </summary>
-    public static BotServer BotServer => Vm.BotServer;
+    public static BotServer GlobalBotServer => Vm.BotServer;
 
     /// <summary>
     /// <see cref="SDK.Client.BotClient"/>
     /// </summary>
-    public static BotClient BotClient => Vm.BotClient;
+    public static BotClient GlobalBotClient => Vm.BotClient;
 
-    public static NapCatWindow NapCatWindow;
+    public static NapCatWindow GlobalNapCatWindow;
     public static Process Bark;
-    public static BarkWindow BarkWindow;
+    public static BarkWindow GlobalBarkWindow;
 
     /// <summary>
     /// 已记录的群消息(用于防止撤回)
     /// </summary>
-    public static ConcurrentDictionary<int, GroupMessage> SavedGroupMessages { get; set; } = [];
+    public static ConcurrentDictionary<string, GroupMessage> SavedGroupMessages { get; set; } = [];
 
-    /// <summary>
-    /// Jieba数据库
-    /// </summary>
-    public static JiebaDbContext JiebaDb = new(new DbContextOptions<JiebaDbContext>());
+    ///// <summary>
+    ///// Jieba数据库
+    ///// </summary>
+    //public static JiebaDbContext JiebaDb = new(new DbContextOptions<JiebaDbContext>());
 
     /// <summary>
     /// Bot数据库
@@ -171,7 +176,7 @@ public static class PublicVar
     /// <summary>
     /// Bot配置
     /// </summary>
-    public static BotConfig BotConfig { get; set; }
+    public static BotConfig GlobalBotConfig { get; set; }
 
     /// <summary>
     /// 节假日信息
@@ -179,24 +184,34 @@ public static class PublicVar
     public static Dictionary<string, bool> HolidayInfo { get; set; }
 
     /// <summary>
+    /// AIClient
+    /// </summary>
+    public static OpenRouterClient AIClient { get; set; }
+
+    /// <summary>
+    /// AIClient Image
+    /// </summary>
+    public static OpenRouterClient AIClientImage { get; set; }
+
+    /// <summary>
     /// AIConfig
     /// </summary>
-    public static AIConfig AIConfig { get; set; }
+    public static AIConfig GlobalAIConfig { get; set; }
 
     /// <summary>
     /// AI数据
     /// </summary>
-    public static AIData AIData { get; set; }
+    public static AIData GlobalAIData { get; set; }
 
     /// <summary>
     /// AICharacter
     /// </summary>
-    public static AICharacter AICharacter { get; set; }
+    public static AICharacter GlobalAICharacter { get; set; }
 
     /// <summary>
     /// AI控制
     /// </summary>
-    public static AIControl AIControl { get; set; }
+    public static AIControl GlobalAIControl { get; set; }
 
     /// <summary>
     /// AI请求时间记录
@@ -206,7 +221,7 @@ public static class PublicVar
     /// <summary>
     /// AI用户信息(好感度描述等)
     /// </summary>
-    public static ConcurrentDictionary<long, AIUserInfo> AIUserInfoDictionary { get; set; } = [];
+    public static ConcurrentDictionary<string, AIUserInfo> AIUserInfoDictionary { get; set; } = [];
 
     /// <summary>
     /// OpenWeatherMap服务
@@ -216,12 +231,12 @@ public static class PublicVar
     /// <summary>
     /// AI记录的群历史消息
     /// </summary>
-    public static readonly ConcurrentDictionary<long, List<Content>> AIHistoryContents = [];
+    public static readonly ConcurrentDictionary<string, List<ContentPart>> AIHistoryContentParts = [];
 
     /// <summary>
     /// AI知识库-用户信息
     /// </summary>
-    public static ConcurrentDictionary<long, AIChatSender> GroupMemberInfos;
+    public static ConcurrentDictionary<string, AIChatSender> AIUserInfos;
 
     /// <summary>
     /// 初始化全局变量
@@ -231,7 +246,7 @@ public static class PublicVar
     {
         Vm = vm;
         var aiUserInfoPath = "AICache/userInfo.json";
-        GroupMemberInfos = File.Exists(aiUserInfoPath)
+        AIUserInfos = File.Exists(aiUserInfoPath)
             ? JsonExtensions.FromJsonFile<GroupMemberInfo>(aiUserInfoPath).UserInfos
             : [];
     }

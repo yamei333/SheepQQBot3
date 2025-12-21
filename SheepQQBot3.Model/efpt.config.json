@@ -1,13 +1,13 @@
 ﻿{
    "CodeGenerationMode": 4,
-   "ContextClassName": "JiebaDbContext",
+   "ContextClassName": "BotDbContext",
    "ContextNamespace": null,
-   "DefaultDacpacSchema": null,
    "FilterSchemas": false,
    "IncludeConnectionString": false,
+   "MinimumProductVersion": "2.6.1186",
    "ModelNamespace": null,
    "OutputContextPath": null,
-   "OutputPath": "DbModel\/JiebaDb",
+   "OutputPath": "DbModel\/BotDb",
    "PreserveCasingWithRegex": true,
    "ProjectRootNamespace": "SheepQQBot3",
    "Schemas": null,
@@ -16,22 +16,24 @@
    "T4TemplatePath": null,
    "Tables": [
       {
-         "Name": "Dict",
+         "Name": "BotGroupMessage",
          "ObjectType": 0
       },
       {
-         "Name": "Idf",
+         "Name": "SetuDoushiInfos",
          "ObjectType": 0
       },
       {
-         "Name": "StopWords",
+         "Name": "SetuSendHistorys",
          "ObjectType": 0
       }
    ],
-   "UiHint": "D:\\Code\\C#\\WPF\\SheepSoft\\SheepQQBot3\\Jieba.db",
+   "UiHint": null,
    "UncountableWords": null,
+   "UseAsyncStoredProcedureCalls": true,
    "UseBoolPropertiesWithoutDefaultSql": false,
    "UseDatabaseNames": true,
+   "UseDatabaseNamesForRoutines": true,
    "UseDateOnlyTimeOnly": false,
    "UseDbContextSplitting": false,
    "UseDecimalDataAnnotationForSprocResult": true,
@@ -39,6 +41,7 @@
    "UseHandleBars": false,
    "UseHierarchyId": false,
    "UseInflector": true,
+   "UseInternalAccessModifiersForSprocsAndFunctions": false,
    "UseLegacyPluralizer": false,
    "UseManyToManyEntity": false,
    "UseNoDefaultConstructor": false,
@@ -50,5 +53,6 @@
    "UseSchemaFolders": false,
    "UseSchemaNamespaces": false,
    "UseSpatial": false,
-   "UseT4": false
+   "UseT4": false,
+   "UseT4Split": false
 }

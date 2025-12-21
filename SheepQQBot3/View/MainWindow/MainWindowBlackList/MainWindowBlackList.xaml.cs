@@ -28,11 +28,11 @@ public partial class MainWindowBlackList
     /// </summary>
     private void BlackList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "黑名单ID");
+        var addNumberDialog = new AddNumberDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add, "黑名单ID");
         if (addNumberDialog.ShowDialog() != true)
             return;
 
-        var blackListMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
+        var blackListMemberId = addNumberDialog.AddNumber;
         _vm.SelectedSetConfig.BlackListIds = _vm.SelectedSetConfig.BlackListIds
             .CopyAdd(blackListMemberId);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
@@ -49,11 +49,11 @@ public partial class MainWindowBlackList
         if (!MainWindowUtil.ShowDeleteDialog())
             return;
 
-        if (!_vm.SelectedMemberId.HasValue)
+        if (_vm.SelectedMemberId.IsNullOrEmpty())
             return;
 
         _vm.SelectedSetConfig.BlackListIds = _vm.SelectedSetConfig.BlackListIds
-            .CopyRemove(_vm.SelectedMemberId.Value);
+            .CopyRemove(_vm.SelectedMemberId);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         _vm.SelectedMemberId = null;
         ConfigExtensions.SaveConfig();

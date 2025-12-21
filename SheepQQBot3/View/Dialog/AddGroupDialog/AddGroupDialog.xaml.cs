@@ -12,7 +12,7 @@ namespace SheepQQBot3.View;
 public partial class AddGroupDialog
     : AddDialogWindowBase<AddGroupDialogViewModel>
 {
-    public long TargetId;
+    public string TargetId;
     public BotConfigTargetType TargetType;
     public string TargetName;
 

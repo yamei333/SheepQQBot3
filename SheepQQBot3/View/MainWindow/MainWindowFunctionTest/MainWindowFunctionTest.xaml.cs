@@ -22,7 +22,7 @@ public partial class MainWindowFunctionTest : UserControl
     private async void TestSendGroupMessage(object sender, RoutedEventArgs e)
     {
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
-            await BotClient.SendGroupMessageAsync(groupId, TxtTestSendGroupMessage_Content.Text, Vm.SetConfigs).ConfigureAwait(false);
+            await GlobalBotClient.SendGroupMessageAsync(groupId.ToString(), TxtTestSendGroupMessage_Content.Text, Vm.SetConfigs).ConfigureAwait(false);
     }
 
     /// <summary>
@@ -37,13 +37,13 @@ public partial class MainWindowFunctionTest : UserControl
         var signedJsonText = "{\"app\":\"com.tencent.tianxuan.share\",\"config\":{\"ctime\":1721896417,\"token\":\"e1e951801b4dabc3c419e628e6bc223f\"},\"meta\":{\"news\":{\"desc\":\"徐州鸡3\",\"jumpUrl\":\"https://www.baidu.com/\",\"preview\":\"https://tianxuan.gtimg.cn/45176_272fa035/assets/200x200.jpg\",\"tag\":\"徐州鸡4\",\"tagIcon\":\"https://tianxuan.gtimg.cn/42065_b555f19c/assets/qq.png\",\"title\":\"徐州鸡2\"}},\"prompt\":\"徐州鸡1\",\"ver\":\"0.0.0.1\",\"view\":\"news\"}\n";
         var message = $"[CQ:json,data={signedJsonText}]";
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
-            await BotClient.SendGroupMessageAsync(groupId, message, Vm.SetConfigs).ConfigureAwait(false);
+            await GlobalBotClient.SendGroupMessageAsync(groupId.ToString(), message, Vm.SetConfigs).ConfigureAwait(false);
     }
 
     private void TestSendPrivateMessage(object sender, RoutedEventArgs e)
     {
         if (long.TryParse(TxtTestSendPrivateMessage_TargetId.Text, out var targetId))
-            BotClient.SendPrivateMessageAsync(targetId, TxtTestSendGroupMessage_Content.Text);
+            GlobalBotClient.SendPrivateMessageAsync(targetId.ToString(), TxtTestSendGroupMessage_Content.Text);
     }
 
     /// <summary>
@@ -90,10 +90,10 @@ public partial class MainWindowFunctionTest : UserControl
             //    }
             //}).ConfigureAwait(false);
 
-            var miniAppJson = await BotClient.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
+            var miniAppJson = await GlobalBotClient.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
                 "https://ragnarokonline.gungho.jp/gameguide/system/expand-item/images/glacier/map01_armor.png",
                 "https://www.bilibili.com/video/BV1GJ411x7h7/").ConfigureAwait(false);
-            await BotClient.SendGroupMessageAsync(groupId, CQCode.Json(miniAppJson))
+            await GlobalBotClient.SendGroupMessageAsync(groupId.ToString(), CQCode.Json(miniAppJson))
                 .ConfigureAwait(false);
             //await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
             //    TxtTestSendJsonMessage1_Title.Text,

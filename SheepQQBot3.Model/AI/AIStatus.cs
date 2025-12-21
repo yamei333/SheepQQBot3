@@ -27,10 +27,10 @@ namespace SheepQQBot3.Model.AI
         public string Scene { get; set; }
 
         /// <summary>
-        /// 当前天气
+        /// 天气相关信息
         /// </summary>
-        [JsonPropertyName("weatherInfo")]
-        public AIWeatherInfo WeatherInfo { get; set; }
+        [JsonPropertyName("weatherContext")]
+        public AIWeatherContext WeatherContext { get; set; }
 
         /// <summary>
         /// 当前时间
@@ -39,74 +39,72 @@ namespace SheepQQBot3.Model.AI
         public string NowDate { get; set; }
     }
 
-    public class AIWeatherInfo
+    public class AIWeatherContext
     {
-        /// <summary>
-        /// 当前天气
-        /// </summary>
-        [JsonPropertyName("weatherData")]
-        public AIWeatherData WeatherData { get; set; }
+        // 1. 简报：把当前天气、温度、体感揉在一起
+        // 例子："Heavy Rain, 15°C (Feels like 10°C)"
+        [JsonPropertyName("current_condition")]
+        public string CurrentCondition { get; set; }
 
-        /// <summary>
-        /// 上个时间点天气预报
-        /// </summary>
-        [JsonPropertyName("prevWeatherData")]
-        public AIWeatherData PrevWeatherData { get; set; }
+        // 2. 预报：把 NextWeatherData 简化成一句话
+        // 例子："Will turn Sunny in 3 hours."
+        [JsonPropertyName("forecast_summary")]
+        public string ForecastSummary { get; set; }
 
-        /// <summary>
-        /// 下个时间点天气预报
-        /// </summary>
-        [JsonPropertyName("nextWeatherData")]
-        public AIWeatherData NextWeatherData { get; set; }
+        // 3. 事件：这是最关键的！用代码对比 Prev 和 Current 得出的结论
+        // 例子："Rain just stopped." 或 "Sudden temperature drop!"
+        // 如果无事发生，这个字段传 null
+        [JsonPropertyName("recent_change_event")]
+        public string RecentChangeEvent { get; set; }
     }
 
-    /// <summary>
-    /// AI天气信息
-    /// </summary>
-    public class AIWeatherData
-    {
-        /// <summary>
-        /// 天气预报时间(预报时使用)
-        /// </summary>
-        [JsonPropertyName("forecastDate")]
-        public string ForecastDate { get; set; }
+    ///// <summary>
+    ///// AI天气信息
+    ///// </summary>
+    //public class AIWeatherData
+    //{
+    //    /// <summary>
+    //    /// 天气预报时间(预报时使用)
+    //    /// </summary>
+    //    [JsonPropertyName("forecastDate")]
+    //    public string ForecastDate { get; set; }
 
-        /// <summary>
-        /// 当前天气
-        /// </summary>
-        [JsonPropertyName("weather")]
-        public string Weather { get; set; }
+    //    /// <summary>
+    //    /// 当前天气
+    //    /// </summary>
+    //    [JsonPropertyName("weather")]
+    //    public string Weather { get; set; }
 
-        /// <summary>
-        /// 平均温度
-        /// </summary>
-        [JsonPropertyName("temp")]
-        public string TempAvg { get; set; }
+    //    /// <summary>
+    //    /// 平均温度
+    //    /// </summary>
+    //    [JsonPropertyName("temp")]
+    //    public string TempAvg { get; set; }
 
-        /// <summary>
-        /// 体感温度
-        /// </summary>
-        [JsonPropertyName("feelLike")]
-        public string FeelLike { get; set; }
+    //    /// <summary>
+    //    /// 体感温度
+    //    /// </summary>
+    //    [JsonPropertyName("feelLike")]
+    //    public string FeelLike { get; set; }
 
-        /// <summary>
-        /// 风速
-        /// </summary>
-        [JsonPropertyName("windSpeed")]
-        public string WindSpeed { get; set; }
+    //    /// <summary>
+    //    /// 风速
+    //    /// </summary>
+    //    [JsonPropertyName("windSpeed")]
+    //    public string WindSpeed { get; set; }
 
-        /// <summary>
-        /// 降雨量(mm/h)
-        /// </summary>
-        [JsonPropertyName("precipitation")]
-        public string Precipitation { get; set; }
+    //    /// <summary>
+    //    /// 降雨量(mm/h)
+    //    /// </summary>
+    //    [JsonPropertyName("precipitation")]
+    //    public string Precipitation { get; set; }
 
-        /// <summary>
-        /// 云层覆盖率
-        /// </summary>
-        [JsonPropertyName("cloudiness")]
-        public string Cloudiness { get; set; }
-    }
+    //    /// <summary>
+    //    /// 云层覆盖率
+    //    /// </summary>
+    //    [JsonPropertyName("cloudiness")]
+    //    public string Cloudiness { get; set; }
+    //}
 
     public static class AIStatusUtil
     {
@@ -114,19 +112,26 @@ namespace SheepQQBot3.Model.AI
         {
             return moodIndexValue switch
             {
-                < -130 => "心情最差",
-                < -100 => "心情极差",
-                < -70 => "心情非常差",
-                < -40 => "心情比较差",
-                < -25 => "心情有点差",
-                < -10 => "心情略微差",
-                <= 10 => "心情一般",
-                <= 25 => "心情略微好",
-                <= 40 => "心情有点好",
-                <= 70 => "心情比较好",
-                <= 100 => "心情非常好",
-                <= 130 => "心情极好",
-                _ => "心情最好",
+                // --- 负面 (Negative) ---
+                // 侧重于：能量低、拒绝交流、烦躁
+                < -130 => "处于崩溃边缘 (On Edge/Broken)",
+                < -100 => "极度消沉 (Deeply Depressed)",
+                < -70 => "阴郁/非常糟糕 (Gloomy)",
+                < -40 => "心情恶劣 (Grumpy)",
+                < -25 => "烦躁 (Irritated)",
+                < -10 => "提不起劲 (Unmotivated)",
+
+                // --- 中性 (Neutral) ---
+                <= 10 => "平静/无波澜 (Calm)",
+
+                // --- 正面 (Positive) ---
+                // 侧重于：能量高、积极、思维活跃
+                <= 25 => "心情不错 (Pleasant)",
+                <= 40 => "愉悦/轻快 (Cheerful)",
+                <= 70 => "兴致盎然 (Enthusiastic)",    // 很有聊天的欲望
+                <= 100 => "兴高采烈 (Jubilant)",       // 非常开心
+                <= 130 => "心花怒放 (Elated)",         // 开心到飞起
+                _ => "神采飞扬/极度亢奋 (Euphoric/Radiant)", // 状态拉满，不管谁来都很热情
             };
         }
 
@@ -135,91 +140,118 @@ namespace SheepQQBot3.Model.AI
             var dateNow = DateTime.Now;
             var dayOfWeek = dateNow.DayOfWeek;
             var timeSeconds = (int)dateNow.TimeOfDay.TotalSeconds;
-            return dayOfWeek switch
+            return timeSeconds switch
             {
-                DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Wednesday or DayOfWeek.Thursday or DayOfWeek.Friday => timeSeconds switch
-                {
-                    _ when timeSeconds <= GetTime(00, 30) => "bed time",
-                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
-                    _ when timeSeconds <= GetTime(08, 00) => "bed time",
-                    _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
-                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
-                    _ when timeSeconds <= GetTime(11, 00) => "小助手 time",
-                    _ when timeSeconds <= GetTime(11, 30) => "lunch",
-                    _ when timeSeconds <= GetTime(12, 30) => "nap",
-                    _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
-                    _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
-                    _ when timeSeconds <= GetTime(17, 00) => "小助手 time",
-                    _ when timeSeconds <= GetTime(17, 30) => "dinner",
-                    _ when timeSeconds <= GetTime(18, 30) => "short rest",
-                    _ when timeSeconds <= GetTime(19, 15) => "sports",
-                    _ when timeSeconds <= GetTime(19, 30) => "a post-workout break",
-                    _ when timeSeconds <= GetTime(20, 00) => "bath",
-                    _ when timeSeconds <= GetTime(21, 00) => "study time",
-                    _ when timeSeconds <= GetTime(22, 00) => "relaxation time",
-                    _ when timeSeconds <= GetTime(23, 00) => "personal time",
-                    _ => "bed time",
-                },
-                DayOfWeek.Saturday => timeSeconds switch
-                {
-                    _ when timeSeconds <= GetTime(00, 30) => "bed time",
-                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
-                    _ when timeSeconds <= GetTime(08, 00) => "bed time",
-                    _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
-                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
-                    _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
-                    _ when timeSeconds <= GetTime(10, 30) => "hair care",
-                    _ when timeSeconds <= GetTime(11, 00) => "short rest",
-                    _ when timeSeconds <= GetTime(11, 30) => "lunch",
-                    _ when timeSeconds <= GetTime(12, 00) => "nap",
-                    _ when timeSeconds <= GetTime(12, 10) => "use the restroom",
-                    _ when timeSeconds <= GetTime(12, 20) => "sleep inertia",
-                    _ when timeSeconds <= GetTime(16, 30) => "spending time with 雅美",
-                    _ when timeSeconds <= GetTime(17, 00) => "time for 雅美 to clean my ears",
-                    _ when timeSeconds <= GetTime(17, 30) => "dinner",
-                    _ when timeSeconds <= GetTime(18, 30) => "short rest",
-                    _ when timeSeconds <= GetTime(19, 30) => "time for 雅美 to help with massage",
-                    _ when timeSeconds <= GetTime(20, 00) => "bath",
-                    _ when timeSeconds <= GetTime(21, 00) => "masturbation time",
-                    _ when timeSeconds <= GetTime(21, 30) => "enjoying the sunset with 雅美",
-                    _ when timeSeconds <= GetTime(22, 00) => "acting cute with 雅美",
-                    _ when timeSeconds <= GetTime(22, 30) => "share the week's fun moments with 雅美",
-                    _ when timeSeconds <= GetTime(23, 00) => "enjoy quiet moments with 雅美",
-                    _ => "sleeping with 雅美",
-                },
-                DayOfWeek.Sunday => timeSeconds switch
-                {
-                    _ when timeSeconds <= GetTime(00, 30) => "sleeping with 雅美",
-                    _ when timeSeconds <= GetTime(07, 30) => "deep sleep with 雅美",
-                    _ when timeSeconds <= GetTime(08, 00) => "sleeping with 雅美",
-                    _ when timeSeconds <= GetTime(08, 15) => "get up",
-                    _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
-                    _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
-                    _ when timeSeconds <= GetTime(09, 15) => "breakfast",
-                    _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
-                    _ when timeSeconds <= GetTime(11, 00) => "strolling",
-                    _ when timeSeconds <= GetTime(11, 30) => "lunch",
-                    _ when timeSeconds <= GetTime(12, 30) => "nap",
-                    _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
-                    _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
-                    _ when timeSeconds <= GetTime(15, 00) => "shopping out",
-                    _ when timeSeconds <= GetTime(17, 00) => "do housework",
-                    _ when timeSeconds <= GetTime(17, 30) => "dinner",
-                    _ when timeSeconds <= GetTime(18, 30) => "scrolling through TikTok",
-                    _ when timeSeconds <= GetTime(19, 00) => "reflecting on the past week",
-                    _ when timeSeconds <= GetTime(19, 30) => "organizing my thoughts for next week",
-                    _ when timeSeconds <= GetTime(20, 00) => "bath",
-                    _ when timeSeconds <= GetTime(21, 00) => "masturbation time",
-                    _ when timeSeconds <= GetTime(22, 00) => "relaxation time",
-                    _ when timeSeconds <= GetTime(23, 00) => "personal time",
-                    _ => "bed time",
-                },
-                _ => throw new ArgumentOutOfRangeException(),
+                _ when timeSeconds <= GetTime(00, 30) => "bed time",
+                _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
+                _ when timeSeconds <= GetTime(08, 00) => "bed time",
+                _ when timeSeconds <= GetTime(08, 15) => "get up",
+                _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+                _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+                _ when timeSeconds <= GetTime(09, 15) => "breakfast",
+                _ when timeSeconds <= GetTime(11, 00) => "小助手 time",
+                _ when timeSeconds <= GetTime(11, 30) => "lunch",
+                _ when timeSeconds <= GetTime(12, 30) => "nap",
+                _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
+                _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
+                _ when timeSeconds <= GetTime(17, 00) => "小助手 time",
+                _ when timeSeconds <= GetTime(17, 30) => "dinner",
+                _ when timeSeconds <= GetTime(18, 30) => "short rest",
+                _ when timeSeconds <= GetTime(19, 15) => "sports",
+                _ when timeSeconds <= GetTime(19, 30) => "a post-workout break",
+                _ when timeSeconds <= GetTime(20, 00) => "bath",
+                _ when timeSeconds <= GetTime(21, 00) => "study time",
+                _ when timeSeconds <= GetTime(22, 00) => "relaxation time",
+                _ when timeSeconds <= GetTime(22, 50) => "personal time",
+                _ when timeSeconds <= GetTime(23, 00) => "use the restroom",
+                _ => "bed time",
             };
+
+            //return dayOfWeek switch
+            //{
+            //    DayOfWeek.Monday or DayOfWeek.Tuesday or DayOfWeek.Wednesday or DayOfWeek.Thursday or DayOfWeek.Friday => timeSeconds switch
+            //    {
+            //        _ when timeSeconds <= GetTime(00, 30) => "bed time",
+            //        _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
+            //        _ when timeSeconds <= GetTime(08, 00) => "bed time",
+            //        _ when timeSeconds <= GetTime(08, 15) => "get up",
+            //        _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+            //        _ when timeSeconds <= GetTime(09, 15) => "breakfast",
+            //        _ when timeSeconds <= GetTime(11, 00) => "小助手 time",
+            //        _ when timeSeconds <= GetTime(11, 30) => "lunch",
+            //        _ when timeSeconds <= GetTime(12, 30) => "nap",
+            //        _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
+            //        _ when timeSeconds <= GetTime(17, 00) => "小助手 time",
+            //        _ when timeSeconds <= GetTime(17, 30) => "dinner",
+            //        _ when timeSeconds <= GetTime(18, 30) => "short rest",
+            //        _ when timeSeconds <= GetTime(19, 15) => "sports",
+            //        _ when timeSeconds <= GetTime(19, 30) => "a post-workout break",
+            //        _ when timeSeconds <= GetTime(20, 00) => "bath",
+            //        _ when timeSeconds <= GetTime(21, 00) => "study time",
+            //        _ when timeSeconds <= GetTime(22, 00) => "relaxation time",
+            //        _ when timeSeconds <= GetTime(23, 00) => "personal time",
+            //        _ => "bed time",
+            //    },
+            //    DayOfWeek.Saturday => timeSeconds switch
+            //    {
+            //        _ when timeSeconds <= GetTime(00, 30) => "bed time",
+            //        _ when timeSeconds <= GetTime(07, 30) => "deep sleep time",
+            //        _ when timeSeconds <= GetTime(08, 00) => "bed time",
+            //        _ when timeSeconds <= GetTime(08, 15) => "get up",
+            //        _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+            //        _ when timeSeconds <= GetTime(09, 15) => "breakfast",
+            //        _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
+            //        _ when timeSeconds <= GetTime(10, 30) => "hair care",
+            //        _ when timeSeconds <= GetTime(11, 00) => "short rest",
+            //        _ when timeSeconds <= GetTime(11, 30) => "lunch",
+            //        _ when timeSeconds <= GetTime(12, 00) => "nap",
+            //        _ when timeSeconds <= GetTime(12, 10) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(12, 20) => "sleep inertia",
+            //        _ when timeSeconds <= GetTime(16, 30) => "spending time with 雅美",
+            //        _ when timeSeconds <= GetTime(17, 00) => "time for 雅美 to clean my ears",
+            //        _ when timeSeconds <= GetTime(17, 30) => "dinner",
+            //        _ when timeSeconds <= GetTime(18, 30) => "short rest",
+            //        _ when timeSeconds <= GetTime(19, 30) => "time for 雅美 to help with massage",
+            //        _ when timeSeconds <= GetTime(20, 00) => "bath",
+            //        _ when timeSeconds <= GetTime(21, 00) => "masturbation time",
+            //        _ when timeSeconds <= GetTime(21, 30) => "enjoying the sunset with 雅美",
+            //        _ when timeSeconds <= GetTime(22, 00) => "acting cute with 雅美",
+            //        _ when timeSeconds <= GetTime(22, 30) => "share the week's fun moments with 雅美",
+            //        _ when timeSeconds <= GetTime(23, 00) => "enjoy quiet moments with 雅美",
+            //        _ => "sleeping with 雅美",
+            //    },
+            //    DayOfWeek.Sunday => timeSeconds switch
+            //    {
+            //        _ when timeSeconds <= GetTime(00, 30) => "sleeping with 雅美",
+            //        _ when timeSeconds <= GetTime(07, 30) => "deep sleep with 雅美",
+            //        _ when timeSeconds <= GetTime(08, 00) => "sleeping with 雅美",
+            //        _ when timeSeconds <= GetTime(08, 15) => "get up",
+            //        _ when timeSeconds <= GetTime(08, 25) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(08, 45) => "wash up in the morning",
+            //        _ when timeSeconds <= GetTime(09, 15) => "breakfast",
+            //        _ when timeSeconds <= GetTime(10, 00) => "sunbathe",
+            //        _ when timeSeconds <= GetTime(11, 00) => "strolling",
+            //        _ when timeSeconds <= GetTime(11, 30) => "lunch",
+            //        _ when timeSeconds <= GetTime(12, 30) => "nap",
+            //        _ when timeSeconds <= GetTime(12, 40) => "use the restroom",
+            //        _ when timeSeconds <= GetTime(13, 00) => "sleep inertia",
+            //        _ when timeSeconds <= GetTime(15, 00) => "shopping out",
+            //        _ when timeSeconds <= GetTime(17, 00) => "do housework",
+            //        _ when timeSeconds <= GetTime(17, 30) => "dinner",
+            //        _ when timeSeconds <= GetTime(18, 30) => "scrolling through TikTok",
+            //        _ when timeSeconds <= GetTime(19, 00) => "reflecting on the past week",
+            //        _ when timeSeconds <= GetTime(19, 30) => "organizing my thoughts for next week",
+            //        _ when timeSeconds <= GetTime(20, 00) => "bath",
+            //        _ when timeSeconds <= GetTime(21, 00) => "masturbation time",
+            //        _ when timeSeconds <= GetTime(22, 00) => "relaxation time",
+            //        _ when timeSeconds <= GetTime(23, 00) => "personal time",
+            //        _ => "bed time",
+            //    },
+            //    _ => throw new ArgumentOutOfRangeException(),
+            //};
         }
 
         private static int GetTime(int hours, int minutes) => (int)new TimeSpan(hours, minutes, 0).TotalSeconds;

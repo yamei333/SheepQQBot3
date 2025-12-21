@@ -41,11 +41,11 @@ public static partial class ProcessGroupMessage
     /// <returns></returns>
     public static async Task<bool> AlarmAideSubmitAsync(
         ConcurrentDictionary<Guid, AlarmAideConfig> alarmAideConfigs,
-        HashSet<long> alarmAideSubmitMembers,
+        HashSet<string> alarmAideSubmitMembers,
         GroupMessage groupMessage)
     {
         // MEMO : 非管理员/投稿者
-        var targetId = groupMessage.Sender.UserId;
+        var targetId = groupMessage.Sender.UserId.ToString();
         if (!BotExtensions.IsAdmin(targetId) && !alarmAideSubmitMembers.Contains(targetId))
             return false;
 
@@ -60,7 +60,7 @@ public static partial class ProcessGroupMessage
         var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
         if (alarmAideConfig == null)
         {
-            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!").ConfigureAwait(false);
+            await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!").ConfigureAwait(false);
             return false;
         }
 
@@ -71,7 +71,7 @@ public static partial class ProcessGroupMessage
         {
             var replaceContent = match.Value;
             var fileId = match.Groups["fileName"].Value;
-            var imageReceiveData = await BotClient.GetImageAsync(fileId).ConfigureAwait(false);
+            var imageReceiveData = await GlobalBotClient.GetImageAsync(fileId).ConfigureAwait(false);
             var filePath = imageReceiveData.Data.File;
             string fileName;
             var isSuccessed = false;
@@ -107,7 +107,7 @@ public static partial class ProcessGroupMessage
             if (alarmTexts.Values.Any(each => each == alarmMessage))
             {
                 // MEMO : 已存在则不添加, 发送反馈
-                await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!").ConfigureAwait(false);
+                await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!").ConfigureAwait(false);
                 return false;
             }
             else
@@ -121,7 +121,7 @@ public static partial class ProcessGroupMessage
                     alarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(alarmTexts.GetSequence(), alarmMessage);
 
                 // MEMO : 发送反馈
-                await BotClient.SendGroupForwardMessageAsync(groupId,
+                await GlobalBotClient.SendGroupForwardMessageAsync(groupId,
                 [
                     //new(groupMessage.MessageId),
                     new GroupForwardMessage(BOT_NAME, BotId, alarmMessage),
@@ -133,7 +133,7 @@ public static partial class ProcessGroupMessage
         }
         catch (Exception)
         {
-            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
+            await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
             YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
             return false;
         }

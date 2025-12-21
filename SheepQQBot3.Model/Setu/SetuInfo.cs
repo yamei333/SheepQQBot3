@@ -99,6 +99,8 @@ public enum SetuType
     /// Jitsu个人版
     /// </summary>
     JitsuSelf,
+
+    NekosiaCat,
 }
 
 /// <summary>

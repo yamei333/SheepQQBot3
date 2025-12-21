@@ -24,10 +24,10 @@ public static partial class ProcessPrivateMessage
     /// </summary>
     private const string COMMAND_ADMIN_IP = "IP";
 
-    /// <summary>
-    /// 取得has剩余流量
-    /// </summary>
-    private const string COMMAND_ADMIN_HAS = "HAS";
+    ///// <summary>
+    ///// 取得has剩余流量
+    ///// </summary>
+    //private const string COMMAND_ADMIN_HAS = "HAS";
 
     /// <summary>
     /// 取得AI当前状态
@@ -59,9 +59,9 @@ public static partial class ProcessPrivateMessage
     /// </summary>
     public static async Task<bool> AdminCommandAsync(PrivateMessage privateMessage)
     {
-        var senderId = privateMessage.Sender.UserId;
+        var senderId = privateMessage.Sender.UserId.ToString();
         // MEMO : 通过群进行临时私聊时会有此值
-        var groupId = privateMessage.Sender.GroupId;
+        var groupId = privateMessage.Sender.GroupId.ToString();
         var message = privateMessage.Message;
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_ADMIN, StringComparison.CurrentCultureIgnoreCase))
@@ -73,17 +73,17 @@ public static partial class ProcessPrivateMessage
             case COMMAND_ADMIN_IP:
                 if (!RouterExtension.TryGetIPAddress(out var ipResult))
                 {
-                    await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
+                    await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
                     return true;
                 }
 
                 if (ipResult.IsNullOrEmpty())
                 {
-                    await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
+                    await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
                     return true;
                 }
 
-                await BotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
+                await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
                 break;
             //case COMMAND_ADMIN_HAS:
             //    if (!RouterExtension.TryGetClashInfo(out var clashInfoResult, out var remainBand, out var resetDaysLeft, out var expireDate))
@@ -99,21 +99,21 @@ public static partial class ProcessPrivateMessage
             //    await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
             //    break;
             case COMMAND_ADMIN_AI:
-                var moodIndex = PublicVar.AIData.AIStatusData.MoodIndexValue;
+                var moodIndex = PublicVar.GlobalAIData.AIStatusData.MoodIndexValue;
                 var aiStatusMessage = $"===={BOT_NICK_NAME}状态===={ENTER}"
                     + $"当前日程: {AIStatusUtil.GetSchedule()}{ENTER}"
                     + $"心情指数: ({moodIndex}){moodIndex.ToMood()}{ENTER}";
-                if (AIHistoryContents.Any())
+                if (AIHistoryContentParts.Any())
                 {
                     aiStatusMessage += $"====群消息记录数===={ENTER}";
-                    AIHistoryContents.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count} 条{ENTER}"; });
+                    AIHistoryContentParts.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count} 条{ENTER}"; });
                 }
                 else
                 {
                     aiStatusMessage += $"无群消息记录!{ENTER}";
                 }
 
-                await BotClient.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
+                await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, aiStatusMessage.RemoveEnd(ENTER)).ConfigureAwait(true);
                 break;
             case COMMAND_ADMIN_AI_CLEAR_DEFAULT:
                 await ClearDefaultAIStatus().ConfigureAwait(false);
@@ -141,7 +141,7 @@ public static partial class ProcessPrivateMessage
                     default:
                         if (!int.TryParse(clearCommand, out var userId))
                         {
-                            await BotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
+                            await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
                             return false;
                         }
 
@@ -150,7 +150,7 @@ public static partial class ProcessPrivateMessage
                 }
 
             default:
-                await BotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
+                await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
                 return false;
         }
 
@@ -158,21 +158,19 @@ public static partial class ProcessPrivateMessage
 
         Task ClearDefaultAIStatus()
         {
-            var defaultFavorability = DefaultAIUserData.Favorability;
-            PublicVar.AIData.UserDatas.RemoveWhere(each => each.Value.Favorability == defaultFavorability);
+            GlobalAIData.UserDatas.Clear();
 
             ConfigExtensions.SaveAIData();
-            return BotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已清理!");
+            return GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已清理!");
         }
 
         Task ResetAIStatus()
         {
-            PublicVar.AIData.AIStatusData.MoodIndexValue = 0;
-            PublicVar.AIData.UserDatas = [];
-            PublicVar.AIData.UserDatas.AddOrUpdate(SuperAdminId, SuperAdminAIUserData, SuperAdminAIUserData);
+            GlobalAIData.AIStatusData.MoodIndexValue = 0;
+            GlobalAIData.UserDatas.Clear();
 
             ConfigExtensions.SaveAIData();
-            return BotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已重置!");
+            return GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"{BOT_NICK_NAME} AI用户数据已重置!");
         }
 
         Task DeleteAIHistory(string searchPattern)
@@ -183,7 +181,7 @@ public static partial class ProcessPrivateMessage
                 sendMessage += $"{each.Split('/')[^1]}{ENTER}";
                 File.Delete(each);
             });
-            return BotClient.SendPrivateMessageAsync(senderId, groupId,
+            return GlobalBotClient.SendPrivateMessageAsync(senderId, groupId,
                 sendMessage.IsNullOrEmpty()
                     ? "没有历史记录需要删除!"
                     : $"{sendMessage}AI历史记录已删除!");

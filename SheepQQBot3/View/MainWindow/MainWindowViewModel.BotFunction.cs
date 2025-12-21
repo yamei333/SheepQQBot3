@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Threading;
 using System.Threading.Tasks;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 
@@ -23,7 +24,7 @@ partial class MainWindowViewModel
         StartTask(TaskProcess.CustomAlarm);
         StartTask(TaskProcess.FundHelper);
         StartTask(TaskProcess.LiveAlarm);
-        if (PublicVar.AIConfig.IsUseAI)
+        if (GlobalAIConfig.IsUseAI)
             StartTask(TaskProcess.AIStatusRecover);
 
         // MEMO : 0.14.9.2 暂时禁用steam监控, 发送推送消息太频繁了

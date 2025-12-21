@@ -18,7 +18,7 @@ public class BotConfig
     /// </summary>
     [JsonIgnore]
     [IgnoreMember]
-    public SetConfig this[BotConfigTargetType targetType, long targetId]
+    public SetConfig this[BotConfigTargetType targetType, string targetId]
         => SetConfigs.Values.FirstOrDefault(each => each.TargetType == targetType && each.TargetId == targetId);
 
     /// <summary>
@@ -31,7 +31,7 @@ public class BotConfig
     /// 用户配置(原神cookie, barkKey等)
     /// </summary>
     [JsonPropertyName(nameof(UserConfigs))]
-    public Dictionary<long, Dictionary<UserConfigType, string>> UserConfigs { get; set; } = [];
+    public Dictionary<string, Dictionary<UserConfigType, string>> UserConfigs { get; set; } = [];
 
     /// <summary>
     /// 保存自定义提醒内容

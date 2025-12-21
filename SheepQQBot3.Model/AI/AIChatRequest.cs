@@ -5,16 +5,16 @@ namespace SheepQQBot3.Model.AI
     public class AIChatRequest
     {
         /// <summary>
-        /// 消息发送者QQID
+        /// 消息发送者QQ号
         /// </summary>
-        [JsonPropertyName("qq")]
-        public long SenderId { get; set; }
+        [JsonPropertyName("qq_id")]
+        public string SenderId { get; set; }
 
         /// <summary>
-        /// 发送时间
+        /// 消息发送者名字
         /// </summary>
-        [JsonPropertyName("date")]
-        public string Date { get; set; }
+        [JsonPropertyName("user_name")]
+        public string NickName { get; set; }
 
         /// <summary>
         /// 响应内容
@@ -26,39 +26,57 @@ namespace SheepQQBot3.Model.AI
     public class AIChatSender
     {
         /// <summary>
-        /// 姓名
+        /// QQ号
         /// </summary>
-        [JsonPropertyName("name")]
-        public string Name { get; set; }
+        [JsonPropertyName("user_qq_id")]
+        public string QQ { get; set; }
+
+        /// <summary>
+        /// 昵称
+        /// </summary>
+        [JsonPropertyName("user_name")]
+        public string NickName { get; set; }
 
         /// <summary>
         /// 性别
         /// </summary>
-        [JsonPropertyName("gander")]
-        public string Gander { get; set; }
+        [JsonPropertyName("user_gender")]
+        public string Gender { get; set; }
 
         /// <summary>
         /// 别名
         /// </summary>
-        [JsonPropertyName("bname")]
-        public string BName { get; set; }
-
-        /// <summary>
-        /// QQ号
-        /// </summary>
-        [JsonPropertyName("qq")]
-        public long QQ { get; set; }
+        [JsonPropertyName("user_aliases")]
+        public string Aliases { get; set; }
 
         /// <summary>
         /// 生日
         /// </summary>
-        [JsonPropertyName("birthday")]
+        [JsonPropertyName("user_birthday")]
         public string Birthday { get; set; }
 
         /// <summary>
         /// 其他信息
         /// </summary>
-        [JsonPropertyName("other")]
-        public string Other { get; set; }
+        [JsonPropertyName("user_other_info")]
+        public string OtherInfo { get; set; }
+
+        /// <summary>
+        /// 初始关系
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("relation")]
+        public AIRelationData Relation { private get; set; }
+
+        /// <summary>
+        /// 允许行为
+        /// </summary>
+        [JsonInclude]
+        [JsonPropertyName("allowed_acts")]
+        public string AllowedActs { private get; set; }
+
+        public AIRelationData GetRelation() => Relation ?? new AIRelationData();
+
+        public string GetAllowedActs() => AllowedActs;
     }
 }

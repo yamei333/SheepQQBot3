@@ -1,6 +1,6 @@
 ﻿using CommonLibrary;
-using GenerativeAI.Types;
 using Masuit.Tools;
+using OpenRouter.NET.Models;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
@@ -8,6 +8,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using System;
+using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -22,9 +23,11 @@ public static partial class ProcessGroupMessage
     private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
     private static readonly Regex _regEmoji = new(@"\p{Cs}");
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
+    //private static ConcurrentDictionary<string, Dictionary<string, GroupMember>> _globalGroupMembers;
+    private static ConcurrentDictionary<string, Lazy<Task<Dictionary<string, GroupMember>>>> _globalGroupMembers = [];
 
     private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
-    private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";
+    //private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";
 
     /// <summary>
     /// AI助手
@@ -34,7 +37,8 @@ public static partial class ProcessGroupMessage
     public static async Task AIAideAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
-        var targetId = groupMessage.Sender.UserId;
+        var sender = groupMessage.Sender;
+        var targetId = sender.UserId.ToString();
         var message = groupMessage.Message;
 
         if (aiGroupConfig.BlackListIds.Contains(targetId))
@@ -75,11 +79,20 @@ public static partial class ProcessGroupMessage
             return;
         }
 
+        var lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
+            id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
+        var groupMembers = await lazyWrapper.Value;
+        if (groupMembers == null)
+        {
+            await GlobalBotClient.SendGroupMessageAsync(groupId, "群成员信息获取失败!").ConfigureAwait(false);
+            return;
+        }
+
         var chatKey = $"g{groupId}";
         var isPrivateChat = message.StartsWith(_commandAI, StringComparison.CurrentCultureIgnoreCase);
         if (isPrivateChat && (dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_GROUP_PRIVATE)
         {
-            await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
+            await GlobalBotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
             return;
         }
 
@@ -90,18 +103,18 @@ public static partial class ProcessGroupMessage
                 return;
 
             // MEMO : 记录消息(添加到历史记录中)
-            var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
-            await historyContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
+            var historyMessages = AIHistoryContentParts.GetOrAdd(groupId, []);
+            await historyMessages.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
 
             //YameiLogExtensions.WriteLog(LogType.Info, $"群({groupId})消息记录数: {historyContents.Count}");
-            if (CanSendGroupChat(aiGroupConfig, historyContents.Count))
+            if (CanSendGroupChat(aiGroupConfig, historyMessages.Count))
             {
                 // MEMO : 某些时间不该发消息
-                if (AIExtensions.IsCantSendMessage(0, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
+                if (AIExtensions.IsCantSendMessage(string.Empty, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
                     return;
 
                 // MEMO : 发送消息
-                await SendGroupAsync(historyContents).ConfigureAwait(false);
+                await SendGroupAsync(historyMessages).ConfigureAwait(false);
             }
 
             return;
@@ -113,43 +126,51 @@ public static partial class ProcessGroupMessage
             // MEMO : 是否只给管理用
             if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {
-                await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
+                await GlobalBotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Moyu).ConfigureAwait(false);
                 return;
             }
 
             // MEMO : 某些时间不该发消息
-            if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)))
+            if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
                 return;
 
-            await BotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Flash).ConfigureAwait(false);
+            await GlobalBotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.E_Flash).ConfigureAwait(false);
 
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
-            var historyContents = AIHistoryContents.GetOrAdd(groupId, []);
-            //var sender = groupMessage.Sender;
+            var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
+
+            // MEMO : 判断使用模型(开头是/image)
+            var useModelImage = false;
+            message = Regex.Replace(message, @"(?<=\[CQ:at,qq=(?<qqId>\d+)\]\s*)/image\s*", match =>
+            {
+                useModelImage = true;
+                return string.Empty;
+            }, RegexOptions.IgnoreCase);
             // MEMO : 构建发送消息并发送
-            await historyContents.AddMessageContentAsync(targetId, message).ConfigureAwait(false);
+            await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
             //historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
             //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
-            var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
-            await historyContents.SendAsync(
-                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
-                (id, msg) => _ = BotClient.SendGroupMessageAsync(id, msg)).ConfigureAwait(false);
+            //var groupMembers = await GlobalBotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
+            await historyContentParts.SendAsync(
+                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
+                (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg),
+                useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat).ConfigureAwait(false);
         }
 
         return;
 
-        async Task SendGroupAsync(List<Content> groupChatHistoryContents)
+        Task SendGroupAsync(List<ContentPart> groupChatHistoryContentParts)
         {
             // MEMO : 清空消息
-            AIHistoryContents.AddOrUpdate(groupId, _ => [], (_, __) => []);
-            var groupMembers = await BotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
+            AIHistoryContentParts.AddOrUpdate(groupId, _ => [], (_, __) => []);
             // MEMO : 发送消息
-            await groupChatHistoryContents.SendAsync(
-                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
-                (id, msg) => _ = BotClient.SendGroupMessageAsync(
+            return groupChatHistoryContentParts.SendAsync(
+                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
+                (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
-                addSystemHint: contents => contents.AddSystemHint(GROUP_CHAT_HINT)).ConfigureAwait(false);
+                GlobalAIConfig.ModelChat,
+                GROUP_CHAT_HINT);
         }
     }
 

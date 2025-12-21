@@ -1,8 +1,8 @@
-﻿using System.Text.RegularExpressions;
+﻿using SheepQQBot3.Enums;
+using SheepQQBot3.Model.Extension;
+using System.Text.RegularExpressions;
 using System.Windows;
 using System.Windows.Input;
-using SheepQQBot3.Enums;
-using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.View;
 
@@ -18,7 +18,7 @@ public partial class AddNumberDialog
     /// <summary>
     /// 增加的数字内容
     /// </summary>
-    public long? AddNumber { get; set; }
+    public string AddNumber { get; set; }
 
     public AddNumberDialog(Window owner, object menuItem, DialogMode mode, string title)
         : base(owner, menuItem, mode, title)

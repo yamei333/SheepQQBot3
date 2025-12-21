@@ -8,7 +8,7 @@ namespace SheepQQBot3.Model;
 public class ReceiveData
 {
     [JsonPropertyName("meta_event_type")]
-    public string Meta_Event_Type { get; set; }
+    public string MetaEventType { get; set; }
 
     [JsonPropertyName("sub_type")]
     public SubType SubType { get; set; }
@@ -53,7 +53,7 @@ public class ReceiveData
     public string Message { get; set; }
 
     [JsonPropertyName("message_id")]
-    public int MessageId { get; set; }
+    public long MessageId { get; set; }
 
     /// <summary>
     /// 消息目标类型

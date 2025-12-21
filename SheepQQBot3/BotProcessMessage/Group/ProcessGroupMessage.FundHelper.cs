@@ -32,7 +32,7 @@ public static partial class ProcessGroupMessage
 
         var sendMessage = new StringBuilder();
         var groupId = groupMessage.GroupId;
-        var targetId = groupMessage.Sender.UserId;
+        var targetId = groupMessage.Sender.UserId.ToString();
         try
         {
             var changedMessageSpace = message[COMMAND_FUNDHELPER_LIBRARY.Length..];
@@ -78,7 +78,7 @@ public static partial class ProcessGroupMessage
                     break;
             }
 
-            await BotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}").ConfigureAwait(false);
+            await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}{sendMessage}").ConfigureAwait(false);
         }
         catch (Exception e)
         {

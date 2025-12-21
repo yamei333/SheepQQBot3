@@ -20,7 +20,7 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="message">消息内容</param>
         /// <param name="setConfigs">已设定的消息内容, 用于消息重定义</param>
         public async Task SendGroupMessageAsync(
-            long groupId,
+            string groupId,
             string message,
             Dictionary<Guid, SetConfig> setConfigs = null)
         {
@@ -56,7 +56,7 @@ namespace SheepQQBot3.SDK.Client
 
             await SendAsync("send_group_msg", new ParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
                 Message = messageList,
             }).ConfigureAwait(false);
             return;
@@ -116,7 +116,7 @@ namespace SheepQQBot3.SDK.Client
                 var countInfos = _botDb.SetuSendHistorys
                     .Where(history => history.TimeStamp >= dateNowStartTimestamp && history.TimeStamp < dateNowEndTimestamp)
                     .GroupBy(history => history.TargetId,
-                        (key, group) => new { TargetId = key, Items = group.ToList() })
+                        (key, group) => new { TargetId = key.ToString(), Items = group.ToList() })
                     .AsEnumerable()
                     .Select(gp =>
                     {
@@ -186,7 +186,7 @@ namespace SheepQQBot3.SDK.Client
                 await SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
                 return;
 
-                string GetSetuSenderName(long userId)
+                string GetSetuSenderName(string userId)
                 {
                     if (groupMembers.TryGetValue(userId, out var groupMember))
                     {
@@ -207,7 +207,7 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="userId">群号</param>
         /// <param name="message">消息内容</param>
-        public Task SendPrivateMessageAsync(long userId, string message)
+        public Task SendPrivateMessageAsync(string userId, string message)
             => SendPrivateMessageAsync(userId, null, message);
 
         /// <summary>
@@ -216,11 +216,11 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="userId">群号</param>
         /// <param name="groupId">临时消息的群号</param>
         /// <param name="message">消息内容</param>
-        public Task SendPrivateMessageAsync(long userId, long? groupId, string message)
+        public Task SendPrivateMessageAsync(string userId, string groupId, string message)
             => SendAsync("send_private_msg", new ParamData
             {
-                UserId = userId.ToString(),
-                GroupId = groupId.HasValue ? groupId.ToString() : null,
+                UserId = userId,
+                GroupId = groupId,
                 Message = MessageUtil.ProcessCQMessage(message),
             });
 
@@ -230,7 +230,7 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="type"><see cref="ElementType"/></param>
         /// <param name="targetId">群号</param>
         /// <param name="message">消息内容</param>
-        public async Task SendMessageAsync(MessageTargetType type, long targetId, string message)
+        public async Task SendMessageAsync(MessageTargetType type, string targetId, string message)
         {
             switch (type)
             {
@@ -256,7 +256,7 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="prompt">左侧外显</param>
         /// <param name="callBack">回调</param>
         public Task<bool> SendGroupForwardMessageAsync(
-            long groupId,
+            string groupId,
             IEnumerable<GroupForwardMessage> messages,
             string title = null,
             string[] content = null,
@@ -266,7 +266,7 @@ namespace SheepQQBot3.SDK.Client
         {
             return SendAsync("send_group_forward_msg", new GroupForwardMessageParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
                 Messages = messages
                     .Select(each => new GroupForwardMessageElement(each))
                     .ToList(),
@@ -285,10 +285,10 @@ namespace SheepQQBot3.SDK.Client
         /// 撤回消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public Task DeleteMessageAsync(int messageId)
+        public Task DeleteMessageAsync(string messageId)
             => SendAsync("delete_msg", new ParamData
             {
-                MessageId = messageId.ToString(),
+                MessageId = messageId,
             });
 
         /// <summary>
@@ -296,10 +296,10 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="userId">对象QQ</param>
         /// <param name="times">点赞次数</param>
-        public Task<bool> SendLikeAsync(long userId, int times)
+        public Task<bool> SendLikeAsync(string userId, int times)
             => SendAsync("send_like", new ParamData
             {
-                UserId = userId.ToString(),
+                UserId = userId,
                 Times = times.ToString(),
             });
 
@@ -308,11 +308,11 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="messageId">消息ID</param>
         /// <param name="emoji"><see cref="Emoji"/>></param>
-        public Task<bool> SendMessageEmojiAsync(long messageId, Emoji emoji)
+        public Task<bool> SendMessageEmojiAsync(string messageId, Emoji emoji)
         {
             return SendAsync("set_msg_emoji_like", new ParamData
             {
-                MessageId = messageId.ToString(),
+                MessageId = messageId,
                 EmojiId = ((int)emoji).ToString(),
             });
         }

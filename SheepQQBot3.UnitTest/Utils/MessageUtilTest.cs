@@ -1,16 +1,7 @@
-﻿using JiebaNet.Analyser;
-using JiebaNet.Segmenter;
-using SheepQQBot3.Model;
+﻿using SheepQQBot3.Model;
 using static SheepQQBot3.Model.MessageUtil;
 
 namespace SheepQQBot3.UnitTest.Utils;
-
-public class TestClass
-{
-    public string Text1 { get; set; }
-
-    public string Text2 { get; set; }
-}
 
 [TestClass]
 public class MessageUtilTest
@@ -51,11 +42,11 @@ public class MessageUtilTest
 
         #endregion Test
 
-        var s = "狂战其实也能玩西洋剑";
-        var jbs = new JiebaSegmenter();
-        var tfidfExtractor = new TfidfExtractor(jbs);
-        var result = tfidfExtractor.ExtractTagsWithWeight(s);
-        ;
+        //var s = "狂战其实也能玩西洋剑";
+        //var jbs = new JiebaSegmenter();
+        //var tfidfExtractor = new TfidfExtractor(jbs);
+        //var result = tfidfExtractor.ExtractTagsWithWeight(s);
+        //;
 
         //var tokens = posSeg.Cut(s);
 

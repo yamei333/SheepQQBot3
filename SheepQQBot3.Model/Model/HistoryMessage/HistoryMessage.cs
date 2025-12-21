@@ -1,6 +1,6 @@
-﻿using System;
+﻿using SheepQQBot3.Model.Enums;
+using System;
 using System.Text.Json.Serialization;
-using SheepQQBot3.Model.Enums;
 using Yamei.Common;
 
 namespace SheepQQBot3.Model;
@@ -33,7 +33,7 @@ public class HistoryMessage
     public long Time { get; set; }
 
     [JsonPropertyName("user_id")]
-    public long UserId { get; set; }
+    public string UserId { get; set; }
 
     [JsonPropertyName("anonymous")]
     public string Anonymous { get; set; }
@@ -42,7 +42,7 @@ public class HistoryMessage
     public int Font { get; set; }
 
     [JsonPropertyName("group_id")]
-    public long GroupId { get; set; }
+    public string GroupId { get; set; }
 
     [JsonPropertyName("message")]
     public string Message { get; set; }
@@ -55,7 +55,7 @@ public class HistoryMessage
     //public string RawMessage { get; set; }
 
     [JsonPropertyName("message_id")]
-    public int MessageId { get; set; }
+    public string MessageId { get; set; }
 
     [JsonPropertyName("sender")]
     public Sender Sender { get; set; }

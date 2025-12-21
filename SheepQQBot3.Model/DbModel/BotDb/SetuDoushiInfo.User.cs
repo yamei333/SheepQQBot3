@@ -29,7 +29,7 @@ public partial class SetuDoushiInfo
     {
     }
 
-    public SetuDoushiInfo(long targetId)
+    public SetuDoushiInfo(string targetId)
     {
         TargetId = targetId;
         SetuDoushiLv = 0;

@@ -28,7 +28,7 @@ public static partial class ProcessGroupMessage
     public static async Task<bool> RollAsync(GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
-        var targetId = groupMessage.Sender.UserId;
+        var targetId = groupMessage.Sender.UserId.ToString();
         var messageId = groupMessage.MessageId;
         var message = groupMessage.Message;
         // MEMO : 简单命令r
@@ -53,7 +53,7 @@ public static partial class ProcessGroupMessage
         }
         else
         {
-            await BotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(targetId, messageId))
+            await GlobalBotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(targetId, messageId))
                 .ConfigureAwait(false);
         }
 
@@ -63,7 +63,7 @@ public static partial class ProcessGroupMessage
 
         Task SendRollResult(int maxRollNumber)
         {
-            return BotClient.SendGroupMessageAsync(groupId,
+            return GlobalBotClient.SendGroupMessageAsync(groupId,
                 $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
         }
     }

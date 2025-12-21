@@ -7,7 +7,7 @@ namespace SheepQQBot3.Model.Fund;
 /// <summary>
 /// 基金持仓数据
 /// </summary>
-public class FundPostionData
+public class FundPositionData
 {
     [JsonPropertyName("code")]
     public int Code { get; set; }

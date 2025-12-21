@@ -62,8 +62,8 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         InitViewModel();
         AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化..."));
 
-        JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
-        AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
+        //JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
+        //AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
 
 #if (!debug)
         InitServer();

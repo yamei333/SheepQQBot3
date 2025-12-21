@@ -68,7 +68,7 @@ public static class PushExtensions
             var stringContent = new StringContent(
                 JsonSerializer.Serialize(pushBarkData, JsonExtensions.GetJsonOptions(false)),
                 Encoding.UTF8, "application/json");
-            var request = await HttpExtensions.CreateHttpClient()
+            var request = await HttpExtensions.HttpClient
                 .PostAsync($"{barkUrl}/{key}", stringContent)
                 .ConfigureAwait(false);
             return request.IsSuccessStatusCode

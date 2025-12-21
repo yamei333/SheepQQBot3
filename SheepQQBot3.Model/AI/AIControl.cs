@@ -1,13 +1,11 @@
-﻿using GenerativeAI;
-using GenerativeAI.Types;
-using Masuit.Tools;
+﻿using Masuit.Tools;
+using OpenRouter.NET.Models;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
-using Yamei.Common;
 using static Masuit.Tools.Systems.EnumExt;
 
 namespace SheepQQBot3.Model.AI
@@ -17,130 +15,74 @@ namespace SheepQQBot3.Model.AI
         public AIConfig AIConfig { get; set; }
         public AICharacter AICharacter { get; set; }
 
-        public ConcurrentDictionary<string, ChatSession> AIChatSessions { get; set; }
-
-        public ConcurrentDictionary<string, IEnumerable<Part>> HistoryCaches { get; set; }
-
-        public static AIChatResponse ExampleAIChatResponse = new()
-        {
-            Date = new DateTime(2025, 8, 1, 10, 11, 12),
-            Contents = [
-                new AIChatResponseContent
-                {
-                    Think = "对方向我友好问好，我也应该友好回应",
-                    Body = "挥挥手",
-                    Mind = "我跟他不认识，只要平常心就好",
-                    Face = "Happy",
-                    ChatMessageInfo = new AIChatMessage
-                    {
-                        Emoji = "eihei",
-                        Text = "你好呀",
-                        Delay = 1000,
-                    },
-                },
-                new AIChatResponseContent
-                {
-                    Think = "作为小助手应该询问他需要什么帮助",
-                    Mind = "先问问他他需要什么帮助",
-                    Face = "Happy",
-                    ChatMessageInfo = new AIChatMessage
-                    {
-                        Emoji = "nihao",
-                        Text = "请问你需要什么帮助",
-                        Delay = 500,
-                    },
-                },
-            ],
-            FavorabilityChangeInfos =
-            [
-                new AIFavorabilityChangeInfo
-                {
-                    TargetId = 252961222,
-                    Value = 1,
-                },
-            ],
-            StatusChangeInfo = new AIStatusChangeInfo
-            {
-                MoodIndexChange = 1,
-            },
-        };
+        public ConcurrentDictionary<string, IEnumerable<ContentPart>> HistoryCaches { get; set; }
 
         public AIControl(AIConfig aiConfig, AICharacter aiCharacter)
         {
-            CheckEmojiCodeFile(aiConfig, aiCharacter);
-            CheckFaceCode(aiCharacter);
+            //CheckEmojiCodeFile(aiConfig, aiCharacter);
+            //CheckFaceCode(aiCharacter);
 
             AIConfig = aiConfig;
             AICharacter = aiCharacter;
-            var model = aiConfig.Model;
-            AIChatSessions = [];
-            aiConfig.ApiKeys.ForEach(each =>
-            {
-                var key = each.Key;
-                var ai = new GoogleAi(key);
-                var geminiModel = ai.CreateGeminiModel(model);
-                AIChatSessions.GetOrAdd(key, geminiModel.StartChat());
-            });
-
             HistoryCaches = [];
         }
 
-        public (string, ChatSession) GetChat(List<Content> history = null)
-        {
-            var minApiKey = AIConfig.ApiKeys.MinBy(each => each.Value).Key;
-            var chat = AIChatSessions[minApiKey];
+        //public (string, ChatSession) GetChat(List<Content> history = null)
+        //{
+        //    var minApiKey = AIConfig.ApiKeys.MinBy(each => each.Value).Key;
+        //    var chat = AIClient[minApiKey];
 
-            AIConfig.ApiKeys[minApiKey] = DateTime.Now.ToTimeStamp();
-            chat.SystemInstruction = AICharacter.SystemInstructionText;
-            chat.Config = new GenerationConfig
-            {
-                ResponseSchema = Schema.FromObject(ExampleAIChatResponse),
-                ThinkingConfig = new ThinkingConfig
-                {
-                    IncludeThoughts = false,
-                    ThinkingBudget = AIConfig.ThinkToken,
-                },
-                Temperature = AIConfig.Temperature,
-            };
-            var schemaProperties = chat.Config.ResponseSchema.Properties!;
-            schemaProperties["contents"].Nullable = false;
-            schemaProperties["contents"].Items.Properties["chatMessageInfo"].Nullable = false;
-            schemaProperties["contents"].Items.Properties["chatMessageInfo"].Properties["text"].Nullable = false;
-            chat.SafetySettings =
-            [
-                new SafetySetting
-                {
-                    Category = HarmCategory.HARM_CATEGORY_HARASSMENT,
-                    Threshold = HarmBlockThreshold.BLOCK_NONE,
-                },
-                new SafetySetting
-                {
-                    Category = HarmCategory.HARM_CATEGORY_HATE_SPEECH,
-                    Threshold = HarmBlockThreshold.BLOCK_NONE,
-                },
-                new SafetySetting
-                {
-                    Category = HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
-                    Threshold = HarmBlockThreshold.BLOCK_NONE,
-                },
-                new SafetySetting
-                {
-                    Category = HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
-                    Threshold = HarmBlockThreshold.BLOCK_NONE,
-                },
-            ];
+        //    AIConfig.ApiKeys[minApiKey] = DateTime.Now.ToTimeStamp();
+        //    chat.SystemInstruction = AICharacter.SystemInstructionText;
+        //    chat.Config = new GenerationConfig
+        //    {
+        //        ResponseSchema = Schema.FromObject(ExampleAIChatResponse),
+        //        ThinkingConfig = new ThinkingConfig
+        //        {
+        //            IncludeThoughts = false,
+        //            ThinkingBudget = AIConfig.ThinkToken,
+        //        },
+        //        Temperature = AIConfig.Temperature,
+        //    };
+        //    var schemaProperties = chat.Config.ResponseSchema.Properties!;
+        //    schemaProperties["contents"].Nullable = false;
+        //    schemaProperties["contents"].Items.Properties["chatMessageInfo"].Nullable = false;
+        //    schemaProperties["contents"].Items.Properties["chatMessageInfo"].Properties["text"].Nullable = false;
+        //    chat.SafetySettings =
+        //    [
+        //        new SafetySetting
+        //        {
+        //            Category = HarmCategory.HARM_CATEGORY_HARASSMENT,
+        //            Threshold = HarmBlockThreshold.BLOCK_NONE,
+        //        },
+        //        new SafetySetting
+        //        {
+        //            Category = HarmCategory.HARM_CATEGORY_HATE_SPEECH,
+        //            Threshold = HarmBlockThreshold.BLOCK_NONE,
+        //        },
+        //        new SafetySetting
+        //        {
+        //            Category = HarmCategory.HARM_CATEGORY_SEXUALLY_EXPLICIT,
+        //            Threshold = HarmBlockThreshold.BLOCK_NONE,
+        //        },
+        //        new SafetySetting
+        //        {
+        //            Category = HarmCategory.HARM_CATEGORY_DANGEROUS_CONTENT,
+        //            Threshold = HarmBlockThreshold.BLOCK_NONE,
+        //        },
+        //    ];
 
-            chat.UseGoogleSearch = true;
-            if (history != null)
-                chat.History = history;
+        //    chat.UseGoogleSearch = true;
+        //    if (history != null)
+        //        chat.History = history;
 
-            return (minApiKey, AIChatSessions[minApiKey]);
-        }
+        //    return (minApiKey, AIClient[minApiKey]);
+        //}
 
         /// <summary>
         /// 检查表情文件, 程序定义, AI介绍表情代码, 3者是否匹配
         /// </summary>
-        private void CheckEmojiCodeFile(AIConfig aiConfig, AICharacter aiCharacter)
+        private static void CheckEmojiCodeFile(AIConfig aiConfig, AICharacter aiCharacter)
         {
             var responseFormat = aiCharacter.SystemInstruction["Response Format"];
             const string START_TEXT = "## available emoji values\r\n\r\n";
@@ -195,7 +137,7 @@ namespace SheepQQBot3.Model.AI
         /// <summary>
         /// 检查AI面部表情定义, 程序定义
         /// </summary>
-        private void CheckFaceCode(AICharacter aiCharacter)
+        private static void CheckFaceCode(AICharacter aiCharacter)
         {
             var responseFormat = aiCharacter.SystemInstruction["Response Format"];
             var regex = new Regex(@"(?<=## available expression values\r\n\r\n)[\s\S]+?(?=\r\n\r\n)");

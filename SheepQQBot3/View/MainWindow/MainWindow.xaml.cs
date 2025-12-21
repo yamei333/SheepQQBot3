@@ -1,5 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using OpenRouter.NET;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -38,9 +39,9 @@ public partial class MainWindow : Window
         // MEMO : 界面初始化时读取配置
         //ConfigExtensions.LoadConfig();
         //ConfigExtensions.LoadAIConfig();
-        //ConfigExtensions.LoadAIAICharacter();
+        //ConfigExtensions.LoadAICharacter();
         Vm.InitBotFunctions();
-        MWindow = this;
+        GlobalMainWindow = this;
 
         // MEMO : 获得节假日配置
         GetHolidayInfo();
@@ -58,7 +59,7 @@ public partial class MainWindow : Window
             }
             else
             {
-                holidayInfoJson = await HttpExtensions.CreateHttpClient()
+                holidayInfoJson = await HttpExtensions.HttpClient
                     .GetStringAsync($"https://timor.tech/api/holiday/year/{nowYear}/")
                     .ConfigureAwait(false);
                 File.WriteAllLines(holidayInfoPath, [holidayInfoJson], Encoding.UTF8);
@@ -78,15 +79,62 @@ public partial class MainWindow : Window
 
         void InitAIModel()
         {
-            if (PublicVar.AIConfig.ApiKeys?.Any() != true)
+            if (GlobalAIConfig.ApiKeyChat.IsNullOrEmpty())
             {
                 LogExtensions.AddRunLog(new RunLog_SystemWarning("AI配置 未配置"));
                 return;
             }
 
             LogExtensions.AddRunLog(new RunLog_SystemInfo("AI配置 初始化完成"));
-            PublicVar.AIControl = new AIControl(PublicVar.AIConfig, PublicVar.AICharacter);
+            GlobalAIControl = new AIControl(GlobalAIConfig, GlobalAICharacter);
+            var baseUrlChat = GlobalAIConfig.BaseUrlChat;
+            var baseUrlImage = GlobalAIConfig.BaseUrlImage;
+            if (baseUrlChat.IsNullOrEmpty())
+            {
+                AIClient = new OpenRouterClient(GlobalAIConfig.ApiKeyChat);
+                AIClientImage = new OpenRouterClient(GlobalAIConfig.ApiKeyImage);
+            }
+            else
+            {
+                AIClient = new OpenRouterClient(new OpenRouterClientOptions
+                {
+                    ApiKey = GlobalAIConfig.ApiKeyChat,
+                    BaseUrl = baseUrlChat,
+                });
+                AIClientImage = new OpenRouterClient(new OpenRouterClientOptions
+                {
+                    ApiKey = GlobalAIConfig.ApiKeyImage,
+                    BaseUrl = baseUrlImage,
+                });
+            }
+
+            //var fieldInfo = typeof(OpenRouterClient).GetField("_jsonOptions", BindingFlags.NonPublic | BindingFlags.Instance);
+            //if (fieldInfo != null)
+            //{
+            //    var sharedOptions = (JsonSerializerOptions)fieldInfo.GetValue(AIClient);
+            //    if (sharedOptions.IsReadOnly)
+            //    {
+            //        throw new InvalidOperationException("Options 已被锁定，无法修改");
+            //    }
+
+            //    var resolver = new DefaultJsonTypeInfoResolver();
+            //    resolver.Modifiers.Add(ConfigureCacheTextPolymorphism);
+            //    sharedOptions.TypeInfoResolver = resolver;
+            //}
         }
+
+        //void ConfigureCacheTextPolymorphism(JsonTypeInfo typeInfo)
+        //{
+        //    if (typeInfo.Type == typeof(ContentPart))
+        //    {
+        //        typeInfo.PolymorphismOptions ??= new JsonPolymorphismOptions
+        //        {
+        //            IgnoreUnrecognizedTypeDiscriminators = false,
+        //            UnknownDerivedTypeHandling = JsonUnknownDerivedTypeHandling.FailSerialization,
+        //        };
+        //        typeInfo.PolymorphismOptions.DerivedTypes.Add(new JsonDerivedType(typeof(CacheTextContent), "cache_text"));
+        //    }
+        //}
     }
 
     private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
@@ -94,19 +142,19 @@ public partial class MainWindow : Window
         this.Left -= int.MaxValue;
         this.Visibility = Visibility.Collapsed;
         // MEMO : NapCat
-        PublicVar.NapCatWindow = new NapCatWindow
+        PublicVar.GlobalNapCatWindow = new NapCatWindow
         {
             Visibility = Visibility.Collapsed,
             WindowStyle = WindowStyle.None,
         };
-        PublicVar.NapCatWindow.Show();
+        PublicVar.GlobalNapCatWindow.Show();
         // MEMO : Bark
-        PublicVar.BarkWindow = new BarkWindow
+        PublicVar.GlobalBarkWindow = new BarkWindow
         {
             Visibility = Visibility.Collapsed,
             WindowStyle = WindowStyle.None,
         };
-        PublicVar.BarkWindow.Show();
+        PublicVar.GlobalBarkWindow.Show();
         Vm.AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化完成"));
     }
 
@@ -309,14 +357,14 @@ public partial class MainWindow : Window
 
     private void NotifyIcon_OnShowNapCatWindow(object sender, RoutedEventArgs e)
     {
-        PublicVar.NapCatWindow.Visibility = Visibility.Visible;
-        PublicVar.NapCatWindow.Activate();
+        PublicVar.GlobalNapCatWindow.Visibility = Visibility.Visible;
+        PublicVar.GlobalNapCatWindow.Activate();
     }
 
     private void NotifyIcon_OnShowBarkWindow(object sender, RoutedEventArgs e)
     {
-        PublicVar.BarkWindow.Visibility = Visibility.Visible;
-        PublicVar.BarkWindow.Activate();
+        PublicVar.GlobalBarkWindow.Visibility = Visibility.Visible;
+        PublicVar.GlobalBarkWindow.Activate();
     }
 
     private void MainWindow_OnClosing(object sender, CancelEventArgs e)

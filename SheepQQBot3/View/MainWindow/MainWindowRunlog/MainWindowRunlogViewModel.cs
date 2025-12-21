@@ -106,15 +106,10 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
                 break;
             case LogMessageType.AIRequest:
                 result.Add(new RunLogMessage($"请求用户: {runLog.TargetId}"));
-                //result.Add(new RunLogMessage($"ApiKey: {runLog.OperatorId}"));
-                var response = runLog.AIResponse;
-                result.Add(new RunLogMessage($"回复内容: {response.Text}"));
-                var usageMetadata = response.UsageMetadata!;
-                result.Add(new RunLogMessage($"Token: 总量:{usageMetadata.TotalTokenCount}"
-                    + $"(履历:{usageMetadata.CachedContentTokenCount}/"
-                    + $"回复:{usageMetadata.PromptTokenCount}/"
-                    + $"思考:{usageMetadata.ThoughtsTokenCount})"));
-                result.Add(new RunLogMessage($"请求内容: {runLog.OtherContent}"));
+                var usage = runLog.Usage!;
+                result.Add(new RunLogMessage($"Token: 总量:{usage.TotalTokens}"
+                    + $"(回复:{usage.CompletionTokens}/"
+                    + $"提示词:{usage.PromptTokens})"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

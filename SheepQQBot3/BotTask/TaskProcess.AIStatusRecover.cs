@@ -28,14 +28,14 @@ public static partial class TaskProcess
                     continue;
                 }
 
-                var moodIndexValue = PublicVar.AIData.AIStatusData.MoodIndexValue;
+                var moodIndexValue = PublicVar.GlobalAIData.AIStatusData.MoodIndexValue;
                 if (moodIndexValue == 0)
                 {
                     CommonExtensions.SleepMinutes(1);
                     continue;
                 }
 
-                PublicVar.AIData.AIStatusData.MoodIndexValue = (int)(moodIndexValue * 0.9);
+                PublicVar.GlobalAIData.AIStatusData.MoodIndexValue = (int)(moodIndexValue * 0.9);
                 ConfigExtensions.SaveAIData();
                 CommonExtensions.SleepMinutes(30);
             }

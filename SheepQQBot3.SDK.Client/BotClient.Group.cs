@@ -9,11 +9,11 @@ namespace SheepQQBot3.SDK.Client
         /// 获取群消息
         /// </summary>
         /// <param name="messageId">消息ID</param>
-        public Task<GroupMessage> GetGroupMessageAsync(int messageId)
+        public Task<GroupMessage> GetGroupMessageAsync(string messageId)
         {
             return SendAsync("get_msg", new ParamData
             {
-                MessageId = messageId.ToString(),
+                MessageId = messageId,
             }, jsonInfo =>
             {
                 var clientReceiveData = jsonInfo.FromJson<ClientReceiveData>();
@@ -25,11 +25,11 @@ namespace SheepQQBot3.SDK.Client
         /// 获取群消息历史记录
         /// </summary>
         /// <param name="groupId">群号</param>
-        public Task<HistoryMessage[]> GetHistoryGroupMessagesAsync(long groupId)
+        public Task<HistoryMessage[]> GetHistoryGroupMessagesAsync(string groupId)
         {
             return SendAsync("get_group_msg_history", new ParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
             }, jsonText =>
             {
                 var clientReceiveData = jsonText.FromJson<ClientReceiveData_HistoryMessages>();
@@ -43,11 +43,11 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="groupId">群号</param>
         /// <param name="userId">对象QQ号</param>
         /// <param name="isReject">是否不再接受申请</param>
-        public Task<bool> SetGroupKickAsync(long groupId, long userId, bool isReject = false)
+        public Task<bool> SetGroupKickAsync(string groupId, string userId, bool isReject = false)
             => SendAsync("set_group_kick", new ParamData
             {
-                GroupId = groupId.ToString(),
-                UserId = userId.ToString(),
+                GroupId = groupId,
+                UserId = userId,
                 Reject_Add_Request = isReject.ToString(),
             });
 
@@ -57,11 +57,11 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="groupId">群号</param>
         /// <param name="userId">对象QQ号</param>
         /// <param name="duration">禁言时长(单位秒), 0表示取消禁言</param>
-        public Task<bool> SetGroupBanAsync(long groupId, long userId, int duration)
+        public Task<bool> SetGroupBanAsync(string groupId, string userId, int duration)
             => SendAsync("set_group_ban", new ParamData
             {
-                GroupId = groupId.ToString(),
-                UserId = userId.ToString(),
+                GroupId = groupId,
+                UserId = userId,
                 Duration = duration.ToString(),
             });
 
@@ -70,10 +70,10 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="enable">是否禁言</param>
-        public Task<bool> SetGroupAllBanAsync(long groupId, bool enable)
+        public Task<bool> SetGroupAllBanAsync(string groupId, bool enable)
             => SendAsync("set_group_whole_ban", new ParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
                 Enable = enable.ToString(),
             });
 
@@ -83,11 +83,11 @@ namespace SheepQQBot3.SDK.Client
         /// <param name="groupId">群号</param>
         /// <param name="userId">对象QQ号</param>
         /// <param name="card">群名片</param>
-        public Task<bool> SetGroupCardAsync(long groupId, int userId, string card)
+        public Task<bool> SetGroupCardAsync(string groupId, string userId, string card)
             => SendAsync("set_group_card", new ParamData
             {
-                GroupId = groupId.ToString(),
-                Enable = userId.ToString(),
+                GroupId = groupId,
+                Enable = userId,
                 Card = card,
             });
 
@@ -96,10 +96,10 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         /// <param name="groupId">群号</param>
         /// <param name="groupName">群名称</param>
-        public Task<bool> SetGroupNameAsync(long groupId, string groupName)
+        public Task<bool> SetGroupNameAsync(string groupId, string groupName)
             => SendAsync("set_group_name", new ParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
                 GroupName = groupName,
             });
 
@@ -107,16 +107,16 @@ namespace SheepQQBot3.SDK.Client
         /// 获得群成员名单
         /// </summary>
         /// <param name="groupId">群号</param>
-        public Task<Dictionary<long, GroupMember>> GetGroupMembersAsync(long groupId)
+        public Task<Dictionary<string, GroupMember>> GetGroupMembersAsync(string groupId)
         {
             return SendAsync("get_group_member_list", new ParamData
             {
-                GroupId = groupId.ToString(),
+                GroupId = groupId,
                 NoCache = false,
             }, jsonText =>
             {
                 var clientData = jsonText.FromJson<ClientReceiveData_GroupMember>();
-                return clientData.Data.ToDictionary(each => each.UserId, each => each);
+                return clientData.Data.ToDictionary(each => each.UserId.ToString(), each => each);
             });
         }
     }

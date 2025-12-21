@@ -37,7 +37,7 @@ partial class MainWindowViewModel
             AddRunLog(new RunLog_SystemInfo("SERVER 连接成功"));
             if (PublicVar.IsDebug)
             {
-                BotClient.SendGroupMessageAsync(15873217, "测试Bot启动完成!").ConfigureAwait(false);
+                BotClient.SendGroupMessageAsync("15873217", "测试Bot启动完成!").ConfigureAwait(false);
 
                 //var message = new List<GroupForwardMessage>
                 //{
@@ -114,7 +114,7 @@ partial class MainWindowViewModel
             if (groupRevokeMessage.OperatorId == targetId)
             {
                 GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeatRevokeMessage, RunAction);
-                void RunAction(SetConfig config) => ProcessRevokeGroupMessage.RepeatRevokeMessageAsync(groupRevokeMessage);
+                void RunAction(SetConfig config) => _ = ProcessRevokeGroupMessage.RepeatRevokeMessageAsync(groupRevokeMessage);
             }
         };
         botServer.OnGroupMessage += (o, message) => OnGroupMessage(message);
@@ -145,7 +145,7 @@ partial class MainWindowViewModel
         GetSelectedCommonConfig(BotFunctionType.Common_KeyConfig, config =>
         {
             StartTaskList(taskList, KeyConfig);
-            void KeyConfig() => ProcessMessage.KeyConfigAsync(privateMessage);
+            void KeyConfig() => _ = ProcessMessage.KeyConfigAsync(privateMessage);
         });
         GetSelectedCommonConfig(BotFunctionType.Common_CustomAlarm, config =>
         {
@@ -156,15 +156,15 @@ partial class MainWindowViewModel
         if (BotExtensions.IsAdmin(userId))
         {
             StartTaskList(taskList, AdminCommand);
-            void AdminCommand() => ProcessPrivateMessage.AdminCommandAsync(privateMessage);
+            void AdminCommand() => _ = ProcessPrivateMessage.AdminCommandAsync(privateMessage);
 
-            StartTaskList(taskList, ChatSummaryConfig);
-            void ChatSummaryConfig() => ProcessPrivateMessage.ChatSummaryConfigAsync(privateMessage);
+            //StartTaskList(taskList, ChatSummaryConfig);
+            //void ChatSummaryConfig() => _ = ProcessPrivateMessage.ChatSummaryConfigAsync(privateMessage);
 
             GetSelectedCommonConfig(BotFunctionType.Common_AIConfig, config =>
             {
                 StartTaskList(taskList, AiAide);
-                void AiAide() => ProcessPrivateMessage.AIAideAsync(privateMessage);
+                void AiAide() => _ = ProcessPrivateMessage.AIAideAsync(privateMessage);
             });
         }
 
@@ -236,7 +236,7 @@ partial class MainWindowViewModel
         GetSelectedGroupConfig(groupId, BotFunctionType.Group_RandomSetu, config =>
         {
             StartTaskList(taskList, RandomSetu);
-            void RandomSetu() => _ = ProcessGroupMessage.RandomSetuAsync(PublicVar.BotConfig, groupMessage);
+            void RandomSetu() => _ = ProcessGroupMessage.RandomSetuAsync(PublicVar.GlobalBotConfig, groupMessage);
         });
 
         //GetSelectedGroupConfig(groupId, BotFunctionType.Group_RepeaterKiller, config =>
@@ -278,7 +278,7 @@ partial class MainWindowViewModel
     }
 
     private bool GetSelectedPrivateConfig(
-        long userId,
+        string userId,
         BotFunctionType botFunctionType,
         Action<SetConfig> runAction = null)
     {
@@ -299,7 +299,7 @@ partial class MainWindowViewModel
     {
         var setConfig = SetConfigs.Values
             .Where(each => each.TargetType == BotConfigTargetType.Common)
-            .FirstOrDefault(each => each.TargetId == PublicVar.CommonId
+            .FirstOrDefault(each => each.TargetId == PublicVar.AISystemId
                 && each.BotFunctions.FirstOrDefault(botFunc => botFunc.BotFunctionType == botFunctionType)?.IsUsed == true);
         if (setConfig == null)
             return false;
@@ -309,7 +309,7 @@ partial class MainWindowViewModel
     }
 
     private bool GetSelectedGroupConfig(
-        long groupId,
+        string groupId,
         BotFunctionType botFunctionType,
         Action<SetConfig> runAction = null)
     {

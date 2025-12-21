@@ -11,15 +11,15 @@ public class PrivateMessage
 {
     public DateTime DateTime { get; set; }
 
-    public long UserId { get; set; }
+    public string UserId { get; set; }
 
-    public long? GroupId { get; set; }
+    public string GroupId { get; set; }
 
     public int Font { get; set; }
 
     public string Message { get; set; }
 
-    public int MessageId { get; set; }
+    public string MessageId { get; set; }
 
     public bool IsFriend { get; set; }
 
@@ -31,10 +31,10 @@ public class PrivateMessage
     public PrivateMessage(ReceiveData receiveData)
     {
         DateTime = receiveData.DateTime;
-        UserId = receiveData.UserId;
+        UserId = receiveData.UserId.ToString();
         Font = receiveData.Font;
         Message = CQCode.ReplaceCQImage(receiveData.Message);
-        MessageId = receiveData.MessageId;
+        MessageId = receiveData.MessageId.ToString();
         IsFriend = receiveData.SubType == SubType.Friend;
         Sender = receiveData.Sender;
     }

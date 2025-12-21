@@ -22,7 +22,7 @@ public class JsonCard_TianxuanShare
     public TianxuanShare_Meta_Config Config { get; set; }
 
     public JsonCard_TianxuanShare(
-        long targetId,
+        string targetId,
         string title,
         string content,
         string tag,
@@ -81,7 +81,7 @@ public class TianxuanShare_Meta_News
     public string Title { get; set; }
 
     [JsonPropertyName("uin")]
-    public long Uin { get; set; }
+    public string Uin { get; set; }
 }
 
 public class TianxuanShare_Meta_Config

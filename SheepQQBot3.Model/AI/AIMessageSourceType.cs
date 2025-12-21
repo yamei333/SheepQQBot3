@@ -11,7 +11,7 @@
     {
         public const string SYSTEM = "System hint";
 
-        public static string ToMessageSourceText(this AIMessageSourceType messageSourceType, long targetId = 0)
+        public static string ToMessageSourceText(this AIMessageSourceType messageSourceType, string targetId = "")
         {
             return messageSourceType switch
             {

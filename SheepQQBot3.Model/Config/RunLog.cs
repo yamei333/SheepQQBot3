@@ -1,6 +1,6 @@
-﻿using GenerativeAI.Types;
-using Masuit.Tools;
+﻿using Masuit.Tools;
 using Masuit.Tools.Systems;
+using OpenRouter.NET.Models;
 using SheepQQBot3.Model.Enums;
 using System;
 using System.Text.Json.Serialization;
@@ -47,9 +47,14 @@ public class RunLog
     public string OtherContent { get; set; }
 
     /// <summary>
-    /// AI回复
+    /// AI用量
     /// </summary>
-    public GenerateContentResponse AIResponse { get; set; }
+    public ResponseUsage Usage { get; set; }
+
+    /// <summary>
+    /// Json字符串
+    /// </summary>
+    public string JsonText { get; set; }
 
     public string MessageId { get; set; }
     public string Content { get; set; }
@@ -95,10 +100,10 @@ public class RunLog
     /// <summary>
     /// 初始化
     /// </summary>
-    protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, long senderId, string content)
+    protected RunLog(LogMessageType logMessageType, BotConfigTargetType targetType, string senderId, string content)
         : this(logMessageType, targetType, content)
     {
-        SenderId = senderId.ToString();
+        SenderId = senderId;
     }
 }
 
@@ -145,10 +150,10 @@ public class RunLog_GroupMessage : RunLog
 {
     /// <inheritdoc />
     public RunLog_GroupMessage(GroupMessage groupMessage)
-        : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.UserId, groupMessage.Message!)
+        : base(LogMessageType.GroupMessage, BotConfigTargetType.Group, groupMessage.Sender!.UserId.ToString(), groupMessage.Message!)
     {
-        GroupId = groupMessage.GroupId.ToString();
-        MessageId = groupMessage.MessageId.ToString();
+        GroupId = groupMessage.GroupId;
+        MessageId = groupMessage.MessageId;
     }
 }
 
@@ -170,9 +175,9 @@ public class RunLog_GroupRevokeMessage : RunLog
     public RunLog_GroupRevokeMessage(GroupRevokeMessage groupRevokeMessage)
         : base(LogMessageType.GroupRevokeMessage, BotConfigTargetType.Group, groupRevokeMessage.UserId, "撤回消息")
     {
-        OperatorId = groupRevokeMessage.OperatorId.ToString();
-        GroupId = groupRevokeMessage.GroupId.ToString();
-        MessageId = groupRevokeMessage.MessageId.ToString();
+        OperatorId = groupRevokeMessage.OperatorId;
+        GroupId = groupRevokeMessage.GroupId;
+        MessageId = groupRevokeMessage.MessageId;
     }
 }
 
@@ -183,9 +188,9 @@ public class RunLog_GroupPoke : RunLog
     public RunLog_GroupPoke(GroupPoke groupPoke)
         : base(LogMessageType.GroupPoke, BotConfigTargetType.Group, groupPoke.SenderId, $"[{groupPoke.SenderId}] 戳了戳 [{groupPoke.TargetId}]")
     {
-        OperatorId = groupPoke.SenderId.ToString();
-        GroupId = groupPoke.GroupId.ToString();
-        TargetId = groupPoke.TargetId.ToString();
+        OperatorId = groupPoke.SenderId;
+        GroupId = groupPoke.GroupId;
+        TargetId = groupPoke.TargetId;
     }
 }
 
@@ -195,7 +200,7 @@ public class RunLog_GroupPoke : RunLog
 public class RunLog_AlarmAide : RunLog
 {
     /// <inheritdoc />
-    public RunLog_AlarmAide(BotConfigTargetType targetType, long targetId, string content)
+    public RunLog_AlarmAide(BotConfigTargetType targetType, string targetId, string content)
         : base(LogMessageType.AlarmAide, targetType, targetId, content)
     {
     }
@@ -207,7 +212,7 @@ public class RunLog_AlarmAide : RunLog
 public class RunLog_FundHelper : RunLog
 {
     /// <inheritdoc />
-    public RunLog_FundHelper(BotConfigTargetType targetType, long targetId, string content)
+    public RunLog_FundHelper(BotConfigTargetType targetType, string targetId, string content)
         : base(LogMessageType.FundHelper, targetType, targetId, content)
     {
     }
@@ -219,7 +224,7 @@ public class RunLog_FundHelper : RunLog
 public class RunLog_LiveAlarm : RunLog
 {
     /// <inheritdoc />
-    public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherContent, long targetId, string content)
+    public RunLog_LiveAlarm(BotConfigTargetType targetType, string otherContent, string targetId, string content)
         : base(LogMessageType.LiveAlarm, targetType, targetId, content)
     {
         OtherContent = otherContent;
@@ -245,14 +250,14 @@ public class RunLog_AIRequest : RunLog
 {
     /// <inheritdoc />
     public RunLog_AIRequest(
-        long requestUserId,
+        string requestUserId,
         bool isGroup,
         string apiKey,
-        GenerateContentResponse response)
+        ResponseUsage usage)
         : base(LogMessageType.AIRequest, BotConfigTargetType.Common, $"哈基米AI请求({(isGroup ? $"群:{requestUserId}" : $"个人:{requestUserId}")})")
     {
-        TargetId = requestUserId.ToString();
+        TargetId = requestUserId;
         OperatorId = apiKey;
-        AIResponse = response;
+        Usage = usage;
     }
 }

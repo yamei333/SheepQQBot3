@@ -28,11 +28,11 @@ public partial class MainWindowAlarmAideSubmit
     /// </summary>
     private void AlarmAideSubmitMemberList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addNumberDialog = new AddNumberDialog(PublicVar.MWindow, sender, DialogMode.Add, "闹钟助手投稿ID");
+        var addNumberDialog = new AddNumberDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add, "闹钟助手投稿ID");
         if (addNumberDialog.ShowDialog() != true)
             return;
 
-        var alarmAideMemberId = addNumberDialog.AddNumber.GetValueOrDefault();
+        var alarmAideMemberId = addNumberDialog.AddNumber;
         _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
             .CopyAdd(alarmAideMemberId);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
@@ -48,11 +48,11 @@ public partial class MainWindowAlarmAideSubmit
         if (!MainWindowUtil.ShowDeleteDialog())
             return;
 
-        if (!_vm.SelectedMemberId.HasValue)
+        if (_vm.SelectedMemberId.IsNullOrEmpty())
             return;
 
         _vm.SelectedSetConfig.AlarmAideSubmitMemberIds = _vm.SelectedSetConfig.AlarmAideSubmitMemberIds
-            .CopyRemove(_vm.SelectedMemberId.Value);
+            .CopyRemove(_vm.SelectedMemberId);
         _vm.OnPropertyChanged(nameof(_vm.SelectedSetConfig));
         _vm.SelectedMemberId = null;
         ConfigExtensions.SaveConfig();

@@ -14,10 +14,10 @@ public class GroupForwardMessage
     [JsonPropertyName("content")]
     public List<Element> Message { get; set; }
 
-    public GroupForwardMessage(string name, long userId, string message)
+    public GroupForwardMessage(string name, string userId, string message)
     {
         Name = name;
-        UserId = userId.ToString();
+        UserId = userId;
         Message = MessageUtil.ProcessCQMessage(message);
     }
 }

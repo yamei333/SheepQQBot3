@@ -1176,7 +1176,6 @@ public static class EnumerableExtensions
     public static HashSet<T> CopyAdd<T>(
         this HashSet<T> hashSet,
         T addItem)
-        where T : unmanaged
         => hashSet == null ? [addItem] : [.. hashSet, addItem];
 
     /// <summary>
@@ -1191,7 +1190,6 @@ public static class EnumerableExtensions
         this HashSet<T> hashSet,
         T deleteItem,
         out bool deleteSuccessed)
-        where T : unmanaged
     {
         if (hashSet == null)
         {
@@ -1213,7 +1211,6 @@ public static class EnumerableExtensions
     public static HashSet<T> CopyRemove<T>(
         this HashSet<T> hashSet,
         T deleteItem)
-        where T : unmanaged
     {
         return CopyRemove(hashSet, deleteItem, out _);
     }

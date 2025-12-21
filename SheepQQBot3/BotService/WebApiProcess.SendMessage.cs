@@ -18,7 +18,7 @@ public static partial class WebApiProcess
                 var apiSendMessage = jsonText.FromJson<WebApi_SendMessage>();
                 if (apiSendMessage?.SheepQQBot3 == TOKEN)
                 {
-                    await PublicVar.BotClient.SendMessageAsync(
+                    await PublicVar.GlobalBotClient.SendMessageAsync(
                         apiSendMessage.IsGroup ? MessageTargetType.Group : MessageTargetType.Private,
                         apiSendMessage.TargetId,
                         apiSendMessage.Message).ConfigureAwait(false);

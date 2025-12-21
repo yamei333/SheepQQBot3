@@ -1,4 +1,5 @@
 ﻿using System.Linq;
+using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
 
@@ -9,45 +10,43 @@ public partial class MainWindowAIConfigModel : MainWindowViewModelBase
     /// </summary>
     public MainWindowAIConfigModel()
     {
-        ListItems = PublicVar.AICharacter?.SystemInstruction?.Keys.ToArray() ?? [];
-        SelectedValue = PublicVar.AICharacter?.SystemInstruction?.First().Key;
+        ListItems = GlobalAICharacter?.SystemInstruction?.Keys.ToArray() ?? [];
+        SelectedValue = GlobalAICharacter?.SystemInstruction?.First().Key;
     }
 
-    private string[] _listItems;
     /// <summary>
     /// Items
     /// </summary>
     public string[] ListItems
     {
-        get => _listItems;
+        get;
         set
         {
-            if (_listItems == value)
+            if (field == value)
                 return;
 
-            _listItems = value;
+            field = value;
             OnPropertyChanged(nameof(ListItems));
         }
     }
 
-    private string _selectedValue;
     /// <summary>
     /// 选中的项目
     /// </summary>
     public string SelectedValue
     {
-        get => _selectedValue;
+        get;
         set
         {
-            if (_selectedValue == value)
+            if (field == value)
                 return;
 
-            _selectedValue = value;
+            field = value;
             OnPropertyChanged(nameof(SelectedValue));
 
-            if (_selectedValue != null)
+            if (field != null)
             {
-                _systemInstructionText = PublicVar.AICharacter?.SystemInstruction[_selectedValue] ?? string.Empty;
+                _systemInstructionText = GlobalAICharacter?.SystemInstruction[field] ?? string.Empty;
                 OnPropertyChanged(nameof(SystemInstructionText));
             }
         }
@@ -67,7 +66,7 @@ public partial class MainWindowAIConfigModel : MainWindowViewModelBase
 
             _systemInstructionText = value;
             OnPropertyChanged(nameof(SystemInstructionText));
-            PublicVar.AICharacter.SystemInstruction[SelectedValue] = _systemInstructionText;
+            GlobalAICharacter.SystemInstruction[SelectedValue] = _systemInstructionText;
         }
     }
 }

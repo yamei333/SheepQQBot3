@@ -42,10 +42,10 @@ public class SetConfig
     [JsonIgnore]
     public BitmapFrame Icon => TargetType switch
     {
-        BotConfigTargetType.Common => QQExtensions.GetQQImage(AppSettingExtensions.Get("selfId", 0L)),
+        BotConfigTargetType.Common => QQExtensions.GetQQImage(AppSettingExtensions.Get("selfId", string.Empty)),
         BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
         BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
-        _ => QQExtensions.GetQQImage(10000),
+        _ => QQExtensions.GetQQImage("10000"),
     };
 
     /// <summary>
@@ -64,13 +64,13 @@ public class SetConfig
     /// 闹钟助手允许投稿成员ID配置
     /// </summary>
     [JsonPropertyName(nameof(AlarmAideSubmitMemberIds))]
-    public HashSet<long> AlarmAideSubmitMemberIds { get; set; }
+    public HashSet<string> AlarmAideSubmitMemberIds { get; set; }
 
     /// <summary>
     /// 黑名单ID配置
     /// </summary>
     [JsonPropertyName(nameof(BlackListIds))]
-    public HashSet<long> BlackListIds { get; set; }
+    public HashSet<string> BlackListIds { get; set; }
 
     /// <summary>
     /// 基金播报配置
@@ -119,7 +119,7 @@ public class SetConfig
     /// 对象ID(群号/个人QQ号)
     /// </summary>
     [JsonPropertyName(nameof(TargetId))]
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
     /// <summary>
     /// 名称
@@ -127,7 +127,7 @@ public class SetConfig
     [JsonPropertyName(nameof(TargetName))]
     public string TargetName { get; set; }
 
-    public SetConfig(Guid id, BotConfigTargetType targetType, long targetId, string targetName)
+    public SetConfig(Guid id, BotConfigTargetType targetType, string targetId, string targetName)
     {
         Id = id;
         TargetType = targetType;

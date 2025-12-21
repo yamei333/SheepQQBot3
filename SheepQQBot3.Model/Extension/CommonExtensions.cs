@@ -20,11 +20,11 @@ public static class CommonExtensions
 
     //public static string ToDayHHMM(this DateTime input) => input.ToString($"d{(input.DayOfWeek == DayOfWeek.Saturday ? "(六)" : string.Empty)}, HH:mm");
 
-    public static string ToYYYYMDDDDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d dddd HH:mm:ss");
+    //public static string ToYYYYMDDDDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d dddd HH:mm:ss");
 
     public static string ToYYYYMDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d HH:mm:ss");
 
-    public static string ToYYYYMMDDHHMM(this DateTime input) => input.ToString("yyyy-M-dd HH:mm");
+    //public static string ToYYYYMMDDHHMM(this DateTime input) => input.ToString("yyyy-M-dd HH:mm");
 
     public static string ToYYYYMD(this DateTime input) => input.ToString("yyyy-M-d");
 
@@ -69,7 +69,8 @@ public static class CommonExtensions
     /// <param name="input">输入内容</param>
     /// <param name="senderId">发送者Id</param>
     /// <returns>替换结果</returns>
-    public static (string Result, bool IsNoAt, bool IsNoReply, bool IsLoop, bool isBark) ToCqCode(this string input, long senderId = 0)
+    public static (string Result, bool IsNoAt, bool IsNoReply, bool IsLoop, bool isBark) ToCqCode(
+        this string input, string senderId = "")
     {
         var result = input;
         var isNoAt = Replace($@"\{KH_LEFT}-na{KH_RIGHT}", string.Empty);

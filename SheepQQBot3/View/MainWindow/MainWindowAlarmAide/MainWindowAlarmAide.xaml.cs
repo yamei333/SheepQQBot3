@@ -56,7 +56,7 @@ public partial class MainWindowAlarmAide
     /// </summary>
     private void AlarmAideList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addAlarmAideDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addAlarmAideDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addAlarmAideDialog.ShowDialog() != true)
             return;
 
@@ -78,7 +78,7 @@ public partial class MainWindowAlarmAide
     private void AlarmAideList_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedAlarmAideConfig = _vm.SelectedAlarmAideConfig;
-        var addAlarmAideDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addAlarmAideDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             AlarmName = selectedAlarmAideConfig.AlarmName,
             Condition = selectedAlarmAideConfig.Condition,
@@ -130,10 +130,10 @@ public partial class MainWindowAlarmAide
         switch (selectedSetConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
+                await GlobalBotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Private:
-                await BotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
+                await GlobalBotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Common:
             default:
@@ -163,7 +163,7 @@ public partial class MainWindowAlarmAide
     /// </summary>
     private void AlarmAideTextList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addAlarmAideTextDialog.ShowDialog() == true)
             _vm.OnAddAlarmAideTest(addAlarmAideTextDialog.AlarmText, AlarmAideTextList);
     }
@@ -188,7 +188,7 @@ public partial class MainWindowAlarmAide
     /// </summary>
     private void AlarmAideTextList_OnEdit(object sender, RoutedEventArgs e)
     {
-        var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addAlarmAideTextDialog = new AddAlarmAideTextDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             AlarmText = _vm.SelectedAlarmText.Value,
         };
@@ -235,10 +235,10 @@ public partial class MainWindowAlarmAide
         switch (selectedSetConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
+                await GlobalBotClient.SendGroupMessageAsync(selectedSetConfig.TargetId, alarmText, _vm.SetConfigs).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Private:
-                await BotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
+                await GlobalBotClient.SendPrivateMessageAsync(selectedSetConfig.TargetId, alarmText).ConfigureAwait(false);
                 break;
             case BotConfigTargetType.Common:
             default:

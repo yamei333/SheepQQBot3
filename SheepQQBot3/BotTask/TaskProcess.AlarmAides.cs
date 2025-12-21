@@ -30,7 +30,7 @@ public static partial class TaskProcess
         {
             while (true)
             {
-                if (BotServer?.Connected == true)
+                if (GlobalBotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     var dateNowStr = dateNow.ToConditionString(HolidayInfo);
@@ -103,11 +103,11 @@ public static partial class TaskProcess
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await BotClient.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs).ConfigureAwait(false);
+                    await GlobalBotClient.SendGroupMessageAsync(targetId, alarmText, Vm.SetConfigs).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Group, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Private:
-                    await BotClient.SendPrivateMessageAsync(targetId, alarmText).ConfigureAwait(false);
+                    await GlobalBotClient.SendPrivateMessageAsync(targetId, alarmText).ConfigureAwait(false);
                     AddRunLog(new RunLog_AlarmAide(BotConfigTargetType.Private, targetId, alarmText));
                     break;
                 case BotConfigTargetType.Common:

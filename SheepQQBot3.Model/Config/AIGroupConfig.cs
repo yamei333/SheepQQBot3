@@ -60,7 +60,7 @@ public partial class AIGroupConfig : NotifyPropertyChangedBase
     /// AI收集消息黑名单
     /// </summary>
     [JsonPropertyName(nameof(BlackListIds))]
-    public HashSet<long> BlackListIds { get; set; }
+    public HashSet<string> BlackListIds { get; set; }
 
     /// <summary>
     /// 是否启用At响应

@@ -38,7 +38,7 @@ public partial class MainWindowFundHelper : UserControl
     /// </summary>
     private void FundAlarmConfigList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addDateTimeConfigDialog.ShowDialog() != true)
             return;
 
@@ -61,7 +61,7 @@ public partial class MainWindowFundHelper : UserControl
     private void FundAlarmConfigList_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedFundAlarmConfig = _vm.SelectedFundAlarmConfig;
-        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             AlarmName = selectedFundAlarmConfig.AlarmName,
             Condition = selectedFundAlarmConfig.Condition,
@@ -102,14 +102,14 @@ public partial class MainWindowFundHelper : UserControl
     /// 基金助手播报时间配置列表-测试
     /// </summary>
     private void FundAlarmConfigList_OnTest(object sender, RoutedEventArgs e)
-        => TaskProcess.SendFundAlarmMessageAsync(_vm.SelectedSetConfig, _vm.SelectedFundAlarmConfig, DateTime.Now, true);
+        => _ = TaskProcess.SendFundAlarmMessageAsync(_vm.SelectedSetConfig, _vm.SelectedFundAlarmConfig, DateTime.Now, true);
 
     /// <summary>
     /// 基金助手阈值观测时间配置列表-新增
     /// </summary>
     private void FundLimitObserveConfigList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addDateTimeConfigDialog.ShowDialog() != true)
             return;
 
@@ -132,7 +132,7 @@ public partial class MainWindowFundHelper : UserControl
     private void FundLimitObserveConfigList_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedFundLimitObserveConfig = _vm.SelectedFundLimitObserveConfig;
-        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addDateTimeConfigDialog = new AddDateTimeConfigDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             AlarmName = selectedFundLimitObserveConfig.LimitObserveName,
             Condition = selectedFundLimitObserveConfig.Condition,
@@ -173,14 +173,14 @@ public partial class MainWindowFundHelper : UserControl
     /// 基金助手阈值观测时间配置列表-测试
     /// </summary>
     private void FundLimitObserveConfigList_OnTest(object sender, RoutedEventArgs e)
-        => TaskProcess.SendFundLimitMessageAsync(_vm.SelectedSetConfig, _vm.SelectedFundLimitObserveConfig, DateTime.Now, true);
+        => _ = TaskProcess.SendFundLimitMessageAsync(_vm.SelectedSetConfig, _vm.SelectedFundLimitObserveConfig, DateTime.Now, true);
 
     /// <summary>
     /// 基金助手播报列表-新增
     /// </summary>
     private void AlarmFundConfigList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addFundAlarmDialog = new AddFundAlarmDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addFundAlarmDialog = new AddFundAlarmDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addFundAlarmDialog.ShowDialog() != true)
             return;
 
@@ -204,7 +204,7 @@ public partial class MainWindowFundHelper : UserControl
     private void AlarmFundConfigList_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedAlarmFundConfig = _vm.SelectedAlarmFundConfig.Value;
-        var addFundAlarmDialog = new AddFundAlarmDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addFundAlarmDialog = new AddFundAlarmDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             FundId = selectedAlarmFundConfig.FundId,
             FundRemark = selectedAlarmFundConfig.FundRemark,
@@ -248,7 +248,7 @@ public partial class MainWindowFundHelper : UserControl
     /// <param name="e"></param>
     private void LimitObserveFundConfigList_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addFundLimitDialog = new AddFundLimitObserveDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addFundLimitDialog = new AddFundLimitObserveDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addFundLimitDialog.ShowDialog() != true)
             return;
 
@@ -274,7 +274,7 @@ public partial class MainWindowFundHelper : UserControl
     private void LimitObserveFundConfigList_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedLimitObserveFundConfig = _vm.SelectedLimitObserveFundConfig.Value;
-        var addFundLimitDialog = new AddFundLimitObserveDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addFundLimitDialog = new AddFundLimitObserveDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             FundId = selectedLimitObserveFundConfig.FundId,
             FundObserveType = selectedLimitObserveFundConfig.FundObserveType,

@@ -1,5 +1,5 @@
-﻿using GenerativeAI.Types;
-using Masuit.Tools;
+﻿using Masuit.Tools;
+using OpenRouter.NET.Models;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -79,18 +79,21 @@ public static class YameiLogExtensions
 
     public static void WriteLog(
         string apiKey,
-        GenerateContentResponse response,
-        List<Content> thisRequestContentShortVer,
+        ChatCompletionResponse response,
+        List<ContentPart> thisRequestContentParts,
         string aiStatusJson)
     {
-        var usageMetadata = response.UsageMetadata!;
+        var usage = response.Usage!;
+        var choice = response.Choices[0];
         var message = $"哈基米请求: {ENTER}"
             + $"ApiKey: {apiKey}{ENTER}"
-            + $"Token: 总量:{usageMetadata.TotalTokenCount}"
-            + $"(提示词:{usageMetadata.PromptTokenCount}/思考:{usageMetadata.ThoughtsTokenCount}){ENTER}"
+            + $"总消耗: {usage.TotalCost}"
+            + $"Token: 总量:{usage.TotalTokens}(提示词:{usage.PromptTokens}/回复:{usage.CompletionTokens}){ENTER}"
             + $"小助手状态: {aiStatusJson}{ENTER}"
-            + $"请求: {thisRequestContentShortVer.ToJsonIgnoreNull()}{ENTER}"
-            + $"回复: {response.Text}";
+            + $"请求: {thisRequestContentParts.ToJsonIgnoreNull()}{ENTER}"
+            + $"回复: {(choice.FinishReason == "stop"
+                ? choice.Message.Content.ToString()
+                : choice.Message.ToolCalls[0].Function.Arguments)}";
         WriteLog(LogType.Info, message);
     }
 }

@@ -1,5 +1,4 @@
-﻿using System.Collections.Concurrent;
-using System.Linq;
+﻿using Masuit.Tools;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
@@ -7,16 +6,46 @@ namespace SheepQQBot3.Model.AI
     public class AIConfig
     {
         /// <summary>
-        /// Keys和最后一次使用时间
+        /// API Key
         /// </summary>
-        [JsonPropertyName("apiKeys")]
-        public ConcurrentDictionary<string, long> ApiKeys { get; set; }
+        [JsonPropertyName("apiKey_chat")]
+        public string ApiKeyChat { get; set; }
 
         /// <summary>
-        /// 模型
+        /// API Key Image
         /// </summary>
-        [JsonPropertyName("model")]
-        public string Model { get; set; }
+        [JsonPropertyName("apiKey_image")]
+        public string ApiKeyImage { get; set; }
+
+        /// <summary>
+        /// BaseUrl
+        /// </summary>
+        [JsonPropertyName("baseUrl_chat")]
+        public string BaseUrlChat { get; set; }
+
+        /// <summary>
+        /// BaseUrl
+        /// </summary>
+        [JsonPropertyName("baseUrl_image")]
+        public string BaseUrlImage { get; set; }
+
+        /// <summary>
+        /// 聊天模型
+        /// </summary>
+        [JsonPropertyName("model_chat")]
+        public AIModel ModelChat { get; set; }
+
+        /// <summary>
+        /// 生成图片模型
+        /// </summary>
+        [JsonPropertyName("model_image")]
+        public AIModel ModelImage { get; set; }
+
+        /// <summary>
+        /// 群聊总结模型
+        /// </summary>
+        [JsonPropertyName("model_summary")]
+        public AIModel ModelSummary { get; set; }
 
         /// <summary>
         /// Model Think Token
@@ -28,7 +57,7 @@ namespace SheepQQBot3.Model.AI
         /// Model Temperature
         /// </summary>
         [JsonPropertyName("temperature")]
-        public double Temperature { get; set; }
+        public float Temperature { get; set; }
 
         ///// <summary>
         ///// Model TopP
@@ -64,6 +93,6 @@ namespace SheepQQBot3.Model.AI
         /// 是否使用AI功能
         /// </summary>
         [JsonIgnore]
-        public bool IsUseAI => ApiKeys?.Any() == true && !string.IsNullOrEmpty(Model);
+        public bool IsUseAI => !ApiKeyChat.IsNullOrEmpty() && !string.IsNullOrEmpty(ModelChat.Model);
     }
 }

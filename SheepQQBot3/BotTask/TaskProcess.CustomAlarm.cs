@@ -26,11 +26,11 @@ public static partial class TaskProcess
         {
             while (true)
             {
-                if (BotServer?.Connected == true)
+                if (GlobalBotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
-                    var userConfigs = PublicVar.BotConfig.UserConfigs;
-                    var customAlarms = PublicVar.BotConfig.CustomAlarms;
+                    var userConfigs = PublicVar.GlobalBotConfig.UserConfigs;
+                    var customAlarms = PublicVar.GlobalBotConfig.CustomAlarms;
                     if (customAlarms == null)
                         return;
 
@@ -61,13 +61,13 @@ public static partial class TaskProcess
                         {
                             if (customAlarm.IsGroup)
                             {
-                                await BotClient.SendGroupMessageAsync(customAlarm.GroupId.GetValueOrDefault(),
+                                await GlobalBotClient.SendGroupMessageAsync(customAlarm.GroupId,
                                     $"{(customAlarm.IsAtTarget ? $"{CQCode.At(customAlarm.TargetId)}{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
                             else
                             {
-                                await BotClient.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
+                                await GlobalBotClient.SendPrivateMessageAsync(targetId, customAlarm.GroupId,
                                     $"{(customAlarm.IsAtTarget ? $"{PushExtensions.TITLE}{ENTER}[内容] " : string.Empty)}" + $"{alarmMessage}")
                                     .ConfigureAwait(false);
                             }
@@ -95,7 +95,7 @@ public static partial class TaskProcess
     private static void ClearHistoryData()
     {
         var startDateNow = DateTime.Now;
-        var customAlarms = PublicVar.BotConfig?.CustomAlarms;
+        var customAlarms = PublicVar.GlobalBotConfig?.CustomAlarms;
         customAlarms?.Values
             .ForEach(customAlarm =>
             {

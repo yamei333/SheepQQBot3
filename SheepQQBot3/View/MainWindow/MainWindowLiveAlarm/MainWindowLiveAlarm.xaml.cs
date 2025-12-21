@@ -32,7 +32,7 @@ public partial class MainWindowLiveAlarm
     /// </summary>
     private void ListView_OnAdd(object sender, RoutedEventArgs e)
     {
-        var addLiveAlarmDialog = new AddLiveAlarmDialog(PublicVar.MWindow, sender, DialogMode.Add);
+        var addLiveAlarmDialog = new AddLiveAlarmDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Add);
         if (addLiveAlarmDialog.ShowDialog() != true)
             return;
 
@@ -55,7 +55,7 @@ public partial class MainWindowLiveAlarm
     private void ListView_OnEdit(object sender, RoutedEventArgs e)
     {
         var selectedLiveAlarmConfig = _vm.SelectedLiveAlarmConfig;
-        var addLiveAlarmDialog = new AddLiveAlarmDialog(PublicVar.MWindow, sender, DialogMode.Edit)
+        var addLiveAlarmDialog = new AddLiveAlarmDialog(PublicVar.GlobalMainWindow, sender, DialogMode.Edit)
         {
             LiveType = selectedLiveAlarmConfig.LiveType,
             LiveRoomId = selectedLiveAlarmConfig.LiveRoomId,

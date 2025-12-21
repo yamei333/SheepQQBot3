@@ -27,7 +27,7 @@ public static class FundExtensions
     public static async Task<FundData[]> GetFundDatasAsync(IEnumerable<string> fundIds)
     {
         var fundIdArray = fundIds as string[] ?? fundIds.ToArray();
-        if (fundIdArray.Any() != true)
+        if (!fundIdArray.Any())
             return null;
 
         // MEMO : doctorxiong 炸了
@@ -80,13 +80,13 @@ public static class FundExtensions
     /// </summary>
     /// <param name="fundId"></param>
     /// <returns></returns>
-    public static async Task<FundPostionData> GetFundPositionDataAsync(string fundId)
+    public static async Task<FundPositionData> GetFundPositionDataAsync(string fundId)
     {
         if (fundId.IsNullOrEmpty())
             return null;
 
         var httpResponse = await HttpExtensions
-            .GetFromJsonAsync<FundPostionData>($"https://api.doctorxiong.club/v1/fund/position?code={fundId}")
+            .GetFromJsonAsync<FundPositionData>($"https://api.doctorxiong.club/v1/fund/position?code={fundId}")
             .ConfigureAwait(false);
         return httpResponse.Result == HttpResponseResult.Successed
             ? httpResponse.Data : null;

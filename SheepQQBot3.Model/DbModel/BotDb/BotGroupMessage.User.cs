@@ -7,8 +7,9 @@ namespace SheepQQBot3.DbModel;
 public partial class BotGroupMessage
 {
     private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
-    private static readonly Regex _regCQCode = RegexGenerator.GetCQCode();
+    //private static readonly Regex _regCQCode = RegexGenerator.GetCQCode();
     private static readonly Regex _regCQImage = RegexGenerator.CQImage();
+
     private static readonly Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
     private static readonly Regex _regCQImageUrl_gchat = RegexGenerator.CQImageUrl_gchat();
 
@@ -17,9 +18,9 @@ public partial class BotGroupMessage
     }
 
     public BotGroupMessage(
-        long groupId,
-        long targetId,
-        int messageId,
+        string groupId,
+        string targetId,
+        string messageId,
         long timeStamp,
         string message)
     {
@@ -34,7 +35,6 @@ public partial class BotGroupMessage
             match => MyStringExtensions.CQCodeToMessageText(match.Groups["tag"].Value, match.Value)).TrimStart();
         // MEMO : 0.14.4.4 不再记录图片
         //MessageImage = messageImage;
-        MessageImage = string.Empty;
     }
 
     /// <summary>

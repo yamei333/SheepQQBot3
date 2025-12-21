@@ -9,11 +9,11 @@ public partial class MainWindowAlarmAideSubmitViewModel : MainWindowViewModelBas
     {
     }
 
-    private long? _selectedMemberId;
+    private string _selectedMemberId;
     /// <summary>
     /// 选中的投稿成员ID
     /// </summary>
-    public long? SelectedMemberId
+    public string SelectedMemberId
     {
         get => _selectedMemberId;
         set

@@ -74,7 +74,7 @@ public static partial class SetuExtensions
                 if (!setuResponse.Data.Any())
                     return new SetuInfo(SetuType.Lolicon, SetuResult.NoSearchResult);
 
-                setuData = setuResponse.Data.First();
+                setuData = setuResponse.Data[0];
                 if (!r18 && setuData.Tags.Contains(TAG_R18))
                     setuResult = SetuResult.ApiR18ReviewError;
 
@@ -101,7 +101,7 @@ public static partial class SetuExtensions
             setuData.Urls?.Original?.ToSmallImageUrl(),
             setuResult);
 
-        string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-5).ToTimeStamp()}";
+        static string GetDateString() => $"&dateAfter={DateTime.Now.AddYears(-5).ToTimeStamp()}";
 
         string GetUrlTagString()
         {
@@ -139,7 +139,7 @@ public static partial class SetuExtensions
                 if (!setuResponse.Data.Any())
                     return new SetuInfo(SetuType.Lolisuki, SetuResult.NoSearchResult);
 
-                setuData = setuResponse.Data.First();
+                setuData = setuResponse.Data[0];
                 if (!r18 && setuData.Tags.Contains(TAG_R18))
                     setuResult = SetuResult.ApiR18ReviewError;
 
@@ -247,7 +247,7 @@ public static partial class SetuExtensions
                 if (setuResponse.Data == null)
                     return new SetuInfo(SetuType.NyanCatda, SetuResult.NoSearchResult);
 
-                setuData = setuResponse.Data.First();
+                setuData = setuResponse.Data[0];
                 if (!r18 && setuData.Tags.Contains(TAG_R18))
                     setuResult = SetuResult.ApiR18ReviewError;
 
@@ -297,7 +297,7 @@ public static partial class SetuExtensions
                 if (!setuDatas.Any())
                     return new SetuInfo(SetuType.Jitsu, SetuResult.NoSearchResult);
 
-                setuData = setuDatas.First();
+                setuData = setuDatas[0];
                 if (!r18 && setuData.Tags.Contains(TAG_R18))
                     setuResult = SetuResult.ApiR18ReviewError;
 
@@ -375,18 +375,64 @@ public static partial class SetuExtensions
             setuResult);
     }
 
-    private static string ToImageUrl(this string url)
-        => url.Replace(Pximg, PixivReverseProxy).Replace(PximgRe, PixivReverseProxy);
+    public static Task<SetuInfo> GetSetu_NekosiaCat_Async(string tag)
+        => GetSetu_NekosiaCat_CoreAsync(tag);
 
-    private static string ToSmallImageUrl(this string url)
+    private static async Task<SetuInfo> GetSetu_NekosiaCat_CoreAsync(string tag, bool r18 = false)
     {
-        var temp = url
-            .Replace(Pximg, PixivReverseProxy)
-            .Replace(PximgRe, PixivReverseProxy)
-            .Replace("sex.nyan.run", PixivReverseProxy)
-            .Replace("img-original", "c/540x540_70/img-master");
-        //.Replace("img-original", "img-master");
-        var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
-        return reg.Replace(temp, "_master1200.jpg");
+        var setuData = new SetuData_NekosiaCat();
+        var setuResult = SetuResult.Successed;
+        var url = @$"https://api.nekosia.cat/api/v1/images/random";
+        var httpResponse = await HttpExtensions.GetFromJsonAsync<SetuData_NekosiaCat>(url).ConfigureAwait(false);
+        switch (httpResponse.Result)
+        {
+            case HttpResponseResult.Successed:
+                setuData = httpResponse.Data;
+                if (setuData == null)
+                    return new SetuInfo(SetuType.NekosiaCat, SetuResult.ApiError);
+
+                if (setuData.Code != 200)
+                    return new SetuInfo(SetuType.NekosiaCat, SetuResult.OtherError);
+
+                break;
+            case HttpResponseResult.UnknownHost:
+                setuResult = SetuResult.ApiError;
+                break;
+            case HttpResponseResult.TimeOut:
+                setuResult = SetuResult.Timeout;
+                break;
+            case HttpResponseResult.UnknownError:
+                YameiLogExtensions.WriteLog(LogType.Error, $"GetSetu_NekosiaCat_Core-{httpResponse.ErrorMessage}");
+                setuResult = SetuResult.OtherError;
+                break;
+        }
+
+        var image = setuData.Image;
+        return new SetuInfo(
+            SetuType.NekosiaCat,
+            setuData.Attribution.Artist.UserName,
+            0,
+            nameof(SetuType.NekosiaCat),
+            image.Original.Url,
+            image.Compressed.Url,
+            setuResult);
+    }
+
+    extension(string url)
+    {
+        private string ToImageUrl()
+            => url.Replace(Pximg, PixivReverseProxy).Replace(PximgRe, PixivReverseProxy);
+
+        private string ToSmallImageUrl()
+        {
+            var temp = url
+                .Replace(Pximg, PixivReverseProxy)
+                .Replace(PximgRe, PixivReverseProxy)
+                .Replace("sex.nyan.run", PixivReverseProxy)
+                .Replace("img-original", "c/540x540_70/img-master");
+            //.Replace("img-original", "img-master");
+            var reg = new Regex(@"\.[a-z]+$", RegexOptions.Multiline);
+            return reg.Replace(temp, "_master1200.jpg");
+        }
     }
 }

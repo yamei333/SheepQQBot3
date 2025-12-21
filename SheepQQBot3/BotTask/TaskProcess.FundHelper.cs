@@ -28,7 +28,7 @@ public static partial class TaskProcess
         {
             try
             {
-                if (BotServer?.Connected == true)
+                if (GlobalBotServer?.Connected == true)
                 {
                     var dateNow = DateTime.Now;
                     var dateNowStr = dateNow.ToConditionString(HolidayInfo);
@@ -114,11 +114,11 @@ public static partial class TaskProcess
             switch (setConfig.TargetType)
             {
                 case BotConfigTargetType.Group:
-                    await BotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                    await GlobalBotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                     AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Private:
-                    await BotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                    await GlobalBotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                     AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                     break;
                 case BotConfigTargetType.Common:
@@ -173,11 +173,11 @@ public static partial class TaskProcess
         switch (setConfig.TargetType)
         {
             case BotConfigTargetType.Group:
-                await BotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
+                await GlobalBotClient.SendGroupMessageAsync(targetId, sendMessage, Vm.SetConfigs).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Group, targetId, sendMessage));
                 break;
             case BotConfigTargetType.Private:
-                await BotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
+                await GlobalBotClient.SendPrivateMessageAsync(targetId, sendMessage).ConfigureAwait(false);
                 LogExtensions.AddRunLog(new RunLog_FundHelper(BotConfigTargetType.Private, targetId, sendMessage));
                 break;
             case BotConfigTargetType.Common:

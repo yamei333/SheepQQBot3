@@ -1,14 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Configuration;
-using System.Diagnostics;
-using System.Linq;
-using Masuit.Tools;
-using SheepQQBot3.DbModel;
-using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
-using Yamei.Common;
+﻿using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Extensions;
 
@@ -20,7 +10,7 @@ public static partial class BotExtensions
     /// <param name="targetId"></param>
     /// <param name="messageId"></param>
     /// <returns></returns>
-    public static string GetMessage_CommandTypeError(long targetId, int messageId)
+    public static string GetMessage_CommandTypeError(string targetId, string messageId)
         => GetMessage_CommonError(targetId, messageId, "命令格式错误!");
 
     /// <summary>
@@ -29,7 +19,7 @@ public static partial class BotExtensions
     /// <param name="targetId"></param>
     /// <param name="messageId"></param>
     /// <returns></returns>
-    public static string GetMessage_ParameterRangeError(long targetId, int messageId)
+    public static string GetMessage_ParameterRangeError(string targetId, string messageId)
         => GetMessage_CommonError(targetId, messageId, "参数范围错误!");
 
     /// <summary>
@@ -38,7 +28,7 @@ public static partial class BotExtensions
     /// <param name="targetId"></param>
     /// <param name="messageId"></param>
     /// <returns></returns>
-    public static string GetMessage_CanOnlyAdminUseError(long targetId, int messageId)
+    public static string GetMessage_CanOnlyAdminUseError(string targetId, string messageId)
         => GetMessage_CommonError(targetId, messageId, "该命令仅管理可用!");
 
     /// <summary>
@@ -48,6 +38,6 @@ public static partial class BotExtensions
     /// <param name="messageId"></param>
     /// <param name="errorMessage"></param>
     /// <returns></returns>
-    public static string GetMessage_CommonError(long targetId, int messageId, string errorMessage)
+    public static string GetMessage_CommonError(string targetId, string messageId, string errorMessage)
         => $"{CQCode.Reply(targetId, messageId)}{errorMessage}";
 }

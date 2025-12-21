@@ -15,7 +15,7 @@ public partial class SetuSendHistory
     }
 
     public SetuSendHistory(
-        long targetId,
+        string targetId,
         DateTime dateTime,
         string searchKeyword,
         bool isRequestSuccessed,

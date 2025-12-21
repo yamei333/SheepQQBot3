@@ -6,17 +6,17 @@ public class GroupPoke
 {
     public DateTime DateTime { get; set; }
 
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
-    public long GroupId { get; set; }
+    public string GroupId { get; set; }
 
-    public long SenderId { get; set; }
+    public string SenderId { get; set; }
 
     public GroupPoke(ReceiveData receiveData)
     {
         DateTime = receiveData.DateTime;
-        SenderId = receiveData.UserId;
-        TargetId = receiveData.TargetId;
-        GroupId = receiveData.GroupId;
+        SenderId = receiveData.UserId.ToString();
+        TargetId = receiveData.TargetId.ToString();
+        GroupId = receiveData.GroupId.ToString();
     }
 }

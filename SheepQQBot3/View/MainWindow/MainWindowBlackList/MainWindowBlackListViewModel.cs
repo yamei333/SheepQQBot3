@@ -9,11 +9,11 @@ public partial class MainWindowBlackListViewModel : MainWindowViewModelBase
     {
     }
 
-    private long? _selectedMemberId;
+    private string _selectedMemberId;
     /// <summary>
     /// 选中的成员ID
     /// </summary>
-    public long? SelectedMemberId
+    public string SelectedMemberId
     {
         get => _selectedMemberId;
         set

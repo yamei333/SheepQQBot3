@@ -22,7 +22,7 @@ public class WebApi_SendMessage
     /// 目标ID
     /// </summary>
     [JsonPropertyName("targetid")]
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
     /// <summary>
     /// 消息内容

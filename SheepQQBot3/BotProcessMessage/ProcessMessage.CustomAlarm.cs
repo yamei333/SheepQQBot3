@@ -39,7 +39,7 @@ public static partial class ProcessMessage
         => CustomAlarmAsyncCore(
             true,
             groupMessage.GroupId,
-            groupMessage.Sender.UserId,
+            groupMessage.Sender.UserId.ToString(),
             groupMessage.Message);
 
     /// <summary>
@@ -50,8 +50,8 @@ public static partial class ProcessMessage
         PrivateMessage privateMessage)
         => CustomAlarmAsyncCore(
             false,
-            privateMessage.Sender.GroupId,
-            privateMessage.Sender.UserId,
+            privateMessage.Sender.GroupId.ToString(),
+            privateMessage.Sender.UserId.ToString(),
             privateMessage.Message);
 
     /// <summary>
@@ -60,8 +60,8 @@ public static partial class ProcessMessage
     /// </summary>
     public static async Task<bool> CustomAlarmAsyncCore(
         bool isGroup,
-        long? groupId,
-        long targetId,
+        string groupId,
+        string targetId,
         string message)
     {
         if (message.Length < COMMAND_CUSTOM_GROUP_ALARM_MINLENGTH
@@ -80,8 +80,8 @@ public static partial class ProcessMessage
             message = message[COMMAND_CUSTOM_GROUP_ALARM_CONTENT_MINLENGTH..];
             var isNoAt = false;
             var isNoReply = false;
-            var customAlarms = PublicVar.BotConfig.CustomAlarms;
-            var customAlarmValues = PublicVar.BotConfig.CustomAlarms.ToValueList();
+            var customAlarms = PublicVar.GlobalBotConfig.CustomAlarms;
+            var customAlarmValues = PublicVar.GlobalBotConfig.CustomAlarms.ToValueList();
             switch (startChar1)
             {
                 case 'C':
@@ -111,12 +111,12 @@ public static partial class ProcessMessage
                                     const string barkKeyError = "BarkKey未正确配置, 无法使用[-bark]!";
                                     if (isGroup)
                                     {
-                                        await BotClient.SendGroupMessageAsync(groupId.GetValueOrDefault(),
+                                        await GlobalBotClient.SendGroupMessageAsync(groupId,
                                             $"{CQCode.At(targetId)}{barkKeyError}").ConfigureAwait(false);
                                     }
                                     else
                                     {
-                                        await BotClient.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
+                                        await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
                                     }
 
                                     return true;
@@ -246,12 +246,12 @@ public static partial class ProcessMessage
 
                 if (isGroup)
                 {
-                    await BotClient.SendGroupMessageAsync(groupId.GetValueOrDefault(),
+                    await GlobalBotClient.SendGroupMessageAsync(groupId,
                         $"{(isNoAt ? string.Empty : $"{CQCode.At(targetId)}{ENTER}")}{sendMessage}").ConfigureAwait(false);
                 }
                 else
                 {
-                    await BotClient.SendPrivateMessageAsync(targetId, groupId, $"{sendMessage}").ConfigureAwait(false);
+                    await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId, $"{sendMessage}").ConfigureAwait(false);
                 }
             }
 

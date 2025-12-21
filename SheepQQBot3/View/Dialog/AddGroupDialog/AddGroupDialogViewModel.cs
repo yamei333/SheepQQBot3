@@ -1,13 +1,13 @@
-﻿using System.Collections.Generic;
+﻿using SheepQQBot3.Model.Enums;
+using System.Collections.Generic;
 using System.ComponentModel;
 using System.Linq;
-using SheepQQBot3.Model.Enums;
 
 namespace SheepQQBot3.View;
 
 public class AddGroupDialogViewModel : INotifyPropertyChanged
 {
-    private long _targetId;
+    private string _targetId;
     private GroupConfig _selectedGroupConfig;
     private string _targetName;
     private List<GroupConfig> _groupConfigs;
@@ -64,7 +64,7 @@ public class AddGroupDialogViewModel : INotifyPropertyChanged
     /// <summary>
     /// 配置目标ID
     /// </summary>
-    public long TargetId
+    public string TargetId
     {
         get => _targetId;
         set

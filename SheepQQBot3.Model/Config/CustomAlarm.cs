@@ -12,7 +12,7 @@ public class CustomAlarm
     public Guid Id { get; set; }
 
     [JsonPropertyName(nameof(TargetId))]
-    public long TargetId { get; set; }
+    public string TargetId { get; set; }
 
     /// <summary>
     /// 是否是群提醒
@@ -21,7 +21,7 @@ public class CustomAlarm
     public bool IsGroup { get; set; }
 
     [JsonPropertyName(nameof(GroupId))]
-    public long? GroupId { get; set; }
+    public string GroupId { get; set; }
 
     [JsonPropertyName(nameof(IsAtTarget))]
     public bool IsAtTarget { get; set; }
@@ -44,8 +44,8 @@ public class CustomAlarm
     public CustomAlarm(
         Guid id,
         bool isGroup,
-        long? groupId,
-        long targetId,
+        string groupId,
+        string targetId,
         DateTime alarmDate,
         string alarmMessage,
         bool isAtTarget,
