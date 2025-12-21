@@ -40,7 +40,7 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?\.[a-z]{3}).*?\]")]
     public static partial Regex CQImage();
 
-    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?),.+?,url=(?<url>.+?),.+?\]")]
+    [GeneratedRegex(@"\[CQ:image(?=[^\]]*\bfile=(?<file>[^,\]]+))(?=[^\]]*\burl=(?<url>[^,\]]+))[^\]]*\]")]
     public static partial Regex CQImageFileUrl();
 
     [GeneratedRegex(@"(?<=image,.+?)https://multimedia.+?(?=[,\]])")]

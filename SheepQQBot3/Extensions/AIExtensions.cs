@@ -45,7 +45,7 @@ public static class AIExtensions
 
     private static readonly Tool _tool = GetTool_Response();
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
-    private static readonly Regex _regGetImage = RegexGenerator.CQImage();
+    private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
     //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
     //private static readonly Regex _regDeleteErrorEmoji = new(@"\[emoji:(?<emojiCode>.+?)\]|\[\[emoji:(?<emojiCode>.+?)\]\]|\[\[\[emoji:(?<emojiCode>.+?)\]\]\]", RegexOptions.IgnoreCase);
     //private static readonly Regex _regDeleteErrorEmoji2 = new(@"\[.+?\]|\[\[.+?\]\]|\[\[\[.+?\]\]\]");
@@ -188,7 +188,7 @@ public static class AIExtensions
 
                 #region 发送AI请求
 
-                // MEMO : 发送AI请求
+                // HINT : 发送AI请求
                 var response = await (model.SupportImage ? AIClientImage : AIClient)
                     .CreateChatCompletionAsync(new ChatCompletionRequest
                     {
@@ -600,11 +600,11 @@ public static class AIExtensions
         if (isGroupRequest)
         {
             if (isGroupMemberRequest)
-                botSendMessage(requestTargetId, $"{CQCode.At(requestTargetId)} API请求重试次数超过限制!");
+                botSendMessage(requestTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 请求重试次数超过限制!");
         }
         else
         {
-            botSendMessage(requestTargetId, $"API请求重试次数超过限制!");
+            botSendMessage(requestTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
         }
 
         // 删除过期图片信息
@@ -784,7 +784,11 @@ public static class AIExtensions
             return aiChatStatus;
         }
 
-        public async Task AddQQChatMessageAsync(AIChatSender sender, string messageText, Dictionary<string, GroupMember> groupMembers)
+        public async Task AddQQChatMessageAsync(
+            AIChatSender sender,
+            string messageText,
+            Dictionary<string, GroupMember> groupMembers,
+            bool imageToText = false)
         {
             if (messageText.IsNullOrEmpty())
                 return;
@@ -802,7 +806,7 @@ public static class AIExtensions
                 });
             }
 
-            var deleteImageJsonText = await contentParts.AddQQChatImageAsync(sender, message).ConfigureAwait(false);
+            var deleteImageJsonText = await contentParts.AddQQChatImageAsync(sender, message, imageToText).ConfigureAwait(false);
             if (!deleteImageJsonText.IsNullOrEmpty())
                 contentParts.AddQQChatTextContent(sender, WebUtility.HtmlDecode(deleteImageJsonText));
         }
@@ -816,27 +820,26 @@ public static class AIExtensions
         /// <param name="sender">发送者信息</param>
         /// <param name="messageText">消息内容</param>
         /// <returns>删除图片后的消息</returns>
-        private async Task<string> AddQQChatImageAsync(AIChatSender sender, string messageText)
+        private async Task<string> AddQQChatImageAsync(AIChatSender sender, string messageText, bool imageToText = false)
         {
             if (messageText.IsNullOrEmpty())
                 return string.Empty;
 
             var processedMessage = messageText;
             var isAddImage = false;
-            var matches = _regGetImage.Matches(messageText);
+            var matches = _regCQImageFileUrl.Matches(messageText);
             var thisContentParts = new List<ContentPart>();
-            await matches.ForeachAsync(async match =>
+            await matches.ForeachAsync(match =>
             {
                 var replaceContent = match.Value;
-                var fileId = WebUtility.HtmlDecode(match.Groups["fileName"].Value);
-                var imageReceiveData = await GlobalBotClient.GetImageAsync(fileId).ConfigureAwait(false);
-                if (imageReceiveData.IsSuccessed)
-                {
-                    thisContentParts.Add(new ImageContent(imageReceiveData.Data.Url));
-                    isAddImage = true;
-                }
+                if (imageToText)
+                    thisContentParts.AddQQChatTextContent(sender, "[图片已过期]");
+                else
+                    thisContentParts.Add(new ImageContent(WebUtility.HtmlDecode(match.Groups["url"].Value)));
 
+                isAddImage = true;
                 processedMessage = processedMessage.Replace(replaceContent, string.Empty);
+                return Task.CompletedTask;
             }).ConfigureAwait(false);
 
             if (isAddImage)

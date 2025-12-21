@@ -15,53 +15,47 @@ public static class CommonExtensions
     public static bool CheckPercent(this Random rand, int percent)
         => rand.Next(100) + 1 <= percent;
 
-    public static string ToConditionString(this DateTime input, Dictionary<string, bool> holidayInfo)
-        => input.ToString($"yyyy-MM-dd-{DayOfWeek2Int(input.DayOfWeek)}-{(input.IsHoliday(holidayInfo) ? 1 : 0)} HH:mm:ss");
+    extension(DateTime input)
+    {
+        public string ToConditionString(Dictionary<string, bool> holidayInfo)
+            => input.ToString($"yyyy-MM-dd-{DayOfWeek2Int(input.DayOfWeek)}-{(input.IsHoliday(holidayInfo) ? 1 : 0)} HH:mm:ss");
 
-    //public static string ToDayHHMM(this DateTime input) => input.ToString($"d{(input.DayOfWeek == DayOfWeek.Saturday ? "(六)" : string.Empty)}, HH:mm");
+        public string ToYYYYMDHHMMSS() => input.ToString("yyyy-M-d HH:mm:ss");
+        public string ToYYYYMD() => input.ToString("yyyy-M-d");
+        public string ToYYYYMMDD() => input.ToString("yyyy-MM-dd");
+        public string ToYYYYMM() => input.ToString("yyyy-MM");
 
-    //public static string ToYYYYMDDDDDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d dddd HH:mm:ss");
-
-    public static string ToYYYYMDHHMMSS(this DateTime input) => input.ToString("yyyy-M-d HH:mm:ss");
-
-    //public static string ToYYYYMMDDHHMM(this DateTime input) => input.ToString("yyyy-M-dd HH:mm");
-
-    public static string ToYYYYMD(this DateTime input) => input.ToString("yyyy-M-d");
-
-    public static string ToYYYYMMDD(this DateTime input) => input.ToString("yyyy-MM-dd");
-
-    public static string ToYYYYMM(this DateTime input) => input.ToString("yyyy-MM");
+        /// <summary>
+        /// 判定是否节假日
+        /// </summary>
+        public bool IsHoliday(Dictionary<string, bool> holidayInfo)
+        {
+            switch (input.DayOfWeek)
+            {
+                case DayOfWeek.Monday:
+                case DayOfWeek.Tuesday:
+                case DayOfWeek.Wednesday:
+                case DayOfWeek.Thursday:
+                case DayOfWeek.Friday:
+                    return holidayInfo != null
+                        && holidayInfo.TryGetValue(input.ToYYYYMMDD(), out var isHoliday1)
+                        && isHoliday1;
+                case DayOfWeek.Saturday:
+                case DayOfWeek.Sunday:
+                    return holidayInfo == null
+                        || !holidayInfo.TryGetValue(input.ToYYYYMMDD(), out var isHoliday2)
+                        || isHoliday2;
+                default:
+                    return false;
+            }
+        }
+    }
 
     /// <summary>
     /// <see cref="DayOfWeek"/>转换为数字
     /// </summary>
     public static int DayOfWeek2Int(DayOfWeek dayOfWeek)
         => dayOfWeek == DayOfWeek.Sunday ? 7 : (int)dayOfWeek;
-
-    /// <summary>
-    /// 判定是否节假日
-    /// </summary>
-    public static bool IsHoliday(this DateTime dateTime, Dictionary<string, bool> holidayInfo)
-    {
-        switch (dateTime.DayOfWeek)
-        {
-            case DayOfWeek.Monday:
-            case DayOfWeek.Tuesday:
-            case DayOfWeek.Wednesday:
-            case DayOfWeek.Thursday:
-            case DayOfWeek.Friday:
-                return holidayInfo != null
-                    && holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday1)
-                    && isHoliday1;
-            case DayOfWeek.Saturday:
-            case DayOfWeek.Sunday:
-                return holidayInfo == null
-                    || !holidayInfo.TryGetValue(dateTime.ToYYYYMMDD(), out var isHoliday2)
-                    || isHoliday2;
-            default:
-                return false;
-        }
-    }
 
     /// <summary>
     /// 替换普通内容为CQ代码
