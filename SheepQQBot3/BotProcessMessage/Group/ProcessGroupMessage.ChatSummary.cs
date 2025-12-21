@@ -188,39 +188,11 @@ public static partial class ProcessGroupMessage
                     thisRequestContentParts.AddSystemHint($"[群聊内容到此为止]");
 
                     var sender = groupMessage.Sender;
-                    //await thisRequestMessages.AddQQChatMessageAsync(sender, $"{CQCode.At(BotId)} 总结一下大家都聊了什么，先对不同内容进行总结，最后再简短的一句话描述，内容分批发送。", groupMembers).ConfigureAwait(false);
                     await thisRequestContentParts.AddQQChatMessageAsync(sender,
-                        $@"{CQCode.At(BotId)} 总结一下大家都聊了什么，先发一条反馈，接着按话题总结，再从群聊中选取部分内容作为【今日怪话】，再增加一个群聊颁奖环节，最后再一句话总结。
-要求:
-1. 每个【xxx】的部分都必须分气泡发送（设置多个'contents'）
-2. 总结中每条气泡消息可以看情况使用表情包
-3. 今日怪话不需要发表感想
-4. 群聊颁奖得奖者只能是群友，不能是事件或物品
-
-话题格式:
-【话题标题（替换为实际内容）】
-1. xx
-2. xx
-
-今日怪话格式:
-【今日怪话】
-1. 群友名（替换为实际内容）：xx
-
-群聊颁奖格式:
-【群聊颁奖】
-活跃奖: xx
-小丑奖: xx
-废物奖: xx
-色色奖: xx", groupMembers).ConfigureAwait(false);
+                        $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers).ConfigureAwait(false);
                     await thisRequestContentParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
                             (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false), GlobalAIConfig.ModelSummary)
                         .ConfigureAwait(false);
-
-                    //requestMessages.AddSystemHint($"[群聊内容到此为止]");
-                    //await requestMessages.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(GroupMemberInfos), aiGroupConfig,
-                    //    (id, msg) => BotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false),
-                    //    $"{sender.NickName}(QQ:{sender.UserId}) 想让你总结一下大家都聊了些什么，先对不同内容进行总结，最后再简短的一句话描述。")
-                    //    .ConfigureAwait(false);
                 }
             }
         }
