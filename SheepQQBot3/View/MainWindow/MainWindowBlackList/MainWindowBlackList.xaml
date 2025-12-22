@@ -106,7 +106,7 @@
                                 <DataTemplate>
                                     <ToggleButton
                                         Click="List_OnEnable"
-                                        IsChecked="{Binding BanedAIAt}"
+                                        IsChecked="{Binding BanedAIResponse}"
                                         Style="{StaticResource CheckOppositeImageButtonStyle}" />
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>

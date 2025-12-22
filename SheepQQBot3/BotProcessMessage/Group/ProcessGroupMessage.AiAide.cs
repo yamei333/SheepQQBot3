@@ -127,7 +127,7 @@ public static partial class ProcessGroupMessage
         //var removeAtMessage = message[_commandAI.Length..].TrimStart();
         if (isPrivateChat && aiGroupConfig.UseAtResponse)
         {
-            if (blackListUserConfig.BanedAIAt)
+            if (blackListUserConfig.BanedAIResponse)
                 return;
 
             // MEMO : 是否只给管理用

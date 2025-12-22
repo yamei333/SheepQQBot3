@@ -3,6 +3,7 @@ using OpenRouter.NET.Models;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
+using SheepQQBot3.Model.Config;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -18,11 +19,16 @@ public static partial class ProcessPrivateMessage
     /// <summary>
     /// AI助手
     /// </summary>
+    /// <param name="blackListUserConfig"></param>
     /// <param name="privateMessage"><see cref="PrivateMessage"/></param>
     /// <returns></returns>
-    public static async Task AIAideAsync(PrivateMessage privateMessage)
+    public static async Task AIAideAsync(BlackListUserConfig blackListUserConfig, PrivateMessage privateMessage)
     {
         var sender = privateMessage.Sender;
+        // MEMO : 非好友禁止AI私聊功能
+        if (!sender.GroupId.IsDefaultValue() || blackListUserConfig.BanedAIResponse)
+            return;
+
         var targetId = sender.UserId.ToString();
         var message = privateMessage.Message;
         var isAdmin = BotExtensions.IsAdmin(targetId);

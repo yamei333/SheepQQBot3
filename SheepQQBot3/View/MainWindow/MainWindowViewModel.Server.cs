@@ -157,6 +157,7 @@ partial class MainWindowViewModel
         if (systemConfig == null)
             return;
 
+        var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId)) ?? new BlackListUserConfig(senderId);
         // 获取或创建一个属于该用户的锁
         var userLock = _userLocks.GetOrAdd(senderId, _ => new SemaphoreSlim(1, 1));
         await userLock.WaitAsync().ConfigureAwait(false);
@@ -168,12 +169,11 @@ partial class MainWindowViewModel
         if (IsEnabled(BotFunctionType.Common_CustomAlarm))
             taskList.Add(ProcessMessage.CustomPrivateAlarmAsync(privateMessage));
 
+        if (IsEnabled(BotFunctionType.Common_AIConfig))
+            taskList.Add(ProcessPrivateMessage.AIAideAsync(blackListUserConfig, privateMessage));
+
         if (BotExtensions.IsAdmin(senderId))
-        {
             taskList.Add(ProcessPrivateMessage.AdminCommandAsync(privateMessage));
-            if (IsEnabled(BotFunctionType.Common_AIConfig))
-                taskList.Add(ProcessPrivateMessage.AIAideAsync(privateMessage));
-        }
 
         try
         {

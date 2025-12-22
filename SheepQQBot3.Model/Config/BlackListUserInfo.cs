@@ -23,10 +23,10 @@ namespace SheepQQBot3.Model.Config
         public bool BanedAICollect { get; set; }
 
         /// <summary>
-        /// 禁止AIAt功能
+        /// 禁止AI响应(At或私聊)
         /// </summary>
-        [JsonPropertyName(nameof(BanedAIAt))]
-        public bool BanedAIAt { get; set; }
+        [JsonPropertyName(nameof(BanedAIResponse))]
+        public bool BanedAIResponse { get; set; }
 
         /// <summary>
         /// 禁止群聊统计功能

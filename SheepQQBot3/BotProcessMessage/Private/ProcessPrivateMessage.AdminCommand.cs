@@ -57,7 +57,7 @@ public static partial class ProcessPrivateMessage
     /// <summary>
     /// Admin功能
     /// </summary>
-    public static async Task<bool> AdminCommandAsync(PrivateMessage privateMessage)
+    public static async Task AdminCommandAsync(PrivateMessage privateMessage)
     {
         var senderId = privateMessage.Sender.UserId.ToString();
         // MEMO : 通过群进行临时私聊时会有此值
@@ -65,7 +65,7 @@ public static partial class ProcessPrivateMessage
         var message = privateMessage.Message;
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_ADMIN, StringComparison.CurrentCultureIgnoreCase))
-            return false;
+            return;
 
         var contentMessage = message[COMMAND_ADMIN.Length..];
         switch (contentMessage.ToUpper())
@@ -74,13 +74,13 @@ public static partial class ProcessPrivateMessage
                 if (!RouterExtension.TryGetIPAddress(out var ipResult))
                 {
                     await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP取得失败!{ENTER}原因: {ipResult}").ConfigureAwait(false);
-                    return true;
+                    return;
                 }
 
                 if (ipResult.IsNullOrEmpty())
                 {
                     await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址为空! 请检查路由是否正确拨号").ConfigureAwait(false);
-                    return true;
+                    return;
                 }
 
                 await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, $"IP地址: {ipResult}").ConfigureAwait(false);
@@ -131,30 +131,30 @@ public static partial class ProcessPrivateMessage
                 {
                     case "":
                         await DeleteAIHistory("*.json").ConfigureAwait(false);
-                        return true;
+                        return;
                     case "P":
                         await DeleteAIHistory("p*.json").ConfigureAwait(false);
-                        return true;
+                        return;
                     case "G":
                         await DeleteAIHistory("g*.json").ConfigureAwait(false);
-                        return true;
+                        return;
                     default:
                         if (!int.TryParse(clearCommand, out var userId))
                         {
                             await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
-                            return false;
+                            return;
                         }
 
                         await DeleteAIHistory($"*{userId}.json").ConfigureAwait(false);
-                        return true;
+                        return;
                 }
 
             default:
                 await GlobalBotClient.SendPrivateMessageAsync(senderId, groupId, "命令格式有误!").ConfigureAwait(true);
-                return false;
+                return;
         }
 
-        return true;
+        return;
 
         Task ClearDefaultAIStatus()
         {
