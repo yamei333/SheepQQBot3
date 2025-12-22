@@ -1,13 +1,12 @@
 ﻿using Masuit.Tools;
+using System.Net;
 using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.Model.Extension;
 
 public static class CQCode
 {
-    private static Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
-    private static Regex _regCQImageUrl_multimedia = RegexGenerator.CQImageUrl_multimedia();
-    private static Regex _regCQImageUrl_gchat = RegexGenerator.CQImageUrl_gchat();
+    private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
 
     public static string At(string targetId)
         => $"[CQ:at,qq={targetId}]";
@@ -67,20 +66,7 @@ public static class CQCode
 
     public static string GetImageUrl(string message)
     {
-        var match = _regCQImageUrl_multimedia.Match(message);
-        if (match.Success)
-        {
-            var cqImageUrl = match.Value;
-            return cqImageUrl.Replace("&amp;", "&");
-        }
-
-        match = _regCQImageUrl_gchat.Match(message);
-        if (match.Success)
-        {
-            var cqImageUrl = match.Value;
-            return cqImageUrl.Replace("&amp;", "&").Replace("gchat.qpic.cn", "multimedia.nt.qq.com.cn");
-        }
-
-        return message;
+        var match = _regCQImageFileUrl.Match(message);
+        return match.Success ? WebUtility.HtmlDecode(match.Value) : string.Empty;
     }
 }

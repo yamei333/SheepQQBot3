@@ -21,8 +21,6 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
-    //private const string PATH_CACHE_WORDCLOUD = "WordCloud";
-    //private const string PATH_WORDCLOUD_CONFIG = "WordCloud/Config";
 
     /// <summary>
     /// 群聊消息总结最低消息数
@@ -40,9 +38,9 @@ public static partial class ProcessGroupMessage
     private const string COMMAND_CHAT_SUMMARY = "#ZJ#";
 
     /// <summary>
-    /// 群聊总结命令CD (60分钟)
+    /// 群聊总结命令CD (30分钟)
     /// </summary>
-    private const int CHAT_SUMMARY_TO_FAST_TIMES = 3600;
+    private const int CHAT_SUMMARY_TO_FAST_TIMES = 1800;
 
     /// <summary>
     /// 群聊总结最后一次执行时间

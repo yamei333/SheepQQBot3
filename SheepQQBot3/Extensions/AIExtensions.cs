@@ -32,7 +32,6 @@ public static class AIExtensions
     public const string ERROR_JSON_BLOCK = "返回截断";
     public const string ERROR_JSON_EMPTY = "返回空内容";
     public const string AI_HISTORY_PATH = "AICache/History/";
-    //private const string AI_IMAGE_PATH = "AICache/Image/";
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
 
     public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
@@ -43,17 +42,15 @@ public static class AIExtensions
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
+    /// <summary>
+    /// 最大历史记录保存数
+    /// </summary>
+    private const int MAX_CACHE_HISTORY_COUNT = 500;
+
     private static readonly Tool _tool = GetTool_Response();
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
-    //private static readonly Regex _regDeleteMarkdown = new(@"(?<=```json)[\s\S.]+(?=```)", RegexOptions.IgnoreCase | RegexOptions.Multiline);
-    //private static readonly Regex _regDeleteErrorEmoji = new(@"\[emoji:(?<emojiCode>.+?)\]|\[\[emoji:(?<emojiCode>.+?)\]\]|\[\[\[emoji:(?<emojiCode>.+?)\]\]\]", RegexOptions.IgnoreCase);
-    //private static readonly Regex _regDeleteErrorEmoji2 = new(@"\[.+?\]|\[\[.+?\]\]|\[\[\[.+?\]\]\]");
-    //private static readonly Regex _regDeleteErrorEmoji3 = new(@"\(.+?\)|\(\(.+?\)\)|\(\(.+?\)\)");
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}");
-
-    //private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}");
-    //private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     public static async Task SendAsync(
         this List<ContentPart> thisRequestContentParts,
@@ -259,15 +256,18 @@ public static class AIExtensions
                             // MEMO : 正常生成图片并发送
                             botSendMessage(sendTargetId, $"{sendMessage}{(isAt ? $"{CQCode.At(requestTargetId)} " : string.Empty)}你要的图片来了!");
 
-                            // MEMO : 删除过期图片信息
-                            //DeleteExpireImage();
-                            // MEMO : 添加本次请求内容
-                            loadedHistories.Add(Message.FromUser(thisRequestContentParts));
-                            // MEMO : 添加本次回复内容
-                            loadedHistories.Add(Message.FromAssistant("[图片已过期]你要的图片来了!"));
-                            // MEMO : 保存历史记录
+                            // MEMO : 保存历史记录(图片内容应该不多, 可以忽略最大限制)
                             if (saveHistory)
+                            {
+                                // MEMO : 删除过期图片信息
+                                DeleteExpireImage();
+                                // MEMO : 添加本次请求内容
+                                loadedHistories.Add(Message.FromUser(thisRequestContentParts));
+                                // MEMO : 添加本次回复内容
+                                loadedHistories.Add(Message.FromAssistant("[图片已过期]你要的图片来了!"));
+                                // MEMO : 保存历史记录
                                 loadedHistories.SaveAIHistory(chatKey);
+                            }
                         }
                         else
                         {
@@ -351,7 +351,10 @@ public static class AIExtensions
                     await GlobalBotClient.SendGroupForwardMessageAsync(IsDebug ? TestGroupId : groupId, sendMessages,
                             $"{dateNow.ToYYYYMD()} 群聊总结", [$"{BOT_NICK_NAME}群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
                         .ConfigureAwait(false);
-                    WriteLog();
+
+                    // MEMO : 群聊总结内容太多了, 不写后台Log
+                    WriteLog(false);
+
                     return;
                 }
 
@@ -521,37 +524,62 @@ public static class AIExtensions
 
                 #region 历史记录保存
 
-                DeleteExpireImage();
-                // MEMO : 添加本次请求内容
-                loadedHistories.Add(Message.FromUser(thisRequestContentParts));
-                // MEMO : 添加本次回复内容
-                var aiContentParts = new List<ContentPart>();
-                aiChatResponse.Contents
-                    .ForEach(each => aiContentParts.Add(new TextContent(new AIChatRequest
-                    {
-                        NickName = BOT_NAME,
-                        Message = each.ChatMessageInfo.Text,
-                    }.ToJsonIgnoreNull())));
-                var aiMessage = Message.FromAssistant(string.Empty);
-                aiMessage.Content = aiContentParts;
-                // MEMO : AI回复只保留text
-                //loadedHistories.Add(Message.FromAssistant(aiChatResponse.ToJsonIgnoreNull()));
-                loadedHistories.Add(aiMessage);
-                // MEMO : 保存历史记录
                 if (saveHistory)
-                    loadedHistories.SaveAIHistory(chatKey);
+                {
+                    DeleteExpireImage();
+                    var newHistories = new List<Message>();
+                    var contentCount = 0;
+                    loadedHistories.Reverse();
+                    foreach (var historyMessage in loadedHistories)
+                    {
+                        newHistories.Add(historyMessage);
+                        if (historyMessage.Role == "user")
+                        {
+                            if (contentCount >= MAX_CACHE_HISTORY_COUNT)
+                                break;
+
+                            if (historyMessage.Content is List<ContentPart> contentParts)
+                                contentCount += contentParts.Count;
+                            else
+                                contentCount++;
+                        }
+
+                        newHistories.Add(historyMessage);
+                    }
+
+                    // MEMO : 添加本次请求内容
+                    newHistories.Add(Message.FromUser(thisRequestContentParts));
+                    // MEMO : 添加本次回复内容
+                    var aiContentParts = new List<ContentPart>();
+                    aiChatResponse.Contents
+                        .ForEach(each => aiContentParts.Add(new TextContent(new AIChatRequest
+                        {
+                            NickName = BOT_NAME,
+                            Message = each.ChatMessageInfo.Text,
+                        }.ToJsonIgnoreNull())));
+                    var aiMessage = Message.FromAssistant(string.Empty);
+                    aiMessage.Content = aiContentParts;
+                    // MEMO : AI回复只保留text
+                    //loadedHistories.Add(Message.FromAssistant(aiChatResponse.ToJsonIgnoreNull()));
+                    newHistories.Add(aiMessage);
+                    // MEMO : 保存历史记录
+                    newHistories.SaveAIHistory(chatKey);
+                }
 
                 #endregion 历史记录保存
 
                 WriteLog();
 
-                void WriteLog()
+                void WriteLog(bool writeBackLog = true)
                 {
                     // MEMO : 写入前台日志
                     var apiKey = GlobalAIControl.AIConfig.ApiKeyChat;
                     LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, apiKey, response.Usage));
-                    // MEMO : 写入Log
-                    YameiLogExtensions.WriteLog(apiKey, response, thisRequestContentParts, aiStatus.ToJsonIgnoreNull());
+                    if (writeBackLog)
+                    {
+                        // MEMO : 写入后台Log
+                        YameiLogExtensions.WriteLog(apiKey, response, thisRequestContentParts, aiStatus.ToJsonIgnoreNull());
+                    }
                 }
             }
             catch (JsonException ex)
@@ -819,6 +847,7 @@ public static class AIExtensions
         /// </summary>
         /// <param name="sender">发送者信息</param>
         /// <param name="messageText">消息内容</param>
+        /// <param name="imageToText"></param>
         /// <returns>删除图片后的消息</returns>
         private async Task<string> AddQQChatImageAsync(AIChatSender sender, string messageText, bool imageToText = false)
         {

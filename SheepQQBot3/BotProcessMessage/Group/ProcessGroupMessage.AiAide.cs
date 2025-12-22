@@ -23,9 +23,6 @@ public static partial class ProcessGroupMessage
     private static readonly Regex _regEmoji = new(@"\p{Cs}");
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
-    private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
-    //private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";
-
     /// <summary>
     /// AI助手
     /// </summary>
@@ -167,7 +164,7 @@ public static partial class ProcessGroupMessage
                 (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
                 GlobalAIConfig.ModelChat,
-                GROUP_CHAT_HINT);
+                AppSettingExtensions.Get("groupChatPrompt"));
         }
     }
 

@@ -19,12 +19,6 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+),.+?\]")]
     public static partial Regex ReplaceCQCode();
 
-    [GeneratedRegex(@"CQ:image,file=(.+?),url=(.+?)(?=[,\]])")]
-    public static partial Regex CQCodeReplaceImage();
-
-    [GeneratedRegex(@",url=.+?(?=[,\]])")]
-    public static partial Regex CQCodeRemoveUrl();
-
     [GeneratedRegex(@",file_size=\d+")]
     public static partial Regex CQCodeRemoveFileSize();
 
@@ -42,12 +36,6 @@ public static partial class RegexGenerator
 
     [GeneratedRegex(@"\[CQ:image(?=[^\]]*\bfile=(?<file>[^,\]]+))(?=[^\]]*\burl=(?<url>[^,\]]+))[^\]]*\]")]
     public static partial Regex CQImageFileUrl();
-
-    [GeneratedRegex(@"(?<=image,.+?)https://multimedia.+?(?=[,\]])")]
-    public static partial Regex CQImageUrl_multimedia();
-
-    [GeneratedRegex(@"(?<=image,.+?)https://gchat.+?(?=[,\]])")]
-    public static partial Regex CQImageUrl_gchat();
 
     [GeneratedRegex(@"\[CQ:(?<tag>[a-z]+),.+?\]")]
     public static partial Regex CQDeleteCQCode();
