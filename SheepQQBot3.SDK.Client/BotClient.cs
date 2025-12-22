@@ -1,6 +1,5 @@
 using CommonLibrary;
 using Masuit.Tools;
-using SheepQQBot3.DbModel;
 using System.Net.Http;
 using System.Text;
 
@@ -16,8 +15,6 @@ namespace SheepQQBot3.SDK.Client
 
         private string Token { get; }
 
-        private static BotDbContext _botDb;
-
         /// <summary>
         /// д╛хо╤к©з
         /// </summary>
@@ -28,9 +25,8 @@ namespace SheepQQBot3.SDK.Client
         /// </summary>
         private const string DEFAULT_IP_ADDRESS = "127.0.0.1";
 
-        public BotClient(BotDbContext botDb)
+        public BotClient()
         {
-            _botDb = botDb;
             var httpClient = new HttpClient();
             httpClient.Timeout = TimeSpan.FromMilliseconds(5000);
             HttpClient = httpClient;

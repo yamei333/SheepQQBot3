@@ -19,7 +19,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> RepeatRevokeMessageAsync(GroupMessage groupMessage)
+    public static async Task RepeatRevokeMessageAsync(GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var targetId = groupMessage.Sender.UserId;
@@ -33,7 +33,5 @@ public static partial class ProcessGroupMessage
             //SavedGroupMessages = SavedGroupMessages.CopyRemove(
             //    SavedGroupMessages.Values.Order(message => message.First().MessageId);
         }
-        // 暂不处理
-        return true;
     }
 }

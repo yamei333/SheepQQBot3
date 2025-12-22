@@ -10,13 +10,13 @@ public static class QQExtensions
 {
     private static readonly Regex _regReplaceCQCode = new(@"\[CQ:(?<tag>[a-z_0-9]+),.+\]");
 
-    public static BitmapFrame GetQQImage(string targetId)
-        => BitmapFrame.Create(new Uri(GetQQImageUrl(targetId)));
+    public static BitmapFrame GetQQHeadImage(string targetId)
+        => BitmapFrame.Create(new Uri(GetQQHeadImageUrl(targetId)));
 
     public static BitmapFrame GetQQGroupImage(string targetId)
         => BitmapFrame.Create(new Uri(GetQQGroupImageUrl(targetId)));
 
-    public static string GetQQImageUrl(string targetId)
+    public static string GetQQHeadImageUrl(string targetId)
         => $"https://q.qlogo.cn/headimg_dl?dst_uin={targetId}&spec=40";
 
     public static string GetQQGroupImageUrl(string targetId)

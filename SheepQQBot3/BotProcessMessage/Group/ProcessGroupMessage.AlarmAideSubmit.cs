@@ -39,7 +39,7 @@ public static partial class ProcessGroupMessage
     /// <param name="alarmAideSubmitMembers">可投稿成员列表</param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> AlarmAideSubmitAsync(
+    public static async Task AlarmAideSubmitAsync(
         ConcurrentDictionary<Guid, AlarmAideConfig> alarmAideConfigs,
         HashSet<string> alarmAideSubmitMembers,
         GroupMessage groupMessage)
@@ -47,21 +47,21 @@ public static partial class ProcessGroupMessage
         // MEMO : 非管理员/投稿者
         var targetId = groupMessage.Sender.UserId.ToString();
         if (!BotExtensions.IsAdmin(targetId) && !alarmAideSubmitMembers.Contains(targetId))
-            return false;
+            return;
 
         var groupId = groupMessage.GroupId;
         var message = groupMessage.Message;
         // MEMO : 命令格式检查
         var upperMessage = message.ToUpper();
         if (!upperMessage.StartsWith(COMMAND_ALARMAIDE_SUBMIT_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
-            return false;
+            return;
 
         // MEMO : 无可投稿配置
         var alarmAideConfig = alarmAideConfigs.Values.FirstOrDefault(each => each.IsDefault);
         if (alarmAideConfig == null)
         {
             await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}未设置默认投稿项, 联系管理设置!").ConfigureAwait(false);
-            return false;
+            return;
         }
 
         var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
@@ -108,7 +108,6 @@ public static partial class ProcessGroupMessage
             {
                 // MEMO : 已存在则不添加, 发送反馈
                 await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 相同的内容已存在!").ConfigureAwait(false);
-                return false;
             }
             else
             {
@@ -128,14 +127,12 @@ public static partial class ProcessGroupMessage
                     new GroupForwardMessage(BOT_NAME, BotId, "投稿成功!!"),
                 ]).ConfigureAwait(false);
                 ConfigExtensions.SaveConfig();
-                return true;
             }
         }
         catch (Exception)
         {
             await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}发生错误! 投稿内容有误!!").ConfigureAwait(false);
             YameiLogExtensions.WriteLog(LogType.Error, $"投稿内容有误-{message}");
-            return false;
         }
     }
 }

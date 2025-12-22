@@ -21,25 +21,19 @@ public partial class AlarmAideConfig : NotifyPropertyChangedConfigBase
     [JsonPropertyName(nameof(Condition))]
     public string Condition { get; set; }
 
-    [JsonIgnore]
-    private ConcurrentDictionary<int, string> _alarmTexts;
-
     /// <summary>
     /// 闹钟消息
     /// </summary>
     [JsonPropertyName(nameof(AlarmTexts))]
     public ConcurrentDictionary<int, string> AlarmTexts
     {
-        get => _alarmTexts;
+        get;
         set
         {
-            _alarmTexts = value;
+            field = value;
             OnPropertyChanged(nameof(AlarmTexts));
         }
     }
-
-    [JsonIgnore]
-    private bool _isDefault;
 
     /// <summary>
     /// 是否默认投稿项
@@ -47,10 +41,10 @@ public partial class AlarmAideConfig : NotifyPropertyChangedConfigBase
     [JsonPropertyName(nameof(IsDefault))]
     public bool IsDefault
     {
-        get => _isDefault;
+        get;
         set
         {
-            _isDefault = value;
+            field = value;
             OnPropertyChanged(nameof(IsDefault));
         }
     }

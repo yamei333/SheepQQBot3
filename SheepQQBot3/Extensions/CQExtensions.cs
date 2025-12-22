@@ -16,13 +16,13 @@ public static class CQExtensions
         => await HttpExtensions.GetSignedArkAsync(
             PublicVar.GlobalBotClient.GetCookiesAsync,
             new JsonCard_TianxuanShare(PublicVar.BotId, title, content, tag, url, previewImage,
-                tagIcon ?? QQExtensions.GetQQImageUrl(PublicVar.BotId))).ConfigureAwait(false);
+                tagIcon ?? QQExtensions.GetQQHeadImageUrl(PublicVar.BotId))).ConfigureAwait(false);
 
     /// <summary>
     /// Json卡片消息(天选转发)
     /// </summary>
     public static Task<string> JsonCard_TianxuanShareAsync(string title, string content, string url, string previewImage)
-        => JsonCard_TianxuanShareAsync(title, content, PublicVar.BOT_NAME, url, previewImage, QQExtensions.GetQQImageUrl(PublicVar.BotId));
+        => JsonCard_TianxuanShareAsync(title, content, PublicVar.BOT_NAME, url, previewImage, QQExtensions.GetQQHeadImageUrl(PublicVar.BotId));
 
     public static string CQCodeToMessageText(string cqCode)
     {

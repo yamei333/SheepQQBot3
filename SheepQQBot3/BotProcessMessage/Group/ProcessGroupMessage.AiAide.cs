@@ -33,16 +33,17 @@ public static partial class ProcessGroupMessage
     /// AI助手
     /// </summary>
     /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
+    /// <param name="blackListUserConfig"></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
-    public static async Task AIAideAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
+    public static async Task AIAideAsync(
+        AIGroupConfig aiGroupConfig,
+        BlackListUserConfig blackListUserConfig,
+        GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var sender = groupMessage.Sender;
         var targetId = sender.UserId.ToString();
         var message = groupMessage.Message;
-
-        if (aiGroupConfig.BlackListIds.Contains(targetId))
-            return;
 
         // MEMO : 字节数超过一定数量(设定数字/3), 忽略
         if (!BotExtensions.IsAdmin(targetId) && _regDeleteCQCode.Replace(message, string.Empty).GetByteCount() > 90)
@@ -81,7 +82,7 @@ public static partial class ProcessGroupMessage
 
         var lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
             id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
-        var groupMembers = await lazyWrapper.Value;
+        var groupMembers = await lazyWrapper.Value.ConfigureAwait(false);
         if (groupMembers == null)
         {
             await GlobalBotClient.SendGroupMessageAsync(groupId, "群成员信息获取失败!").ConfigureAwait(false);
@@ -98,6 +99,9 @@ public static partial class ProcessGroupMessage
 
         if (aiGroupConfig.JoinGroupChat && !isPrivateChat)
         {
+            if (blackListUserConfig.BanedAICollect)
+                return;
+
             // MEMO : 日程在深度睡眠时, 不接收消息
             if (AIStatusUtil.GetSchedule().Contains("deep sleep"))
                 return;
@@ -123,6 +127,9 @@ public static partial class ProcessGroupMessage
         //var removeAtMessage = message[_commandAI.Length..].TrimStart();
         if (isPrivateChat && aiGroupConfig.UseAtResponse)
         {
+            if (blackListUserConfig.BanedAIAt)
+                return;
+
             // MEMO : 是否只给管理用
             if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {

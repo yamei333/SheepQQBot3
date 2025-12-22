@@ -1,5 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using Microsoft.EntityFrameworkCore;
+using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -109,11 +111,13 @@ namespace SheepQQBot3.SDK.Client
                 var dateNowStart = dateNow.ToString("yyyy-MM-dd 00:00:00").ToDateTime();
                 var dateNowStartTimestamp = dateNowStart.ToTimeStamp();
                 var dateNowEndTimestamp = dateNowStart.AddDays(1).ToTimeStamp();
-                var setuSendHistorys = _botDb.SetuSendHistorys;
-                if (setuSendHistorys == null || !setuSendHistorys.Any())
+
+                await using var botDb = new BotDbContext(new DbContextOptions<BotDbContext>());
+                var setuSendHistories = botDb.SetuSendHistorys;
+                if (setuSendHistories == null || !setuSendHistories.Any())
                     return;
 
-                var countInfos = _botDb.SetuSendHistorys
+                var countInfos = botDb.SetuSendHistorys
                     .Where(history => history.TimeStamp >= dateNowStartTimestamp && history.TimeStamp < dateNowEndTimestamp)
                     .GroupBy(history => history.TargetId,
                         (key, group) => new { TargetId = key.ToString(), Items = group.ToList() })

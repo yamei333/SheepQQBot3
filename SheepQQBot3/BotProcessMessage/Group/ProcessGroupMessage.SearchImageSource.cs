@@ -20,23 +20,23 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> SearchImageSource(GroupMessage groupMessage)
+    public static async Task SearchImageSourceAsync(GroupMessage groupMessage)
     {
         var sauceNaoKey = AppSettingExtensions.Get("saucenaokey");
         if (sauceNaoKey.IsNullOrEmpty())
-            return false;
+            return;
 
         var groupId = groupMessage.GroupId;
         var message = groupMessage.Message;
         // MEMO : 命令格式检查
         var upperMessage = message.ToUpper();
         if (!upperMessage.StartsWith(COMMAND_SEARCH_IMAGE_SOURCE))
-            return false;
+            return;
 
         message = message[4..];
         var url = CQCode.GetImageUrl(message);
         if (url.IsNullOrEmpty())
-            return false;
+            return;
 
         await GlobalBotClient.SendGroupMessageAsync(groupId, "图片搜索中...").ConfigureAwait(false);
 
@@ -52,7 +52,7 @@ public static partial class ProcessGroupMessage
             $"https://saucenao.com/search.php?api_key={sauceNaoKey}" +
             $"&db=999&output_type=2&url={url}").ConfigureAwait(false);
         if (httpResponse.Result != HttpResponseResult.Successed)
-            return true;
+            return;
 
         var sauceNaoResponse = httpResponse.Data;
         if (sauceNaoResponse.Results?.Count > 0)
@@ -62,7 +62,7 @@ public static partial class ProcessGroupMessage
             if (result == null)
             {
                 await GlobalBotClient.SendGroupMessageAsync(groupId, "没有包含链接信息的图源!").ConfigureAwait(false);
-                return false;
+                return;
             }
 
             //var result = sauceNaoRequest.Results.First();
@@ -95,12 +95,9 @@ public static partial class ProcessGroupMessage
                 await GlobalBotClient.SendGroupMessageAsync(groupId, "找不到相似的图片!").ConfigureAwait(false);
                 //$"{ENTER}查看全部结果: https://saucenao.com/search.php?url={url}");
             }
-
-            return true;
         }
 
         // 无匹配结果,或API超过使用次数限制
         // 暂不处理
-        return false;
     }
 }

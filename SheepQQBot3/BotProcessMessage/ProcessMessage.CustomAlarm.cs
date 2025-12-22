@@ -26,17 +26,17 @@ public static partial class ProcessMessage
 
     private const int COMMAND_CUSTOM_GROUP_ALARM_CONTENT_MINLENGTH = 2;
 
-    private static Regex regCustomAlarmDateTime = RegexGenerator.CustomAlarm_DateTime();
-    private static Regex regCustomAlarmTime = RegexGenerator.CustomAlarm_Time();
-    private static Regex regCustomAlarmMinutes = RegexGenerator.CustomAlarm_Minutes();
+    private static readonly Regex _regCustomAlarmDateTime = RegexGenerator.CustomAlarm_DateTime();
+    private static readonly Regex _regCustomAlarmTime = RegexGenerator.CustomAlarm_Time();
+    private static readonly Regex _regCustomAlarmMinutes = RegexGenerator.CustomAlarm_Minutes();
 
     /// <summary>
     /// 自定义提醒(群版)
     /// <para>可群内设置消息提醒</para>
     /// </summary>
-    public static Task<bool> CustomGroupAlarmAsync(
+    public static Task CustomGroupAlarmAsync(
         GroupMessage groupMessage)
-        => CustomAlarmAsyncCore(
+        => CustomAlarmAsyncCoreAsync(
             true,
             groupMessage.GroupId,
             groupMessage.Sender.UserId.ToString(),
@@ -46,9 +46,9 @@ public static partial class ProcessMessage
     /// 自定义提醒(私聊版)
     /// <para>可私聊设置消息提醒</para>
     /// </summary>
-    public static Task<bool> CustomPrivateAlarmAsync(
+    public static Task CustomPrivateAlarmAsync(
         PrivateMessage privateMessage)
-        => CustomAlarmAsyncCore(
+        => CustomAlarmAsyncCoreAsync(
             false,
             privateMessage.Sender.GroupId.ToString(),
             privateMessage.Sender.UserId.ToString(),
@@ -58,7 +58,7 @@ public static partial class ProcessMessage
     /// 自定义提醒
     /// <para>可在群内设置消息提醒</para>
     /// </summary>
-    public static async Task<bool> CustomAlarmAsyncCore(
+    public static async Task CustomAlarmAsyncCoreAsync(
         bool isGroup,
         string groupId,
         string targetId,
@@ -67,7 +67,7 @@ public static partial class ProcessMessage
         if (message.Length < COMMAND_CUSTOM_GROUP_ALARM_MINLENGTH
             || !message.StartsWith(COMMAND_CUSTOM_GROUP_ALARM_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
         {
-            return false;
+            return;
         }
 
         message = message[COMMAND_CUSTOM_GROUP_ALARM_LIBRARY.Length..];
@@ -119,7 +119,7 @@ public static partial class ProcessMessage
                                         await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId, barkKeyError).ConfigureAwait(false);
                                     }
 
-                                    return true;
+                                    return;
                                 }
 
                                 var addDateString = addAlarmDateTime.ToYYYYMDHHMMSS();
@@ -257,21 +257,21 @@ public static partial class ProcessMessage
 
             bool GetAddCustomAlarmDate(out DateTime alarmDateTime)
             {
-                var match = regCustomAlarmDateTime.Match(message);
+                var match = _regCustomAlarmDateTime.Match(message);
                 if (match.Success && DateTime.TryParse(match.Groups[1].Value, out alarmDateTime))
                 {
                     message = message.Replace(match.Value, string.Empty);
                     return true;
                 }
 
-                match = regCustomAlarmTime.Match(message);
+                match = _regCustomAlarmTime.Match(message);
                 if (match.Success && DateTime.TryParse($"{dateNow.ToYYYYMD()} {match.Groups[1].Value}", out alarmDateTime))
                 {
                     message = message.Replace(match.Value, string.Empty);
                     return true;
                 }
 
-                match = regCustomAlarmMinutes.Match(message);
+                match = _regCustomAlarmMinutes.Match(message);
                 if (match.Success)
                 {
                     alarmDateTime = dateNow.AddMinutes(int.Parse(match.Groups[1].Value));
@@ -285,9 +285,9 @@ public static partial class ProcessMessage
         }
         catch (Exception)
         {
-            return false;
+            return;
         }
 
-        return true;
+        return;
     }
 }

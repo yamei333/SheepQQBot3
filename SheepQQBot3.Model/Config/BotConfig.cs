@@ -28,7 +28,7 @@ public class BotConfig
     public Dictionary<Guid, SetConfig> SetConfigs { get; set; } = [];
 
     /// <summary>
-    /// 用户配置(原神cookie, barkKey等)
+    /// 用户配置(barkKey等)
     /// </summary>
     [JsonPropertyName(nameof(UserConfigs))]
     public Dictionary<string, Dictionary<UserConfigType, string>> UserConfigs { get; set; } = [];
@@ -47,7 +47,7 @@ public class BotConfig
     }
 
     /// <summary>
-    /// 初始化BotFuntion可用状态, 顺便排序
+    /// 初始化BotFunction可用状态, 顺便排序
     /// </summary>
     public void InitBotFunctionIsEnabled()
     {

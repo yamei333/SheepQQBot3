@@ -23,7 +23,7 @@ public partial class App : Application
 
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接
-        PublicVar.BotDb.SetuDoushiInfos.Find("0");
+        DbExtensions.CreateBotDbContext().SetuDoushiInfos.Find("0");
     }
 
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

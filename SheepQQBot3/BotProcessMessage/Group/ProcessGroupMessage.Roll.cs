@@ -25,7 +25,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> RollAsync(GroupMessage groupMessage)
+    public static async Task RollAsync(GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
         var targetId = groupMessage.Sender.UserId.ToString();
@@ -37,13 +37,13 @@ public static partial class ProcessGroupMessage
 
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_ROLL, StringComparison.CurrentCultureIgnoreCase))
-            return false;
+            return;
 
         var contentMessage = message[3..];
         if (contentMessage.IsNullOrEmpty())
         {
             await SendRollResult(100).ConfigureAwait(false);
-            return true;
+            return;
         }
 
         var regNumber = new Regex(@"\d+");
@@ -59,12 +59,10 @@ public static partial class ProcessGroupMessage
 
         // 无匹配结果,或API超过使用次数限制
         // 暂不处理
-        return true;
+        return;
 
         Task SendRollResult(int maxRollNumber)
-        {
-            return GlobalBotClient.SendGroupMessageAsync(groupId,
+            => GlobalBotClient.SendGroupMessageAsync(groupId,
                 $"[{groupMessage.Sender.CardName}]的Roll点结果 {Rand.Next(maxRollNumber) + 1}");
-        }
     }
 }

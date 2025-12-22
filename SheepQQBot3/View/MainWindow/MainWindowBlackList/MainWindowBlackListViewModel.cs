@@ -1,4 +1,6 @@
-﻿namespace SheepQQBot3.View;
+﻿using SheepQQBot3.Model.Config;
+
+namespace SheepQQBot3.View;
 
 public partial class MainWindowBlackListViewModel : MainWindowViewModelBase
 {
@@ -9,20 +11,19 @@ public partial class MainWindowBlackListViewModel : MainWindowViewModelBase
     {
     }
 
-    private string _selectedMemberId;
     /// <summary>
     /// 选中的成员ID
     /// </summary>
-    public string SelectedMemberId
+    public BlackListUserConfig SelectedBlackListUserConfig
     {
-        get => _selectedMemberId;
+        get;
         set
         {
-            if (_selectedMemberId == value)
+            if (field == value)
                 return;
 
-            _selectedMemberId = value;
-            OnPropertyChanged(nameof(SelectedMemberId));
+            field = value;
+            OnPropertyChanged(nameof(SelectedBlackListUserConfig));
         }
     }
 }

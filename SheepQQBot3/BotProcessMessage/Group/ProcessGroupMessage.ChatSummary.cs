@@ -53,10 +53,15 @@ public static partial class ProcessGroupMessage
     /// 群聊总结
     /// </summary>
     /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
+    /// <param name="blackListUserConfig"><see cref="BlackListUserConfig"/></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> ChatSummaryAsync(AIGroupConfig aiGroupConfig, GroupMessage groupMessage)
+    public static async Task ChatSummaryAsync(
+        AIGroupConfig aiGroupConfig,
+        BlackListUserConfig blackListUserConfig,
+        GroupMessage groupMessage)
     {
+        await using var botDb = DbExtensions.CreateBotDbContext();
         var groupId = groupMessage.GroupId;
         var senderId = groupMessage.Sender.UserId.ToString();
         var messageId = groupMessage.MessageId;
@@ -65,141 +70,140 @@ public static partial class ProcessGroupMessage
 
         try
         {
-            if (senderId is "1395335318" or "664152503")
-                return true;
-
             // MEMO : 命令格式检查
             if (!message.StartsWith(COMMAND_CHAT_SUMMARY, StringComparison.CurrentCultureIgnoreCase))
             {
+                if (blackListUserConfig.BanedChatSummaryCollect)
+                    return;
+
                 if (!NeedRecordMessage(message))
-                    return true;
+                    return;
 
                 var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
                 // 去掉CQCode之后内容过多的(认定是转发复读)
                 if (addBotGroupMessage.IsNullOrEmpty() || addBotGroupMessage.MessageText.Replace(_regReplaceCQCode, string.Empty).GetByteCount() > CHAT_SUMMARY_LIMIT_BYTE)
-                    return true;
+                    return;
 
                 // MEMO : 将群聊录入数据库
-                lock (BotDb.SyncLock)
-                {
-                    var botGroupMessage = BotDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).Result;
-                    if (botGroupMessage == null)
-                        BotDb.AddAsync(addBotGroupMessage);
-                }
+                if (await botDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).ConfigureAwait(false) == null)
+                    await botDb.AddAsync(addBotGroupMessage).ConfigureAwait(false);
 
-                return true;
+                return;
             }
-            else
+
+            if (blackListUserConfig.BanedChatSummary)
+                return;
+
+            if (message.Length < 4)
+                return;
+
+            var dateNow = DateTime.Now;
+            if (!BotExtensions.IsAdmin(senderId)
+                && (dateNow - _chatSummaryRequestLastTimes.GetOrAdd(groupId, DateTime.MinValue)).TotalSeconds < CHAT_SUMMARY_TO_FAST_TIMES)
             {
-                if (message.Length < 4)
-                    return false;
+                await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
+                return;
+            }
 
-                var dateNow = DateTime.Now;
-                if (!BotExtensions.IsAdmin(senderId)
-                    && (dateNow - _chatSummaryRequestLastTimes.GetOrAdd(groupId, DateTime.MinValue)).TotalSeconds < CHAT_SUMMARY_TO_FAST_TIMES)
-                {
-                    await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.Coffee).ConfigureAwait(false);
-                    return true;
-                }
+            _chatSummaryRequestLastTimes.AddOrUpdate(groupId, dateNow, dateNow);
+            if (message.Length == 4)
+            {
+                await AISummary(16, "一天").ConfigureAwait(false);
+                return;
+            }
 
-                _chatSummaryRequestLastTimes.AddOrUpdate(groupId, dateNow, dateNow);
-
-                if (message.Length == 4)
-                    return await AISummary(16, "一天").ConfigureAwait(false);
-
-                var summaryType = message.ToUpper().Substring(4, 1);
-                switch (summaryType)
-                {
-                    case "A":
-                        return await AISummary(16, "一天").ConfigureAwait(false);
-                    default:
-                        var match = Regex.Match(message[4..], @"\d+");
-                        if (match.Success)
-                            return await AISummary(int.Parse(match.Value), $"{match}小时").ConfigureAwait(false);
-
-                        await GlobalBotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
-                        return false;
-                }
-
-                async Task<bool> AISummary(int aiHour, string description = "")
-                {
-                    // MEMO : 某些时间不该发消息
-                    if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
-                        return true;
-
-                    // MEMO : AI小时统计
-                    if (aiHour <= 0)
+            var summaryType = message.ToUpper().Substring(4, 1);
+            switch (summaryType)
+            {
+                case "A":
+                    await AISummary(16, "一天").ConfigureAwait(false);
+                    return;
+                default:
+                    var match = Regex.Match(message[4..], @"\d+");
+                    if (match.Success)
                     {
-                        await GlobalBotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
-                        return false;
-                    }
-
-                    await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.E_Flash).ConfigureAwait(false);
-                    await AISummaryCore(groupId, description, dateNow.AddHours(-aiHour)).ConfigureAwait(false);
-                    return true;
-                }
-
-                // MEMO : AI群聊总结
-                async Task AISummaryCore(string targetGroupId, string description, DateTime fromDate, DateTime? toDate = null)
-                {
-                    if (IsDebug)
-                        targetGroupId = "414774779";
-
-                    var groupMembers = await GlobalBotClient.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
-                    if (groupMembers == null)
-                    {
-                        await GlobalBotClient.SendGroupMessageAsync(targetGroupId, "群成员信息获取失败!").ConfigureAwait(false);
+                        await AISummary(int.Parse(match.Value), $"{match}小时").ConfigureAwait(false);
                         return;
                     }
 
-                    var thisRequestContentParts = new List<ContentPart>();
-                    thisRequestContentParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
-                    lock (BotDb.SyncLock)
-                    {
-                        var fromDateTimeStamp = fromDate.ToTimeStamp();
-                        var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
-                        BotDb.BotGroupMessages
-                            .Where(each => each.GroupId == targetGroupId
-                                && each.TimeStamp >= fromDateTimeStamp
-                                && each.TimeStamp < toDateTimeStamp)
-                            .AsEnumerable()
-                            .ForEach(each =>
-                            {
-                                var historyMessage = each.MessageText;
-                                historyMessage = historyMessage.Trim();
-                                if (historyMessage.IsNullOrEmpty())
-                                    return;
+                    await GlobalBotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_CommandTypeError(senderId, messageId)).ConfigureAwait(false);
+                    return;
+            }
 
-                                // MEMO : 不喜欢的内容直接屏蔽
-                                if (_regInjectHurry.IsMatch(historyMessage))
-                                    return;
+            async Task AISummary(int aiHour, string description = "")
+            {
+                // MEMO : 某些时间不该发消息
+                if (AIExtensions.IsCantSendMessage(groupId, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
+                    return;
 
-                                //groupMembers[each.TargetId].ToAIChatSender()
-                                _ = thisRequestContentParts.AddQQChatMessageAsync(groupMembers[each.TargetId].ToAIChatSender(AIUserInfos), historyMessage, groupMembers, true);
-                            });
-                    }
-
-                    if (!IsDebug && thisRequestContentParts.Count <= SUMMARY_MESSAGE_COUNT_LIMIT + 1)
-                    {
-                        await GlobalBotClient.SendGroupMessageAsync(targetGroupId, $"群聊消息过少(少于{SUMMARY_MESSAGE_COUNT_LIMIT}条)! 不需要总结!").ConfigureAwait(false);
-                        return;
-                    }
-
-                    thisRequestContentParts.AddSystemHint($"[群聊内容到此为止]");
-
-                    var sender = groupMessage.Sender;
-                    await thisRequestContentParts.AddQQChatMessageAsync(sender,
-                        $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers).ConfigureAwait(false);
-                    await thisRequestContentParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
-                            (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false), GlobalAIConfig.ModelSummary)
-                        .ConfigureAwait(false);
+                // MEMO : AI小时统计
+                if (aiHour <= 0)
+                {
+                    await GlobalBotClient.SendGroupMessageAsync(groupId, BotExtensions.GetMessage_ParameterRangeError(senderId, messageId)).ConfigureAwait(false);
+                    return;
                 }
+
+                await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.E_Flash).ConfigureAwait(false);
+                await AISummaryCore(groupId, description, dateNow.AddHours(-aiHour)).ConfigureAwait(false);
+                return;
+            }
+
+            // MEMO : AI群聊总结
+            async Task AISummaryCore(string targetGroupId, string description, DateTime fromDate, DateTime? toDate = null)
+            {
+                if (IsDebug)
+                    targetGroupId = "414774779";
+
+                var groupMembers = await GlobalBotClient.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
+                if (groupMembers == null)
+                {
+                    await GlobalBotClient.SendGroupMessageAsync(targetGroupId, "群成员信息获取失败!").ConfigureAwait(false);
+                    return;
+                }
+
+                var thisRequestContentParts = new List<ContentPart>();
+                thisRequestContentParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
+                var fromDateTimeStamp = fromDate.ToTimeStamp();
+                var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
+                botDb.BotGroupMessages
+                    .Where(each => each.GroupId == targetGroupId
+                        && each.TimeStamp >= fromDateTimeStamp
+                        && each.TimeStamp < toDateTimeStamp)
+                    .AsEnumerable()
+                    .ForEach(each =>
+                    {
+                        var historyMessage = each.MessageText;
+                        historyMessage = historyMessage.Trim();
+                        if (historyMessage.IsNullOrEmpty())
+                            return;
+
+                        // MEMO : 不喜欢的内容直接屏蔽
+                        if (_regInjectHurry.IsMatch(historyMessage))
+                            return;
+
+                        //groupMembers[each.TargetId].ToAIChatSender()
+                        _ = thisRequestContentParts.AddQQChatMessageAsync(groupMembers[each.TargetId].ToAIChatSender(AIUserInfos), historyMessage, groupMembers, true);
+                    });
+
+                if (!IsDebug && thisRequestContentParts.Count <= SUMMARY_MESSAGE_COUNT_LIMIT + 1)
+                {
+                    await GlobalBotClient.SendGroupMessageAsync(targetGroupId, $"群聊消息过少(少于{SUMMARY_MESSAGE_COUNT_LIMIT}条)! 不需要总结!").ConfigureAwait(false);
+                    return;
+                }
+
+                thisRequestContentParts.AddSystemHint($"[群聊内容到此为止]");
+
+                var sender = groupMessage.Sender;
+                await thisRequestContentParts.AddQQChatMessageAsync(sender,
+                    $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers).ConfigureAwait(false);
+                await thisRequestContentParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
+                        (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false), GlobalAIConfig.ModelSummary)
+                    .ConfigureAwait(false);
             }
         }
         catch (Exception e)
         {
             YameiLogExtensions.WriteLog(e);
-            return false;
         }
     }
 

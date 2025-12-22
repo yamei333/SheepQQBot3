@@ -1,6 +1,5 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using Microsoft.EntityFrameworkCore;
 using OpenRouter.NET;
 using OpenRouter.NET.Models;
 using OpenWeatherMap.Standard;
@@ -167,11 +166,6 @@ public static class PublicVar
     ///// Jieba数据库
     ///// </summary>
     //public static JiebaDbContext JiebaDb = new(new DbContextOptions<JiebaDbContext>());
-
-    /// <summary>
-    /// Bot数据库
-    /// </summary>
-    public static BotDbContext BotDb = new(new DbContextOptions<BotDbContext>());
 
     /// <summary>
     /// Bot配置

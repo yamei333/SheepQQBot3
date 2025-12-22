@@ -91,208 +91,190 @@ public static class EnumerableExtensions
 
     #endregion Inner Classes
 
-    /// <summary>
-    /// 在<paramref name="sequence"/>后连接<paramref name="item"/>
-    /// </summary>
-    /// <typeparam name="TSource">对象类型</typeparam>
     /// <param name="sequence">连接对象</param>
-    /// <param name="item"><paramref name="sequence"/>连接要素</param>
-    /// <returns>被连接后的结果</returns>
-    public static IEnumerable<TSource> ConcatItem<TSource>(this IEnumerable<TSource> sequence, TSource item)
+    /// <typeparam name="TSource">对象类型</typeparam>
+    extension<TSource>(IEnumerable<TSource> sequence)
     {
-        foreach (var eachItem in sequence)
-            yield return eachItem;
-
-        yield return item;
-    }
-
-    /// <summary>
-    /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つのシーケンスの積集合を生成します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="first">second にも含まれる、返される一意の要素を含む<see cref="IEnumerable{T}"/></param>
-    /// <param name="second">最初のシーケンスにも含まれる、返される一意の要素を含む<see cref="IEnumerable{T}"/></param>
-    /// <param name="keySelector">比較する値に変換する関数</param>
-    /// <returns>2つのシーケンスの積集合を構成する要素が格納されている<see cref="IEnumerable{T}"/></returns>
-    public static IEnumerable<TSource> Intersect<TSource, TKey>(
-        this IEnumerable<TSource> first, IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
-    {
-        return first.Intersect(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
-    }
-
-    /// <summary>
-    /// シーケンスの要素数を比較し、相対値を示す値を返します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <param name="source">比較基のシーケンス</param>
-    /// <param name="target">比較対象のシーケンス</param>
-    /// <returns>
-    /// 要素数の相対値を示す値
-    /// <list type="table">
-    ///		<listheader><term>戻り値</term><description>説明</description></listheader>
-    ///		<item><term>0より小さい値</term><description>このシーケンスの要素数は<paramref name="target"/>より小さいことを示します。</description></item>
-    ///		<item><term>0</term><description>このシーケンスの要素数は<paramref name="target"/>と等しいことを示します。</description></item>
-    ///		<item><term>0より大きい値</term><description>このシーケンスの要素数は<paramref name="target"/>より大きいことを示します。</description></item>
-    /// </list>
-    /// </returns>
-    [DebuggerStepThrough]
-    public static int CompareCount<TSource>(this IEnumerable<TSource> source, IEnumerable<TSource> target)
-    {
-        if (target == null)
-            return 1;
-
-        if (Equals(source, target))
-            return 0;
-
-        using var sourceEnumerator = source?.GetEnumerator();
-        using var targetEnumerator = target.GetEnumerator();
-        while (true)
+        /// <summary>
+        /// 在<paramref name="sequence"/>后连接<paramref name="item"/>
+        /// </summary>
+        /// <param name="item"><paramref name="sequence"/>连接要素</param>
+        /// <returns>被连接后的结果</returns>
+        public IEnumerable<TSource> ConcatItem(TSource item)
         {
-            var existSource = sourceEnumerator?.MoveNext();
-            var existTarget = targetEnumerator.MoveNext();
+            foreach (var eachItem in sequence)
+                yield return eachItem;
 
-            if (existSource == false)
-                return existTarget ? -1 : 0;
+            yield return item;
+        }
 
-            if (!existTarget)
+        /// <summary>
+        /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つのシーケンスの積集合を生成します。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="second">最初のシーケンスにも含まれる、返される一意の要素を含む<see cref="IEnumerable{T}"/></param>
+        /// <param name="keySelector">比較する値に変換する関数</param>
+        /// <returns>2つのシーケンスの積集合を構成する要素が格納されている<see cref="IEnumerable{T}"/></returns>
+        public IEnumerable<TSource> Intersect<TKey>(IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
+        {
+            return sequence.Intersect(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
+        }
+
+        ///  <summary>
+        ///  シーケンスの要素数を比較し、相対値を示す値を返します。
+        ///  </summary>
+        ///  <param name="target">比較対象のシーケンス</param>
+        ///  <returns>
+        ///  要素数の相対値を示す値
+        ///  <list type="table">
+        /// 		<listheader><term>戻り値</term><description>説明</description></listheader>
+        /// 		<item><term>0より小さい値</term><description>このシーケンスの要素数は<paramref name="target"/>より小さいことを示します。</description></item>
+        /// 		<item><term>0</term><description>このシーケンスの要素数は<paramref name="target"/>と等しいことを示します。</description></item>
+        /// 		<item><term>0より大きい値</term><description>このシーケンスの要素数は<paramref name="target"/>より大きいことを示します。</description></item>
+        ///  </list>
+        ///  </returns>
+        [DebuggerStepThrough]
+        public int CompareCount(IEnumerable<TSource> target)
+        {
+            if (target == null)
                 return 1;
-        }
-    }
 
-    /// <summary>
-    /// シーケンスの要素数を比較し、相対値を示す値を返します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <param name="source">比較元のシーケンス</param>
-    /// <param name="count">比較する数</param>
-    /// <returns>
-    /// 要素数の相対値を示す値
-    /// <list type="table">
-    ///		<listheader><term>戻り値</term><description>説明</description></listheader>
-    ///		<item><term>0より小さい値</term><description>このシーケンスの要素数は<paramref name="count"/>より小さいことを示します。</description></item>
-    ///		<item><term>0</term><description>このシーケンスの要素数は<paramref name="count"/>と等しいことを示します。</description></item>
-    ///		<item><term>0より大きい値</term><description>このシーケンスの要素数は<paramref count="target"/>より大きいことを示します。</description></item>
-    /// </list>
-    /// </returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/>が<see langword="null"/>です。</exception>
-    [DebuggerStepThrough]
-    public static int CompareCount<TSource>(this IEnumerable<TSource> source, int count)
-    {
-        if (count < 0)
-        {
-            return 1;
-        }
+            if (Equals(sequence, target))
+                return 0;
 
-        var index = 0;
-        using (var sourceEnumerator = source.GetEnumerator())
-        {
-            while (sourceEnumerator.MoveNext())
+            using var sourceEnumerator = sequence?.GetEnumerator();
+            using var targetEnumerator = target.GetEnumerator();
+            while (true)
             {
-                index++;
-                if (count < index)
-                {
+                var existSource = sourceEnumerator?.MoveNext();
+                var existTarget = targetEnumerator.MoveNext();
+
+                if (existSource == false)
+                    return existTarget ? -1 : 0;
+
+                if (!existTarget)
                     return 1;
-                }
             }
         }
 
-        return index == count ? 0 : -1;
-    }
+        ///  <summary>
+        ///  シーケンスの要素数を比較し、相対値を示す値を返します。
+        ///  </summary>
+        ///  <param name="count">比較する数</param>
+        ///  <returns>
+        ///  要素数の相対値を示す値
+        ///  <list type="table">
+        /// 		<listheader><term>戻り値</term><description>説明</description></listheader>
+        /// 		<item><term>0より小さい値</term><description>このシーケンスの要素数は<paramref name="count"/>より小さいことを示します。</description></item>
+        /// 		<item><term>0</term><description>このシーケンスの要素数は<paramref name="count"/>と等しいことを示します。</description></item>
+        /// 		<item><term>0より大きい値</term><description>このシーケンスの要素数は<paramref count="target"/>より大きいことを示します。</description></item>
+        ///  </list>
+        ///  </returns>
+        ///  <exception cref="ArgumentNullException"><paramref name="sequence"/>が<see langword="null"/>です。</exception>
+        [DebuggerStepThrough]
+        public int CompareCount(int count)
+        {
+            if (count < 0)
+            {
+                return 1;
+            }
 
-    /// <summary>
-    /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、シーケンスから一意の要素を返します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="source">重複する要素を削除する対象となるシーケンス</param>
-    /// <param name="keySelector">比較する値に変換する関数</param>
-    /// <returns>シーケンスの一意の要素を格納する<see cref="IEnumerable{T}"/></returns>
-    /// <exception cref="ArgumentNullException"><paramref name="source"/>または<paramref name="keySelector"/>が<see langword="null"/>です。</exception>
-    [DebuggerStepThrough]
-    public static IEnumerable<TSource> Distinct<TSource, TKey>(this IEnumerable<TSource> source, Func<TSource, TKey> keySelector)
-    {
-        return source.Distinct(new SelectionEqualityComparer<TSource, TKey>(keySelector));
-    }
+            var index = 0;
+            using (var sourceEnumerator = sequence.GetEnumerator())
+            {
+                while (sourceEnumerator.MoveNext())
+                {
+                    index++;
+                    if (count < index)
+                    {
+                        return 1;
+                    }
+                }
+            }
 
-    /// <summary>
-    /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つのシーケンスの差集合を生成します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="first"><paramref name="second"/>には含まれて否外、返される要素を含むシーケンス</param>
-    /// <param name="second">最初のシーケンスにも含まれ、返されたシーケンスからは削除される要素を含むシーケンス</param>
-    /// <param name="keySelector">比較する値に変換する関数</param>
-    /// <returns>2つのシーケンスの差集合が格納されているシーケンス<see cref="IEnumerable{T}"/></returns>
-    /// <exception cref="ArgumentNullException"><paramref name="first"/>または<paramref name="keySelector"/>が<see langword="null"/>です。</exception>
-    [DebuggerStepThrough]
-    public static IEnumerable<TSource> Except<TSource, TKey>(
-        this IEnumerable<TSource> first, IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
-    {
-        //Guard.ArgumentNotNull(first, nameof(first));
-        //Guard.ArgumentNotNull(second, nameof(second));
-        //Guard.ArgumentNotNull(keySelector, nameof(keySelector));
+            return index == count ? 0 : -1;
+        }
 
-        return first.Except(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
-    }
+        /// <summary>
+        /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、シーケンスから一意の要素を返します。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="keySelector">比較する値に変換する関数</param>
+        /// <returns>シーケンスの一意の要素を格納する<see cref="IEnumerable{T}"/></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="sequence"/>または<paramref name="keySelector"/>が<see langword="null"/>です。</exception>
+        [DebuggerStepThrough]
+        public IEnumerable<TSource> Distinct<TKey>(Func<TSource, TKey> keySelector)
+        {
+            return sequence.Distinct(new SelectionEqualityComparer<TSource, TKey>(keySelector));
+        }
 
-    /// <summary>
-    /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つの<see cref="IEnumerable{TSource}"/>の和集合を生成します。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="first">和集合を構成する最初の<see cref="IEnumerable{TSource}"/></param>
-    /// <param name="second">和集合を構成する2番目の<see cref="IEnumerable{TSource}"/></param>
-    /// <param name="keySelector">比較する値を取得する<see cref="Func{TSource, TKey}"/></param>
-    /// <returns>2つの<see cref="IEnumerable{TSource}"/>の和集合を格納する<see cref="IEnumerable{TSource}"/></returns>
-    /// <exception cref="ArgumentNullException">
-    /// <paramref name="first"/>または<paramref name="second"/>または<paramref name="keySelector"/>が<see langword="null"/>です。
-    /// </exception>
-    public static IEnumerable<TSource> Union<TSource, TKey>(
-        this IEnumerable<TSource> first, IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
-    {
-        //Guard.ArgumentNotNull(first, nameof(first));
-        //Guard.ArgumentNotNull(second, nameof(second));
-        //Guard.ArgumentNotNull(keySelector, nameof(keySelector));
+        /// <summary>
+        /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つのシーケンスの差集合を生成します。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="second">最初のシーケンスにも含まれ、返されたシーケンスからは削除される要素を含むシーケンス</param>
+        /// <param name="keySelector">比較する値に変換する関数</param>
+        /// <returns>2つのシーケンスの差集合が格納されているシーケンス<see cref="IEnumerable{T}"/></returns>
+        /// <exception cref="ArgumentNullException"><paramref name="sequence"/>または<paramref name="keySelector"/>が<see langword="null"/>です。</exception>
+        [DebuggerStepThrough]
+        public IEnumerable<TSource> Except<TKey>(IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
+        {
+            //Guard.ArgumentNotNull(first, nameof(first));
+            //Guard.ArgumentNotNull(second, nameof(second));
+            //Guard.ArgumentNotNull(keySelector, nameof(keySelector));
 
-        return first.Union(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
-    }
+            return sequence.Except(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
+        }
 
-    /// <summary>
-    /// シーケンス内の要素をキーに従って並べ替えます。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="source">順序付ける値のシーケンス</param>
-    /// <param name="keySelector">要素からキーを抽出する関数</param>
-    /// <param name="ascending">昇順の場合は<see langword="true"/>、降順の場合は<see langword="false"/></param>
-    /// <returns>要素がキーに従って並べ替えられている<see cref="IOrderedEnumerable{TElement}"/></returns>
-    [DebuggerStepThrough]
-    public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(
-        this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, bool ascending)
-    {
-        return ascending
-            ? source.OrderBy(keySelector)
-            : source.OrderByDescending(keySelector);
-    }
+        /// <summary>
+        /// 指定された<paramref name="keySelector"/>を使用して取得した値を比較することにより、2つの<see cref="IEnumerable{TSource}"/>の和集合を生成します。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="second">和集合を構成する2番目の<see cref="IEnumerable{TSource}"/></param>
+        /// <param name="keySelector">比較する値を取得する<see cref="Func{TSource, TKey}"/></param>
+        /// <returns>2つの<see cref="IEnumerable{TSource}"/>の和集合を格納する<see cref="IEnumerable{TSource}"/></returns>
+        /// <exception cref="ArgumentNullException">
+        /// <paramref name="sequence"/>または<paramref name="second"/>または<paramref name="keySelector"/>が<see langword="null"/>です。
+        /// </exception>
+        public IEnumerable<TSource> Union<TKey>(IEnumerable<TSource> second, Func<TSource, TKey> keySelector)
+        {
+            //Guard.ArgumentNotNull(first, nameof(first));
+            //Guard.ArgumentNotNull(second, nameof(second));
+            //Guard.ArgumentNotNull(keySelector, nameof(keySelector));
 
-    /// <summary>
-    /// シーケンス内の要素をキーに従って並べ替えます。
-    /// </summary>
-    /// <typeparam name="TSource">各要素の型</typeparam>
-    /// <typeparam name="TKey">比較する値の型</typeparam>
-    /// <param name="source">順序付ける値のシーケンス</param>
-    /// <param name="keySelector">要素からキーを抽出する関数</param>
-    /// <param name="comparer">キーを比較する<see cref="IComparer{TKey}"/></param>
-    /// <param name="ascending">昇順の場合は<see langword="true"/>、降順の場合は<see langword="false"/></param>
-    /// <returns>要素がキーに従って並べ替えられている<see cref="IOrderedEnumerable{TElement}"/></returns>
-    [DebuggerStepThrough]
-    public static IOrderedEnumerable<TSource> OrderBy<TSource, TKey>(
-        this IEnumerable<TSource> source, Func<TSource, TKey> keySelector, IComparer<TKey> comparer, bool ascending)
-    {
-        return ascending
-            ? source.OrderBy(keySelector, comparer)
-            : source.OrderByDescending(keySelector, comparer);
+            return sequence.Union(second, new SelectionEqualityComparer<TSource, TKey>(keySelector));
+        }
+
+        /// <summary>
+        /// シーケンス内の要素をキーに従って並べ替えます。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="keySelector">要素からキーを抽出する関数</param>
+        /// <param name="ascending">昇順の場合は<see langword="true"/>、降順の場合は<see langword="false"/></param>
+        /// <returns>要素がキーに従って並べ替えられている<see cref="IOrderedEnumerable{TElement}"/></returns>
+        [DebuggerStepThrough]
+        public IOrderedEnumerable<TSource> OrderBy<TKey>(Func<TSource, TKey> keySelector, bool ascending)
+        {
+            return ascending
+                ? sequence.OrderBy(keySelector)
+                : sequence.OrderByDescending(keySelector);
+        }
+
+        /// <summary>
+        /// シーケンス内の要素をキーに従って並べ替えます。
+        /// </summary>
+        /// <typeparam name="TKey">比較する値の型</typeparam>
+        /// <param name="keySelector">要素からキーを抽出する関数</param>
+        /// <param name="comparer">キーを比較する<see cref="IComparer{TKey}"/></param>
+        /// <param name="ascending">昇順の場合は<see langword="true"/>、降順の場合は<see langword="false"/></param>
+        /// <returns>要素がキーに従って並べ替えられている<see cref="IOrderedEnumerable{TElement}"/></returns>
+        [DebuggerStepThrough]
+        public IOrderedEnumerable<TSource> OrderBy<TKey>(Func<TSource, TKey> keySelector, IComparer<TKey> comparer, bool ascending)
+        {
+            return ascending
+                ? sequence.OrderBy(keySelector, comparer)
+                : sequence.OrderByDescending(keySelector, comparer);
+        }
     }
 
     /// <summary>

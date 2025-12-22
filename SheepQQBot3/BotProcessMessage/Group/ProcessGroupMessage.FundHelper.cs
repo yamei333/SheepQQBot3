@@ -14,7 +14,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 基金助手命令开头
     /// </summary>
-    private const string COMMAND_FUNDHELPER_LIBRARY = "#JJ#";
+    private const string COMMAND_FUND_HELPER_LIBRARY = "#JJ#";
 
     /// <summary>
     /// 基金助手
@@ -22,24 +22,24 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
-    public static async Task<bool> FundHelperAsync(GroupMessage groupMessage)
+    public static async Task FundHelperAsync(GroupMessage groupMessage)
     {
         var message = groupMessage.Message;
         // MEMO : 命令格式检查
         var upperMessage = message.ToUpper();
-        if (!upperMessage.StartsWith(COMMAND_FUNDHELPER_LIBRARY))
-            return false;
+        if (!upperMessage.StartsWith(COMMAND_FUND_HELPER_LIBRARY))
+            return;
 
         var sendMessage = new StringBuilder();
         var groupId = groupMessage.GroupId;
         var targetId = groupMessage.Sender.UserId.ToString();
         try
         {
-            var changedMessageSpace = message[COMMAND_FUNDHELPER_LIBRARY.Length..];
+            var changedMessageSpace = message[COMMAND_FUND_HELPER_LIBRARY.Length..];
             var changedMessage = changedMessageSpace
                 .Replace(SPACE, string.Empty);
 
-            var (startChar, _) = GetStartChar(upperMessage.Substring(COMMAND_FUNDHELPER_LIBRARY.Length));
+            var (startChar, _) = GetStartChar(upperMessage[COMMAND_FUND_HELPER_LIBRARY.Length..]);
             switch (startChar)
             {
                 case 'H':
@@ -83,9 +83,6 @@ public static partial class ProcessGroupMessage
         catch (Exception e)
         {
             YameiLogExtensions.WriteLog(e);
-            return false;
         }
-
-        return true;
     }
 }

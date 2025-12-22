@@ -1,25 +1,24 @@
-﻿<UserControl x:Class="SheepQQBot3.View.MainWindowAIGroupConfig"
-             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
-             xmlns:local="clr-namespace:SheepQQBot3.View"
-             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
-             Width="800"
-             Height="538"
-             Loaded="MainWindowAIGroupConfig_OnLoaded"
-             mc:Ignorable="d">
+﻿<UserControl
+    x:Class="SheepQQBot3.View.MainWindowAIGroupConfig"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:local="clr-namespace:SheepQQBot3.View"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    Width="800"
+    Height="538"
+    Loaded="MainWindowAIGroupConfig_OnLoaded"
+    mc:Ignorable="d">
     <UserControl.DataContext>
         <local:MainWindowAIGroupConfigModel />
     </UserControl.DataContext>
     <UserControl.Resources>
-        <Style x:Key="ResponseMessageLimitTextBlockKey"
-               TargetType="TextBlock">
+        <Style x:Key="ResponseMessageLimitTextBlockKey" TargetType="TextBlock">
             <Setter Property="Margin" Value="0,0,6,0" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="Grid.Column" Value="0" />
         </Style>
-        <Style x:Key="ResponseMessageLimitTextBoxKey"
-               TargetType="TextBox">
+        <Style x:Key="ResponseMessageLimitTextBoxKey" TargetType="TextBox">
             <Setter Property="Margin" Value="0,0,2,0" />
             <Setter Property="TextAlignment" Value="Right" />
             <Setter Property="Grid.Column" Value="1" />
@@ -41,15 +40,17 @@
                 <StackPanel>
                     <GroupBox>
                         <GroupBox.Header>
-                            <CheckBox Name="chkAIJoinGroupChat"
-                                      Click="CheckBox_OnClick"
-                                      Content="参与群聊"
-                                      IsChecked="{Binding SelectedSetConfig.AIGroupConfig.JoinGroupChat}" />
+                            <CheckBox
+                                Name="chkAIJoinGroupChat"
+                                Click="CheckBox_OnClick"
+                                Content="参与群聊"
+                                IsChecked="{Binding SelectedSetConfig.AIGroupConfig.JoinGroupChat}" />
                         </GroupBox.Header>
                         <StackPanel IsEnabled="{Binding ElementName=chkAIJoinGroupChat, Mode=OneWay, Path=IsChecked}">
-                            <CheckBox Click="CheckBox_OnClick"
-                                      Content="(测试)消息发送至测试群"
-                                      IsChecked="{Binding SelectedSetConfig.AIGroupConfig.JoinGroupChatSendToTestGroup}" />
+                            <CheckBox
+                                Click="CheckBox_OnClick"
+                                Content="(测试)消息发送至测试群"
+                                IsChecked="{Binding SelectedSetConfig.AIGroupConfig.JoinGroupChatSendToTestGroup}" />
                             <GroupBox>
                                 <GroupBox.Header>
                                     <TextBlock Text="响应需要消息数" />
@@ -67,75 +68,83 @@
                                         <ColumnDefinition Width="74" />
                                         <ColumnDefinition Width="26" />
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Row="0"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="5% 消息数" />
-                                    <TextBox Grid.Row="0"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit5,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
-                                    <TextBlock Grid.Row="1"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="10% 消息数" />
-                                    <TextBox Grid.Row="1"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit10,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
-                                    <TextBlock Grid.Row="2"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="20% 消息数" />
-                                    <TextBox Grid.Row="2"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit20,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
-                                    <TextBlock Grid.Row="3"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="35% 消息数" />
-                                    <TextBox Grid.Row="3"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit35,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
-                                    <TextBlock Grid.Row="4"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="50% 消息数" />
-                                    <TextBox Grid.Row="4"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit50,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
-                                    <TextBlock Grid.Row="5"
-                                               Style="{StaticResource ResponseMessageLimitTextBlockKey}"
-                                               Text="必定 消息数" />
-                                    <TextBox Grid.Row="5"
-                                             PreviewTextInput="TxtContent_OnPreviewTextInput"
-                                             Style="{StaticResource ResponseMessageLimitTextBoxKey}"
-                                             Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit100,
-                                                            UpdateSourceTrigger=PropertyChanged}"
-                                             TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="0"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="5% 消息数" />
+                                    <TextBox
+                                        Grid.Row="0"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit5, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="1"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="10% 消息数" />
+                                    <TextBox
+                                        Grid.Row="1"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit10, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="2"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="20% 消息数" />
+                                    <TextBox
+                                        Grid.Row="2"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit20, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="3"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="35% 消息数" />
+                                    <TextBox
+                                        Grid.Row="3"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit35, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="4"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="50% 消息数" />
+                                    <TextBox
+                                        Grid.Row="4"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit50, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
+                                    <TextBlock
+                                        Grid.Row="5"
+                                        Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                        Text="必定 消息数" />
+                                    <TextBox
+                                        Grid.Row="5"
+                                        PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                        Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                        Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponseLimit100, UpdateSourceTrigger=PropertyChanged}"
+                                        TextChanged="TextBoxBase_OnTextChanged" />
                                 </Grid>
                             </GroupBox>
                         </StackPanel>
                     </GroupBox>
                     <GroupBox>
                         <GroupBox.Header>
-                            <CheckBox Name="chkAIAtResponse"
-                                      Click="CheckBox_OnClick"
-                                      Content="at响应"
-                                      IsChecked="{Binding SelectedSetConfig.AIGroupConfig.UseAtResponse}" />
+                            <CheckBox
+                                Name="chkAIAtResponse"
+                                Click="CheckBox_OnClick"
+                                Content="at响应"
+                                IsChecked="{Binding SelectedSetConfig.AIGroupConfig.UseAtResponse}" />
                         </GroupBox.Header>
                         <StackPanel IsEnabled="{Binding ElementName=chkAIAtResponse, Mode=OneWay, Path=IsChecked}">
-                            <CheckBox Click="CheckBox_OnClick"
-                                      Content="(测试)仅限管理"
-                                      IsChecked="{Binding SelectedSetConfig.AIGroupConfig.AtResponseAdminOnly}" />
+                            <CheckBox
+                                Click="CheckBox_OnClick"
+                                Content="(测试)仅限管理"
+                                IsChecked="{Binding SelectedSetConfig.AIGroupConfig.AtResponseAdminOnly}" />
                         </StackPanel>
                     </GroupBox>
 
@@ -146,49 +155,32 @@
                     <TextBlock Text="回复显示设置" />
                 </GroupBox.Header>
                 <StackPanel>
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="思考"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowThinking}" />
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="感受"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowSensory}" />
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="心想"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowPsychologicalDesc}" />
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="表情"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowExpression}" />
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="动作"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowBodyLanguage}" />
-                    <CheckBox Click="CheckBox_OnClick"
-                              Content="表情包"
-                              IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowEmojiImage}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="思考"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowThinking}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="感受"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowSensory}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="心想"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowPsychologicalDesc}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="表情"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowExpression}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="动作"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowBodyLanguage}" />
+                    <CheckBox
+                        Click="CheckBox_OnClick"
+                        Content="表情包"
+                        IsChecked="{Binding SelectedSetConfig.AIGroupConfig.ShowEmojiImage}" />
                 </StackPanel>
             </GroupBox>
         </StackPanel>
-        <GroupBox Grid.Row="0"
-                  Grid.Column="1"
-                  Width="120"
-                  Height="200"
-                  VerticalAlignment="Top">
-            <GroupBox.Header>
-                <TextBlock Text="AI黑名单" />
-            </GroupBox.Header>
-            <ListBox ItemsSource="{Binding SelectedSetConfig.AIGroupConfig.BlackListIds}"
-                     ScrollViewer.HorizontalScrollBarVisibility="Disabled"
-                     SelectedItem="{Binding SelectedMemberId}"
-                     SelectionMode="Single">
-                <ListBox.ContextMenu>
-                    <ContextMenu>
-                        <MenuItem Click="BlackList_OnAdd"
-                                  Header="新增" />
-                        <MenuItem Click="BlackList_OnDelete"
-                                  Header="删除"
-                                  Style="{StaticResource EditDeleteMenuItemStyle}" />
-                    </ContextMenu>
-                </ListBox.ContextMenu>
-            </ListBox>
-        </GroupBox>
     </Grid>
 </UserControl>

@@ -66,7 +66,7 @@
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
                         <GridViewColumn Width="30"
-                                        CellTemplate="{StaticResource CheckImageButtonTemplate}"
+                                        CellTemplate="{StaticResource IsActiveTemplate}"
                                         Header="√" />
                     </GridView>
                 </ListView.View>

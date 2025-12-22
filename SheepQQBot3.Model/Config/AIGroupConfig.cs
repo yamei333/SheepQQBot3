@@ -1,5 +1,4 @@
-﻿using System.Collections.Generic;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Config;
 
@@ -55,12 +54,6 @@ public partial class AIGroupConfig : NotifyPropertyChangedBase
     /// </summary>
     [JsonPropertyName(nameof(GroupChatResponseLimit100))]
     public int GroupChatResponseLimit100 { get; set; }
-
-    /// <summary>
-    /// AI收集消息黑名单
-    /// </summary>
-    [JsonPropertyName(nameof(BlackListIds))]
-    public HashSet<string> BlackListIds { get; set; }
 
     /// <summary>
     /// 是否启用At响应
@@ -123,7 +116,6 @@ public partial class AIGroupConfig : NotifyPropertyChangedBase
         GroupChatResponseLimit35 = 25;
         GroupChatResponseLimit50 = 30;
         GroupChatResponseLimit100 = 35;
-        BlackListIds = [];
         UseAtResponse = true;
         AtResponseAdminOnly = true;
         ShowThinking = false;

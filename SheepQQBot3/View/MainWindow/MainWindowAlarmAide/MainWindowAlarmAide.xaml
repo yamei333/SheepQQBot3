@@ -70,7 +70,7 @@
                         </GridViewColumn.CellTemplate>
                     </GridViewColumn>
                     <GridViewColumn Width="30"
-                                    CellTemplate="{StaticResource CheckImageButtonTemplate}"
+                                    CellTemplate="{StaticResource IsActiveTemplate}"
                                     Header="√" />
                     <GridViewColumn Width="30"
                                     Header="投">

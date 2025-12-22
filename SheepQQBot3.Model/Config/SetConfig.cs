@@ -42,10 +42,10 @@ public class SetConfig
     [JsonIgnore]
     public BitmapFrame Icon => TargetType switch
     {
-        BotConfigTargetType.Common => QQExtensions.GetQQImage(AppSettingExtensions.Get("selfId", string.Empty)),
+        BotConfigTargetType.Common => QQExtensions.GetQQHeadImage(AppSettingExtensions.Get("selfId", string.Empty)),
         BotConfigTargetType.Group => QQExtensions.GetQQGroupImage(TargetId),
-        BotConfigTargetType.Private => QQExtensions.GetQQImage(TargetId),
-        _ => QQExtensions.GetQQImage("10000"),
+        BotConfigTargetType.Private => QQExtensions.GetQQHeadImage(TargetId),
+        _ => QQExtensions.GetQQHeadImage("10000"),
     };
 
     /// <summary>
@@ -67,10 +67,10 @@ public class SetConfig
     public HashSet<string> AlarmAideSubmitMemberIds { get; set; }
 
     /// <summary>
-    /// 黑名单ID配置
+    /// 黑名单用户配置
     /// </summary>
-    [JsonPropertyName(nameof(BlackListIds))]
-    public HashSet<string> BlackListIds { get; set; }
+    [JsonPropertyName(nameof(BlackListUserConfigs))]
+    public ConcurrentDictionary<string, BlackListUserConfig> BlackListUserConfigs { get; set; }
 
     /// <summary>
     /// 基金播报配置
@@ -135,7 +135,7 @@ public class SetConfig
         TargetName = targetName ?? throw new ArgumentNullException(nameof(targetName));
         BotFunctions = DefaultBotFunctions.DeepClone();
         AlarmAideConfigs = [];
-        BlackListIds = [];
+        BlackListUserConfigs = [];
         AlarmAideSubmitMemberIds = [];
         FundAlarmConfigs = [];
         FundLimitObserveConfigs = [];
@@ -170,7 +170,7 @@ public class SetConfig
     }
 
     /// <summary>
-    /// 初始化BotFuntion可用状态
+    /// 初始化BotFunction可用状态
     /// </summary>
     internal void InitBotFunctionIsEnabled()
     {
