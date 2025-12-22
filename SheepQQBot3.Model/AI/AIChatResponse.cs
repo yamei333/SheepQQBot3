@@ -71,7 +71,7 @@ namespace SheepQQBot3.Model.AI
         /// 思考内容
         /// </summary>
         //[Description("thinking")]
-        [Description("【关键】内心独白（用户不可见）。在回复前，先分析用户意图，结合当前心情(Mood)和好感度，决定你的情绪反应（傲娇/开心/生气等）。")]
+        [Description("【关键】内心独白（用户不可见）。在回复前，先分析用户意图，结合当前心情(Mood)和好感度，决定你的情绪反应（开心/生气/傲娇等）。")]
         [JsonPropertyName("think")]
         public string Think { get; set; }
 
@@ -79,7 +79,7 @@ namespace SheepQQBot3.Model.AI
         /// 肢体语言
         /// </summary>
         //[Description("body language, The cat ears' movements also fall under this category.")]
-        [Description("肢体语言描述。重点描写猫娘特征（如耳朵抖动、尾巴摇摆、炸毛）及面部神态。")]
+        [Description("你所做的动作描述，猫娘特征（如耳朵抖动、尾巴摇摆、炸毛）及面部神态也需要描写，无需加上自己的名字。")]
         [JsonPropertyName("body_language")]
         public string Body { get; set; }
 
@@ -132,7 +132,7 @@ namespace SheepQQBot3.Model.AI
         /// 消息内容
         /// </summary>
         //[Description("message text")]
-        [Description("气泡内的文字。请严格遵循 System Prompt 中的【Reply Settings】：根据当前心情和好感度决定语气。注意：只有开心时才偶尔加'喵'，生气或严肃时不要加。")]
+        [Description("气泡内的文字。请严格遵循 System Prompt 中的【Reply Settings】和【角色多维关系特质与动态交互判定系统】：根据当前心情和关系决定语气。注意：只有开心时才偶尔加'喵'，生气或严肃时不要加。")]
         [JsonPropertyName("text")]
         [NotNull]
         [Required]
