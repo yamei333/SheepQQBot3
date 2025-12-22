@@ -22,7 +22,7 @@ public static partial class ProcessMessage
     /// <summary>
     /// KEY配置
     /// </summary>
-    public static async Task<bool> KeyConfigAsync(PrivateMessage privateMessage)
+    public static async Task KeyConfigAsync(PrivateMessage privateMessage)
     {
         var targetId = privateMessage.Sender.UserId.ToString();
         var groupId = privateMessage.Sender.GroupId.ToString();
@@ -30,7 +30,7 @@ public static partial class ProcessMessage
         var message = privateMessage.Message;
         // MEMO : 命令格式检查
         if (!message.StartsWith(COMMAND_CONFIG, StringComparison.CurrentCultureIgnoreCase))
-            return false;
+            return;
 
         var contentMessage = message[COMMAND_CONFIG.Length..];
         if (contentMessage.StartsWith(COMMAND_CONFIG_BARK, StringComparison.CurrentCultureIgnoreCase))
@@ -43,12 +43,9 @@ public static partial class ProcessMessage
             await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId,
                 $"BarkKey已{(isUpdate ? "更新" : "配置")}")
                 .ConfigureAwait(false);
-            return true;
+            return;
         }
 
-        await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!")
-            .ConfigureAwait(false);
-        // 暂不处理
-        return true;
+        await GlobalBotClient.SendPrivateMessageAsync(targetId, groupId, "命令格式有误!").ConfigureAwait(false);
     }
 }

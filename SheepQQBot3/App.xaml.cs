@@ -1,5 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
+using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.Extensions;
 using System;
 using System.Linq;
@@ -23,7 +24,11 @@ public partial class App : Application
 
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接
-        DbExtensions.CreateBotDbContext().SetuDoushiInfos.Find("0");
+        var botDb = DbExtensions.CreateBotDbContext();
+        botDb.SetuDoushiInfos.Find("0");
+        botDb.Database.ExecuteSqlRaw(@"
+PRAGMA journal_mode=WAL;
+PRAGMA synchronous=NORMAL;");
     }
 
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)

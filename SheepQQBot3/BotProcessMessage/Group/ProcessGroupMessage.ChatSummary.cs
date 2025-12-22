@@ -54,11 +54,13 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
     /// <param name="blackListUserConfig"><see cref="BlackListUserConfig"/></param>
+    /// <param name="groupMembers"></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     /// <returns></returns>
     public static async Task ChatSummaryAsync(
         AIGroupConfig aiGroupConfig,
         BlackListUserConfig blackListUserConfig,
+        Dictionary<string, GroupMember> groupMembers,
         GroupMessage groupMessage)
     {
         await using var botDb = DbExtensions.CreateBotDbContext();
@@ -153,13 +155,6 @@ public static partial class ProcessGroupMessage
             {
                 if (IsDebug)
                     targetGroupId = "414774779";
-
-                var groupMembers = await GlobalBotClient.GetGroupMembersAsync(targetGroupId).ConfigureAwait(false);
-                if (groupMembers == null)
-                {
-                    await GlobalBotClient.SendGroupMessageAsync(targetGroupId, "群成员信息获取失败!").ConfigureAwait(false);
-                    return;
-                }
 
                 var thisRequestContentParts = new List<ContentPart>();
                 thisRequestContentParts.AddSystemHint($"[以下是最近{description}的群聊内容]");

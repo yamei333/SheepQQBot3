@@ -98,7 +98,6 @@ public partial class BotServer : IDisposable
         };
 
         _server.Start();
-        return;
     }
 
     private void ProcessReceiveData(ReceiveData receiveData)

@@ -8,7 +8,6 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using System;
-using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
@@ -23,8 +22,6 @@ public static partial class ProcessGroupMessage
     private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
     private static readonly Regex _regEmoji = new(@"\p{Cs}");
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
-    //private static ConcurrentDictionary<string, Dictionary<string, GroupMember>> _globalGroupMembers;
-    private static ConcurrentDictionary<string, Lazy<Task<Dictionary<string, GroupMember>>>> _globalGroupMembers = [];
 
     private const string GROUP_CHAT_HINT = "上面是群友最近的聊天内容，参与一下群聊(随机1~3句话)";
     //private const string GROUP_PRIVATE_CHAT_HINT = "正在向你搭话(回复随机1~2句话)";
@@ -34,10 +31,12 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="aiGroupConfig"><see cref="AIGroupConfig"/></param>
     /// <param name="blackListUserConfig"></param>
+    /// <param name="groupMembers"></param>
     /// <param name="groupMessage"><see cref="GroupMessage"/></param>
     public static async Task AIAideAsync(
         AIGroupConfig aiGroupConfig,
         BlackListUserConfig blackListUserConfig,
+        Dictionary<string, GroupMember> groupMembers,
         GroupMessage groupMessage)
     {
         var groupId = groupMessage.GroupId;
@@ -77,15 +76,6 @@ public static partial class ProcessGroupMessage
         if (message.StartsWith("#") || message.EndsWith("色图") || message.ToLower() == "r")
         {
             //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(bot命令): {message}");
-            return;
-        }
-
-        var lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
-            id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
-        var groupMembers = await lazyWrapper.Value.ConfigureAwait(false);
-        if (groupMembers == null)
-        {
-            await GlobalBotClient.SendGroupMessageAsync(groupId, "群成员信息获取失败!").ConfigureAwait(false);
             return;
         }
 

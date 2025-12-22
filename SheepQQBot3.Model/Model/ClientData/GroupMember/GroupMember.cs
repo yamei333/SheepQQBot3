@@ -52,4 +52,7 @@ public class GroupMember
 
     [JsonPropertyName("unfriendly")]
     public bool Unfriendly { get; set; }
+    
+    [JsonPropertyName("is_robot")]
+    public bool IsRobot { get; set; }
 }

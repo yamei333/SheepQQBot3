@@ -44,7 +44,7 @@
     </UserControl.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="360" />
+            <ColumnDefinition Width="376" />
         </Grid.ColumnDefinitions>
         <Grid.RowDefinitions>
             <RowDefinition Height="300" />
@@ -101,7 +101,7 @@
                                 </DataTemplate>
                             </GridViewColumn.CellTemplate>
                         </GridViewColumn>
-                        <GridViewColumn Width="32" Header="AIAt">
+                        <GridViewColumn Width="48" Header="AI响应">
                             <GridViewColumn.CellTemplate>
                                 <DataTemplate>
                                     <ToggleButton

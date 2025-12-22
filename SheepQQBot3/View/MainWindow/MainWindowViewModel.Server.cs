@@ -31,6 +31,8 @@ partial class MainWindowViewModel
     // 存储每个用户的锁，Key 是用户 QQ 号
     private static readonly ConcurrentDictionary<string, SemaphoreSlim> _userLocks = [];
 
+    private static readonly ConcurrentDictionary<string, Lazy<Task<Dictionary<string, GroupMember>>>> _globalGroupMembers = [];
+
     private void InitServer()
     {
         BotServer = new BotServer();
@@ -197,8 +199,26 @@ partial class MainWindowViewModel
             return;
 
         var senderId = groupMessage.UserId;
+        // MEMO : 取得GroupMembers
+        var lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
+            id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
+        var groupMembers = await lazyWrapper.Value.ConfigureAwait(false);
+        if (groupMembers == null)
+        {
+            await GlobalBotClient.SendGroupMessageAsync(groupId, "群成员信息获取失败!").ConfigureAwait(false);
+            return;
+        }
+
+        // MEMO : 新进群友忽略 / 机器人消息忽略
+        if (!groupMembers.TryGetValue(senderId, out var groupMember) || groupMember.IsRobot)
+            return;
+
         var systemConfig = SetConfigs.Values.FirstOrDefault(x => x.TargetType == BotConfigTargetType.Common && x.TargetId == AISystemId);
         var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId)) ?? new BlackListUserConfig(senderId);
+
+        AddRunLog(blackListUserConfig.BanedChatSummaryCollect
+            ? new RunLog_GroupMessageBlackList(groupMessage)
+            : new RunLog_GroupMessage(groupMessage));
 
         // 获取或创建一个属于该用户的锁
         var userLock = _userLocks.GetOrAdd(senderId, _ => new SemaphoreSlim(1, 1));
@@ -213,9 +233,9 @@ partial class MainWindowViewModel
             (BotFunctionType.Group_RandomSetu, () => ProcessGroupMessage.RandomSetuAsync(blackListUserConfig, groupMessage)),
             (BotFunctionType.Group_SearchImageSource, () => ProcessGroupMessage.SearchImageSourceAsync(groupMessage)),
             (BotFunctionType.Group_Roll, () => ProcessGroupMessage.RollAsync(groupMessage)),
-            (BotFunctionType.Group_ChatSummary, () => ProcessGroupMessage.ChatSummaryAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMessage)),
+            (BotFunctionType.Group_ChatSummary, () => ProcessGroupMessage.ChatSummaryAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
             (BotFunctionType.Group_RepeatRevokeMessage, () => ProcessGroupMessage.RepeatRevokeMessageAsync(groupMessage)),
-            (BotFunctionType.Group_AIAide, () => ProcessGroupMessage.AIAideAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMessage)),
+            (BotFunctionType.Group_AIAide, () => ProcessGroupMessage.AIAideAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
         };
 
         foreach (var (type, action) in actions)
