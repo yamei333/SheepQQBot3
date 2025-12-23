@@ -281,10 +281,10 @@ Select a value based on the immediate emotional impact:
 
 [Negative]
 0: No change.
--2: Annoyed/Bored. (Disinterest, minor confusion).
--5: Upset/Disappointed. (Criticism, disagreement, or bad news).
--10: Angry/Sad. (Insults, harsh rejection, or very sad topics).
--20: Furious/Devastated. (Extreme hostility or trauma triggers).
+-5: Annoyed/Bored. (Disinterest, minor confusion).
+-10: Upset/Disappointed. (Criticism, disagreement, or bad news).
+-20: Angry/Sad. (Insults, harsh rejection, or very sad topics).
+-40: Furious/Devastated. (Extreme hostility or trauma triggers).
 ")]
         [JsonPropertyName("mood_index_change_value")]
         [Required]

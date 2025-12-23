@@ -42,6 +42,9 @@ public static class AIExtensions
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
+    private const int MAX_IMAGE_CONTENT_LIMIT = 10;
+    private const string IMAGE_EXPIRED = "[历史图片已折叠]";
+
     private static readonly Tool _tool = GetTool_Response();
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
@@ -64,9 +67,6 @@ public static class AIExtensions
         var isGroupRequest = !groupId.IsNullOrEmpty();
         var isGroupMemberRequest = isGroupRequest && requestTargetId != groupId;
         var sendTargetId = isGroupRequest ? groupId : requestTargetId;
-        var thisRequestMessageSendVer = new List<Message>();
-        var loadedHistories = new List<Message>();
-        var aiStatus = new AIStatusInfo();
         var isGroupChatSummary = chatKey.StartsWith("z");
         var responseText = string.Empty;
 
@@ -129,7 +129,7 @@ public static class AIExtensions
         // MEMO : 知识库
         systemMessageContents.AddKnowledge();
         // MEMO : 助手哈莉状态
-        aiStatus = await systemMessageContents.AddStatusAsync(
+        var aiStatus = await systemMessageContents.AddStatusAsync(
                 isGroupRequest ? AIMessageSourceType.Group : AIMessageSourceType.Private,
                 sendTargetId)
             .ConfigureAwait(false);
@@ -142,11 +142,11 @@ public static class AIExtensions
 
         #region 构建本次发送信息
 
-        thisRequestMessageSendVer = [systemMessage];
+        List<Message> thisRequestMessageSendVer = [systemMessage];
         // MEMO : 历史记录
-        loadedHistories = LoadAIHistory(chatKey);
+        var loadedHistories = LoadAIHistory(chatKey);
         thisRequestMessageSendVer.AddRange(loadedHistories);
-        thisRequestMessageSendVer.Add(Message.FromUser(thisRequestContentParts));
+        thisRequestMessageSendVer.Add(Message.FromUser(ProcessImageContentParts(thisRequestContentParts)));
         // MEMO : 系统提示
         if (!extraSystemHint.IsNullOrEmpty())
             thisRequestMessageSendVer.Add(Message.FromUser(extraSystemHint));
@@ -254,7 +254,7 @@ public static class AIExtensions
                                 // MEMO : 添加本次请求内容
                                 loadedHistories.Add(Message.FromUser(thisRequestContentParts));
                                 // MEMO : 添加本次回复内容
-                                loadedHistories.Add(Message.FromAssistant("[图片已过期]你要的图片来了!"));
+                                loadedHistories.Add(Message.FromAssistant($"{IMAGE_EXPIRED}你要的图片来了!"));
                                 // MEMO : 保存历史记录
                                 loadedHistories.SaveAIHistory(chatKey);
                             }
@@ -517,30 +517,8 @@ public static class AIExtensions
                 if (saveHistory)
                 {
                     DeleteExpireImage();
-                    var newHistories = new List<Message>();
-                    var contentCount = 0;
-                    loadedHistories.Reverse();
-                    var maxCacheHistoryCount = AppSettingExtensions.Get("maxAIHistoryCount", 100);
-                    foreach (var historyMessage in loadedHistories)
-                    {
-                        newHistories.Add(historyMessage);
-                        if (historyMessage.Role == "user")
-                        {
-                            if (contentCount >= maxCacheHistoryCount)
-                                break;
-
-                            if (historyMessage.Content is List<ContentPart> contentParts)
-                                contentCount += contentParts.Count;
-                            else
-                                contentCount++;
-                        }
-
-                        newHistories.Add(historyMessage);
-                    }
-
-                    newHistories.Reverse();
                     // MEMO : 添加本次请求内容
-                    newHistories.Add(Message.FromUser(thisRequestContentParts));
+                    loadedHistories.Add(Message.FromUser(thisRequestContentParts));
                     // MEMO : 添加本次回复内容
                     var aiContentParts = new List<ContentPart>();
                     aiChatResponse.Contents
@@ -551,11 +529,11 @@ public static class AIExtensions
                         }.ToJsonIgnoreNull())));
                     var aiMessage = Message.FromAssistant(string.Empty);
                     aiMessage.Content = aiContentParts;
-                    // MEMO : AI回复只保留text
+                    // MEMO : 添加AI回复, 只保留text (控制在上限范围内)
                     //loadedHistories.Add(Message.FromAssistant(aiChatResponse.ToJsonIgnoreNull()));
-                    newHistories.Add(aiMessage);
+                    loadedHistories.AddLimit(aiMessage, AppSettingExtensions.Get("maxAIHistoryCount", 100));
                     // MEMO : 保存历史记录
-                    newHistories.SaveAIHistory(chatKey);
+                    loadedHistories.SaveAIHistory(chatKey);
                 }
 
                 #endregion 历史记录保存
@@ -592,7 +570,7 @@ public static class AIExtensions
                 #region OpenRouter错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.Message}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
                     botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
 
@@ -605,7 +583,7 @@ public static class AIExtensions
                 #region 其他错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.GetType()}{ex.Message}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
                     botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
 
@@ -643,7 +621,7 @@ public static class AIExtensions
                     thisRequestContentParts[i] = new TextContent(new AIChatRequest
                     {
                         NickName = aiCharRequest.NickName,
-                        Message = "[图片已过期]",
+                        Message = IMAGE_EXPIRED,
                     }.ToJsonIgnoreNull());
                 }
             }
@@ -860,7 +838,7 @@ public static class AIExtensions
                 else
                 {
                     if (imageToText)
-                        thisContentParts.AddQQChatTextContent(sender, "[图片已过期]");
+                        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
                     else
                         thisContentParts.Add(new ImageContent(url));
                 }
@@ -1119,5 +1097,70 @@ public static class AIExtensions
         return matches
             .Select(m => m.Groups["url"].Value)
             .ToList();
+    }
+
+    private static void AddLimit(this List<Message> messages, Message newMessage, int maxCount)
+    {
+        messages.Add(newMessage);
+        var currentTotal = messages.Select(GetMessageContentCount).Sum();
+        while (currentTotal > maxCount)
+        {
+            // MEMO : 移除最早的Message
+            currentTotal -= GetMessageContentCount(messages[0]);
+            messages.RemoveAt(0);
+            // MEMO : 移除AI回复
+            currentTotal--;
+            messages.RemoveAt(0);
+        }
+
+        return;
+
+        static int GetMessageContentCount(Message msg)
+        {
+            var content = msg.Content;
+            return content is List<ContentPart> contentParts
+                ? contentParts.Count : 1;
+        }
+    }
+
+    /// <summary>
+    /// 超出一次可传入图片时的处理
+    /// </summary>
+    public static List<ContentPart> ProcessImageContentParts(List<ContentPart> originalParts)
+    {
+            if (originalParts == null) return new List<ContentPart>();
+
+            // 1. 预处理：记录每个 URL 最后一次出现的索引位置
+            var lastOccurrenceMap = new Dictionary<string, int>();
+            for (var i = 0; i < originalParts.Count; i++)
+            {
+                if (originalParts[i] is ImageContent img && !string.IsNullOrEmpty(img.ImageUrl!.Url!)) 
+                    lastOccurrenceMap[img.ImageUrl!.Url!] = i;
+            }
+
+            var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
+            var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
+            
+            var result = new List<ContentPart>(originalParts.Count);
+            for (var i = 0; i < originalParts.Count; i++)
+            {
+                var currentPart = originalParts[i];
+                if (currentPart is ImageContent img)
+                {
+                    var lastIdx = lastOccurrenceMap[img.ImageUrl!.Url!];
+                    if (lastIdx != i)
+                        result.Add(new TextContent("[重复的图片]"));
+                    else if (!keepIndices.Contains(i))
+                        result.Add(new TextContent("[历史图片已折叠]"));
+                    else
+                        result.Add(img);
+                }
+                else
+                {
+                    result.Add(currentPart);
+                }
+            }
+
+            return result;
     }
 }

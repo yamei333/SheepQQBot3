@@ -8,7 +8,7 @@ namespace SheepQQBot3.BotTask;
 
 public static partial class TaskProcess
 {
-    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|01|02|03|04|05|06|07|08|09|12|15|18|21):00:\d{2}");
+    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|01|02|03|04|05|06|07|08|10|12|14|16|18|20|22):00:\d{2}");
 
     /// <summary>
     /// AI状态恢复
@@ -35,9 +35,9 @@ public static partial class TaskProcess
                     continue;
                 }
 
-                PublicVar.GlobalAIData.AIStatusData.MoodIndexValue = moodIndexValue > 80
-                    ? (int)(moodIndexValue * 0.85)
-                    : (int)(moodIndexValue * 0.9);
+                PublicVar.GlobalAIData.AIStatusData.MoodIndexValue = moodIndexValue > 50
+                    ? (int)(moodIndexValue * 0.8)
+                    : (int)(moodIndexValue * 0.7);
                 ConfigExtensions.SaveAIData();
                 CommonExtensions.SleepMinutes(30);
             }
