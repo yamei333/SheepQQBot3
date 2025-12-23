@@ -852,14 +852,21 @@ public static class AIExtensions
             var thisContentParts = new List<ContentPart>();
             await matches.ForeachAsync(match =>
             {
-                var replaceContent = match.Value;
-                if (imageToText)
-                    thisContentParts.AddQQChatTextContent(sender, "[图片已过期]");
+                var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
+                if (match.Groups["file"].Value.EndsWith(".gif", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
+                }
                 else
-                    thisContentParts.Add(new ImageContent(WebUtility.HtmlDecode(match.Groups["url"].Value)));
+                {
+                    if (imageToText)
+                        thisContentParts.AddQQChatTextContent(sender, "[图片已过期]");
+                    else
+                        thisContentParts.Add(new ImageContent(url));
+                }
 
                 isAddImage = true;
-                processedMessage = processedMessage.Replace(replaceContent, string.Empty);
+                processedMessage = processedMessage.Replace(match.Value, string.Empty);
                 return Task.CompletedTask;
             }).ConfigureAwait(false);
 
@@ -1052,8 +1059,8 @@ public static class AIExtensions
     {
         using var fs = new FileStream(AI_KNOWLEDGE_NOTE_PATH, FileMode.Append, FileAccess.Write);
         using var sw = new StreamWriter(fs, Encoding.UTF8);
-        sw.Write($"# {knowledgeNote.Title}{ENTER}{ENTER}"
-            + $"{knowledgeNote.Content}{ENTER}※Date: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
+        sw.Write($"## {knowledgeNote.Title}{ENTER}{ENTER}"
+            + $"{knowledgeNote.Content}{ENTER}※记录日期: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
         sw.Close();
         fs.Close();
     }
@@ -1062,8 +1069,8 @@ public static class AIExtensions
     {
         using var fs = new FileStream(AI_INSPIRATION_NOTE_PATH, FileMode.Append, FileAccess.Write);
         using var sw = new StreamWriter(fs, Encoding.UTF8);
-        sw.Write($"# {inspirationNote.Title}{ENTER}{ENTER}"
-            + $"{inspirationNote.Content}{ENTER}※Date: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
+        sw.Write($"## {inspirationNote.Title}{ENTER}{ENTER}"
+            + $"{inspirationNote.Content}{ENTER}※记录日期: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
         sw.Close();
         fs.Close();
     }
