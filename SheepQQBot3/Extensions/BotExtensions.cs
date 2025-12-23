@@ -15,7 +15,7 @@ namespace SheepQQBot3.Extensions;
 
 public static partial class BotExtensions
 {
-    private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
+    private static readonly Regex _regCQCode = RegexGenerator.CQCode();
     private static readonly Regex _regSetuCommand = new(@"^(?!.*\[CQ:).*色图[a-zA-Z]?$", RegexOptions.Singleline);
     private static readonly Regex _regEmoji = new(@"\p{Cs}");
 
@@ -113,7 +113,7 @@ public static partial class BotExtensions
             return true;
 
         // MEMO : 去除个别CQ码之后无任何内容的消息(转发, 小程序)
-        return _regReplaceCQCode.Replace(message, match =>
+        return _regCQCode.Replace(message, match =>
         {
             var cqCode = match.Groups["tag"].Value;
             if (cqCode != "image" && cqCode != "at")

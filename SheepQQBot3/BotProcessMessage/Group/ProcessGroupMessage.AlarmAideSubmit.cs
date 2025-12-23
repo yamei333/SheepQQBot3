@@ -11,6 +11,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
@@ -68,7 +69,7 @@ public static partial class ProcessGroupMessage
         await _regCQImageFileUrl.Matches(alarmMessage).ForeachAsync(async match =>
         {
             var replaceContent = match.Value;
-            var fileId = match.Groups["file"].Value;
+            var fileId = WebUtility.HtmlDecode(match.Groups["file"].Value);
             var imageReceiveData = await GlobalBotClient.GetImageAsync(fileId).ConfigureAwait(false);
             var filePath = imageReceiveData.Data.File;
             string fileName;
@@ -82,7 +83,7 @@ public static partial class ProcessGroupMessage
             else
             {
                 var url = match.Groups["url"];
-                var picUrl = url.Success ? url.Value : imageReceiveData.Data.Url;
+                var picUrl = url.Success ? WebUtility.HtmlDecode(url.Value) : imageReceiveData.Data.Url;
                 (isSuccessed, fileName) = await HttpExtensions
                     .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
                     .ConfigureAwait(false);

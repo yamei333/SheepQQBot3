@@ -5,7 +5,6 @@ using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using System;
 using System.Collections.Generic;
@@ -20,8 +19,6 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
-    private static readonly Regex _regDeleteCQCode = RegexGenerator.CQDeleteCQCode();
-    private static readonly Regex _regEmoji = new(@"\p{Cs}");
     private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     /// <summary>
@@ -62,11 +59,6 @@ public static partial class ProcessGroupMessage
 
             if (NeedNotRecordMessage(msg =>
             {
-                // MEMO : 字节数超过一定数量(设定数字/3)
-                // MEMO : at消息则无此限制
-                if (_regDeleteCQCode.Replace(msg, string.Empty).GetByteCount() > 90)
-                    return true;
-
                 // MEMO : 注入攻击
                 if (!BotExtensions.IsAdmin(targetId) && _regInjectHurry.IsMatch(msg))
                 {
@@ -79,6 +71,11 @@ public static partial class ProcessGroupMessage
             {
                 return;
             }
+
+            // MEMO : 除CQ段以外, 字节数超过一定数量(1汉字=3字节), 认为是转发消息
+            // MEMO : at消息则无此限制
+            if (_regCQCode.Replace(message, string.Empty).GetByteCount() > CHAT_SUMMARY_LIMIT_BYTE)
+                message = "[转发消息]";
 
             // MEMO : 记录消息(添加到历史记录中)
             var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);

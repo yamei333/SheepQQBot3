@@ -20,8 +20,6 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 
 public static partial class ProcessGroupMessage
 {
-    private static readonly Regex _regReplaceCQCode = RegexGenerator.ReplaceCQCode();
-
     /// <summary>
     /// 群聊消息总结最低消息数
     /// </summary>
@@ -30,7 +28,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 统计忽略词长
     /// </summary>
-    private const int CHAT_SUMMARY_LIMIT_BYTE = 100;
+    private const int CHAT_SUMMARY_LIMIT_BYTE = 90;
 
     /// <summary>
     /// 群聊总结命令
@@ -80,9 +78,10 @@ public static partial class ProcessGroupMessage
                     return;
 
                 var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
+                var processedMessage = addBotGroupMessage.MessageText.Replace(_regCQCode, string.Empty);
                 // 去掉CQCode之后内容过多的(认定是转发复读)
-                if (addBotGroupMessage.IsNullOrEmpty() || addBotGroupMessage.MessageText.Replace(_regReplaceCQCode, string.Empty).GetByteCount() > CHAT_SUMMARY_LIMIT_BYTE)
-                    return;
+                if (processedMessage.GetByteCount() > CHAT_SUMMARY_LIMIT_BYTE)
+                    addBotGroupMessage.MessageText = "[转发消息]";
 
                 // MEMO : 将群聊录入数据库
                 if (await botDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).ConfigureAwait(false) == null)

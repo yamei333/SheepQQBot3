@@ -45,7 +45,7 @@ public static class CQCode
         => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image},singer={singer}]";
 
     /// <summary>
-    /// 将收到的CQImage段替换为可发送的CQImage段
+    /// 将接收到的CQImage段替换为可发送的CQImage段
     /// </summary>
     /// <param name="message"></param>
     /// <returns></returns>
@@ -53,6 +53,7 @@ public static class CQCode
     {
         message = _regCQImageFileUrl.Replace(message, match =>
         {
+            // MEMO : 此处不需要Decode, Decode在真正使用时才转换
             var file = match.Groups["file"];
             var url = match.Groups["url"];
             return Image(url.Success ? url.Value : string.Empty,

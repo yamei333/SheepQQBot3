@@ -10,17 +10,8 @@ public static partial class RegexGenerator
     [GeneratedRegex("@\"(?<=id=)\\d+\"")]
     public static partial Regex GetImageId_RainChan();
 
-    [GeneratedRegex(@"\[CQ:[a-z_0-9]+,(?:[^\[\]]|\[[^\[\]]*\])*\]", RegexOptions.Singleline)]
-    public static partial Regex GetCQArea();
-
-    [GeneratedRegex(@"(?<=\[CQ:)[a-z_0-9]+?(?=[,\]])", RegexOptions.Singleline)]
-    public static partial Regex GetCQCode();
-
-    [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+),.+?\]")]
-    public static partial Regex ReplaceCQCode();
-
-    [GeneratedRegex(@",file_size=\d+")]
-    public static partial Regex CQCodeRemoveFileSize();
+    [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+),(?:[^\[\]]|\[[^\[\]]*\])*\]", RegexOptions.Singleline)]
+    public static partial Regex CQCode();
 
     [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]
     public static partial Regex HolidayInfo();
@@ -33,9 +24,6 @@ public static partial class RegexGenerator
 
     [GeneratedRegex(@"\[CQ:image(?=[^\]]*?\bfile=(?<file>[^,\]]+)|)(?=[^\]]*?\burl=(?<url>[^,\]]+)|)[^\]]*\]")]
     public static partial Regex CQImageFileUrl();
-
-    [GeneratedRegex(@"\[CQ:(?<tag>[a-z]+),.+?\]")]
-    public static partial Regex CQDeleteCQCode();
 
     [GeneratedRegex(@"#(\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2}:\d{1,2}|\d{4}-\d{1,2}-\d{1,2} \d{1,2}:\d{1,2})#")]
     public static partial Regex CustomAlarm_DateTime();

@@ -13,9 +13,7 @@ namespace SheepQQBot3.Model;
 /// </summary>
 public static class MessageUtil
 {
-    private static readonly Regex _regGetCQArea = RegexGenerator.GetCQArea();
-    private static readonly Regex _regGetCQCode = RegexGenerator.GetCQCode();
-    private static readonly Regex _regRemoveSubType = RegexGenerator.CQCodeRemoveFileSize();
+    private static readonly Regex _regCQCode = RegexGenerator.CQCode();
 
     /// <summary>
     /// 将消息处理为CQ码消息
@@ -28,18 +26,19 @@ public static class MessageUtil
         var messageResult = new List<Element>();
         while (processIndex < message.Length - 1)
         {
-            var cqAreaResult = _regGetCQArea.Match(message, processIndex);
-            if (cqAreaResult.Success)
+            var match = _regCQCode.Match(message, processIndex);
+            if (match.Success)
             {
-                if (cqAreaResult.Index != processIndex)
+                var cqTag = match.Groups["tag"].Value;
+                if (match.Index != processIndex)
                 {
                     // CQ区域前包含其他文本, 先处理文本
-                    messageResult.Add(ProcessCQAreaMessage(message[processIndex..cqAreaResult.Index]));
-                    processIndex = cqAreaResult.Index;
+                    messageResult.Add(ProcessCQAreaMessage(message[processIndex..match.Index]));
+                    processIndex = match.Index;
                 }
 
-                messageResult.Add(ProcessCQAreaMessage(cqAreaResult.Value));
-                processIndex += cqAreaResult.Length;
+                messageResult.Add(ProcessCQAreaMessage(match.Value, cqTag));
+                processIndex += match.Length;
             }
             else
             {
@@ -51,14 +50,13 @@ public static class MessageUtil
         return messageResult;
     }
 
-    public static Element ProcessCQAreaMessage(string message)
+    public static Element ProcessCQAreaMessage(string message, string cqTag = "")
     {
-        var cqCode = _regGetCQCode.Match(message).Value;
-        if (cqCode.IsNullOrEmpty())
+        if (cqTag.IsNullOrEmpty())
             return new Element(ElementType.text, new ElementBaseData(message));
 
-        var cqType = (ElementType)Enum.Parse(typeof(ElementType), cqCode, true);
-        switch (cqType)
+        var cqTagType = (ElementType)Enum.Parse(typeof(ElementType), cqTag, true);
+        switch (cqTagType)
         {
             //case "ym_play":
             //    YameiExtensions.PlaySe(GetElementBaseData().File);
@@ -67,15 +65,15 @@ public static class MessageUtil
             //    YameiExtensions.PlaySe3(GetElementBaseData().File);
             //    return new Element(ElementType.text, new ElementBaseData(string.Empty));
             case ElementType.json:
-                return new Element(cqType, GetElementBaseData_Json());
+                return new Element(cqTagType, GetElementBaseData_Json());
             case ElementType.xml:
-                return new Element(cqType, GetElementBaseData_Xml());
+                return new Element(cqTagType, GetElementBaseData_Xml());
             //case "image":
             //    return new Element(cqType, GetElementBaseData_Image());
             //case "File":
             //    return new Element(cqType, GetElementBaseData_File());
             default:
-                return new Element(cqType, GetElementBaseData());
+                return new Element(cqTagType, GetElementBaseData());
                 //case "at":
                 //case "face":
                 //case "image":
@@ -90,8 +88,8 @@ public static class MessageUtil
 
         ElementBaseData GetElementBaseData_Json()
         {
-            var subIndex = cqCode.Length + 5;
-            var subMessage = message.Substring(subIndex, message.Length - cqCode.Length - 6);
+            var subIndex = cqTag.Length + 5;
+            var subMessage = message.Substring(subIndex, message.Length - cqTag.Length - 6);
             return new ElementBaseData
             {
                 Data = subMessage[5..],
@@ -108,8 +106,8 @@ public static class MessageUtil
 
         ElementBaseData GetElementBaseData_Xml()
         {
-            var subIndex = cqCode.Length + 5;
-            var subMessage = message.Substring(subIndex, message.Length - cqCode.Length - 6);
+            var subIndex = cqTag.Length + 5;
+            var subMessage = message.Substring(subIndex, message.Length - cqTag.Length - 6);
             var xmlString = new Regex(@"data=\<\?xml.+\>", RegexOptions.Singleline).Match(subMessage).Value;
             subMessage = subMessage.Replace(xmlString, string.Empty);
             var subJsonContent = string.Join(",", subMessage.Split(',')
@@ -124,22 +122,22 @@ public static class MessageUtil
 
         string GetSubJson()
         {
-            var subIndex = cqCode.Length + 5;
+            var subIndex = cqTag.Length + 5;
             if (subIndex >= message.Length)
                 return "{}";
 
-            var subMessage = message.Substring(subIndex, message.Length - cqCode.Length - 6);
+            var subMessage = message.Substring(subIndex, message.Length - cqTag.Length - 6);
             var subJsonContent = string.Join(",", subMessage.Split(',')
-                .Select(eachSubData => string.Join(":", SplitJsonContent(eachSubData)
+                .Select(eachSubData => string.Join(':', SplitJsonContent(eachSubData)
                     .Select(eachElement => $"\"{eachElement}\"")
                     .ToArray())));
             return $"{{{subJsonContent}}}";
         }
 
-        IEnumerable<string> SplitJsonContent(string jsonContent)
+        static IEnumerable<string> SplitJsonContent(string jsonContent)
         {
             var firstEqual = jsonContent.IndexOf('=');
-            return new[] { jsonContent[..firstEqual], jsonContent[(firstEqual + 1)..] };
+            return [jsonContent[..firstEqual], jsonContent[(firstEqual + 1)..]];
         }
     }
 }
