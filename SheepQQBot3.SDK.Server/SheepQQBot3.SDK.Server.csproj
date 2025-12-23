@@ -19,7 +19,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Sisk.HttpServer" Version="1.5.2" />
+    <PackageReference Include="Sisk.HttpServer" Version="1.6.0" />
     <PackageReference Include="WatsonWebsocket" Version="4.1.7" />
   </ItemGroup>
 

@@ -29,7 +29,7 @@ public static partial class ProcessGroupMessage
     /// </summary>
     private const string TG_DIRECTORY_NAME = "TgImage";
 
-    private static readonly Regex _regCQImage = RegexGenerator.CQImage();
+    private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
 
     /// <summary>
     /// 闹钟助手投稿
@@ -52,8 +52,7 @@ public static partial class ProcessGroupMessage
         var groupId = groupMessage.GroupId;
         var message = groupMessage.Message;
         // MEMO : 命令格式检查
-        var upperMessage = message.ToUpper();
-        if (!upperMessage.StartsWith(COMMAND_ALARMAIDE_SUBMIT_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
+        if (!message.StartsWith(COMMAND_ALARMAIDE_SUBMIT_LIBRARY, StringComparison.CurrentCultureIgnoreCase))
             return;
 
         // MEMO : 无可投稿配置
@@ -66,11 +65,10 @@ public static partial class ProcessGroupMessage
 
         var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
         // MEMO : 0.14.4.4 已在接收消息层处理image消息, 此处不需要额外处理
-        var matches = _regCQImage.Matches(alarmMessage);
-        await matches.ForeachAsync(async match =>
+        await _regCQImageFileUrl.Matches(alarmMessage).ForeachAsync(async match =>
         {
             var replaceContent = match.Value;
-            var fileId = match.Groups["fileName"].Value;
+            var fileId = match.Groups["file"].Value;
             var imageReceiveData = await GlobalBotClient.GetImageAsync(fileId).ConfigureAwait(false);
             var filePath = imageReceiveData.Data.File;
             string fileName;
@@ -83,7 +81,8 @@ public static partial class ProcessGroupMessage
             }
             else
             {
-                var picUrl = imageReceiveData.Data.Url;
+                var url = match.Groups["url"];
+                var picUrl = url.Success ? url.Value : imageReceiveData.Data.Url;
                 (isSuccessed, fileName) = await HttpExtensions
                     .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
                     .ConfigureAwait(false);

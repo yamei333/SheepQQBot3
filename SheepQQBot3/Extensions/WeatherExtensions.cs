@@ -16,15 +16,23 @@ namespace SheepQQBot3.Extensions
 
         public static async Task<AIWeatherContext> AIGetWeatherDataAsync(string cityName = "shanghai")
         {
-            var weatherData = await OpenWeatherMapService.GetWeatherDataByCityNameAsync(cityName).ConfigureAwait(false);
-
-            var dateNow = DateTime.Now;
-            var forecastData = await OpenWeatherMapService.GetForecastDataByCityNameAsync(cityName).ConfigureAwait(false);
-            var forecastWeatherDatas = forecastData.WeatherData;
-            var nextWeatherData = forecastWeatherDatas.First(each => each.AcquisitionDateTime > dateNow);
-            var prevWeatherData = forecastWeatherDatas.Last(each => each.AcquisitionDateTime < dateNow);
-
-            return CreateWeatherContext(weatherData, prevWeatherData, nextWeatherData);
+            try
+            {
+                var weatherData = await OpenWeatherMapService.GetWeatherDataByCityNameAsync(cityName).ConfigureAwait(false);
+                var forecastData = await OpenWeatherMapService.GetForecastDataByCityNameAsync(cityName).ConfigureAwait(false);
+                var forecastWeatherDatas = forecastData.WeatherData;
+                var dateNow = DateTime.Now;
+                var nextWeatherData = forecastWeatherDatas.First(each => each.AcquisitionDateTime > dateNow);
+                var prevWeatherData = forecastWeatherDatas.Last(each => each.AcquisitionDateTime < dateNow);
+                return CreateWeatherContext(weatherData, prevWeatherData, nextWeatherData);
+            }
+            catch
+            {
+                return new AIWeatherContext
+                {
+                    CurrentCondition = "get weather failed.",
+                };
+            }
         }
 
         //private static AIWeatherData ToAIWeatherData(this WeatherData weatherData, bool setForecastDate)

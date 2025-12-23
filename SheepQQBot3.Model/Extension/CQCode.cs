@@ -53,12 +53,10 @@ public static class CQCode
     {
         message = _regCQImageFileUrl.Replace(message, match =>
         {
-            var groupFileName = match.Groups["fileName"];
-            var fileName = groupFileName.Success ? groupFileName.Value : string.Empty;
-            var groupUrl = match.Groups["url"];
-            var url = groupUrl.Success ? groupUrl.Value : string.Empty;
-
-            return Image(url, fileName);
+            var file = match.Groups["file"];
+            var url = match.Groups["url"];
+            return Image(url.Success ? url.Value : string.Empty,
+                file.Success ? file.Value : string.Empty);
         });
 
         return message;

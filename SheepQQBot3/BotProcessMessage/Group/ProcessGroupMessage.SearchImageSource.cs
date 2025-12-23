@@ -2,6 +2,7 @@
 using Masuit.Tools;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Extension;
+using System;
 using System.Linq;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
@@ -29,8 +30,7 @@ public static partial class ProcessGroupMessage
         var groupId = groupMessage.GroupId;
         var message = groupMessage.Message;
         // MEMO : 命令格式检查
-        var upperMessage = message.ToUpper();
-        if (!upperMessage.StartsWith(COMMAND_SEARCH_IMAGE_SOURCE))
+        if (!message.StartsWith(COMMAND_SEARCH_IMAGE_SOURCE, StringComparison.CurrentCultureIgnoreCase))
             return;
 
         message = message[4..];

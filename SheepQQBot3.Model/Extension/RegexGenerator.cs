@@ -31,10 +31,7 @@ public static partial class RegexGenerator
     [GeneratedRegex(@"^.+?(?=\[\d{4}-\d{2}-\d{2})")]
     public static partial Regex CmdStart();
 
-    [GeneratedRegex(@"\[CQ:image,.*?file=(?<fileName>.+?\.[a-z]{3}).*?\]")]
-    public static partial Regex CQImage();
-
-    [GeneratedRegex(@"\[CQ:image(?=[^\]]*\bfile=(?<file>[^,\]]+))(?=[^\]]*\burl=(?<url>[^,\]]+))[^\]]*\]")]
+    [GeneratedRegex(@"\[CQ:image(?=[^\]]*?\bfile=(?<file>[^,\]]+)|)(?=[^\]]*?\burl=(?<url>[^,\]]+)|)[^\]]*\]")]
     public static partial Regex CQImageFileUrl();
 
     [GeneratedRegex(@"\[CQ:(?<tag>[a-z]+),.+?\]")]

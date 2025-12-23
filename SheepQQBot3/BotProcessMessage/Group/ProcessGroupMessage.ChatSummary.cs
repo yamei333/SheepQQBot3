@@ -76,7 +76,7 @@ public static partial class ProcessGroupMessage
                 if (blackListUserConfig.BanedChatSummaryCollect)
                     return;
 
-                if (!NeedRecordMessage(message))
+                if (BotExtensions.NeedNotRecordMessage(message))
                     return;
 
                 var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
@@ -198,47 +198,5 @@ public static partial class ProcessGroupMessage
         {
             YameiLogExtensions.WriteLog(e);
         }
-    }
-
-    /// <summary>
-    /// 不记录的群聊消息
-    /// </summary>
-    private static bool NeedRecordMessage(string message)
-    {
-        if (message.StartsWith("#") || message.ToUpper() == "R")
-            return false;
-
-        if (message.Contains($"[CQ:at,qq={BotId}]") || message.Contains($"[CQ:at,qq=3889001246]"))
-            return false;
-
-        if (message.Contains("色图") && message.BytesCount() <= 20)
-            return false;
-
-        // MEMO : emoji数量超过一定数量
-        if (_regEmoji.Matches(message).Count >= 6)
-            return false;
-
-        // MEMO : 色图系列
-        var uMessage = message.ToUpper();
-        if (uMessage.EndsWith("色图")
-            || uMessage.EndsWith("色图L")
-            || uMessage.EndsWith("色图N")
-            || uMessage.EndsWith("色图J")
-            || uMessage.EndsWith("色图Y")
-            || uMessage.EndsWith("色图S")
-            || uMessage.EndsWith("色图C"))
-        {
-            return false;
-        }
-
-        // MEMO : 去除所有CQ码之后无任何内容的消息
-        return !_regReplaceCQCode.Replace(message, match =>
-        {
-            var cqCode = match.Groups["tag"].Value;
-            if (cqCode != "image" && cqCode != "at")
-                return string.Empty;
-
-            return match.Value;
-        }).Trim().IsNullOrEmpty();
     }
 }

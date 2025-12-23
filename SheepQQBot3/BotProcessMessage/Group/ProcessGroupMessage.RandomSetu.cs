@@ -32,7 +32,7 @@ public static partial class ProcessGroupMessage
         "https://i0.hdslb.com/bfs/garb/8b6d3154bd4eb96df7603163cffc1db407d92bf2.png",
     ];
 
-    private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Multiline);
+    private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Singleline);
 
     /// <summary>
     /// 色图命令的开头
@@ -238,20 +238,22 @@ public static partial class ProcessGroupMessage
         if (blackListUserConfig.BanedSetu)
             return;
 
+        var message = groupMessage.Message;
+        // MEMO : 色图请求格式检查
+        if (!_regCorrectSetuMessage.IsMatch(message))
+            return;
+
         await using var botDb = DbExtensions.CreateBotDbContext();
         var groupId = groupMessage.GroupId;
         var senderId = groupMessage.Sender.UserId.ToString();
         var messageId = groupMessage.MessageId;
-        var message = groupMessage.Message;
         var dateNow = DateTime.Now;
 
         var setuDoushiInfo = await GetSetuDoushiInfoAsync(botDb, senderId).ConfigureAwait(false);
+        // MEMO : 色图黑名单检测
         if ((dateNow - setuDoushiInfo.BlackListCD.ToDateTime()).TotalMicroseconds < 0)
         {
-            // MEMO : 黑名单的人, 给色图请求打标记
-            if (_regCorrectSetuMessage.IsMatch(message))
-                await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.DogeBig).ConfigureAwait(false);
-
+            await GlobalBotClient.SendMessageEmojiAsync(messageId, Emoji.DogeBig).ConfigureAwait(false);
             return;
         }
 

@@ -9,6 +9,7 @@ using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.QQ;
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
@@ -40,41 +41,7 @@ public static partial class ProcessGroupMessage
         var sender = groupMessage.Sender;
         var targetId = sender.UserId.ToString();
         var message = groupMessage.Message;
-
-        // MEMO : 字节数超过一定数量(设定数字/3), 忽略
-        if (!BotExtensions.IsAdmin(targetId) && _regDeleteCQCode.Replace(message, string.Empty).GetByteCount() > 90)
-        {
-            //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(字数太多): {message}");
-            return;
-        }
-
-        // MEMO : emoji数量超过一定数量
-        if (_regEmoji.Matches(message).Count >= 4)
-        {
-            YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(emoji太多): {message}");
-            return;
-        }
-
-        // MEMO : 注入攻击, 忽略
-        if (!BotExtensions.IsAdmin(targetId) && _regInjectHurry.IsMatch(message))
-        {
-            YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(注入): {message}");
-            return;
-        }
-
         var dateNow = DateTime.Now;
-        if (dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
-        {
-            //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(拉黑): {message}");
-            return;
-        }
-
-        // MEMO : 开头是#表示Bot命令, 结尾是"色图"表示色图命令, 单"r"是roll点命令, 忽略
-        if (message.StartsWith("#") || message.EndsWith("色图") || message.ToLower() == "r")
-        {
-            //YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(bot命令): {message}");
-            return;
-        }
 
         var chatKey = $"g{groupId}";
         var isPrivateChat = message.StartsWith(_commandAI, StringComparison.CurrentCultureIgnoreCase);
@@ -86,32 +53,50 @@ public static partial class ProcessGroupMessage
 
         if (aiGroupConfig.JoinGroupChat && !isPrivateChat)
         {
-            if (blackListUserConfig.BanedAICollect)
-                return;
-
             // MEMO : 日程在深度睡眠时, 不接收消息
             if (AIStatusUtil.GetSchedule().Contains("deep sleep"))
                 return;
 
-            // MEMO : 记录消息(添加到历史记录中)
-            var historyMessages = AIHistoryContentParts.GetOrAdd(groupId, []);
-            await historyMessages.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
+            if (blackListUserConfig.BanedAICollect)
+                return;
 
-            //YameiLogExtensions.WriteLog(LogType.Info, $"群({groupId})消息记录数: {historyContents.Count}");
-            if (CanSendGroupChat(aiGroupConfig, historyMessages.Count))
+            if (NeedNotRecordMessage(msg =>
+            {
+                // MEMO : 字节数超过一定数量(设定数字/3)
+                // MEMO : at消息则无此限制
+                if (_regDeleteCQCode.Replace(msg, string.Empty).GetByteCount() > 90)
+                    return true;
+
+                // MEMO : 注入攻击
+                if (!BotExtensions.IsAdmin(targetId) && _regInjectHurry.IsMatch(msg))
+                {
+                    YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(注入): {msg}");
+                    return true;
+                }
+
+                return false;
+            }))
+            {
+                return;
+            }
+
+            // MEMO : 记录消息(添加到历史记录中)
+            var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
+            await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
+
+            if (CanSendGroupChat(aiGroupConfig, historyContentParts.Count(contentPart => contentPart.Type == "text")))
             {
                 // MEMO : 某些时间不该发消息
                 if (AIExtensions.IsCantSendMessage(string.Empty, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
                     return;
 
                 // MEMO : 发送消息
-                await SendGroupAsync(historyMessages).ConfigureAwait(false);
+                await SendGroupAsync(historyContentParts).ConfigureAwait(false);
             }
 
             return;
         }
 
-        //var removeAtMessage = message[_commandAI.Length..].TrimStart();
         if (isPrivateChat && aiGroupConfig.UseAtResponse)
         {
             if (blackListUserConfig.BanedAIResponse)
@@ -165,6 +150,21 @@ public static partial class ProcessGroupMessage
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
                 GlobalAIConfig.ModelChat,
                 AppSettingExtensions.Get("groupChatPrompt"));
+        }
+
+        bool NeedNotRecordMessage(Func<string, bool> otherCheckFunc = null)
+        {
+            return BotExtensions.NeedNotRecordMessage(message, msg =>
+            {
+                // MEMO : 被Bot拉黑
+                if (dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
+                    return true;
+
+                if (otherCheckFunc?.Invoke(msg) == true)
+                    return true;
+
+                return false;
+            });
         }
     }
 

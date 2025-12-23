@@ -42,11 +42,6 @@ public static class AIExtensions
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
-    /// <summary>
-    /// 最大历史记录保存数
-    /// </summary>
-    private const int MAX_CACHE_HISTORY_COUNT = 500;
-
     private static readonly Tool _tool = GetTool_Response();
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
@@ -530,12 +525,13 @@ public static class AIExtensions
                     var newHistories = new List<Message>();
                     var contentCount = 0;
                     loadedHistories.Reverse();
+                    var maxCacheHistoryCount = AppSettingExtensions.Get("maxAIHistoryCount", 100);
                     foreach (var historyMessage in loadedHistories)
                     {
                         newHistories.Add(historyMessage);
                         if (historyMessage.Role == "user")
                         {
-                            if (contentCount >= MAX_CACHE_HISTORY_COUNT)
+                            if (contentCount >= maxCacheHistoryCount)
                                 break;
 
                             if (historyMessage.Content is List<ContentPart> contentParts)
@@ -547,6 +543,7 @@ public static class AIExtensions
                         newHistories.Add(historyMessage);
                     }
 
+                    newHistories.Reverse();
                     // MEMO : 添加本次请求内容
                     newHistories.Add(Message.FromUser(thisRequestContentParts));
                     // MEMO : 添加本次回复内容
