@@ -10,7 +10,7 @@ public static partial class RegexGenerator
     [GeneratedRegex("@\"(?<=id=)\\d+\"")]
     public static partial Regex GetImageId_RainChan();
 
-    [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+),(?:[^\[\]]|\[[^\[\]]*\])*\]", RegexOptions.Singleline)]
+    [GeneratedRegex(@"\[CQ:(?<tag>[a-z_0-9]+)(?:,(?:[^\[\]]|\[[^\[\]]*\])*)?\]", RegexOptions.Singleline)]
     public static partial Regex CQCode();
 
     [GeneratedRegex(@"(?<=""\d{2}-\d{2}"":){.+?}")]

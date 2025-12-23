@@ -192,13 +192,8 @@ public static class AIExtensions
                             type = "function",
                             function = new { name = "reply_user" },
                         },
-                        Reasoning = new ReasoningConfig
-                        {
-                            Effort = "high",
-                            Enabled = true,
-                            Exclude = true,
-                        },
                         Temperature = GlobalAIConfig.Temperature,
+                        TopP = GlobalAIConfig.TopP,
                     }).ConfigureAwait(false);
 
                 #endregion 发送AI请求

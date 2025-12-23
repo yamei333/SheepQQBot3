@@ -59,11 +59,11 @@ namespace SheepQQBot3.Model.AI
         [JsonPropertyName("temperature")]
         public float Temperature { get; set; }
 
-        ///// <summary>
-        ///// Model TopP
-        ///// </summary>
-        //[JsonPropertyName("topP")]
-        //public double TopP { get; set; }
+        /// <summary>
+        /// Model TopP
+        /// </summary>
+        [JsonPropertyName("topP")]
+        public float TopP { get; set; }
 
         ///// <summary>
         ///// Model TopK
