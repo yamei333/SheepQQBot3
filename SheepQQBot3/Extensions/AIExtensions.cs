@@ -148,6 +148,7 @@ public static class AIExtensions
         var loadedHistories = LoadAIHistory(chatKey);
         thisRequestMessageSendVer.AddRange(loadedHistories);
         ProcessImageContentParts();
+        RemoveRedundantImageSummaries();
         thisRequestMessageSendVer.Add(Message.FromUser(thisRequestContentParts));
         // MEMO : 系统提示
         if (!extraSystemHint.IsNullOrEmpty())
@@ -259,6 +260,7 @@ public static class AIExtensions
                             {
                                 // MEMO : 删除过期图片信息
                                 DeleteExpireImage();
+                                RemoveRedundantImageSummaries();
                                 // MEMO : 添加本次请求内容
                                 loadedHistories.Add(Message.FromUser(thisRequestContentParts));
                                 // MEMO : 添加本次回复内容
@@ -525,6 +527,7 @@ public static class AIExtensions
                 if (saveHistory)
                 {
                     DeleteExpireImage();
+                    RemoveRedundantImageSummaries();
                     // MEMO : 添加本次请求内容
                     loadedHistories.Add(Message.FromUser(thisRequestContentParts));
                     // MEMO : 添加本次回复内容
@@ -679,6 +682,36 @@ public static class AIExtensions
             }
 
             return "未知用户";
+        }
+
+        // 移除冗余的图片总结文本
+        void RemoveRedundantImageSummaries()
+        {
+            if (thisRequestContentParts.Count == 0)
+                return;
+
+            var indicesToRemove = new List<int>();
+            var hasRealImageInGroup = false;
+            for (var i = 0; i < thisRequestContentParts.Count; i++)
+            {
+                var part = thisRequestContentParts[i];
+                switch (part)
+                {
+                    case ImageContent:
+                        hasRealImageInGroup = true;
+                        break;
+                    case TextContent txt when txt.Text.FromJson<AIChatRequest>().Message == SEND_SOME_IMAGES:
+                        if (!hasRealImageInGroup)
+                            indicesToRemove.Add(i);
+
+                        hasRealImageInGroup = false;
+                        break;
+                }
+            }
+
+            // 倒序删除 (防止索引错位)
+            for (var i = indicesToRemove.Count - 1; i >= 0; i--)
+                thisRequestContentParts.RemoveAt(indicesToRemove[i]);
         }
     }
 
@@ -865,7 +898,7 @@ public static class AIExtensions
             var isAddImage = false;
             var matches = _regCQImageFileUrl.Matches(messageText);
             var thisContentParts = new List<ContentPart>();
-            matches.ForeachAsync(async match =>
+            await matches.ForeachAsync(async match =>
             {
                 var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
                 if (await HttpExtensions.IsGifFromUrlAsync(url).ConfigureAwait(false))
@@ -882,7 +915,7 @@ public static class AIExtensions
 
                 isAddImage = true;
                 processedMessage = processedMessage.Replace(match.Value, string.Empty);
-            });
+            }).ConfigureAwait(false);
 
             if (isAddImage)
                 thisContentParts.AddQQChatTextContent(sender, SEND_SOME_IMAGES);
