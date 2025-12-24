@@ -42,7 +42,8 @@ public static class AIExtensions
     private const string AI_KNOWLEDGE_NOTE_PATH = "AICache/knowledgeNote.txt";
     private const string AI_INSPIRATION_NOTE_PATH = "AICache/inspirationNote.txt";
 
-    private const int MAX_IMAGE_CONTENT_LIMIT = 10;
+    private const int MAX_IMAGE_CONTENT_LIMIT = 5;
+    private const string IMAGE_DUPLICATE = "[重复的图片]";
     private const string IMAGE_EXPIRED = "[历史图片已折叠]";
 
     private static readonly Tool _tool = GetTool_Response();
@@ -191,6 +192,12 @@ public static class AIExtensions
                         {
                             type = "function",
                             function = new { name = "reply_user" },
+                        },
+                        Reasoning = new ReasoningConfig
+                        {
+                            Effort = "high",
+                            Enabled = true,
+                            Exclude = true,
                         },
                         Temperature = GlobalAIConfig.Temperature,
                         TopP = GlobalAIConfig.TopP,
@@ -612,9 +619,9 @@ public static class AIExtensions
             for (var i = thisRequestContentParts.Count - 1; i >= 0; i--)
             {
                 var contentPart = thisRequestContentParts[i];
-                if (contentPart.Type == "text")
+                if (contentPart is TextContent textContent)
                 {
-                    aiCharRequest = ((TextContent)contentPart).Text.FromJson<AIChatRequest>();
+                    aiCharRequest = textContent.Text.FromJson<AIChatRequest>();
                 }
                 else
                 {
@@ -1128,39 +1135,39 @@ public static class AIExtensions
     /// </summary>
     public static List<ContentPart> ProcessImageContentParts(List<ContentPart> originalParts)
     {
-            if (originalParts == null) return new List<ContentPart>();
+        if (originalParts == null)
+            return [];
 
-            // 1. 预处理：记录每个 URL 最后一次出现的索引位置
-            var lastOccurrenceMap = new Dictionary<string, int>();
-            for (var i = 0; i < originalParts.Count; i++)
-            {
-                if (originalParts[i] is ImageContent img && !string.IsNullOrEmpty(img.ImageUrl!.Url!)) 
-                    lastOccurrenceMap[img.ImageUrl!.Url!] = i;
-            }
+        var lastOccurrenceMap = new Dictionary<string, int>();
+        for (var i = 0; i < originalParts.Count; i++)
+        {
+            if (originalParts[i] is ImageContent img && !string.IsNullOrEmpty(img.ImageUrl!.Url!))
+                lastOccurrenceMap[img.ImageUrl!.Url!] = i;
+        }
 
-            var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
-            var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
-            
-            var result = new List<ContentPart>(originalParts.Count);
-            for (var i = 0; i < originalParts.Count; i++)
+        var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
+        var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
+
+        var result = new List<ContentPart>(originalParts.Count);
+        for (var i = 0; i < originalParts.Count; i++)
+        {
+            var currentPart = originalParts[i];
+            if (currentPart is ImageContent img)
             {
-                var currentPart = originalParts[i];
-                if (currentPart is ImageContent img)
-                {
-                    var lastIdx = lastOccurrenceMap[img.ImageUrl!.Url!];
-                    if (lastIdx != i)
-                        result.Add(new TextContent("[重复的图片]"));
-                    else if (!keepIndices.Contains(i))
-                        result.Add(new TextContent("[历史图片已折叠]"));
-                    else
-                        result.Add(img);
-                }
+                var lastIdx = lastOccurrenceMap[img.ImageUrl!.Url!];
+                if (lastIdx != i)
+                    result.Add(new TextContent(IMAGE_DUPLICATE));
+                else if (!keepIndices.Contains(i))
+                    result.Add(new TextContent(IMAGE_EXPIRED));
                 else
-                {
-                    result.Add(currentPart);
-                }
+                    result.Add(img);
             }
+            else
+            {
+                result.Add(currentPart);
+            }
+        }
 
-            return result;
+        return result;
     }
 }
