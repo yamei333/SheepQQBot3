@@ -865,10 +865,10 @@ public static class AIExtensions
             var isAddImage = false;
             var matches = _regCQImageFileUrl.Matches(messageText);
             var thisContentParts = new List<ContentPart>();
-            await matches.ForeachAsync(match =>
+            matches.ForeachAsync(async match =>
             {
                 var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
-                if (match.Groups["file"].Value.EndsWith(".gif", StringComparison.CurrentCultureIgnoreCase))
+                if (await HttpExtensions.IsGifFromUrlAsync(url).ConfigureAwait(false))
                 {
                     thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
                 }
@@ -882,8 +882,7 @@ public static class AIExtensions
 
                 isAddImage = true;
                 processedMessage = processedMessage.Replace(match.Value, string.Empty);
-                return Task.CompletedTask;
-            }).ConfigureAwait(false);
+            });
 
             if (isAddImage)
                 thisContentParts.AddQQChatTextContent(sender, SEND_SOME_IMAGES);

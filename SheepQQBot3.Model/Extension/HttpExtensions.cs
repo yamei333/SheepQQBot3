@@ -9,6 +9,7 @@ using System;
 using System.IO;
 using System.Net;
 using System.Net.Http;
+using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
@@ -275,5 +276,73 @@ public static class HttpExtensions
 
         ms.SaveFile($"{path}/{tempFileName}.png");
         return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
+    }
+
+    public static async Task<bool> IsGifFromUrlAsync(string url)
+    {
+        // --- 第一步：尝试 HEAD 请求 (只读头) ---
+        try
+        {
+            var headRequest = new HttpRequestMessage(HttpMethod.Head, url);
+            var headResponse = await HttpClient.SendAsync(headRequest).ConfigureAwait(false);
+            if (headResponse.IsSuccessStatusCode && headResponse.Content.Headers.ContentType != null)
+            {
+                var mediaType = headResponse.Content.Headers.ContentType.MediaType;
+                // 如果服务器明确说是 gif，那就信它
+                if (mediaType.Equals("image/gif", StringComparison.OrdinalIgnoreCase))
+                    return true;
+
+                // 如果服务器明确说是 jpg/png，那肯定不是 gif，直接返回 false
+                if (mediaType.StartsWith("image/", StringComparison.OrdinalIgnoreCase))
+                    return false;
+            }
+        }
+        catch
+        {
+            // HEAD 请求有时会被防火墙拦截，如果失败不报错，继续走下面的 Range 方案
+        }
+
+        // --- 第二步：尝试 Range 请求 (只读前3个字节) ---
+        try
+        {
+            var rangeRequest = new HttpRequestMessage(HttpMethod.Get, url);
+            // 设置 Range 头，只请求 0-2 字节 (共3字节)
+            rangeRequest.Headers.Range = new RangeHeaderValue(0, 2);
+            // HttpCompletionOption.ResponseHeadersRead 意思是一拿到头就返回，不要等内容
+            var rangeResponse = await HttpClient.SendAsync(rangeRequest, HttpCompletionOption.ResponseHeadersRead).ConfigureAwait(false);
+            if (!rangeResponse.IsSuccessStatusCode)
+                return false;
+
+            // 检查服务器是否支持 Range (支持返回 206 Partial Content)
+            // 如果不支持 (返回 200 OK)，它会把整个文件塞给你，必须立刻切断!
+            if (rangeResponse.StatusCode == HttpStatusCode.OK)
+            {
+                // 虽然服务器不支持 Range，但我们可以只读流的前3个字节就断开
+                await using var stream = await rangeResponse.Content.ReadAsStreamAsync().ConfigureAwait(false);
+                var buffer = new byte[3];
+                var bytesRead = await stream.ReadAsync(buffer, 0, 3).ConfigureAwait(false);
+                return IsGifHeader(buffer);
+            }
+
+            if (rangeResponse.StatusCode == HttpStatusCode.PartialContent)
+            {
+                var bytes = await rangeResponse.Content.ReadAsByteArrayAsync().ConfigureAwait(false);
+                return IsGifHeader(bytes);
+            }
+        }
+        catch
+        {
+            return false;
+        }
+
+        return false;
+
+        // 本地判定函数
+        bool IsGifHeader(byte[] bytes)
+        {
+            if (bytes == null || bytes.Length < 3) return false;
+            // 'G' = 0x47, 'I' = 0x49, 'F' = 0x46
+            return bytes[0] == 0x47 && bytes[1] == 0x49 && bytes[2] == 0x46;
+        }
     }
 }
