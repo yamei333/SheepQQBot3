@@ -147,7 +147,8 @@ public static class AIExtensions
         // MEMO : 历史记录
         var loadedHistories = LoadAIHistory(chatKey);
         thisRequestMessageSendVer.AddRange(loadedHistories);
-        thisRequestMessageSendVer.Add(Message.FromUser(ProcessImageContentParts(thisRequestContentParts)));
+        ProcessImageContentParts();
+        thisRequestMessageSendVer.Add(Message.FromUser(thisRequestContentParts));
         // MEMO : 系统提示
         if (!extraSystemHint.IsNullOrEmpty())
             thisRequestMessageSendVer.Add(Message.FromUser(extraSystemHint));
@@ -214,8 +215,8 @@ public static class AIExtensions
                     YameiLogExtensions.WriteJsonDeserializeLog(
                         new JsonException(ERROR_JSON_BLOCK),
                         nameof(AIChatResponse),
-                        $"[GeminiError]无返回内容");
-                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]Gemini无返回内容");
+                        $"[GeminiError-无返回内容]");
+                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-无返回内容]");
                     if (IsDebug)
                         botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_EMPTY)}");
 
@@ -280,8 +281,8 @@ public static class AIExtensions
                         YameiLogExtensions.WriteJsonDeserializeLog(
                             new JsonException(ERROR_JSON_ERROR),
                             nameof(AIChatResponse),
-                            $"[GeminiError]生成图片返回非Stop");
-                        YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]生成图片返回非Stop");
+                            $"[GeminiError-非预期Reason]生成图片返回非Stop");
+                        YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-非预期Reason]生成图片返回非Stop");
                         if (IsDebug)
                             botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat("生成图片返回非Stop")}");
 
@@ -305,7 +306,7 @@ public static class AIExtensions
                 if (responseText.IsNullOrEmpty())
                 {
                     retryTimes++;
-                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError]Gemini返回截断");
+                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-返回截断]");
                     if (IsDebug)
                         botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_BLOCK)}");
 
@@ -333,9 +334,9 @@ public static class AIExtensions
                 if (isGroupChatSummary)
                 {
                     var sendMessages = new List<GroupForwardMessage>
-                {
-                    new(BOT_NAME, BotId, $"总结消息数: {thisRequestContentParts.Count - 2}"),
-                };
+                    {
+                        new(BOT_NAME, BotId, $"总结消息数: {thisRequestContentParts.Count - 2}"),
+                    };
                     chatMessages.ForEach(aiChatResponseContent =>
                     {
                         var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, false, requestTargetId, isGroupRequest);
@@ -529,11 +530,7 @@ public static class AIExtensions
                     // MEMO : 添加本次回复内容
                     var aiContentParts = new List<ContentPart>();
                     aiChatResponse.Contents
-                        .ForEach(each => aiContentParts.Add(new TextContent(new AIChatRequest
-                        {
-                            NickName = BOT_NAME,
-                            Message = each.ChatMessageInfo.Text,
-                        }.ToJsonIgnoreNull())));
+                        .ForEach(each => aiContentParts.Add(CreateTextContent(BOT_NAME, each.ChatMessageInfo.Text)));
                     var aiMessage = Message.FromAssistant(string.Empty);
                     aiMessage.Content = aiContentParts;
                     // MEMO : 添加AI回复, 只保留text (控制在上限范围内)
@@ -564,7 +561,7 @@ public static class AIExtensions
                 #region Json转换失败处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError]{responseText}");
+                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-JsonException]{ENTER}返回内容: {responseText}");
                 if (IsDebug)
                     botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 
@@ -577,7 +574,7 @@ public static class AIExtensions
                 #region OpenRouter错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OpenRouterException]{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
                     botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
 
@@ -590,7 +587,7 @@ public static class AIExtensions
                 #region 其他错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OtherException]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
                     botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
 
@@ -612,43 +609,76 @@ public static class AIExtensions
             botSendMessage(requestTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
         }
 
+        return;
+
         // 删除过期图片信息
         void DeleteExpireImage()
         {
-            var aiCharRequest = new AIChatRequest();
-            for (var i = thisRequestContentParts.Count - 1; i >= 0; i--)
+            for (var i = 0; i < thisRequestContentParts.Count; i++)
             {
-                var contentPart = thisRequestContentParts[i];
-                if (contentPart is TextContent textContent)
+                if (thisRequestContentParts[i] is ImageContent)
+                    thisRequestContentParts[i] = CreateTextContent(GetImageContentSenderName(i), IMAGE_EXPIRED);
+            }
+        }
+
+        // 超出一次可传入图片时的处理
+        void ProcessImageContentParts()
+        {
+            try
+            {
+                var lastOccurrenceMap = new Dictionary<string, int>();
+                for (var i = 0; i < thisRequestContentParts.Count; i++)
                 {
-                    aiCharRequest = textContent.Text.FromJson<AIChatRequest>();
+                    if (thisRequestContentParts[i] is ImageContent { ImageUrl: not null } img)
+                        lastOccurrenceMap[img.ImageUrl.Url] = i;
                 }
-                else
+
+                var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
+                var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
+                for (var i = 0; i < thisRequestContentParts.Count; i++)
                 {
-                    thisRequestContentParts[i] = new TextContent(new AIChatRequest
+                    if (thisRequestContentParts[i] is ImageContent { ImageUrl: not null } img)
                     {
-                        NickName = aiCharRequest.NickName,
-                        Message = IMAGE_EXPIRED,
-                    }.ToJsonIgnoreNull());
+                        var lastIdx = lastOccurrenceMap[img.ImageUrl.Url];
+                        if (lastIdx != i)
+                        {
+                            thisRequestContentParts[i] = new TextContent(new AIChatRequest
+                            {
+                                NickName = GetImageContentSenderName(i),
+                                Message = IMAGE_DUPLICATE,
+                            }.ToJsonIgnoreNull());
+                        }
+                        else if (!keepIndices.Contains(i))
+                        {
+                            thisRequestContentParts[i] = new TextContent(new AIChatRequest
+                            {
+                                NickName = GetImageContentSenderName(i),
+                                Message = IMAGE_EXPIRED,
+                            }.ToJsonIgnoreNull());
+                        }
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                YameiLogExtensions.WriteJsonSerializeLog(ex, "ProcessImageContentParts.originalParts", thisRequestContentParts);
+                throw;
+            }
+        }
+
+        // 向后寻找最近的 TextContent 并提取 NickName
+        string GetImageContentSenderName(int currentIndex)
+        {
+            for (var i = currentIndex + 1; i < thisRequestContentParts.Count; i++)
+            {
+                if (thisRequestContentParts[i] is TextContent textContent)
+                {
+                    var aiChatRequest = textContent.Text.FromJson<AIChatRequest>();
+                    return aiChatRequest.NickName;
                 }
             }
 
-            //thisRequestContentParts.ForEach(contentPart =>
-            //{
-            //    if (contentPart.Content is List<ContentPart> contentParts && contentParts.Count >= 2)
-            //    {
-            //        var count = contentParts.Count;
-            //        var userName = ((TextContent)contentParts[count - 1]).Text.FromJson<AIChatRequest>().NickName;
-            //        for (var i = 0; i <= contentParts.Count - 2; i++)
-            //        {
-            //            contentParts[i] = new TextContent(new AIChatRequest
-            //            {
-            //                NickName = userName,
-            //                Message = "[图片已过期]",
-            //            }.ToJsonIgnoreNull());
-            //        }
-            //    }
-            //});
+            return "未知用户";
         }
     }
 
@@ -1130,44 +1160,10 @@ public static class AIExtensions
         }
     }
 
-    /// <summary>
-    /// 超出一次可传入图片时的处理
-    /// </summary>
-    public static List<ContentPart> ProcessImageContentParts(List<ContentPart> originalParts)
-    {
-        if (originalParts == null)
-            return [];
-
-        var lastOccurrenceMap = new Dictionary<string, int>();
-        for (var i = 0; i < originalParts.Count; i++)
+    private static TextContent CreateTextContent(string userName, string message)
+        => new(new AIChatRequest
         {
-            if (originalParts[i] is ImageContent img && !string.IsNullOrEmpty(img.ImageUrl!.Url!))
-                lastOccurrenceMap[img.ImageUrl!.Url!] = i;
-        }
-
-        var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
-        var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
-
-        var result = new List<ContentPart>(originalParts.Count);
-        for (var i = 0; i < originalParts.Count; i++)
-        {
-            var currentPart = originalParts[i];
-            if (currentPart is ImageContent img)
-            {
-                var lastIdx = lastOccurrenceMap[img.ImageUrl!.Url!];
-                if (lastIdx != i)
-                    result.Add(new TextContent(IMAGE_DUPLICATE));
-                else if (!keepIndices.Contains(i))
-                    result.Add(new TextContent(IMAGE_EXPIRED));
-                else
-                    result.Add(img);
-            }
-            else
-            {
-                result.Add(currentPart);
-            }
-        }
-
-        return result;
-    }
+            NickName = userName,
+            Message = message,
+        }.ToJsonIgnoreNull());
 }
