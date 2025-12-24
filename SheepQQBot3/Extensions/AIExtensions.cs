@@ -810,7 +810,7 @@ public static class AIExtensions
         var emoji = aiChatMessage.Emoji;
         return emoji is null or AIEmojiType.None
             ? string.Empty
-            : CQCode.Image($"file:///{GlobalAIConfig.FacePath}{emoji.ToString()}.png", isBiaoQing: true);
+            : CQCode.Image($"file:///{GlobalAIConfig.FacePath}{emoji.ToString()}.gif");
     }
 
     private static int CalculateRelationChange(int currentValue, int rawChange)

@@ -99,14 +99,14 @@ public static partial class ProcessPrivateMessage
             //    await BotServer.SendPrivateMessageAsync(senderId, groupId, hasMessage).ConfigureAwait(true);
             //    break;
             case COMMAND_ADMIN_AI:
-                var moodIndex = PublicVar.GlobalAIData.AIStatusData.MoodIndexValue;
+                var moodIndex = GlobalAIData.AIStatusData.MoodIndexValue;
                 var aiStatusMessage = $"===={BOT_NICK_NAME}状态===={ENTER}"
                     + $"当前日程: {AIStatusUtil.GetSchedule()}{ENTER}"
                     + $"心情指数: ({moodIndex}){moodIndex.ToMood()}{ENTER}";
                 if (AIHistoryContentParts.Any())
                 {
                     aiStatusMessage += $"====群消息记录数===={ENTER}";
-                    AIHistoryContentParts.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count} 条{ENTER}"; });
+                    AIHistoryContentParts.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count(contentPart => contentPart.Type == "text")} 条{ENTER}"; });
                 }
                 else
                 {

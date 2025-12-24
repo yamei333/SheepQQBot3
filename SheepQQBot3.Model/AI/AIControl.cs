@@ -19,7 +19,7 @@ namespace SheepQQBot3.Model.AI
 
         public AIControl(AIConfig aiConfig, AICharacter aiCharacter)
         {
-            //CheckEmojiCodeFile(aiConfig, aiCharacter);
+            CheckEmojiCodeFile(aiConfig);
             //CheckFaceCode(aiCharacter);
 
             AIConfig = aiConfig;
@@ -80,58 +80,33 @@ namespace SheepQQBot3.Model.AI
         //}
 
         /// <summary>
-        /// 检查表情文件, 程序定义, AI介绍表情代码, 3者是否匹配
+        /// 检查表情文件是否缺失
         /// </summary>
-        private static void CheckEmojiCodeFile(AIConfig aiConfig, AICharacter aiCharacter)
+        private static void CheckEmojiCodeFile(AIConfig aiConfig)
         {
-            var responseFormat = aiCharacter.SystemInstruction["Response Format"];
-            const string START_TEXT = "## available emoji values\r\n\r\n";
-            var aiEmojiCodeEnumText = responseFormat[(responseFormat.IndexOf(START_TEXT, StringComparison.CurrentCulture) + START_TEXT.Length)..];
-            var aiEmojiCodeEnums = aiEmojiCodeEnumText.Split("\r\n").Select(each => each.Split(':')[0]).OrderBy(each => each).ToHashSet();
-            var codeEmojiCodeEnums = Enum.GetNames(typeof(AIEmojiType)).OrderBy(each => each).ToHashSet();
             var aiFacePath = aiConfig.FacePath;
-
-            // MEMO : AI代码查文件和代码定义
-            aiEmojiCodeEnums
-                .Where(each => each != "None")
-                .ForEach(aiEmojiCode =>
-            {
-                var fileName = GetFileName(aiEmojiCode);
-                if (!File.Exists(Path.Combine(aiFacePath, fileName)))
-                    throw new FileNotFoundException(fileName);
-
-                if (!codeEmojiCodeEnums.Contains(aiEmojiCode))
-                    throw new KeyNotFoundException(aiEmojiCode);
-            });
-
             // MEMO : 从代码开始反查
-            codeEmojiCodeEnums
+            Enum.GetNames(typeof(AIEmojiType))
                 .Where(each => each != "None")
                 .ForEach(codeEmojiCode =>
             {
                 var fileName = GetFileName(codeEmojiCode);
                 if (!File.Exists(Path.Combine(aiFacePath, fileName)))
                     throw new FileNotFoundException(fileName);
-
-                if (!aiEmojiCodeEnums.Contains(codeEmojiCode))
-                    throw new KeyNotFoundException(codeEmojiCode);
             });
 
             // MEMO : 从文件开始反查
-            Directory.GetFiles(aiFacePath, "*.png")
+            Directory.GetFiles(aiFacePath, "*.gif")
                 .Select(each => new FileInfo(each).Name.Split('.')[0])
                 .ForEach(emojiFileName =>
                 {
-                    if (!aiEmojiCodeEnums.Contains(emojiFileName))
-                        throw new KeyNotFoundException(emojiFileName);
-
-                    if (!codeEmojiCodeEnums.Contains(emojiFileName))
+                    if (!Enum.TryParse<AIEmojiType>(emojiFileName, out _))
                         throw new KeyNotFoundException(emojiFileName);
                 });
 
             return;
 
-            string GetFileName(string emjCode) => $"{emjCode}.png";
+            static string GetFileName(string emjCode) => $"{emjCode}.gif";
         }
 
         /// <summary>

@@ -14,10 +14,9 @@ public static class CQCode
     public static string AtAll()
         => $"[CQ:at,qq=all]";
 
-    public static string Image(string filePath, string fileName = "", bool isBiaoQing = false, string summary = "")
+    public static string Image(string filePath, string fileName = "", string summary = "")
         => $"[CQ:image,url={filePath}"
             + $"{(!fileName.IsNullOrEmpty() ? $",file={fileName}" : string.Empty)}"
-            + $"{(isBiaoQing ? ",sub_type=1" : string.Empty)}"
             + $"{(!summary.IsNullOrEmpty() ? $",summary={summary}" : string.Empty)}]";
 
     public static string Reply(string targetId, string messageId)

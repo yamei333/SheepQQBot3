@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel;
+using System.ComponentModel.DataAnnotations;
 using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
@@ -10,21 +11,26 @@ namespace SheepQQBot3.Model.AI
     public enum AIEmojiType
     {
         [Description("无")]
+        [Display(Name = "无")]
         None = 0,
 
         #region 正面情绪 / 开心 / 期待
 
         [Description("做得好、干得好、太棒了")]
+        [Display(Name = "GoodJob")]
         goodjob,
 
         [Description("好的、OK")]
+        [Display(Name = "OK")]
         ok,
 
         [Description("开心、幸福")]
+        [Display(Name = "开心")]
         kaixin,
 
         [Description("太好了")]
-        thl,
+        [Display(Name = "太好了")]
+        taihaole,
 
         [Description("兴奋")]
         xingfen,
@@ -36,7 +42,7 @@ namespace SheepQQBot3.Model.AI
         xixi,
 
         [Description("心花怒放")]
-        xhnf,
+        xinhuanufang,
 
         [Description("我真帅气、爱你哟、比心")]
         meigui,
@@ -67,16 +73,16 @@ namespace SheepQQBot3.Model.AI
         baowawa,
 
         [Description("给你心心")]
-        gnxx,
+        geinixinxin,
 
         [Description("递玫瑰、给你花花")]
-        dmg,
+        geinihuahua,
 
         [Description("给你蛋糕、生日快乐")]
-        gndg,
+        geinidangao,
 
         [Description("陪我玩")]
-        pww,
+        peiwowan,
 
         [Description("亲亲")]
         qinqin,
@@ -109,14 +115,14 @@ namespace SheepQQBot3.Model.AI
         [Description("不对、拒绝、NO")]
         no,
 
-        [Description("不回消息")]
+        [Description("不回消息是吧")]
         bhxx,
 
         [Description("哼")]
         heng,
 
         [Description("骂骂咧咧")]
-        mmll,
+        mamalielie,
 
         [Description("黑化")]
         heihua,
@@ -149,7 +155,7 @@ namespace SheepQQBot3.Model.AI
         [Description("不好意思、抱歉、对不起")]
         sorry,
 
-        [Description("害怕")]
+        [Description("害怕、抖")]
         haipa,
 
         [Description("哭哭")]
@@ -165,10 +171,10 @@ namespace SheepQQBot3.Model.AI
         weiqu,
 
         [Description("含泪掏钱")]
-        hltq,
+        hanleitaoqian,
 
         [Description("没钱了、贫穷")]
-        mql,
+        meiqianle,
 
         #endregion 难过 / 委屈 / 害怕 / 道歉
 
@@ -186,9 +192,6 @@ namespace SheepQQBot3.Model.AI
         [Description("被捏脸")]
         beinielian,
 
-        [Description("被捏脸")]
-        beinl,
-
         [Description("被摸头")]
         beimotou,
 
@@ -203,10 +206,10 @@ namespace SheepQQBot3.Model.AI
         #region 惊讶 / 疑惑 / 混乱
 
         [Description("不是这样")]
-        bszy,
+        bushizheyang,
 
         [Description("大脑过载")]
-        dngz,
+        danaoguozai,
 
         [Description("疑惑")]
         yihuo,
@@ -223,11 +226,8 @@ namespace SheepQQBot3.Model.AI
         [Description("搞砸了、别骂了")]
         gaozale,
 
-        [Description("啊？、诶？")]
+        [Description("啊？、诶？、呆住")]
         what,
-
-        [Description("呆住")]
-        dz,
 
         [Description("灵魂出窍")]
         linghun,
@@ -236,7 +236,7 @@ namespace SheepQQBot3.Model.AI
         shengtian,
 
         [Description("顷刻炼化")]
-        qklh,
+        qingkelianhua,
 
         [Description("我的呢")]
         wodene,
@@ -245,7 +245,7 @@ namespace SheepQQBot3.Model.AI
 
         #region 状态 / 日常 / 动作
 
-        [Description("等待")]
+        [Description("等待、盯")]
         dengdai,
 
         [Description("喝茶, 喝咖啡, 得意")]
@@ -261,22 +261,22 @@ namespace SheepQQBot3.Model.AI
         ji,
 
         [Description("快点睡觉")]
-        kdsj,
+        kuaidianshuijiao,
 
         [Description("流汗")]
         liuhan,
 
-        [Description("喵")]
-        mm,
+        [Description("喵、喵喵")]
+        miaomiao,
 
         [Description("叹气")]
         tanqi,
 
         [Description("偷看")]
-        tk,
+        toukan,
 
         [Description("调皮")]
-        tp,
+        tiaopi,
 
         [Description("晚安")]
         wanan,
@@ -285,10 +285,10 @@ namespace SheepQQBot3.Model.AI
         zzz,
 
         [Description("不行了")]
-        bxl,
+        buxingle,
 
         [Description("辛苦了")]
-        xkl,
+        xinkule,
 
         [Description("炫耀、得意")]
         jiman,
@@ -296,7 +296,7 @@ namespace SheepQQBot3.Model.AI
         [Description("逃了")]
         taole,
 
-        [Description("拍照")]
+        [Description("拍照、臭美")]
         paizhao,
 
         [Description("摸鱼")]
@@ -324,8 +324,71 @@ namespace SheepQQBot3.Model.AI
         xgb,
 
         [Description("在做什么呢")]
-        zaizuosm
+        zaizuosm,
 
         #endregion 状态 / 日常 / 动作
+
+        [Description("0分")]
+        fen_0,
+
+        [Description("10分")]
+        fen_10,
+
+        [Description("20分")]
+        fen_20,
+
+        [Description("30分")]
+        fen_30,
+
+        [Description("40分")]
+        fen_40,
+
+        [Description("50分")]
+        fen_50,
+
+        [Description("60分")]
+        fen_60,
+
+        [Description("70分")]
+        fen_70,
+
+        [Description("80分")]
+        fen_80,
+
+        [Description("90分")]
+        fen_90,
+
+        [Description("100分")]
+        fen_100,
+
+        [Description("令人窒息")]
+        zhixi,
+
+        [Description("红包")]
+        hongbao,
+
+        [Description("吃饼干")]
+        chibing,
+
+        [Description("举喇叭")]
+        laba,
+
+        [Description("上吊、被吊住")]
+        shangdiao,
+
+        [Description("捡到宝了、捡到钱了")]
+        jiandaoqian,
+
+        [Description("使用券、哈莉使用券")]
+        shiyongquan,
+
+        [Description("没人带我玩、练游戏")]
+        meirenwan,
+
+        [Description("被揪舌头")]
+        beijiushetou,
+
+        [Description("跟你爆了")]
+        gennibaole,
     }
 }

@@ -122,4 +122,45 @@ public static partial class BotExtensions
             return match.Value;
         }).Trim().IsNullOrEmpty();
     }
+
+    /// <summary>
+    /// 读取本地图片并转换为 Base64 字符串
+    /// </summary>
+    /// <param name="filePath">图片路径</param>
+    /// <param name="includeDataUri">是否包含 'data:image/xxx;base64,' 前缀 (AI请求通常需要true)</param>
+    public static string GetBase64FromFileAsync(string filePath, bool includeDataUri = false)
+    {
+        if (!File.Exists(filePath))
+            throw new FileNotFoundException("图片文件未找到", filePath);
+
+        byte[] imageBytes = File.ReadAllBytes(filePath);
+        string base64 = Convert.ToBase64String(imageBytes);
+        return $"base64://{base64}";
+
+        //if (includeDataUri)
+        //{
+        //    string extension = Path.GetExtension(filePath).TrimStart('.').ToLower();
+        //    //string mimeType = GetMimeType(extension);
+        //    //return $"data:{mimeType};base64,{base64}";
+        //    return $"base64://{base64}";
+        //}
+
+        //return base64;
+    }
+
+    /// <summary>
+    /// 简单的 MimeType 映射辅助方法
+    /// </summary>
+    private static string GetMimeType(string extension)
+    {
+        return extension switch
+        {
+            "jpg" or "jpeg" => "image/jpeg",
+            "png" => "image/png",
+            "webp" => "image/webp",
+            "gif" => "image/gif",
+            "bmp" => "image/bmp",
+            _ => "image/jpeg" // 默认回退
+        };
+    }
 }
