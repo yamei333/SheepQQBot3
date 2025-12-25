@@ -69,14 +69,14 @@ public static partial class ProcessGroupMessage
         await _regCQImageFileUrl.Matches(alarmMessage).ForeachAsync(async match =>
         {
             var replaceContent = match.Value;
-            var fileId = WebUtility.HtmlDecode(match.Groups["file"].Value);
-            var imageReceiveData = await GlobalBotClient.GetImageAsync(fileId).ConfigureAwait(false);
+            var file = WebUtility.HtmlDecode(match.Groups["file"].Value);
+            var imageReceiveData = await GlobalBotClient.GetImageAsync(file).ConfigureAwait(false);
             var filePath = imageReceiveData.Data.File;
             string fileName;
             var isSuccessed = false;
-            if (File.Exists(filePath))
+            if (imageReceiveData.IsSuccessed)
             {
-                fileName = $"{Guid.NewGuid()}{Path.GetExtension(fileId)}";
+                fileName = $"{Guid.NewGuid()}{Path.GetExtension(file)}";
                 File.Copy(filePath, Path.Combine(TG_DIRECTORY_NAME, fileName));
                 isSuccessed = true;
             }

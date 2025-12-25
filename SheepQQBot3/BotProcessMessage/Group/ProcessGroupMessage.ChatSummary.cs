@@ -28,7 +28,7 @@ public static partial class ProcessGroupMessage
     /// <summary>
     /// 统计忽略词长
     /// </summary>
-    private const int CHAT_SUMMARY_LIMIT_BYTE = 90;
+    private const int CHAT_SUMMARY_LIMIT_BYTE = 150;
 
     /// <summary>
     /// 群聊总结命令

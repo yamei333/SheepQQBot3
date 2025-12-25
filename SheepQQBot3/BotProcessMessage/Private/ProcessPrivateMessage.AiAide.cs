@@ -44,7 +44,7 @@ public static partial class ProcessPrivateMessage
         }
 
         // MEMO : 不该发消息时, 发送不回应消息
-        if (!isAdmin && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
+        if (!isAdmin && AIExtensions.IsCantSendMessage(targetId, (id, msg) => _ = GlobalBotClient.SendPrivateMessageAsync(id, msg)))
             return;
 
         // MEMO : debug时只准测试号测试

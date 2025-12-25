@@ -1,4 +1,5 @@
 ﻿using Masuit.Tools;
+using System;
 using System.Net;
 using System.Text.RegularExpressions;
 
@@ -15,9 +16,13 @@ public static class CQCode
         => $"[CQ:at,qq=all]";
 
     public static string Image(string filePath, string fileName = "", string summary = "")
-        => $"[CQ:image,url={filePath}"
+    {
+        var url = filePath.StartsWith("http", StringComparison.CurrentCultureIgnoreCase) || filePath.StartsWith("file:///", StringComparison.CurrentCultureIgnoreCase)
+            ? filePath : new Uri(filePath).AbsoluteUri;
+        return $"[CQ:image,url={url}"
             + $"{(!fileName.IsNullOrEmpty() ? $",file={fileName}" : string.Empty)}"
             + $"{(!summary.IsNullOrEmpty() ? $",summary={summary}" : string.Empty)}]";
+    }
 
     public static string Reply(string targetId, string messageId)
         => $"[CQ:reply,qq={targetId},id={messageId}]";

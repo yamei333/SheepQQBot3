@@ -147,8 +147,7 @@ public static class CommonExtensions
             case GetPathType.Normal:
                 return Path.Combine(appPath, directoryName, fileName);
             case GetPathType.CQCodePath:
-                return $"file:///{appPath.Replace(@"\", "/")}"
-                    + $"{(directoryName.IsNullOrEmpty() ? string.Empty : $"/{directoryName}")}/{fileName}";
+                return $"{new Uri(appPath).AbsoluteUri}{(directoryName.IsNullOrEmpty() ? string.Empty : $"/{directoryName}")}/{fileName}";
             default:
                 throw new ArgumentOutOfRangeException(nameof(pathType), pathType, null);
         }

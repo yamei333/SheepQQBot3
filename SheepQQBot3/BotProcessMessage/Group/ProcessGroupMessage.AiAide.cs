@@ -81,12 +81,10 @@ public static partial class ProcessGroupMessage
             var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
             await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
 
-            if (CanSendGroupChat(aiGroupConfig, historyContentParts.Count(contentPart => contentPart.Type == "text")))
+            var messageCount = historyContentParts.Count(contentPart => contentPart.Type == "text");
+            if (CanSendGroupChat(aiGroupConfig, messageCount))
             {
-                // MEMO : 某些时间不该发消息
-                if (AIExtensions.IsCantSendMessage(string.Empty, (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg)))
-                    return;
-
+                YameiLogExtensions.WriteLog(LogType.Info, $"AI群消息发送(触发消息数: {messageCount})");
                 // MEMO : 发送消息
                 await SendGroupAsync(historyContentParts).ConfigureAwait(false);
             }
@@ -115,14 +113,8 @@ public static partial class ProcessGroupMessage
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
             var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
-
             // MEMO : 判断使用模型(开头是/image)
-            var useModelImage = false;
-            message = Regex.Replace(message, @"(?<=\[CQ:at,qq=(?<qqId>\d+)\]\s*)/image\s*", match =>
-            {
-                useModelImage = true;
-                return string.Empty;
-            }, RegexOptions.IgnoreCase);
+            var useModelImage = _regCQCode.Replace(message, string.Empty).Trim().StartsWith("/image", StringComparison.CurrentCultureIgnoreCase);
             // MEMO : 构建发送消息并发送
             await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
             //historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");

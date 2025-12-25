@@ -43,10 +43,28 @@ public partial class MainWindow : Window
         Vm.InitBotFunctions();
         GlobalMainWindow = this;
 
+        // MEMO : for test
+        TestMethod();
+
         // MEMO : 获得节假日配置
         GetHolidayInfo();
         // MEMO : 初始化AI设定
         InitAIModel();
+
+        async void TestMethod()
+        {
+            //ChatClient client = new(
+            //    model: "gemini-3-flash-preview",
+            //    credential: new ApiKeyCredential("sk-GNzO7gj97BOfNW1hQSjev96k2bC4ZIP5nNPUwkjsCoOp80zE"),
+            //    options: new OpenAIClientOptions()
+            //    {
+            //        Endpoint = new Uri("https://api.xiaocaseai.cn/v1"),
+            //    }
+            //);
+
+            //var result = await client.CompleteChatAsync(new UserChatMessage(ChatMessageContentPart.CreateTextPart("测试一下"))).ConfigureAwait(false);
+            //;
+        }
 
         async void GetHolidayInfo()
         {

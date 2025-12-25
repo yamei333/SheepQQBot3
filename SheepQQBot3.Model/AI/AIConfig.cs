@@ -78,6 +78,12 @@ namespace SheepQQBot3.Model.AI
         //public double FrequencyPenalty { get; set; }
 
         /// <summary>
+        /// Max Token
+        /// </summary>
+        [JsonPropertyName("maxToken")]
+        public int MaxToken { get; set; }
+
+        /// <summary>
         /// 表情包路径
         /// </summary>
         [JsonPropertyName("facePath")]

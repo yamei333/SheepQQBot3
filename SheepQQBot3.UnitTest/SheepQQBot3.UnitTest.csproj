@@ -19,16 +19,12 @@
 
   <ItemGroup>
     <PackageReference Include="Microsoft.NET.Test.Sdk" Version="18.0.1" />
-    <PackageReference Include="MSTest.TestAdapter" Version="4.0.2" />
     <PackageReference Include="MSTest.TestFramework" Version="4.0.2" />
-    <PackageReference Include="OpenRouter.NET" Version="0.7.4" />
   </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj" />
-    <ProjectReference Include="..\SheepQQBot3\SheepQQBot3.csproj" />
   </ItemGroup>
 
 </Project>

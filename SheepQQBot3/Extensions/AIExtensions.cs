@@ -66,7 +66,7 @@ public static class AIExtensions
     {
         var retryTimes = 0;
         var isGroupRequest = !groupId.IsNullOrEmpty();
-        var isGroupMemberRequest = isGroupRequest && requestTargetId != groupId;
+        var isGroupAt = isGroupRequest && requestTargetId != groupId;
         var sendTargetId = isGroupRequest ? groupId : requestTargetId;
         var isGroupChatSummary = chatKey.StartsWith("z");
         var responseText = string.Empty;
@@ -166,7 +166,7 @@ public static class AIExtensions
             }
             else
             {
-                botSendMessage(TestGroupId, isGroupMemberRequest
+                botSendMessage(TestGroupId, isGroupAt
                     ? $"{SENDING_GEMINI_REQUEST}(群:{groupId}/群友:{requestTargetId})..."
                     : $"{SENDING_GEMINI_REQUEST}(群:{groupId})...");
             }
@@ -203,6 +203,7 @@ public static class AIExtensions
                         },
                         Temperature = GlobalAIConfig.Temperature,
                         TopP = GlobalAIConfig.TopP,
+                        MaxTokens = GlobalAIConfig.MaxToken,
                     }).ConfigureAwait(false);
 
                 #endregion 发送AI请求
@@ -219,7 +220,7 @@ public static class AIExtensions
                         $"[GeminiError-无返回内容]");
                     YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-无返回内容]");
                     if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_EMPTY)}");
+                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_EMPTY)}");
 
                     continue;
                 }
@@ -286,7 +287,7 @@ public static class AIExtensions
                             $"[GeminiError-非预期Reason]生成图片返回非Stop");
                         YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-非预期Reason]生成图片返回非Stop");
                         if (IsDebug)
-                            botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat("生成图片返回非Stop")}");
+                            botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat("生成图片返回非Stop")}");
 
                         continue;
 
@@ -310,7 +311,7 @@ public static class AIExtensions
                     retryTimes++;
                     YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-返回截断]");
                     if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_BLOCK)}");
+                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_BLOCK)}");
 
                     continue;
                 }
@@ -462,7 +463,7 @@ public static class AIExtensions
 
                 valueChangeMessage = valueChangeMessage.RemoveEnd(ENTER);
                 if (IsDebug && !valueChangeMessage.IsNullOrEmpty())
-                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{valueChangeMessage}");
+                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{valueChangeMessage}");
 
                 #endregion 处理心情指数
 
@@ -479,7 +480,7 @@ public static class AIExtensions
                     // MEMO : 写入知识笔记内容
                     WriteAINote(knowledgeNote);
                     if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
+                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
                 }
 
                 // MEMO : 保存灵感笔记内容
@@ -489,7 +490,7 @@ public static class AIExtensions
                     // MEMO : 写入灵感笔记内容
                     WriteAINote(inspirationNote);
                     if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
+                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
                 }
 
                 #endregion 处理知识和灵感笔记
@@ -566,7 +567,7 @@ public static class AIExtensions
                 retryTimes++;
                 YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-JsonException]{ENTER}返回内容: {responseText}");
                 if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
+                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 
                 continue;
 
@@ -579,7 +580,13 @@ public static class AIExtensions
                 retryTimes++;
                 YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OpenRouterException]{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
+                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
+
+                if (ex.Message.Contains("Internal Server Error", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    DeleteExpireImage();
+                    RemoveRedundantImageSummaries();
+                }
 
                 continue;
 
@@ -592,7 +599,7 @@ public static class AIExtensions
                 retryTimes++;
                 YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OtherException]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
                 if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : requestTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
+                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
 
                 continue;
 
@@ -604,12 +611,12 @@ public static class AIExtensions
 
         if (isGroupRequest)
         {
-            if (isGroupMemberRequest)
-                botSendMessage(requestTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 请求重试次数超过限制!");
+            if (isGroupAt)
+                botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 请求重试次数超过限制!");
         }
         else
         {
-            botSendMessage(requestTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
+            botSendMessage(sendTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
         }
 
         return;
@@ -810,7 +817,7 @@ public static class AIExtensions
         var emoji = aiChatMessage.Emoji;
         return emoji is null or AIEmojiType.None
             ? string.Empty
-            : CQCode.Image($"file:///{GlobalAIConfig.FacePath}{emoji.ToString()}.gif");
+            : CQCode.Image(Path.Combine(GlobalAIConfig.FacePath, $"{emoji.ToString()}.gif"), summary: emoji.GetDisplay());
     }
 
     private static int CalculateRelationChange(int currentValue, int rawChange)
@@ -900,20 +907,44 @@ public static class AIExtensions
             var thisContentParts = new List<ContentPart>();
             await matches.ForeachAsync(async match =>
             {
-                var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
-                if (await HttpExtensions.IsGifFromUrlAsync(url).ConfigureAwait(false))
+                //var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
+                var file = WebUtility.HtmlDecode(match.Groups["file"].Value);
+                var imageReceiveData = await GlobalBotClient.GetImageAsync(file).ConfigureAwait(false);
+                if (imageReceiveData.IsSuccessed)
                 {
-                    thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
+                    if (imageToText)
+                    {
+                        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
+                        return;
+                    }
+
+                    if (ImageExtensions.IsGifFile(imageReceiveData.Data.File))
+                    {
+                        thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
+                    }
+                    else
+                    {
+                        isAddImage = true;
+                        thisContentParts.Add(new ImageContent(imageReceiveData.Data.Url));
+                    }
                 }
                 else
                 {
-                    if (imageToText)
-                        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
-                    else
-                        thisContentParts.Add(new ImageContent(url));
+                    thisContentParts.AddQQChatTextContent(sender, $"[加载失败图片]");
                 }
 
-                isAddImage = true;
+                //if (await HttpExtensions.IsGifFromUrlAsync(url).ConfigureAwait(false))
+                //{
+                //    thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
+                //}
+                //else
+                //{
+                //    if (imageToText)
+                //        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
+                //    else
+                //        thisContentParts.Add(new ImageContent(url));
+                //}
+
                 processedMessage = processedMessage.Replace(match.Value, string.Empty);
             }).ConfigureAwait(false);
 

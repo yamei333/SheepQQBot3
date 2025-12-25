@@ -12,15 +12,12 @@
   </PropertyGroup>
   
   <ItemGroup>
-    <PackageReference Include="EntityFrameworkCore.Sqlite.NodaTime" Version="9.2.1" />
     <PackageReference Include="MessagePack" Version="3.1.4" />
     <PackageReference Include="MessagePackAnalyzer" Version="3.1.4">
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Microsoft.EntityFrameworkCore.Sqlite" Version="10.0.1" />
-    <PackageReference Include="Newtonsoft.Json" Version="13.0.4" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="3.1.12" />
     <PackageReference Include="SSH.NET" Version="2025.1.0" />
   </ItemGroup>
 
