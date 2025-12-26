@@ -1,7 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using OpenRouter.NET;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using OpenWeatherMap.Standard;
 using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
@@ -178,14 +177,19 @@ public static class PublicVar
     public static Dictionary<string, bool> HolidayInfo { get; set; }
 
     /// <summary>
-    /// AIClient
+    /// AIClientChat
     /// </summary>
-    public static OpenRouterClient AIClient { get; set; }
+    public static ChatClient AIClientChat { get; set; }
 
     /// <summary>
-    /// AIClient Image
+    /// AIClientSummary
     /// </summary>
-    public static OpenRouterClient AIClientImage { get; set; }
+    public static ChatClient AIClientSummary { get; set; }
+
+    /// <summary>
+    /// AIClientImage
+    /// </summary>
+    public static ChatClient AIClientImage { get; set; }
 
     /// <summary>
     /// AIConfig
@@ -225,7 +229,7 @@ public static class PublicVar
     /// <summary>
     /// AI记录的群历史消息
     /// </summary>
-    public static readonly ConcurrentDictionary<string, List<ContentPart>> AIHistoryContentParts = [];
+    public static readonly ConcurrentDictionary<string, List<ChatMessageContentPart>> AIHistoryParts = [];
 
     /// <summary>
     /// AI知识库-用户信息

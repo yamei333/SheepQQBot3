@@ -107,9 +107,9 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
             case LogMessageType.AIRequest:
                 result.Add(new RunLogMessage($"请求用户: {runLog.TargetId}"));
                 var usage = runLog.Usage!;
-                result.Add(new RunLogMessage($"Token: 总量:{usage.TotalTokens}"
-                    + $"(回复:{usage.CompletionTokens}/"
-                    + $"提示词:{usage.PromptTokens})"));
+                result.Add(new RunLogMessage($"Token: 总量:{usage.TotalTokenCount}"
+                    + $"(输入:{usage.InputTokenCount}/"
+                    + $"输出:{usage.OutputTokenCount})"));
                 break;
             default:
                 throw new ArgumentOutOfRangeException();

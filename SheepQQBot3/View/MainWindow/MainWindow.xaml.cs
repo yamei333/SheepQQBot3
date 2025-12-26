@@ -1,6 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using OpenRouter.NET;
+using OpenAI;
+using OpenAI.Chat;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
@@ -9,6 +10,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
 using System;
+using System.ClientModel;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -97,7 +99,7 @@ public partial class MainWindow : Window
 
         void InitAIModel()
         {
-            if (GlobalAIConfig.ApiKeyChat.IsNullOrEmpty())
+            if (GlobalAIConfig.ModelChat.IsNullOrEmpty() || GlobalAIConfig.ModelChat.Url.IsNullOrEmpty())
             {
                 LogExtensions.AddRunLog(new RunLog_SystemWarning("AI配置 未配置"));
                 return;
@@ -105,40 +107,20 @@ public partial class MainWindow : Window
 
             LogExtensions.AddRunLog(new RunLog_SystemInfo("AI配置 初始化完成"));
             GlobalAIControl = new AIControl(GlobalAIConfig, GlobalAICharacter);
-            var baseUrlChat = GlobalAIConfig.BaseUrlChat;
-            var baseUrlImage = GlobalAIConfig.BaseUrlImage;
-            if (baseUrlChat.IsNullOrEmpty())
-            {
-                AIClient = new OpenRouterClient(GlobalAIConfig.ApiKeyChat);
-                AIClientImage = new OpenRouterClient(GlobalAIConfig.ApiKeyImage);
-            }
-            else
-            {
-                AIClient = new OpenRouterClient(new OpenRouterClientOptions
-                {
-                    ApiKey = GlobalAIConfig.ApiKeyChat,
-                    BaseUrl = baseUrlChat,
-                });
-                AIClientImage = new OpenRouterClient(new OpenRouterClientOptions
-                {
-                    ApiKey = GlobalAIConfig.ApiKeyImage,
-                    BaseUrl = baseUrlImage,
-                });
-            }
+            AIClientChat = CreateChatClient(GlobalAIConfig.ModelChat);
+            AIClientSummary = CreateChatClient(GlobalAIConfig.ModelSummary);
+            AIClientImage = CreateChatClient(GlobalAIConfig.ModelImage);
+            return;
 
-            //var fieldInfo = typeof(OpenRouterClient).GetField("_jsonOptions", BindingFlags.NonPublic | BindingFlags.Instance);
-            //if (fieldInfo != null)
-            //{
-            //    var sharedOptions = (JsonSerializerOptions)fieldInfo.GetValue(AIClient);
-            //    if (sharedOptions.IsReadOnly)
-            //    {
-            //        throw new InvalidOperationException("Options 已被锁定，无法修改");
-            //    }
+            static ChatClient CreateChatClient(AIModel model)
+                => new(model.Model, new ApiKeyCredential(model.Key), new OpenAIClientOptions
+                {
+                    NetworkTimeout = TimeSpan.FromSeconds(90),
+                    Endpoint = new Uri(model.Url),
+                });
 
-            //    var resolver = new DefaultJsonTypeInfoResolver();
-            //    resolver.Modifiers.Add(ConfigureCacheTextPolymorphism);
-            //    sharedOptions.TypeInfoResolver = resolver;
-            //}
+            //static ImageClient CreateImageClient(AIModel model)
+            //    => new(model.Model, new ApiKeyCredential(model.Key), new OpenAIClientOptions { Endpoint = new Uri(model.Url) });
         }
 
         //void ConfigureCacheTextPolymorphism(JsonTypeInfo typeInfo)

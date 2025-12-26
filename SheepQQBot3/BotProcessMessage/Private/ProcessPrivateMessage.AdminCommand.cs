@@ -1,4 +1,5 @@
 ﻿using Masuit.Tools;
+using OpenAI.Chat;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
@@ -103,10 +104,10 @@ public static partial class ProcessPrivateMessage
                 var aiStatusMessage = $"===={BOT_NICK_NAME}状态===={ENTER}"
                     + $"当前日程: {AIStatusUtil.GetSchedule()}{ENTER}"
                     + $"心情指数: ({moodIndex}){moodIndex.ToMood()}{ENTER}";
-                if (AIHistoryContentParts.Any())
+                if (AIHistoryParts.Any())
                 {
                     aiStatusMessage += $"====群消息记录数===={ENTER}";
-                    AIHistoryContentParts.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count(contentPart => contentPart.Type == "text")} 条{ENTER}"; });
+                    AIHistoryParts.ForEach(each => { aiStatusMessage += $"群({each.Key}): {each.Value.Count(part => part.Kind == ChatMessageContentPartKind.Text)} 条{ENTER}"; });
                 }
                 else
                 {

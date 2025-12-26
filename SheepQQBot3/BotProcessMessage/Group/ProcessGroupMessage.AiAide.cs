@@ -1,6 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
+using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
@@ -78,15 +79,15 @@ public static partial class ProcessGroupMessage
                 message = "[转发消息]";
 
             // MEMO : 记录消息(添加到历史记录中)
-            var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
-            await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
+            var historyParts = AIHistoryParts.GetOrAdd(groupId, []);
+            await historyParts.AddQQChatMessageAsync(sender, message, groupMembers, imageNumLimit: 3).ConfigureAwait(false);
 
-            var messageCount = historyContentParts.Count(contentPart => contentPart.Type == "text");
+            var messageCount = historyParts.Count(part => part.Kind == ChatMessageContentPartKind.Text);
             if (CanSendGroupChat(aiGroupConfig, messageCount))
             {
                 YameiLogExtensions.WriteLog(LogType.Info, $"AI群消息发送(触发消息数: {messageCount})");
                 // MEMO : 发送消息
-                await SendGroupAsync(historyContentParts).ConfigureAwait(false);
+                await SendGroupAsync(historyParts, groupId, false, GlobalAIConfig.ModelChat, AIRequestType.Chat).ConfigureAwait(false);
             }
 
             return;
@@ -112,33 +113,39 @@ public static partial class ProcessGroupMessage
 
             AILastRequestDates.AddOrUpdate(chatKey, dateNow, dateNow);
             // MEMO : 获得现有的缓存群消息
-            var historyContentParts = AIHistoryContentParts.GetOrAdd(groupId, []);
+            var historyContentParts = AIHistoryParts.GetOrAdd(groupId, []);
             // MEMO : 判断使用模型(开头是/image)
             var useModelImage = _regCQCode.Replace(message, string.Empty).Trim().StartsWith("/image", StringComparison.CurrentCultureIgnoreCase);
             // MEMO : 构建发送消息并发送
-            await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers).ConfigureAwait(false);
-            //historyContents.AddSystemHint($"[QQID:{targetId}] {GROUP_PRIVATE_CHAT_HINT}");
-            //historyContents.AddSystemHint($"{sender.NickName}(QQID:{sender.UserId}){GROUP_PRIVATE_CHAT_HINT}");
-            //var groupMembers = await GlobalBotClient.GetGroupMembersAsync(groupId).ConfigureAwait(false);
-            await historyContentParts.SendAsync(
-                chatKey, targetId, groupId, true, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
-                (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(id, msg),
-                useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat).ConfigureAwait(false);
+            await historyContentParts.AddQQChatMessageAsync(sender, message, groupMembers, imageNumLimit: 1).ConfigureAwait(false);
+            await SendGroupAsync(
+                historyContentParts,
+                targetId,
+                true,
+                useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat,
+                useModelImage ? AIRequestType.Image : AIRequestType.Chat)
+                .ConfigureAwait(false);
         }
 
         return;
 
-        Task SendGroupAsync(List<ContentPart> groupChatHistoryContentParts)
+        Task SendGroupAsync(
+            List<ChatMessageContentPart> groupChatHistoryParts,
+            string requestTargetId,
+            bool isAt,
+            AIModel aiModel,
+            AIRequestType requestType)
         {
             // MEMO : 清空消息
-            AIHistoryContentParts.AddOrUpdate(groupId, _ => [], (_, __) => []);
+            AIHistoryParts.AddOrUpdate(groupId, _ => [], (_, __) => []);
             // MEMO : 发送消息
-            return groupChatHistoryContentParts.SendAsync(
-                chatKey, groupId, groupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
+            return groupChatHistoryParts.SendAsync(
+                chatKey, requestTargetId, groupId, isAt, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
                 (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
-                GlobalAIConfig.ModelChat,
-                AppSettingExtensions.Get("groupChatPrompt"));
+                aiModel,
+                requestType,
+                isAt ? null : AppSettingExtensions.Get("groupChatPrompt"));
         }
 
         bool NeedNotRecordMessage(Func<string, bool> otherCheckFunc = null)

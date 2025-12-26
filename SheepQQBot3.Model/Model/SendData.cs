@@ -94,8 +94,7 @@ public class ParamData
 
     [JsonPropertyName("webUrl")]
     public string WebUrl { get; set; }
-    
+
     [JsonPropertyName("file_id")]
     public string FileId { get; set; }
-
 }

@@ -703,16 +703,15 @@ public static partial class ProcessGroupMessage
                 UpdateSetuDoushiInfo(botDb, setuDoushiInfo);
             }
 
-            if (IsDebug)
-            {
-                await GlobalBotClient.SendGroupMessageAsync(groupId, "[DEBUG]"
-                        + $"{ENTER}目标对象: {senderId}"
-                        + $"{ENTER}色图Lv: {setuDoushiLv}"
-                        + $"{ENTER}是否发送: {canSendSetu}"
-                        + $"{ENTER}增加时间: {addSecond}s"
-                        + $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
-                    .ConfigureAwait(false);
-            }
+#if DEBUG
+            await GlobalBotClient.SendGroupMessageAsync(groupId, "[DEBUG]"
+                    + $"{ENTER}目标对象: {senderId}"
+                    + $"{ENTER}色图Lv: {setuDoushiLv}"
+                    + $"{ENTER}是否发送: {canSendSetu}"
+                    + $"{ENTER}增加时间: {addSecond}s"
+                    + $"{ENTER}色图CD: {GetCD(setuDoushiInfo)}")
+                .ConfigureAwait(false);
+#endif
 
             var addSetuSenderLv = setuDoushiLv - oldSetuSenderLv;
             var isFree = false;
@@ -1033,17 +1032,18 @@ public static partial class ProcessGroupMessage
                     if (setuInfo.Result == SetuResult.Successed
                         && File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
                     {
-                        if (IsDebug)
-                        {
-                            await GlobalBotClient.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
-                                .ConfigureAwait(false);
-                        }
+#if DEBUG
+                        await GlobalBotClient.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
+                            .ConfigureAwait(false);
+#endif
 
                         // MEMO : 缓存中存在该图, 跳过下载
                         return (setuInfo, setuInfo.FullCacheFileName);
                     }
 
+#if DEBUG
                     await DebugSendSetuInfo(setuInfo).ConfigureAwait(false);
+#endif
 
                     const int maxRetryTimes = 5;
                     var retryTimes = 1;
@@ -1053,18 +1053,17 @@ public static partial class ProcessGroupMessage
                         {
                             if (File.Exists(Path.Combine(PATH_CACHE_IMAGE, setuInfo.FullCacheFileName)))
                             {
-                                if (IsDebug)
-                                {
-                                    await GlobalBotClient.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
-                                        .ConfigureAwait(false);
-                                }
+#if DEBUG
+                                await GlobalBotClient.SendGroupMessageAsync(groupId, $"[DEBUG]已存在缓存{setuInfo.FullCacheFileName}!")
+                                    .ConfigureAwait(false);
+#endif
 
                                 // MEMO : 缓存中存在该图, 跳过下载
                                 return (setuInfo, setuInfo.FullCacheFileName);
                             }
 
                             var (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
-                                setuInfo.ImageUrl, PATH_CACHE_IMAGE, true, checkImageOnly, setuInfo.CacheFileName).ConfigureAwait(false);
+                                setuInfo.ImageUrl, PATH_CACHE_IMAGE, checkImageOnly, customName: setuInfo.CacheFileName).ConfigureAwait(false);
                             if (getSuccessed)
                                 return (setuInfo, fileName);
                         }
@@ -1094,18 +1093,18 @@ public static partial class ProcessGroupMessage
                             break;
 
                         setuInfo = await getSetuInfoFunc().ConfigureAwait(false);
+#if DEBUG
                         await DebugSendSetuInfo(setuInfo).ConfigureAwait(false);
+#endif
                     }
 
                     await GlobalBotClient.SendGroupMessageAsync(groupId, "超过重试次数上限,放弃下载!").ConfigureAwait(false);
                     setuInfo.Result = SetuResult.ApiError;
                     return (setuInfo, string.Empty);
 
+#if DEBUG
                     async Task DebugSendSetuInfo(SetuInfo stInfo)
                     {
-                        if (!IsDebug)
-                            return;
-
                         if (stInfo.Result == SetuResult.Successed)
                         {
                             await GlobalBotClient.SendGroupMessageAsync(groupId, "[DEBUG]SetuInfo" +
@@ -1123,6 +1122,7 @@ public static partial class ProcessGroupMessage
                                 .ConfigureAwait(false);
                         }
                     }
+#endif
                 }
             }
             catch

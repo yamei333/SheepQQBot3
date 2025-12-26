@@ -85,7 +85,7 @@ public static partial class ProcessGroupMessage
                 var url = match.Groups["url"];
                 var picUrl = url.Success ? WebUtility.HtmlDecode(url.Value) : imageReceiveData.Data.Url;
                 (isSuccessed, fileName) = await HttpExtensions
-                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME, false)
+                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
                     .ConfigureAwait(false);
             }
 

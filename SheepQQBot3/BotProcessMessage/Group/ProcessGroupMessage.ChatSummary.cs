@@ -1,7 +1,8 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using SheepQQBot3.DbModel;
+using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
@@ -150,11 +151,12 @@ public static partial class ProcessGroupMessage
             // MEMO : AI群聊总结
             async Task AISummaryCore(string targetGroupId, string description, DateTime fromDate, DateTime? toDate = null)
             {
-                if (IsDebug)
-                    targetGroupId = "414774779";
+#if DEBUG
+                targetGroupId = "414774779";
+#endif
 
-                var thisRequestContentParts = new List<ContentPart>();
-                thisRequestContentParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
+                var thisRequestParts = new List<ChatMessageContentPart>();
+                thisRequestParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
                 var fromDateTimeStamp = fromDate.ToTimeStamp();
                 var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
                 botDb.BotGroupMessages
@@ -162,7 +164,7 @@ public static partial class ProcessGroupMessage
                         && each.TimeStamp >= fromDateTimeStamp
                         && each.TimeStamp < toDateTimeStamp)
                     .AsEnumerable()
-                    .ForEach(each =>
+                    .ForEach(async each =>
                     {
                         var historyMessage = each.MessageText;
                         historyMessage = historyMessage.Trim();
@@ -173,23 +175,25 @@ public static partial class ProcessGroupMessage
                         if (_regInjectHurry.IsMatch(historyMessage))
                             return;
 
-                        //groupMembers[each.TargetId].ToAIChatSender()
-                        _ = thisRequestContentParts.AddQQChatMessageAsync(groupMembers[each.TargetId].ToAIChatSender(AIUserInfos), historyMessage, groupMembers, true);
+                        thisRequestParts.AddQQChatMessage(groupMembers[each.TargetId].ToAIChatSender(AIUserInfos), historyMessage, groupMembers);
                     });
 
-                if (!IsDebug && thisRequestContentParts.Count <= SUMMARY_MESSAGE_COUNT_LIMIT + 1)
+#if !DEBUG
+                if (thisRequestParts.Count <= SUMMARY_MESSAGE_COUNT_LIMIT + 1)
                 {
                     await GlobalBotClient.SendGroupMessageAsync(targetGroupId, $"群聊消息过少(少于{SUMMARY_MESSAGE_COUNT_LIMIT}条)! 不需要总结!").ConfigureAwait(false);
                     return;
                 }
+#endif
 
-                thisRequestContentParts.AddSystemHint($"[群聊内容到此为止]");
+                thisRequestParts.AddSystemHint($"[群聊内容到此为止]");
 
                 var sender = groupMessage.Sender;
-                await thisRequestContentParts.AddQQChatMessageAsync(sender,
-                    $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers).ConfigureAwait(false);
-                await thisRequestContentParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
-                        (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false), GlobalAIConfig.ModelSummary)
+                await thisRequestParts.AddQQChatMessageAsync(sender,
+                    $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers, true).ConfigureAwait(false);
+                await thisRequestParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
+                        (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false),
+                        GlobalAIConfig.ModelSummary, AIRequestType.ChatSummary)
                     .ConfigureAwait(false);
             }
         }

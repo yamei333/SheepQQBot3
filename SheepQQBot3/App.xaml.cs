@@ -1,9 +1,6 @@
-﻿using CommonLibrary;
-using Masuit.Tools;
-using Microsoft.EntityFrameworkCore;
+﻿using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.Extensions;
 using System;
-using System.Linq;
 using System.Windows;
 using System.Windows.Threading;
 
@@ -18,10 +15,9 @@ public partial class App : Application
 
     private void App_OnStartup(object sender, StartupEventArgs e)
     {
-        var args = Environment.GetCommandLineArgs();
-
         BotExtensions.KillBarkExe();
 
+        var args = Environment.GetCommandLineArgs();
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接
         var botDb = DbExtensions.CreateBotDbContext();
@@ -33,10 +29,11 @@ PRAGMA synchronous=NORMAL;");
 
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-        if (PublicVar.IsDebug)
-            throw e.Exception;
-
+#if DEBUG
+        throw e.Exception;
+#else
         YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.StackTrace}-{e.Exception?.Message}");
         e.Handled = true;
+#endif
     }
 }

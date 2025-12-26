@@ -2,7 +2,7 @@
 
 namespace SheepQQBot3.Model.AI
 {
-    public class AIModel(string model, bool supportImage)
+    public class AIModel(string model, string url, string key)
     {
         /// <summary>
         /// 模型名
@@ -11,9 +11,15 @@ namespace SheepQQBot3.Model.AI
         public string Model { get; init; } = model;
 
         /// <summary>
-        /// 是否支持生成图片
+        /// 模型请求Url
         /// </summary>
-        [JsonPropertyName("support_image")]
-        public bool SupportImage { get; init; } = supportImage;
+        [JsonPropertyName("url")]
+        public string Url { get; init; } = url;
+
+        /// <summary>
+        /// 模型ApiKey
+        /// </summary>
+        [JsonPropertyName("key")]
+        public string Key { get; init; } = key;
     }
 }

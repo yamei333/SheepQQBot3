@@ -1,5 +1,6 @@
 ﻿using Masuit.Tools;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
+using SheepQQBot3.Enums;
 using SheepQQBot3.Extensions;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
@@ -37,8 +38,9 @@ public static partial class ProcessPrivateMessage
         var dateNow = DateTime.Now;
         if (!isSuperAdmin && dateNow.ToTimeStamp() <= AIExtensions.GetAIUserData(targetId).BlockUntil)
         {
-            if (IsDebug)
-                await GlobalBotClient.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
+#if DEBUG
+            await GlobalBotClient.SendPrivateMessageAsync(targetId, "你正在被屏蔽!").ConfigureAwait(false);
+#endif
 
             return;
         }
@@ -69,7 +71,7 @@ public static partial class ProcessPrivateMessage
         message = Regex.Replace(message, @"^/image\s*", "", RegexOptions.IgnoreCase);
 
         // MEMO : 构建发送消息并发送
-        var thisRequestContentParts = new List<ContentPart>();
+        var thisRequestContentParts = new List<ChatMessageContentPart>();
         await thisRequestContentParts.AddQQChatMessageAsync(sender, message, null).ConfigureAwait(false);
 
         var aiChatSenders = new ConcurrentDictionary<string, AIChatSender>();
@@ -77,6 +79,7 @@ public static partial class ProcessPrivateMessage
 
         await thisRequestContentParts.SendAsync(chatKey, targetId, string.Empty, false, aiChatSenders, null,
             (id, msg) => _ = GlobalBotClient.SendPrivateMessageAsync(targetId, msg),
-            useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat).ConfigureAwait(false);
+            useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat,
+            useModelImage ? AIRequestType.Image : AIRequestType.Chat).ConfigureAwait(false);
     }
 }

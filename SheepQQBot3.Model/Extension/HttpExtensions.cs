@@ -1,10 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using Masuit.Tools.Files;
-using Masuit.Tools.Media;
 using SheepQQBot3.Model.JsonCard;
-using SixLabors.ImageSharp;
-using SixLabors.ImageSharp.Formats.Png;
 using System;
 using System.IO;
 using System.Net;
@@ -188,94 +184,74 @@ public static class HttpExtensions
     }
 
     /// <summary>
-    /// http下载
+    /// HTTP图片下载工具
     /// </summary>
+    /// <param name="url">图片链接</param>
+    /// <param name="path">保存目录</param>
+    /// <param name="checkOnly">仅检查链接是否有效（不下载文件），用于发直链场景</param>
+    /// <param name="modifyHash">是否修改文件哈希（通过追加1个随机字节），用于规避MD5检测</param>
+    /// <param name="customName">自定义文件名（不含后缀）</param>
     public static async Task<(bool Successed, string FileName)> HttpDownloadAsync(
-        string url, string path, bool needResize, bool checkOnly = false, string customTempFileName = null)
+        string url, string path, bool checkOnly = false, bool modifyHash = false, string customName = null)
     {
-        if (url.IsNullOrEmpty())
+        if (string.IsNullOrEmpty(url))
             return (false, string.Empty);
 
-        var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
-        var response = await HttpGetAsync(url).ConfigureAwait(false);
-        if (response?.StatusCode != HttpStatusCode.OK)
-            return (false, string.Empty);
-
-        var mimeType = response.Content.Headers.ContentType?.MediaType;
-        var fileExtend = mimeType switch
+        try
         {
-            "image/jpeg" => "jpg",
-            "image/gif" => "gif",
-            _ => "png",
-        };
+            // 1. 发起请求
+            // 注意：建议检查你的 HttpGetAsync 内部是否使用了 HttpCompletionOption.ResponseHeadersRead
+            // 如果用了，checkOnly 会非常快，不需要等待图片数据传输完成
+            using var response = await HttpGetAsync(url).ConfigureAwait(false);
+            // 2. 检查状态码
+            if (response?.StatusCode != HttpStatusCode.OK)
+                return (false, string.Empty);
 
-        CommonExtensions.CreatePath(path);
-        if (!checkOnly)
-        {
-            var stream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
-            var image = await Image.LoadAsync(stream).ConfigureAwait(false);
+            // 【优化点】：CheckOnly 逻辑提前
+            // 如果只是为了确认图片存在（准备发链接），这里直接返回 true
+            // 不需要解析后缀，也不需要读取流或创建文件
+            if (checkOnly)
+                return (true, string.Empty);
 
-            if (needResize)
+            // 3. 准备下载：解析后缀
+            var mimeType = response.Content.Headers.ContentType?.MediaType?.ToLower();
+            string extension = mimeType switch
             {
-                await image.ResizeImage(image.Width + GetRandom(), image.Height + GetRandom())
-                    .SaveAsPngAsync($"{path}/{tempFileName}.png")
-                    .ConfigureAwait(false);
-            }
-            else
+                "image/gif" => "gif",
+                "image/jpeg" => "jpg",
+                "image/pjpeg" => "jpg",
+                "image/png" => "png",
+                "image/webp" => "webp",
+                _ => "jpg", // 兜底
+            };
+
+            CommonExtensions.CreatePath(path);
+
+            var fileNameWithoutExt = customName ?? Guid.NewGuid().ToString("N");
+            var fullFileName = $"{fileNameWithoutExt}.{extension}";
+            var fullPath = Path.Combine(path, fullFileName);
+
+            // 4. 写入文件
+            // 使用 await using 自动释放流
+            await using var httpStream = await response.Content.ReadAsStreamAsync().ConfigureAwait(false);
+            await using var fileStream = new FileStream(fullPath, FileMode.Create, FileAccess.Write);
+
+            await httpStream.CopyToAsync(fileStream).ConfigureAwait(false);
+
+            // 【优化点】：参数控制是否追加字节
+            if (modifyHash)
             {
-                switch (fileExtend)
-                {
-                    case "gif":
-                        await image.SaveAsGifAsync($"{path}/{tempFileName}.gif").ConfigureAwait(false);
-                        break;
-                    default:
-                        await image.SaveAsPngAsync($"{path}/{tempFileName}.png").ConfigureAwait(false);
-                        break;
-                }
+                // 在文件末尾写一个随机字节，破坏文件 MD5
+                fileStream.WriteByte((byte)new Random().Next(0, 255));
             }
 
-            int GetRandom() => new[] { -1, -2, -3, 0, 1, 2, 3 }.Random();
+            return (true, fullFileName);
         }
-
-        return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
-    }
-
-    /// <summary>
-    /// http下载
-    /// </summary>
-    public static (bool Successed, string FileName) AIHttpDownloadImage(
-        string url, string path, string customTempFileName = null)
-    {
-        if (url.IsNullOrEmpty())
-            return (false, "[Url错误图片]");
-
-        var tempFileName = customTempFileName ?? Guid.NewGuid().ToString();
-        var response = HttpGet(url);
-        if (response?.StatusCode != HttpStatusCode.OK)
-            return (false, "[下载失败图片]");
-
-        var mimeType = response.Content.Headers.ContentType?.MediaType;
-        var fileExtend = mimeType switch
+        catch
         {
-            "image/jpeg" => "jpg",
-            "image/gif" => "gif",
-            _ => "png",
-        };
-
-        if (fileExtend == "gif")
-            return (false, "[Gif图片]");
-
-        CommonExtensions.CreatePath(path);
-        using var ms = new MemoryStream();
-        var image = Image.Load(response.Content.ReadAsStream());
-        image.Save(ms, new PngEncoder());
-        //YameiLogExtensions.WriteLog(LogType.Info, $"AIHttpDownloadImage: {BOT_NICK_NAME}下载了一张图片[{tempFileName}], 大小是{ms.Length}");
-        // MEMO : 超过一定大小的图片不保存
-        if (ms.Length / 1024.0 > 500)
-            return (false, "[占用过大图片]");
-
-        ms.SaveFile($"{path}/{tempFileName}.png");
-        return (true, $"{tempFileName}.{(fileExtend == "gif" ? "gif" : "png")}");
+            // 记录日志...
+            return (false, string.Empty);
+        }
     }
 
     public static async Task<bool> IsGifFromUrlAsync(string url)

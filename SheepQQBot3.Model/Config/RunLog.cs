@@ -1,6 +1,6 @@
 ﻿using Masuit.Tools;
 using Masuit.Tools.Systems;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using SheepQQBot3.Model.Enums;
 using System;
 using System.Text.Json.Serialization;
@@ -49,12 +49,7 @@ public class RunLog
     /// <summary>
     /// AI用量
     /// </summary>
-    public ResponseUsage Usage { get; set; }
-
-    /// <summary>
-    /// Json字符串
-    /// </summary>
-    public string JsonText { get; set; }
+    public ChatTokenUsage Usage { get; set; }
 
     public string MessageId { get; set; }
     public string Content { get; set; }
@@ -252,12 +247,10 @@ public class RunLog_AIRequest : RunLog
     public RunLog_AIRequest(
         string requestUserId,
         bool isGroup,
-        string apiKey,
-        ResponseUsage usage)
+        ChatTokenUsage usage)
         : base(LogMessageType.AIRequest, BotConfigTargetType.Common, $"哈基米AI请求({(isGroup ? $"群:{requestUserId}" : $"个人:{requestUserId}")})")
     {
         TargetId = requestUserId;
-        OperatorId = apiKey;
         Usage = usage;
     }
 }

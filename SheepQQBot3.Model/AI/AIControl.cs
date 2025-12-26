@@ -1,5 +1,5 @@
 ﻿using Masuit.Tools;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
@@ -15,7 +15,7 @@ namespace SheepQQBot3.Model.AI
         public AIConfig AIConfig { get; set; }
         public AICharacter AICharacter { get; set; }
 
-        public ConcurrentDictionary<string, IEnumerable<ContentPart>> HistoryCaches { get; set; }
+        public ConcurrentDictionary<string, IEnumerable<ChatMessageContentPart>> HistoryCaches { get; set; }
 
         public AIControl(AIConfig aiConfig, AICharacter aiCharacter)
         {

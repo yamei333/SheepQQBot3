@@ -80,16 +80,16 @@ public static class ConfigExtensions
             botConfig.InitBotFunctionIsEnabled();
             PrepareData(botConfig);
 
-            PublicVar.GlobalBotConfig = botConfig;
+            GlobalBotConfig = botConfig;
             Vm.SetConfigs = botConfig.SetConfigs;
             Vm.IsLoadComplete = true;
-            if (PublicVar.IsDebug)
+            if (IsDebug)
                 WriteJsonConfig(jsonText);
 
             if (isImportConfigFileExists)
                 FileSystem.DeleteFile(configFilePath, UIOption.OnlyErrorDialogs, RecycleOption.SendToRecycleBin);
         }
-        catch (Exception)
+        catch
         {
             if (!isImportConfigFileExists)
             {

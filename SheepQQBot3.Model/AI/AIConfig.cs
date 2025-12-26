@@ -1,34 +1,9 @@
-﻿using Masuit.Tools;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.AI
 {
     public class AIConfig
     {
-        /// <summary>
-        /// API Key
-        /// </summary>
-        [JsonPropertyName("apiKey_chat")]
-        public string ApiKeyChat { get; set; }
-
-        /// <summary>
-        /// API Key Image
-        /// </summary>
-        [JsonPropertyName("apiKey_image")]
-        public string ApiKeyImage { get; set; }
-
-        /// <summary>
-        /// BaseUrl
-        /// </summary>
-        [JsonPropertyName("baseUrl_chat")]
-        public string BaseUrlChat { get; set; }
-
-        /// <summary>
-        /// BaseUrl
-        /// </summary>
-        [JsonPropertyName("baseUrl_image")]
-        public string BaseUrlImage { get; set; }
-
         /// <summary>
         /// 聊天模型
         /// </summary>
@@ -99,6 +74,6 @@ namespace SheepQQBot3.Model.AI
         /// 是否使用AI功能
         /// </summary>
         [JsonIgnore]
-        public bool IsUseAI => !ApiKeyChat.IsNullOrEmpty() && !string.IsNullOrEmpty(ModelChat.Model);
+        public bool IsUseAI => !string.IsNullOrEmpty(ModelChat.Key) && !string.IsNullOrEmpty(ModelChat.Url);
     }
 }

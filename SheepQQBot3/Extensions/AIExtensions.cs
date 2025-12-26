@@ -1,8 +1,7 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Masuit.Tools.Systems;
-using OpenRouter.NET;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using SheepQQBot3.Enums;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
@@ -18,20 +17,17 @@ using System.Text;
 using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using Yamei.Common;
 using static SheepQQBot3.PublicVar;
-using Message = OpenRouter.NET.Models.Message;
 
 namespace SheepQQBot3.Extensions;
 
-public static class AIExtensions
+public static partial class AIExtensions
 {
     public const string ERROR_MESSAGE = "我脑袋好像短路了！";
     public const string ERROR_REASON = "(原因: {0})";
     public const string ERROR_JSON_ERROR = "Json解析失败";
-    public const string ERROR_JSON_BLOCK = "返回截断";
-    public const string ERROR_JSON_EMPTY = "返回空内容";
     public const string AI_HISTORY_PATH = "AICache/History/";
+
     private const string SENDING_GEMINI_REQUEST = "正在发送哈基米请求";
 
     public const string MESSAGE_BUSY = "我...现在正忙!...不太方便!...";
@@ -46,13 +42,12 @@ public static class AIExtensions
     private const string IMAGE_DUPLICATE = "[重复的图片]";
     private const string IMAGE_EXPIRED = "[历史图片已折叠]";
 
-    private static readonly Tool _tool = GetTool_Response();
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}");
 
     public static async Task SendAsync(
-        this List<ContentPart> thisRequestContentParts,
+        this List<ChatMessageContentPart> thisRequestParts,
         string chatKey,
         string requestTargetId,
         string groupId,
@@ -61,6 +56,7 @@ public static class AIExtensions
         AIGroupConfig aiGroupConfig,
         Action<string, string> botSendMessage,
         AIModel model,
+        AIRequestType aiRequestType,
         string extraSystemHint = null,
         bool saveHistory = true)
     {
@@ -69,22 +65,21 @@ public static class AIExtensions
         var isGroupAt = isGroupRequest && requestTargetId != groupId;
         var sendTargetId = isGroupRequest ? groupId : requestTargetId;
         var isGroupChatSummary = chatKey.StartsWith("z");
-        var responseText = string.Empty;
 
         #region 预处理用户好感度等信息(不存在则追加)
 
         // MEMO : 替换信息
         var requestUserInfos = new ConcurrentDictionary<string, AIUserInfo>();
-        for (var i = 0; i < thisRequestContentParts.Count; i++)
+        for (var i = 0; i < thisRequestParts.Count; i++)
         {
-            var contentPart = thisRequestContentParts[i];
-            if (contentPart is TextContent textContent)
+            var part = thisRequestParts[i];
+            if (part.Kind == ChatMessageContentPartKind.Text)
             {
-                var aiChatRequest = textContent.Text.FromJson<AIChatRequest>();
+                var aiChatRequest = part.Text.FromJson<AIChatRequest>();
                 var qqId = aiChatRequest.SenderId;
                 // MEMO : 清空SenderId
                 aiChatRequest.SenderId = null;
-                thisRequestContentParts[i] = new TextContent(aiChatRequest.ToJsonIgnoreNull());
+                thisRequestParts[i] = ChatMessageContentPart.CreateTextPart(aiChatRequest.ToJsonIgnoreNull());
                 if (qqId != AISystemId)
                 {
                     var aiChatSender = aiChatSenderInfos.GetOrAdd(qqId, new AIChatSender
@@ -124,9 +119,11 @@ public static class AIExtensions
         #region 构建系统信息
 
         // MEMO : 系统信息
-        var systemMessage = Message.FromSystem(string.Empty);
         // MEMO : 角色设计
-        var systemMessageContents = new List<ContentPart> { new TextContent(GlobalAICharacter.SystemInstructionText) };
+        var systemMessageContents = new List<ChatMessageContentPart>
+        {
+            ChatMessageContentPart.CreateTextPart(GlobalAICharacter.SystemInstructionText),
+        };
         // MEMO : 知识库
         systemMessageContents.AddKnowledge();
         // MEMO : 助手哈莉状态
@@ -136,41 +133,39 @@ public static class AIExtensions
             .ConfigureAwait(false);
         // MEMO : 本次请求的用户信息
         if (requestUserInfos.Any())
-            systemMessageContents.Add(new TextContent(requestUserInfos.Values.ToJsonIgnoreNull()));
-        systemMessage.Content = systemMessageContents;
+            systemMessageContents.Add(ChatMessageContentPart.CreateTextPart(requestUserInfos.Values.ToJsonIgnoreNull()));
+        var systemMessage = ChatMessage.CreateSystemMessage(systemMessageContents);
 
         #endregion 构建系统信息
 
         #region 构建本次发送信息
 
-        List<Message> thisRequestMessageSendVer = [systemMessage];
+        List<ChatMessage> thisRequestMessageSendVer = [systemMessage];
         // MEMO : 历史记录
         var loadedHistories = LoadAIHistory(chatKey);
         thisRequestMessageSendVer.AddRange(loadedHistories);
-        ProcessImageContentParts();
-        RemoveRedundantImageSummaries();
-        thisRequestMessageSendVer.Add(Message.FromUser(thisRequestContentParts));
+        thisRequestParts.ProcessImageContentParts();
+        thisRequestMessageSendVer.Add(ChatMessage.CreateUserMessage(thisRequestParts));
         // MEMO : 系统提示
         if (!extraSystemHint.IsNullOrEmpty())
-            thisRequestMessageSendVer.Add(Message.FromUser(extraSystemHint));
+            thisRequestMessageSendVer.Add(ChatMessage.CreateUserMessage(extraSystemHint));
 
         #endregion 构建本次发送信息
 
         #region DEBUG响应, 正在发送哈基米请求
 
-        if (IsDebug)
+#if DEBUG
+        if (!isGroupRequest)
         {
-            if (!isGroupRequest)
-            {
-                botSendMessage(sendTargetId, $"{SENDING_GEMINI_REQUEST}...");
-            }
-            else
-            {
-                botSendMessage(TestGroupId, isGroupAt
-                    ? $"{SENDING_GEMINI_REQUEST}(群:{groupId}/群友:{requestTargetId})..."
-                    : $"{SENDING_GEMINI_REQUEST}(群:{groupId})...");
-            }
+            botSendMessage(sendTargetId, $"{SENDING_GEMINI_REQUEST}...");
         }
+        else
+        {
+            botSendMessage(TestGroupId, isGroupAt
+                ? $"{SENDING_GEMINI_REQUEST}(群:{groupId}/群友:{requestTargetId})..."
+                : $"{SENDING_GEMINI_REQUEST}(群:{groupId})...");
+        }
+#endif
 
         #endregion DEBUG响应, 正在发送哈基米请求
 
@@ -181,426 +176,60 @@ public static class AIExtensions
                 if (IsDebug && retryTimes > 0)
                     botSendMessage(TestGroupId, $"重新发送AI请求中...{retryTimes}");
 
-                #region 发送AI请求
-
-                // HINT : 发送AI请求
-                var response = await (model.SupportImage ? AIClientImage : AIClient)
-                    .CreateChatCompletionAsync(new ChatCompletionRequest
-                    {
-                        Model = model.Model,
-                        Messages = thisRequestMessageSendVer,
-                        Tools = [_tool],
-                        ToolChoice = new
-                        {
-                            type = "function",
-                            function = new { name = "reply_user" },
-                        },
-                        Reasoning = new ReasoningConfig
-                        {
-                            Effort = "high",
-                            Enabled = true,
-                            Exclude = true,
-                        },
-                        Temperature = GlobalAIConfig.Temperature,
-                        TopP = GlobalAIConfig.TopP,
-                        MaxTokens = GlobalAIConfig.MaxToken,
-                    }).ConfigureAwait(false);
-
-                #endregion 发送AI请求
-
-                #region Error处理 - 无返回内容
-
-                if (response.Choices == null)
+                switch (aiRequestType)
                 {
-                    // MEMO : 无返回内容
-                    retryTimes++;
-                    YameiLogExtensions.WriteJsonDeserializeLog(
-                        new JsonException(ERROR_JSON_BLOCK),
-                        nameof(AIChatResponse),
-                        $"[GeminiError-无返回内容]");
-                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-无返回内容]");
-                    if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_EMPTY)}");
-
-                    continue;
-                }
-
-                #endregion Error处理 - 无返回内容
-
-                #region JsonText提取
-
-                var responseChoice = response.Choices[0];
-                var finishReason = responseChoice.FinishReason;
-                var jsonText = finishReason == "stop"
-                    ? responseChoice.Message.Content.ToString()
-                    : responseChoice.Message.ToolCalls[0].Function.Arguments;
-
-                #region 图片模型特殊处理
-
-                if (model.SupportImage)
-                {
-                    if (finishReason == "stop")
-                    {
-                        var sendMessage = string.Empty;
-                        var imageUrls = ExtractImageUrls(jsonText);
-                        await imageUrls.ForeachAsync(async imageUrl =>
-                        {
-                            var (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
-                                imageUrl, "Cache", true).ConfigureAwait(false);
-                            if (getSuccessed)
-                                sendMessage += CQCode.Image(CommonExtensions.GetPath("Cache", fileName, GetPathType.CQCodePath));
-                        }).ConfigureAwait(false);
-
-                        if (!sendMessage.IsNullOrEmpty())
-                        {
-                            // MEMO : 正常生成图片并发送
-                            botSendMessage(sendTargetId, $"{sendMessage}{(isAt ? $"{CQCode.At(requestTargetId)} " : string.Empty)}你要的图片来了!");
-
-                            // MEMO : 保存历史记录(图片内容应该不多, 可以忽略最大限制)
-                            if (saveHistory)
-                            {
-                                // MEMO : 删除过期图片信息
-                                DeleteExpireImage();
-                                RemoveRedundantImageSummaries();
-                                // MEMO : 添加本次请求内容
-                                loadedHistories.Add(Message.FromUser(thisRequestContentParts));
-                                // MEMO : 添加本次回复内容
-                                loadedHistories.Add(Message.FromAssistant($"{IMAGE_EXPIRED}你要的图片来了!"));
-                                // MEMO : 保存历史记录
-                                loadedHistories.SaveAIHistory(chatKey);
-                            }
-                        }
-                        else
-                        {
-                            botSendMessage(sendTargetId, "返回消息中不存在图片地址!");
-                        }
-                    }
-                    else
-                    {
-                        #region Error处理 - 图片生成返回非Stop
-
-                        // MEMO : 生成图片返回非Stop
-                        retryTimes++;
-                        YameiLogExtensions.WriteJsonDeserializeLog(
-                            new JsonException(ERROR_JSON_ERROR),
-                            nameof(AIChatResponse),
-                            $"[GeminiError-非预期Reason]生成图片返回非Stop");
-                        YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-非预期Reason]生成图片返回非Stop");
-                        if (IsDebug)
-                            botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat("生成图片返回非Stop")}");
-
-                        continue;
-
-                        #endregion Error处理 - 图片生成返回非Stop
-                    }
-
-                    WriteLog();
-                    return;
-                }
-
-                #endregion 图片模型特殊处理
-
-                #endregion JsonText提取
-
-                #region 删除返回消息中的emoji字符
-
-                // MEMO : 删除emoji
-                responseText = _regDeleteEmoji.Replace(jsonText, string.Empty);
-                if (responseText.IsNullOrEmpty())
-                {
-                    retryTimes++;
-                    YameiLogExtensions.WriteLog(LogType.Error, "[GeminiError-返回截断]");
-                    if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_BLOCK)}");
-
-                    continue;
-                }
-
-                #endregion 删除返回消息中的emoji字符
-
-                #region ChatMessages获取
-
-                var aiChatResponse = finishReason == "stop"
-                    ? responseText.StartsWith('[')
-                        ? responseText.FromJson<AIStopResponse[]>().First().ChatResponse
-                        : responseText.FromJson<AIChatResponse>()
-                    : responseText.FromJson<AIChatResponse>();
-                var dateNow = DateTime.Now;
-                aiChatResponse.Date = dateNow;
-                var chatMessages = aiChatResponse.Contents;
-
-                #endregion ChatMessages获取
-
-                #region 群聊总结处理
-
-                // MEMO : 群聊总结提前处理, 采用转发形式发送
-                if (isGroupChatSummary)
-                {
-                    var sendMessages = new List<GroupForwardMessage>
-                    {
-                        new(BOT_NAME, BotId, $"总结消息数: {thisRequestContentParts.Count - 2}"),
-                    };
-                    chatMessages.ForEach(aiChatResponseContent =>
-                    {
-                        var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, false, requestTargetId, isGroupRequest);
-                        if (sendMessage.IsNullOrEmpty())
-                            return;
-
-                        sendMessages.Add(new GroupForwardMessage(BOT_NAME, BotId, sendMessage));
-                    });
-
-                    await GlobalBotClient.SendGroupForwardMessageAsync(IsDebug ? TestGroupId : groupId, sendMessages,
-                            $"{dateNow.ToYYYYMD()} 群聊总结", [$"{BOT_NICK_NAME}群聊总结", "打开查看"], $"查看{sendMessages.Count}条消息", "[今日群聊总结]")
-                        .ConfigureAwait(false);
-
-                    // MEMO : 群聊总结内容太多了, 不写后台Log
-                    WriteLog(false);
-
-                    return;
-                }
-
-                #endregion 群聊总结处理
-
-                var needSaveAIData = false;
-
-                #region 处理关系变化
-
-                // MEMO : 计算关系变化
-                var valueChangeMessage = string.Empty;
-                var relationChangeInfos = aiChatResponse.RelationChangeInfos;
-                if (relationChangeInfos?.Any() == true)
-                {
-                    relationChangeInfos
-                        .Where(relationChangeInfo => !relationChangeInfo.TargetId.IsNullOrEmpty()
-                            && (relationChangeInfo.IntimacyChange != 0
-                                || relationChangeInfo.RespectChange != 0
-                                || relationChangeInfo.AffectionChange != 0))
-                        .ForEach(relationChangeInfo =>
-                        {
-                            needSaveAIData = true;
-                            var intimacyChange = relationChangeInfo.IntimacyChange;
-                            var respectChange = relationChangeInfo.RespectChange;
-                            var affectionChange = relationChangeInfo.AffectionChange;
-                            GlobalAIData.UserDatas.AddOrUpdate(
-                                relationChangeInfo.TargetId,
-                                _ =>
-                                {
-                                    var userData = new AIUserData();
-                                    userData.Relation.Intimacy += intimacyChange;
-                                    userData.Relation.Respect += respectChange;
-                                    userData.Relation.Affection += affectionChange;
-                                    return userData;
-                                },
-                                (_, oldValue) =>
-                                {
-                                    intimacyChange = CalculateRelationChange(oldValue.Relation.Intimacy, intimacyChange);
-                                    respectChange = CalculateRelationChange(oldValue.Relation.Respect, respectChange);
-                                    affectionChange = CalculateRelationChange(oldValue.Relation.Affection, affectionChange);
-                                    oldValue.Relation.Intimacy += intimacyChange;
-                                    oldValue.Relation.Respect += respectChange;
-                                    oldValue.Relation.Affection += affectionChange;
-                                    return oldValue;
-                                });
-
-                            valueChangeMessage += $"[({relationChangeInfo.TargetId})关系变化: "
-                                + $"亲密{(intimacyChange > 0 ? "+" : string.Empty)}{intimacyChange}"
-                                + $"/认可{(respectChange > 0 ? "+" : string.Empty)}{respectChange}"
-                                + $"/好感{(affectionChange > 0 ? "+" : string.Empty)}{affectionChange}]{ENTER}";
-                        });
-                }
-
-                #endregion 处理关系变化
-
-                #region 处理用户屏蔽
-
-                // MEMO : 计算用户屏蔽时长
-                var blockUserInfos = aiChatResponse.BlockUserInfos;
-                if (blockUserInfos?.Any() == true)
-                {
-                    blockUserInfos
-                        .Where(blockUserInfo => !blockUserInfo.TargetId.IsNullOrEmpty() && blockUserInfo.Value != 0)
-                        .ForEach(blockUserInfo =>
-                        {
-                            needSaveAIData = true;
-                            var changeValue = blockUserInfo.Value;
-                            GlobalAIData.UserDatas.AddOrUpdate(
-                                blockUserInfo.TargetId,
-                                _ =>
-                                {
-                                    var userData = new AIUserData
-                                    {
-                                        BlockUntil = dateNow.AddMinutes(changeValue).ToTimeStamp(),
-                                    };
-                                    return userData;
-                                },
-                                (_, oldValue) =>
-                                {
-                                    oldValue.BlockUntil = dateNow.AddMinutes(changeValue).ToTimeStamp();
-                                    return oldValue;
-                                });
-
-                            valueChangeMessage += $"[({blockUserInfo.TargetId})封禁: {changeValue} 分钟]{ENTER}";
-                        });
-                }
-
-                #endregion 处理用户屏蔽
-
-                #region 处理心情指数
-
-                // MEMO : 计算心情指数变化
-                var statusChangeInfo = aiChatResponse.StatusChangeInfo;
-                if (statusChangeInfo != null)
-                {
-                    var moodIndexChange = statusChangeInfo.MoodIndexChange;
-                    if (moodIndexChange != 0)
-                    {
-                        needSaveAIData = true;
-                        PublicVar.GlobalAIData.AIStatusData.MoodIndexValue += moodIndexChange;
-
-                        valueChangeMessage += $"[心情指数: {(moodIndexChange > 0 ? "+" : string.Empty)}{moodIndexChange}]{ENTER}";
-                    }
-                }
-
-                valueChangeMessage = valueChangeMessage.RemoveEnd(ENTER);
-                if (IsDebug && !valueChangeMessage.IsNullOrEmpty())
-                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{valueChangeMessage}");
-
-                #endregion 处理心情指数
-
-                // MEMO : 保存AI数据
-                if (needSaveAIData)
-                    ConfigExtensions.SaveAIData();
-
-                #region 处理知识和灵感笔记
-
-                // MEMO : 保存知识笔记内容
-                var knowledgeNote = aiChatResponse.KnowledgeNote;
-                if (knowledgeNote != null && !knowledgeNote.Title.IsNullOrEmpty() && !knowledgeNote.Content.IsNullOrEmpty())
-                {
-                    // MEMO : 写入知识笔记内容
-                    WriteAINote(knowledgeNote);
-                    if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
-                }
-
-                // MEMO : 保存灵感笔记内容
-                var inspirationNote = aiChatResponse.InspirationNote;
-                if (inspirationNote != null && !inspirationNote.Title.IsNullOrEmpty() && !inspirationNote.Content.IsNullOrEmpty())
-                {
-                    // MEMO : 写入灵感笔记内容
-                    WriteAINote(inspirationNote);
-                    if (IsDebug)
-                        botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
-                }
-
-                #endregion 处理知识和灵感笔记
-
-                #region 处理回复消息和回复
-
-                // MEMO : 构建回复消息
-                var needAt = isAt;
-                // MEMO : 排除消息为空的内容
-                chatMessages = chatMessages.Where(each => each.ChatMessageInfo != null).ToArray();
-                chatMessages[^1].ChatMessageInfo.Delay = 0;
-                // MEMO : 处理消息回复
-                chatMessages.ForEach(aiChatResponseContent =>
-                {
-                    var sendMessage = CreateSendMessage(aiGroupConfig, aiChatResponseContent, needAt, requestTargetId, isGroupRequest);
-                    if (sendMessage.IsNullOrEmpty())
+                    case AIRequestType.Chat:
+                        var chatCompletion = await ChatRequestAsync(thisRequestParts, thisRequestMessageSendVer, loadedHistories, botSendMessage,
+                                aiGroupConfig, isGroupRequest, requestTargetId, sendTargetId, chatKey, isAt)
+                            .ConfigureAwait(false);
+                        LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, chatCompletion.Usage));
+                        YameiLogExtensions.WriteLog(chatCompletion, thisRequestParts, aiStatus.ToJsonIgnoreNull());
+                        break;
+                    case AIRequestType.Image:
+                        await ImageRequestAsync(thisRequestParts, thisRequestMessageSendVer, loadedHistories,
+                                botSendMessage, isGroupRequest, requestTargetId, sendTargetId, chatKey, isAt)
+                            .ConfigureAwait(false);
                         return;
-
-                    // MEMO : 只有第一句回复需要at
-                    needAt = false;
-
-                    // MEMO : 发送消息
-                    botSendMessage(sendTargetId, $"{sendMessage}");
-
-                    // MEMO : 延迟
-                    var delay = aiChatResponseContent.ChatMessageInfo.Delay ?? 0;
-                    if (delay > 0)
-                        CommonExtensions.Sleep(delay * 2);
-                });
-
-                #endregion 处理回复消息和回复
-
-                #region 历史记录保存
-
-                if (saveHistory)
-                {
-                    DeleteExpireImage();
-                    RemoveRedundantImageSummaries();
-                    // MEMO : 添加本次请求内容
-                    loadedHistories.Add(Message.FromUser(thisRequestContentParts));
-                    // MEMO : 添加本次回复内容
-                    var aiContentParts = new List<ContentPart>();
-                    aiChatResponse.Contents
-                        .ForEach(each => aiContentParts.Add(CreateTextContent(BOT_NAME, each.ChatMessageInfo.Text)));
-                    var aiMessage = Message.FromAssistant(string.Empty);
-                    aiMessage.Content = aiContentParts;
-                    // MEMO : 添加AI回复, 只保留text (控制在上限范围内)
-                    //loadedHistories.Add(Message.FromAssistant(aiChatResponse.ToJsonIgnoreNull()));
-                    loadedHistories.AddLimit(aiMessage, AppSettingExtensions.Get("maxAIHistoryCount", 100));
-                    // MEMO : 保存历史记录
-                    loadedHistories.SaveAIHistory(chatKey);
+                    case AIRequestType.ChatSummary:
+                        await GroupSummaryRequestAsync(thisRequestParts, thisRequestMessageSendVer,
+                                aiGroupConfig, requestTargetId, sendTargetId)
+                            .ConfigureAwait(false);
+                        break;
+                    default:
+                        throw new ArgumentOutOfRangeException(nameof(aiRequestType), aiRequestType, null);
                 }
-
-                #endregion 历史记录保存
-
-                WriteLog();
-
-                void WriteLog(bool writeBackLog = true)
-                {
-                    // MEMO : 写入前台日志
-                    var apiKey = GlobalAIControl.AIConfig.ApiKeyChat;
-                    LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, apiKey, response.Usage));
-                    if (writeBackLog)
-                    {
-                        // MEMO : 写入后台Log
-                        YameiLogExtensions.WriteLog(apiKey, response, thisRequestContentParts, aiStatus.ToJsonIgnoreNull());
-                    }
-                }
+            }
+            catch (AIException ex)
+            {
+                retryTimes++;
+                YameiLogExtensions.WriteLog(LogType.Error, $"{ex.Message}{ENTER}返回内容: {ex.ResponseText}");
+#if DEBUG
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
+#endif
+                continue;
             }
             catch (JsonException ex)
             {
                 #region Json转换失败处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-JsonException]{ENTER}返回内容: {responseText}");
-                if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
-
+                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-JsonException]");
+#if DEBUG
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
+#endif
                 continue;
 
                 #endregion Json转换失败处理
-            }
-            catch (OpenRouterException ex)
-            {
-                #region OpenRouter错误处理
-
-                retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OpenRouterException]{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
-                if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
-
-                if (ex.Message.Contains("Internal Server Error", StringComparison.CurrentCultureIgnoreCase))
-                {
-                    DeleteExpireImage();
-                    RemoveRedundantImageSummaries();
-                }
-
-                continue;
-
-                #endregion OpenRouter错误处理
             }
             catch (Exception ex)
             {
                 #region 其他错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OtherException]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestContentParts.ToJsonIgnoreNull()}");
-                if (IsDebug)
-                    botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
-
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OtherException]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+#if DEBUG
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
+#endif
                 continue;
 
                 #endregion 其他错误处理
@@ -618,128 +247,242 @@ public static class AIExtensions
         {
             botSendMessage(sendTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
         }
+    }
 
-        return;
+    //// 删除过期图片信息
+    //private static void DeleteExpireImage(this List<ChatMessageContentPart> parts)
+    //{
+    //    for (var i = 0; i < parts.Count; i++)
+    //    {
+    //        if (parts[i].Kind == ChatMessageContentPartKind.Image)
+    //            parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_EXPIRED);
+    //    }
+    //}
 
-        // 删除过期图片信息
-        void DeleteExpireImage()
+    // 删除过期图片信息
+    private static void DeleteExpireImage(this List<ChatMessageContentPart> parts)
+    {
+        if (parts == null || parts.Count == 0) return;
+
+        // 缓存当前上下文的名字，初始为默认值
+        string currentNickName = "未知用户";
+
+        // 倒序遍历
+        for (var i = parts.Count - 1; i >= 0; i--)
         {
-            for (var i = 0; i < thisRequestContentParts.Count; i++)
-            {
-                if (thisRequestContentParts[i] is ImageContent)
-                    thisRequestContentParts[i] = CreateTextContent(GetImageContentSenderName(i), IMAGE_EXPIRED);
-            }
-        }
+            var part = parts[i];
 
-        // 超出一次可传入图片时的处理
-        void ProcessImageContentParts()
-        {
-            try
+            // 1. 如果是文本：尝试提取名字，更新上下文
+            if (part.Kind == ChatMessageContentPartKind.Text)
             {
-                var lastOccurrenceMap = new Dictionary<string, int>();
-                for (var i = 0; i < thisRequestContentParts.Count; i++)
-                {
-                    if (thisRequestContentParts[i] is ImageContent { ImageUrl: not null } img)
-                        lastOccurrenceMap[img.ImageUrl.Url] = i;
-                }
+                if (string.IsNullOrEmpty(part.Text))
+                    continue;
 
-                var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
-                var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
-                for (var i = 0; i < thisRequestContentParts.Count; i++)
+                try
                 {
-                    if (thisRequestContentParts[i] is ImageContent { ImageUrl: not null } img)
+                    // 解析 JSON 获取名字
+                    // 这里的 try-catch 保证即使某条消息格式错误，也不影响整体清理流程
+                    var aiChatRequest = part.Text.FromJson<AIChatRequest>();
+                    if (!string.IsNullOrEmpty(aiChatRequest?.NickName))
                     {
-                        var lastIdx = lastOccurrenceMap[img.ImageUrl.Url];
-                        if (lastIdx != i)
-                        {
-                            thisRequestContentParts[i] = new TextContent(new AIChatRequest
-                            {
-                                NickName = GetImageContentSenderName(i),
-                                Message = IMAGE_DUPLICATE,
-                            }.ToJsonIgnoreNull());
-                        }
-                        else if (!keepIndices.Contains(i))
-                        {
-                            thisRequestContentParts[i] = new TextContent(new AIChatRequest
-                            {
-                                NickName = GetImageContentSenderName(i),
-                                Message = IMAGE_EXPIRED,
-                            }.ToJsonIgnoreNull());
-                        }
+                        currentNickName = aiChatRequest.NickName;
                     }
                 }
-            }
-            catch (Exception ex)
-            {
-                YameiLogExtensions.WriteJsonSerializeLog(ex, "ProcessImageContentParts.originalParts", thisRequestContentParts);
-                throw;
-            }
-        }
-
-        // 向后寻找最近的 TextContent 并提取 NickName
-        string GetImageContentSenderName(int currentIndex)
-        {
-            for (var i = currentIndex + 1; i < thisRequestContentParts.Count; i++)
-            {
-                if (thisRequestContentParts[i] is TextContent textContent)
+                catch
                 {
-                    var aiChatRequest = textContent.Text.FromJson<AIChatRequest>();
-                    return aiChatRequest.NickName;
+                    // 解析失败忽略，继续使用上一个有效的名字
                 }
             }
-
-            return "未知用户";
-        }
-
-        // 移除冗余的图片总结文本
-        void RemoveRedundantImageSummaries()
-        {
-            if (thisRequestContentParts.Count == 0)
-                return;
-
-            var indicesToRemove = new List<int>();
-            var hasRealImageInGroup = false;
-            for (var i = 0; i < thisRequestContentParts.Count; i++)
+            // 2. 如果是图片：直接替换，使用手里拿着的最新（其实是后面）的名字
+            else if (part.Kind == ChatMessageContentPartKind.Image)
             {
-                var part = thisRequestContentParts[i];
-                switch (part)
-                {
-                    case ImageContent:
-                        hasRealImageInGroup = true;
-                        break;
-                    case TextContent txt when txt.Text.FromJson<AIChatRequest>().Message == SEND_SOME_IMAGES:
-                        if (!hasRealImageInGroup)
-                            indicesToRemove.Add(i);
-
-                        hasRealImageInGroup = false;
-                        break;
-                }
+                parts[i] = CreateTextPart(currentNickName, IMAGE_EXPIRED);
             }
-
-            // 倒序删除 (防止索引错位)
-            for (var i = indicesToRemove.Count - 1; i >= 0; i--)
-                thisRequestContentParts.RemoveAt(indicesToRemove[i]);
         }
     }
 
-    private static Tool GetTool_Response() => Tool.CreateFunctionTool(
-        "reply_user",
-        "Call this function to send a response to the user.",
-        SchemaDeepPatcher.Generate(typeof(AIChatResponse)));
+    //// 移除冗余的图片总结文本
+    //private static void RemoveRedundantImageSummaries(this List<ChatMessageContentPart> parts)
+    //{
+    //    if (parts.Count == 0)
+    //        return;
+
+    //    var indicesToRemove = new List<int>();
+    //    var hasRealImageInGroup = false;
+    //    for (var i = 0; i < parts.Count; i++)
+    //    {
+    //        var part = parts[i];
+    //        switch (part.Kind)
+    //        {
+    //            case ChatMessageContentPartKind.Image:
+    //                hasRealImageInGroup = true;
+    //                break;
+    //            case ChatMessageContentPartKind.Text when part.Text.FromJson<AIChatRequest>().Message == SEND_SOME_IMAGES:
+    //                if (!hasRealImageInGroup)
+    //                    indicesToRemove.Add(i);
+
+    //                hasRealImageInGroup = false;
+    //                break;
+    //        }
+    //    }
+
+    //    // 倒序删除 (防止索引错位)
+    //    for (var i = indicesToRemove.Count - 1; i >= 0; i--)
+    //        parts.RemoveAt(indicesToRemove[i]);
+    //}
+
+    ///// <summary>
+    ///// 超出一次可传入图片时的处理
+    ///// </summary>
+    //private static void ProcessImageContentParts(this List<ChatMessageContentPart> parts)
+    //{
+    //    try
+    //    {
+    //        var lastOccurrenceMap = new Dictionary<string, int>();
+    //        for (var i = 0; i < parts.Count; i++)
+    //        {
+    //            var part = parts[i];
+    //            if (part.Kind == ChatMessageContentPartKind.Image)
+    //                lastOccurrenceMap[part.ImageUri.AbsoluteUri] = i;
+    //        }
+
+    //        var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
+    //        var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
+    //        for (var i = 0; i < parts.Count; i++)
+    //        {
+    //            var part = parts[i];
+    //            if (part.Kind == ChatMessageContentPartKind.Image)
+    //            {
+    //                var lastIdx = lastOccurrenceMap[part.ImageUri.AbsoluteUri];
+    //                if (lastIdx != i)
+    //                    parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_DUPLICATE);
+    //                else if (!keepIndices.Contains(i))
+    //                    parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_EXPIRED);
+    //            }
+    //        }
+    //    }
+    //    catch (Exception ex)
+    //    {
+    //        YameiLogExtensions.WriteJsonSerializeLog(ex, "ProcessImageContentParts.originalParts", parts);
+    //        throw;
+    //    }
+    //}
+
+    //// 向后寻找最近的 TextContent 并提取 NickName
+    //private static string GetImageContentSenderName(this List<ChatMessageContentPart> parts, int currentIndex)
+    //{
+    //    for (var i = currentIndex + 1; i < parts.Count; i++)
+    //    {
+    //        var part = parts[i];
+    //        if (part.Kind == ChatMessageContentPartKind.Text)
+    //        {
+    //            var aiChatRequest = part.Text.FromJson<AIChatRequest>();
+    //            return aiChatRequest.NickName;
+    //        }
+    //    }
+
+    //    return "未知用户";
+    //}
+
+    private static void ProcessImageContentParts(this List<ChatMessageContentPart> parts)
+    {
+        if (parts == null || parts.Count == 0) return;
+
+        try
+        {
+            // 记录已遇到的唯一图片 URL (用于去重)
+            var seenImageUrls = new HashSet<string>();
+
+            // 缓存当前上下文的 NickName
+            // 初始值设为 "未知用户"，防止列表末尾全是图片、没有文本的情况
+            string currentContextNickName = "未知用户";
+
+            // 计数器：记录我们从后往前保留了多少张有效图片
+            int validImageCount = 0;
+
+            // [关键]倒序遍历：从最后一个元素往回走
+            for (var i = parts.Count - 1; i >= 0; i--)
+            {
+                var part = parts[i];
+
+                // ---------------
+                // 1. 处理文本部分
+                // ---------------
+                if (part.Kind == ChatMessageContentPartKind.Text)
+                {
+                    try
+                    {
+                        // 只有遇到文本时才解析 JSON，且每个文本只解析一次！
+                        // 相比旧代码，极大地减少了 FromJson 的调用次数
+                        if (!string.IsNullOrEmpty(part.Text))
+                        {
+                            var aiChatRequest = part.Text.FromJson<AIChatRequest>();
+                            if (!string.IsNullOrEmpty(aiChatRequest?.NickName))
+                            {
+                                // 更新当前上下文的名字，供前面的图片使用
+                                currentContextNickName = aiChatRequest.NickName;
+                            }
+                        }
+                    }
+                    catch
+                    {
+                        // 容错：JSON 解析失败时，保持沿用上一个有效的名字
+                    }
+                    continue;
+                }
+
+                // ---------------
+                // 2. 处理图片部分
+                // ---------------
+                if (part.Kind == ChatMessageContentPartKind.Image)
+                {
+                    var url = part.ImageUri?.AbsoluteUri;
+
+                    // 防御性检查
+                    if (string.IsNullOrEmpty(url)) continue;
+
+                    if (!seenImageUrls.Add(url))
+                    {
+                        // [重复图片逻辑]
+                        // 因为是倒序，既然 Set 里已经有了，说明后面（未来）已经出现过这张图
+                        // 所以当前这张（前面的）是重复的
+                        parts[i] = CreateTextPart(currentContextNickName, IMAGE_DUPLICATE);
+                    }
+                    else
+                    {
+                        // 这是一个新的（相对于倒序视角）图片
+                        validImageCount++;
+
+                        // [过期图片逻辑]
+                        // 如果有效图片数量已经超过限制，剩下的（前面的）都是过期
+                        if (validImageCount > MAX_IMAGE_CONTENT_LIMIT)
+                        {
+                            parts[i] = CreateTextPart(currentContextNickName, IMAGE_EXPIRED);
+                        }
+                        // 否则：正常保留，不需要做任何操作
+                    }
+                }
+            }
+        }
+        catch (Exception ex)
+        {
+            YameiLogExtensions.WriteJsonSerializeLog(ex, "ProcessImageContentParts.originalParts", parts);
+            throw;
+        }
+    }
 
     private static string CreateSendMessage(
         AIGroupConfig aiGroupConfig,
-        AIChatResponseContent aiChatResponseContent,
+        AIChatResponseContent content,
         bool needAt,
         string targetId,
         bool isGroupRequest)
     {
-        var think = aiChatResponseContent.Think;
-        var body = aiChatResponseContent.Body;
-        var sensory = aiChatResponseContent.Sensory;
-        var mind = aiChatResponseContent.Mind;
-        var face = aiChatResponseContent.Face;
-        var chatMessage = aiChatResponseContent.ChatMessageInfo;
+        var think = content.Think;
+        var body = content.Body;
+        var sensory = content.Sensory;
+        var mind = content.Mind;
+        var face = content.Face;
         string resultMessage;
         if (IsDebug)
         {
@@ -749,7 +492,7 @@ public static class AIExtensions
                 + GetExpressionText(true)
                 + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
 
-            resultMessage += chatMessage.DeleteCode(true, needAt, targetId);
+            resultMessage += content.DeleteCode(true, needAt, targetId);
         }
         else
         {
@@ -779,7 +522,7 @@ public static class AIExtensions
                         resultMessage += $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}";
                 }
 
-                resultMessage += chatMessage.DeleteCode(aiGroupConfig.ShowEmojiImage, needAt, targetId);
+                resultMessage += content.DeleteCode(aiGroupConfig.ShowEmojiImage, needAt, targetId);
             }
             else
             {
@@ -795,50 +538,33 @@ public static class AIExtensions
                     resultMessage += $"{GetExpressionText(false)}{(body.IsNullOrEmpty() ? string.Empty : $"[{body}]{ENTER}")}";
                 }
 
-                resultMessage += chatMessage.DeleteCode(true, false);
+                resultMessage += content.DeleteCode(true, false);
             }
         }
 
         return resultMessage;
 
-        string GetExpressionText(bool useTitle) => face is null or AIExpressionType.None
+        string GetExpressionText(bool useTitle) => face == AIExpressionType.None
             ? string.Empty
             : $"[{(useTitle ? "表情:" : string.Empty)}{face.GetDisplay()}]{(useTitle ? ENTER : string.Empty)}";
     }
 
-    private static string GetEmojiCode(AIChatMessage aiChatMessage, bool showEmojiImage)
+    private static string GetEmojiCode(AIChatResponseContent content, bool showEmojiImage)
     {
         if (!showEmojiImage)
         {
-            aiChatMessage.Emoji = null;
+            content.Emoji = null;
             return string.Empty;
         }
 
-        var emoji = aiChatMessage.Emoji;
+        var emoji = content.Emoji;
         return emoji is null or AIEmojiType.None
             ? string.Empty
-            : CQCode.Image(Path.Combine(GlobalAIConfig.FacePath, $"{emoji.ToString()}.gif"), summary: emoji.GetDisplay());
-    }
-
-    private static int CalculateRelationChange(int currentValue, int rawChange)
-    {
-        // 只有在增加好感，且当前是负分时触发回归逻辑
-        if (currentValue < -100 && rawChange > 0)
-        {
-            return rawChange switch
-            {
-                >= 3 => (int)(rawChange * 2.5), // 高诚意行为加速回归
-                >= 2 => (int)(rawChange * 1.5),
-                _ => rawChange,               // 敷衍行为不加速
-            };
-        }
-
-        // 正常慢热逻辑 (正分区间)
-        return rawChange;
+            : CQCode.Image(Path.Combine(GlobalAIConfig.FacePath, $"{emoji.ToString()}.gif")/*, summary: emoji.GetDisplay()*/);
     }
 
     /// <param name="contentParts"><see cref="List{ContentPart}"/></param>
-    extension(List<ContentPart> contentParts)
+    extension(List<ChatMessageContentPart> contentParts)
     {
         /// <summary>
         /// 追加小助手状态
@@ -855,7 +581,7 @@ public static class AIExtensions
                 WeatherContext = weatherContext,
             };
 
-            contentParts.Add(new TextContent(aiChatStatus.ToJsonIgnoreNull()));
+            contentParts.Add(ChatMessageContentPart.CreateTextPart(aiChatStatus.ToJsonIgnoreNull()));
             return aiChatStatus;
         }
 
@@ -863,31 +589,36 @@ public static class AIExtensions
             AIChatSender sender,
             string messageText,
             Dictionary<string, GroupMember> groupMembers,
-            bool imageToText = false)
+            bool imageToText = false,
+            int imageNumLimit = 0)
         {
             if (messageText.IsNullOrEmpty())
                 return;
 
-            var message = messageText;
-            if (groupMembers?.Any() == true)
-            {
-                message = _regReplaceAt.Replace(message, match =>
-                {
-                    var qqId = long.Parse(match.Groups["qqId"].Value).ToString();
-                    if (IsDebug && qqId == SuperAdminId)
-                        return $"[at:{BOT_NAME}]";
-
-                    return $"[at:{groupMembers[qqId].ToAIChatSender(AIUserInfos).NickName}]";
-                });
-            }
-
-            var deleteImageJsonText = await contentParts.AddQQChatImageAsync(sender, message, imageToText).ConfigureAwait(false);
+            var message = ReplaceAt(groupMembers, messageText);
+            var deleteImageJsonText = await contentParts.AddQQChatImageAsync(sender, message, imageToText, imageNumLimit).ConfigureAwait(false);
             if (!deleteImageJsonText.IsNullOrEmpty())
                 contentParts.AddQQChatTextContent(sender, WebUtility.HtmlDecode(deleteImageJsonText));
         }
 
-        public Task AddQQChatMessageAsync(Sender sender, string messageText, Dictionary<string, GroupMember> groupMembers)
-            => AddQQChatMessageAsync(contentParts, sender.ToAIChatSender(AIUserInfos), messageText, groupMembers);
+        private static string ReplaceAt(Dictionary<string, GroupMember> groupMembers, string message)
+        {
+            if (groupMembers?.Any() != true)
+                return message;
+
+            return _regReplaceAt.Replace(message, match =>
+            {
+                var qqId = long.Parse(match.Groups["qqId"].Value).ToString();
+                if (IsDebug && qqId == SuperAdminId)
+                    return $"[at:{BOT_NAME}]";
+
+                return $"[at:{groupMembers[qqId].ToAIChatSender(AIUserInfos).NickName}]";
+            });
+        }
+
+        public Task AddQQChatMessageAsync(Sender sender, string messageText, Dictionary<string, GroupMember> groupMembers,
+            bool imageToText = false, int imageNumLimit = 0)
+            => AddQQChatMessageAsync(contentParts, sender.ToAIChatSender(AIUserInfos), messageText, groupMembers, imageToText, imageNumLimit);
 
         /// <summary>
         /// 添加图片
@@ -895,8 +626,13 @@ public static class AIExtensions
         /// <param name="sender">发送者信息</param>
         /// <param name="messageText">消息内容</param>
         /// <param name="imageToText"></param>
+        /// <param name="imageNumLimit">解析图片上限</param>
         /// <returns>删除图片后的消息</returns>
-        private async Task<string> AddQQChatImageAsync(AIChatSender sender, string messageText, bool imageToText = false)
+        private async Task<string> AddQQChatImageAsync(
+            AIChatSender sender,
+            string messageText,
+            bool imageToText = false,
+            int imageNumLimit = 0)
         {
             if (messageText.IsNullOrEmpty())
                 return string.Empty;
@@ -904,20 +640,22 @@ public static class AIExtensions
             var processedMessage = messageText;
             var isAddImage = false;
             var matches = _regCQImageFileUrl.Matches(messageText);
-            var thisContentParts = new List<ContentPart>();
+            // MEMO : QQ群at+图片时, 图片数量>2会丢失at指令
+            if (imageToText || (imageNumLimit > 0 && matches.Count > imageNumLimit))
+            {
+                var noImageContents = new List<ChatMessageContentPart>();
+                noImageContents.AddQQChatTextContent(sender, IMAGE_EXPIRED);
+                contentParts.AddRange(noImageContents);
+                return _regCQImageFileUrl.Replace(messageText, string.Empty);
+            }
+
+            var thisContentParts = new List<ChatMessageContentPart>();
             await matches.ForeachAsync(async match =>
             {
-                //var url = WebUtility.HtmlDecode(match.Groups["url"].Value);
                 var file = WebUtility.HtmlDecode(match.Groups["file"].Value);
                 var imageReceiveData = await GlobalBotClient.GetImageAsync(file).ConfigureAwait(false);
                 if (imageReceiveData.IsSuccessed)
                 {
-                    if (imageToText)
-                    {
-                        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
-                        return;
-                    }
-
                     if (ImageExtensions.IsGifFile(imageReceiveData.Data.File))
                     {
                         thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
@@ -925,25 +663,13 @@ public static class AIExtensions
                     else
                     {
                         isAddImage = true;
-                        thisContentParts.Add(new ImageContent(imageReceiveData.Data.Url));
+                        thisContentParts.Add(ChatMessageContentPart.CreateImagePart(new Uri(imageReceiveData.Data.Url)));
                     }
                 }
                 else
                 {
                     thisContentParts.AddQQChatTextContent(sender, $"[加载失败图片]");
                 }
-
-                //if (await HttpExtensions.IsGifFromUrlAsync(url).ConfigureAwait(false))
-                //{
-                //    thisContentParts.AddQQChatTextContent(sender, $"[GIF动图]");
-                //}
-                //else
-                //{
-                //    if (imageToText)
-                //        thisContentParts.AddQQChatTextContent(sender, IMAGE_EXPIRED);
-                //    else
-                //        thisContentParts.Add(new ImageContent(url));
-                //}
 
                 processedMessage = processedMessage.Replace(match.Value, string.Empty);
             }).ConfigureAwait(false);
@@ -973,7 +699,7 @@ public static class AIExtensions
                 NickName = sender.NickName,
                 Message = QQExtensions.ProcessAIRequestMessage(messageText),
             };
-            contentParts.Add(new TextContent(contentPart.ToJsonIgnoreNull()));
+            contentParts.Add(ChatMessageContentPart.CreateTextPart(contentPart.ToJsonIgnoreNull()));
         }
 
         /// <summary>
@@ -993,7 +719,7 @@ public static class AIExtensions
                     if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath)))
                         return;
 
-                    contentParts.Add(new TextContent(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath), Encoding.UTF8)));
+                    contentParts.Add(ChatMessageContentPart.CreateTextPart(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath), Encoding.UTF8)));
                 }
             }
         }
@@ -1013,18 +739,18 @@ public static class AIExtensions
                 NickName = AISystemHintName,
                 Message = systemHint,
             };
-            contentParts.Add(new TextContent(contentPart.ToJsonIgnoreNull()));
+            contentParts.Add(ChatMessageContentPart.CreateTextPart(contentPart.ToJsonIgnoreNull()));
         }
     }
 
-    public static void SaveAIHistory(this List<Message> messages, string key)
-        => messages.ToJsonFile(GetAIHistoryPath(key));
+    public static void SaveAIHistory(this List<ChatMessage> messages, string key)
+        => ChatHistorySerializer.Save(messages, GetAIHistoryPath(key));
 
     /// <summary>
     /// 读取历史记录
     /// </summary>
-    public static List<Message> LoadAIHistory(string key)
-        => JsonExtensions.FromJsonFile<List<Message>>(GetAIHistoryPath(key)) ?? [];
+    public static List<ChatMessage> LoadAIHistory(string key)
+        => ChatHistorySerializer.Load(GetAIHistoryPath(key));
 
     /// <summary>
     /// 是否不方便发送消息的时候
@@ -1057,62 +783,15 @@ public static class AIExtensions
     /// <summary>
     /// 删除AI不该出现在聊天中的Code
     /// </summary>
-    /// <param name="aiChatMessage"><see cref="AIChatMessage"/></param>
+    /// <param name="aiChatResponseContent"><see cref="AIChatMessage"/></param>
     /// <param name="showEmojiImage">是否显示表示</param>
     /// <param name="needAt">是否文字开头加at</param>
     /// <param name="targetId">at对象QQ号</param>
     /// <returns>替换结果</returns>
-    public static string DeleteCode(this AIChatMessage aiChatMessage, bool showEmojiImage, bool needAt, string targetId = "")
+    public static string DeleteCode(this AIChatResponseContent aiChatResponseContent, bool showEmojiImage, bool needAt, string targetId = "")
     {
-        //var emojiCode = aiChatMessage.Emoji;
-        var result = aiChatMessage.Text ?? string.Empty;
-        //Replace(@"\[emojiCode:.+?\]", string.Empty);
-
-        //result = _regDeleteErrorEmoji.Replace(result, match =>
-        //{
-        //    var matchValue = match.Value;
-        //    var emojiCodeMatch = match.Groups["emojiCode"].Value;
-        //    if (Enum.TryParse(typeof(AIEmojiType), emojiCodeMatch, true, out _))
-        //    {
-        //        if (emojiCode is null or AIEmojiType.None)
-        //            emojiCode = emojiCodeMatch;
-
-        //        return string.Empty;
-        //    }
-
-        //    return $"[{matchValue}]";
-        //});
-
-        //result = _regDeleteErrorEmoji2.Replace(result, match =>
-        //{
-        //    var matchValue = match.Value;
-        //    if (Enum.TryParse(typeof(AIEmojiType), matchValue, true, out _))
-        //    {
-        //        if (emojiCode.IsNullOrEmpty())
-        //            emojiCode = matchValue;
-
-        //        return string.Empty;
-        //    }
-
-        //    return $"[{matchValue}]";
-        //});
-
-        //result = _regDeleteErrorEmoji3.Replace(result, match =>
-        //{
-        //    var matchValue = match.Value;
-        //    if (Enum.TryParse(typeof(AIEmojiType), matchValue, true, out _))
-        //    {
-        //        if (emojiCode.IsNullOrEmpty())
-        //            emojiCode = matchValue;
-
-        //        return string.Empty;
-        //    }
-
-        //    return $"({matchValue})";
-        //});
-
-        //aiChatMessage.Emoji = emojiCode;
-        return GetEmojiCode(aiChatMessage, showEmojiImage) + (needAt ? $"{CQCode.At(targetId)} " : string.Empty) + result;
+        var result = aiChatResponseContent.Text ?? string.Empty;
+        return GetEmojiCode(aiChatResponseContent, showEmojiImage) + (needAt ? $"{CQCode.At(targetId)} " : string.Empty) + result;
     }
 
     public static AIUserData GetAIUserData(string targetId) => GlobalAIData.UserDatas.GetOrAdd(targetId,
@@ -1133,98 +812,8 @@ public static class AIExtensions
 
     private static string GetAIHistoryPath(string key) => Path.Combine(AI_HISTORY_PATH, $"{key}.json");
 
-    private static void WriteAINote(AIKnowledgeNote knowledgeNote)
-    {
-        using var fs = new FileStream(AI_KNOWLEDGE_NOTE_PATH, FileMode.Append, FileAccess.Write);
-        using var sw = new StreamWriter(fs, Encoding.UTF8);
-        sw.Write($"## {knowledgeNote.Title}{ENTER}{ENTER}"
-            + $"{knowledgeNote.Content}{ENTER}※记录日期: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
-        sw.Close();
-        fs.Close();
-    }
-
-    private static void WriteAINote(AIInspirationNote inspirationNote)
-    {
-        using var fs = new FileStream(AI_INSPIRATION_NOTE_PATH, FileMode.Append, FileAccess.Write);
-        using var sw = new StreamWriter(fs, Encoding.UTF8);
-        sw.Write($"## {inspirationNote.Title}{ENTER}{ENTER}"
-            + $"{inspirationNote.Content}{ENTER}※记录日期: {DateTime.Now.ToYYYYMDHHMMSS()}{ENTER}{ENTER}");
-        sw.Close();
-        fs.Close();
-    }
-
-    ///// <summary>
-    ///// 删除AI回复中的其他信息(思考, 动作, 表情等), 只保留文字内容
-    ///// <remarks>
-    ///// 额外的信息保留可能导致AI复读自己的内容
-    ///// </remarks>
-    ///// </summary>
-    ///// <param name="aiChatResponse"></param>
-    //private static void DeleteOtherInfo(this AIChatResponse aiChatResponse)
-    //{
-    //    aiChatResponse.Contents.ForEach(content =>
-    //    {
-    //        content.Think = null;
-    //        content.Sensory = null;
-    //        content.Body = null;
-    //        content.Face = null;
-    //        content.Mind = null;
-    //        content.ChatMessageInfo.Delay = null;
-    //        content.ChatMessageInfo.Emoji = null;
-    //    });
-    //    aiChatResponse.FavorabilityChangeInfos = null;
-    //    aiChatResponse.StatusChangeInfo = null;
-    //    aiChatResponse.BlockUserInfos = null;
-    //    aiChatResponse.KnowledgeNote = null;
-    //    aiChatResponse.InspirationNote = null;
-    //}
-
-    /// <summary>
-    /// 从 Markdown 格式的字符串中提取所有图片 URL
-    /// </summary>
-    /// <param name="input">输入的包含 ![image](url) 的字符串</param>
-    /// <returns>匹配到的 URL 列表</returns>
-    public static List<string> ExtractImageUrls(string input)
-    {
-        if (string.IsNullOrWhiteSpace(input))
-            return [];
-
-        // 正则表达式逻辑：匹配 ![描述](URL) 结构
-        var pattern = @"!\[.*?\]\((?<url>.*?)\)";
-        var matches = Regex.Matches(input, pattern, RegexOptions.IgnoreCase);
-
-        // 使用 LINQ 提取所有名为 "url" 的捕获组内容
-        return matches
-            .Select(m => m.Groups["url"].Value)
-            .ToList();
-    }
-
-    private static void AddLimit(this List<Message> messages, Message newMessage, int maxCount)
-    {
-        messages.Add(newMessage);
-        var currentTotal = messages.Select(GetMessageContentCount).Sum();
-        while (currentTotal > maxCount)
-        {
-            // MEMO : 移除最早的Message
-            currentTotal -= GetMessageContentCount(messages[0]);
-            messages.RemoveAt(0);
-            // MEMO : 移除AI回复
-            currentTotal--;
-            messages.RemoveAt(0);
-        }
-
-        return;
-
-        static int GetMessageContentCount(Message msg)
-        {
-            var content = msg.Content;
-            return content is List<ContentPart> contentParts
-                ? contentParts.Count : 1;
-        }
-    }
-
-    private static TextContent CreateTextContent(string userName, string message)
-        => new(new AIChatRequest
+    private static ChatMessageContentPart CreateTextPart(string userName, string message)
+        => ChatMessageContentPart.CreateTextPart(new AIChatRequest
         {
             NickName = userName,
             Message = message,

@@ -8,7 +8,7 @@ namespace SheepQQBot3.Model.AI
     public enum AIExpressionType
     {
         [Display(Name = "none")]
-        [Description("none")]
+        [Description("普通")]
         None = 0,
 
         [Display(Name = "淡定")]

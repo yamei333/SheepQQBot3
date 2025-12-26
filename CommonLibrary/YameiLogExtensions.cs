@@ -1,5 +1,5 @@
 ﻿using Masuit.Tools;
-using OpenRouter.NET.Models;
+using OpenAI.Chat;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -78,22 +78,19 @@ public static class YameiLogExtensions
     }
 
     public static void WriteLog(
-        string apiKey,
-        ChatCompletionResponse response,
-        List<ContentPart> thisRequestContentParts,
+        ChatCompletion response,
+        List<ChatMessageContentPart> thisRequestContentParts,
         string aiStatusJson)
     {
         var usage = response.Usage!;
-        var choice = response.Choices[0];
         var message = $"哈基米请求: {ENTER}"
-            + $"ApiKey: {apiKey}{ENTER}"
-            + $"总消耗: {usage.TotalCost}"
-            + $"Token: 总量:{usage.TotalTokens}(提示词:{usage.PromptTokens}/回复:{usage.CompletionTokens}){ENTER}"
+            + $"Token: 总量:{usage.TotalTokenCount}(输入:{usage.InputTokenCount}/输出:{usage.OutputTokenCount}){ENTER}"
             + $"小助手状态: {aiStatusJson}{ENTER}"
             + $"请求: {thisRequestContentParts.ToJsonIgnoreNull()}{ENTER}"
-            + $"回复: {(choice.FinishReason == "stop"
-                ? choice.Message.Content.ToString()
-                : choice.Message.ToolCalls[0].Function.Arguments)}";
+            + $"回复: {(response.FinishReason == ChatFinishReason.ToolCalls
+                ? response.ToolCalls[0].FunctionArguments.ToString()
+                : response.Content[0].Text)}";
+        //choice.Message.ToolCalls[0].Function.Arguments)}";
         WriteLog(LogType.Info, message);
     }
 }
