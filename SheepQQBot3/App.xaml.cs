@@ -1,4 +1,5 @@
-﻿using Microsoft.EntityFrameworkCore;
+﻿using CommonLibrary;
+using Microsoft.EntityFrameworkCore;
 using SheepQQBot3.Extensions;
 using System;
 using System.Windows;
@@ -31,9 +32,9 @@ PRAGMA synchronous=NORMAL;");
     {
 #if DEBUG
         throw e.Exception;
-#else
+#endif
+
         YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.StackTrace}-{e.Exception?.Message}");
         e.Handled = true;
-#endif
     }
 }

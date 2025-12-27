@@ -8,6 +8,7 @@ using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Extension;
 using System;
+using System.ClientModel;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -57,8 +58,7 @@ public static partial class AIExtensions
         Action<string, string> botSendMessage,
         AIModel model,
         AIRequestType aiRequestType,
-        string extraSystemHint = null,
-        bool saveHistory = true)
+        string extraSystemHint = null)
     {
         var retryTimes = 0;
         var isGroupRequest = !groupId.IsNullOrEmpty();
@@ -140,15 +140,10 @@ public static partial class AIExtensions
 
         #region 构建本次发送信息
 
-        List<ChatMessage> thisRequestMessageSendVer = [systemMessage];
+        List<ChatMessage> thisRequestMessagePrepare = [systemMessage];
         // MEMO : 历史记录
         var loadedHistories = LoadAIHistory(chatKey);
-        thisRequestMessageSendVer.AddRange(loadedHistories);
-        thisRequestParts.ProcessImageContentParts();
-        thisRequestMessageSendVer.Add(ChatMessage.CreateUserMessage(thisRequestParts));
-        // MEMO : 系统提示
-        if (!extraSystemHint.IsNullOrEmpty())
-            thisRequestMessageSendVer.Add(ChatMessage.CreateUserMessage(extraSystemHint));
+        thisRequestMessagePrepare.AddRange(loadedHistories);
 
         #endregion 构建本次发送信息
 
@@ -173,28 +168,35 @@ public static partial class AIExtensions
         {
             try
             {
+                var thisRequestMessages = new List<ChatMessage>(thisRequestMessagePrepare);
+                thisRequestParts.ProcessImageContentParts();
+                thisRequestMessages.Add(ChatMessage.CreateUserMessage(thisRequestParts));
+                // MEMO : 系统提示
+                if (!extraSystemHint.IsNullOrEmpty())
+                    thisRequestMessages.Add(ChatMessage.CreateUserMessage(extraSystemHint));
+
                 if (IsDebug && retryTimes > 0)
                     botSendMessage(TestGroupId, $"重新发送AI请求中...{retryTimes}");
 
                 switch (aiRequestType)
                 {
                     case AIRequestType.Chat:
-                        var chatCompletion = await ChatRequestAsync(thisRequestParts, thisRequestMessageSendVer, loadedHistories, botSendMessage,
+                        var chatCompletion = await ChatRequestAsync(thisRequestParts, thisRequestMessages, loadedHistories, botSendMessage,
                                 aiGroupConfig, isGroupRequest, requestTargetId, sendTargetId, chatKey, isAt)
                             .ConfigureAwait(false);
                         LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, chatCompletion.Usage));
                         YameiLogExtensions.WriteLog(chatCompletion, thisRequestParts, aiStatus.ToJsonIgnoreNull());
-                        break;
+                        return;
                     case AIRequestType.Image:
-                        await ImageRequestAsync(thisRequestParts, thisRequestMessageSendVer, loadedHistories,
+                        await ImageRequestAsync(thisRequestParts, thisRequestMessages, loadedHistories,
                                 botSendMessage, isGroupRequest, requestTargetId, sendTargetId, chatKey, isAt)
                             .ConfigureAwait(false);
                         return;
                     case AIRequestType.ChatSummary:
-                        await GroupSummaryRequestAsync(thisRequestParts, thisRequestMessageSendVer,
+                        await GroupSummaryRequestAsync(thisRequestParts, thisRequestMessages,
                                 aiGroupConfig, requestTargetId, sendTargetId)
                             .ConfigureAwait(false);
-                        break;
+                        return;
                     default:
                         throw new ArgumentOutOfRangeException(nameof(aiRequestType), aiRequestType, null);
                 }
@@ -202,62 +204,72 @@ public static partial class AIExtensions
             catch (AIException ex)
             {
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"{ex.Message}{ENTER}返回内容: {ex.ResponseText}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex.Message}{ENTER}返回内容: {ex.ResponseText}");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 #endif
-                continue;
             }
             catch (JsonException ex)
             {
                 #region Json转换失败处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-JsonException]");
+                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-{ex.GetType()}]");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 #endif
-                continue;
 
                 #endregion Json转换失败处理
+            }
+            catch (ClientResultException ex)
+            {
+                #region 请求返回报错处理
+
+                var errorMessage = ex.Message;
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{errorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+#if DEBUG
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(errorMessage)}");
+#endif
+                // MEMO : QQ图片有有效期, 过期了则部分/所有图片不解析
+                if (errorMessage.Contains("mime type is not supported by Gemini", StringComparison.CurrentCultureIgnoreCase))
+                {
+                    // MEMO : 第1次重试只解析最后2张图片
+                    if (retryTimes == 0)
+                        thisRequestParts.ProcessImageContentParts(2);
+                    // MEMO : 第2次重试不解析所有图片
+                    else if (retryTimes == 1)
+                        thisRequestParts.DeleteExpireImage();
+                }
+
+                retryTimes++;
+
+                #endregion 请求返回报错处理
             }
             catch (Exception ex)
             {
                 #region 其他错误处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-OtherException]{ex.GetType()}{ex.Message}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+                var errorMessage = ex.Message;
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{errorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
 #if DEBUG
-                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ex.Message)}");
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(errorMessage)}");
 #endif
-                continue;
 
                 #endregion 其他错误处理
             }
-
-            return;
         }
 
         if (isGroupRequest)
         {
             if (isGroupAt)
-                botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 请求重试次数超过限制!");
+                botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 重试次数超过限制!");
         }
         else
         {
-            botSendMessage(sendTargetId, $"哈基米请求失败! 请求重试次数超过限制!");
+            botSendMessage(sendTargetId, $"哈基米请求失败! 重试次数超过限制!");
         }
     }
-
-    //// 删除过期图片信息
-    //private static void DeleteExpireImage(this List<ChatMessageContentPart> parts)
-    //{
-    //    for (var i = 0; i < parts.Count; i++)
-    //    {
-    //        if (parts[i].Kind == ChatMessageContentPartKind.Image)
-    //            parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_EXPIRED);
-    //    }
-    //}
 
     // 删除过期图片信息
     private static void DeleteExpireImage(this List<ChatMessageContentPart> parts)
@@ -301,90 +313,8 @@ public static partial class AIExtensions
         }
     }
 
-    //// 移除冗余的图片总结文本
-    //private static void RemoveRedundantImageSummaries(this List<ChatMessageContentPart> parts)
-    //{
-    //    if (parts.Count == 0)
-    //        return;
-
-    //    var indicesToRemove = new List<int>();
-    //    var hasRealImageInGroup = false;
-    //    for (var i = 0; i < parts.Count; i++)
-    //    {
-    //        var part = parts[i];
-    //        switch (part.Kind)
-    //        {
-    //            case ChatMessageContentPartKind.Image:
-    //                hasRealImageInGroup = true;
-    //                break;
-    //            case ChatMessageContentPartKind.Text when part.Text.FromJson<AIChatRequest>().Message == SEND_SOME_IMAGES:
-    //                if (!hasRealImageInGroup)
-    //                    indicesToRemove.Add(i);
-
-    //                hasRealImageInGroup = false;
-    //                break;
-    //        }
-    //    }
-
-    //    // 倒序删除 (防止索引错位)
-    //    for (var i = indicesToRemove.Count - 1; i >= 0; i--)
-    //        parts.RemoveAt(indicesToRemove[i]);
-    //}
-
-    ///// <summary>
-    ///// 超出一次可传入图片时的处理
-    ///// </summary>
-    //private static void ProcessImageContentParts(this List<ChatMessageContentPart> parts)
-    //{
-    //    try
-    //    {
-    //        var lastOccurrenceMap = new Dictionary<string, int>();
-    //        for (var i = 0; i < parts.Count; i++)
-    //        {
-    //            var part = parts[i];
-    //            if (part.Kind == ChatMessageContentPartKind.Image)
-    //                lastOccurrenceMap[part.ImageUri.AbsoluteUri] = i;
-    //        }
-
-    //        var uniqueImageIndices = lastOccurrenceMap.Values.OrderBy(idx => idx).ToList();
-    //        var keepIndices = new HashSet<int>(uniqueImageIndices.TakeLast(MAX_IMAGE_CONTENT_LIMIT));
-    //        for (var i = 0; i < parts.Count; i++)
-    //        {
-    //            var part = parts[i];
-    //            if (part.Kind == ChatMessageContentPartKind.Image)
-    //            {
-    //                var lastIdx = lastOccurrenceMap[part.ImageUri.AbsoluteUri];
-    //                if (lastIdx != i)
-    //                    parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_DUPLICATE);
-    //                else if (!keepIndices.Contains(i))
-    //                    parts[i] = CreateTextPart(parts.GetImageContentSenderName(i), IMAGE_EXPIRED);
-    //            }
-    //        }
-    //    }
-    //    catch (Exception ex)
-    //    {
-    //        YameiLogExtensions.WriteJsonSerializeLog(ex, "ProcessImageContentParts.originalParts", parts);
-    //        throw;
-    //    }
-    //}
-
-    //// 向后寻找最近的 TextContent 并提取 NickName
-    //private static string GetImageContentSenderName(this List<ChatMessageContentPart> parts, int currentIndex)
-    //{
-    //    for (var i = currentIndex + 1; i < parts.Count; i++)
-    //    {
-    //        var part = parts[i];
-    //        if (part.Kind == ChatMessageContentPartKind.Text)
-    //        {
-    //            var aiChatRequest = part.Text.FromJson<AIChatRequest>();
-    //            return aiChatRequest.NickName;
-    //        }
-    //    }
-
-    //    return "未知用户";
-    //}
-
-    private static void ProcessImageContentParts(this List<ChatMessageContentPart> parts)
+    // MEMO : 重复图片处理
+    private static void ProcessImageContentParts(this List<ChatMessageContentPart> parts, int maxImageLimit = MAX_IMAGE_CONTENT_LIMIT)
     {
         if (parts == null || parts.Count == 0) return;
 
@@ -455,7 +385,7 @@ public static partial class AIExtensions
 
                         // [过期图片逻辑]
                         // 如果有效图片数量已经超过限制，剩下的（前面的）都是过期
-                        if (validImageCount > MAX_IMAGE_CONTENT_LIMIT)
+                        if (validImageCount > maxImageLimit)
                         {
                             parts[i] = CreateTextPart(currentContextNickName, IMAGE_EXPIRED);
                         }
