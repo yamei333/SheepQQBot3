@@ -200,13 +200,18 @@ partial class MainWindowViewModel
 
         var senderId = groupMessage.UserId;
         // MEMO : 取得GroupMembers
-#if DEBUG
-        var lazyWrapper = _globalGroupMembers.GetOrAdd("414774779",
-            id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
-#else
-        var lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
-            id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
-#endif
+        Lazy<Task<Dictionary<string, GroupMember>>> lazyWrapper;
+        if (IsDebug)
+        {
+            lazyWrapper = _globalGroupMembers.GetOrAdd("414774779",
+                id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
+        }
+        else
+        {
+            lazyWrapper = _globalGroupMembers.GetOrAdd(groupId,
+                id => new Lazy<Task<Dictionary<string, GroupMember>>>(() => GlobalBotClient.GetGroupMembersAsync(id)));
+        }
+
         var groupMembers = await lazyWrapper.Value.ConfigureAwait(false);
         if (groupMembers == null)
         {

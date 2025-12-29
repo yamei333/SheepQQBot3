@@ -151,9 +151,8 @@ public static partial class ProcessGroupMessage
             // MEMO : AI群聊总结
             async Task AISummaryCore(string targetGroupId, string description, DateTime fromDate, DateTime? toDate = null)
             {
-#if DEBUG
-                targetGroupId = "414774779";
-#endif
+                if (IsDebug)
+                    targetGroupId = "414774779";
 
                 var thisRequestParts = new List<ChatMessageContentPart>();
                 thisRequestParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
