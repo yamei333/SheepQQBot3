@@ -84,6 +84,9 @@ public static partial class ProcessGroupMessage
             if (blackListUserConfig.BanedAIResponse)
                 return;
 
+            if (NeedNotRecordMessage())
+                return;
+
             // MEMO : 是否只给管理用
             if (aiGroupConfig.AtResponseAdminOnly && !BotExtensions.IsAdmin(targetId))
             {

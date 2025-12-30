@@ -32,7 +32,10 @@ public static partial class ProcessGroupMessage
         "https://i0.hdslb.com/bfs/garb/8b6d3154bd4eb96df7603163cffc1db407d92bf2.png",
     ];
 
-    private static readonly Regex _regCorrectSetuMessage = new("^.*?色图[a-zA-Z]?$", RegexOptions.Singleline);
+    private static readonly Regex _regCorrectSetuMessage = new(
+        @"^(?!.*(\[CQ:|@)).*?色图[a-zA-Z]?$",
+        RegexOptions.Singleline
+    );
 
     /// <summary>
     /// 色图命令的开头
