@@ -8,7 +8,7 @@ namespace SheepQQBot3.BotTask;
 
 public static partial class TaskProcess
 {
-    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|01|02|03|04|05|06|07|08|10|12|14|16|18|20|22):00:\d{2}");
+    private static readonly Regex _aiStatusRevocer = new(@"\d{4}-\d{2}-\d{2}-\d{1}-\d{1} (00|01|02|03|04|05|06|07|08|10|12|14|16|18|20|22):[01]\d{1}:\d{2}");
 
     /// <summary>
     /// AI状态恢复
@@ -24,20 +24,25 @@ public static partial class TaskProcess
                 var dateNowStr = dateNow.ToConditionString(PublicVar.HolidayInfo);
                 if (!_aiStatusRevocer.IsMatch(dateNowStr))
                 {
-                    CommonExtensions.SleepMinutes(1);
+                    CommonExtensions.SleepMinutes(15);
                     continue;
                 }
 
                 var moodIndexValue = PublicVar.GlobalAIData.AIStatusData.MoodIndexValue;
                 if (moodIndexValue == 0)
                 {
-                    CommonExtensions.SleepMinutes(1);
+                    CommonExtensions.SleepMinutes(15);
                     continue;
                 }
 
                 PublicVar.GlobalAIData.AIStatusData.MoodIndexValue = moodIndexValue > 50
                     ? (int)(moodIndexValue * 0.8)
                     : (int)(moodIndexValue * 0.7);
+
+                // MEMO : 5点时清空群记录
+                if (dateNow.Hour == 5)
+                    PublicVar.AIHistoryParts.Clear();
+
                 ConfigExtensions.SaveAIData();
                 CommonExtensions.SleepMinutes(30);
             }

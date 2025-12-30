@@ -27,6 +27,7 @@ partial class MainWindowViewModel
         if (GlobalAIConfig.IsUseAI)
             StartTask(TaskProcess.AIStatusRecover);
 
+        StartTask(TaskProcess.CleanFiles);
         // MEMO : 0.14.9.2 暂时禁用steam监控, 发送推送消息太频繁了
         //StartTask(TaskProcess.SteamMarketWatchAsync);
     }

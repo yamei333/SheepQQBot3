@@ -44,7 +44,7 @@ public class GroupMessage
         DateTime = clientData.DateTime;
         GroupId = clientData.GroupId;
         Message = clientData.Message;
-        MessageId = clientData.MessageId;
+        MessageId = clientData.MessageId.ToString();
         Sender = clientData.Sender;
     }
 

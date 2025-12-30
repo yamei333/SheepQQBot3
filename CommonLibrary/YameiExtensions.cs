@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 
 namespace Yamei.Common;
 
-public static class YameiExtensions
+public static partial class YameiExtensions
 {
     /// <summary>
     /// 转换为带符号的字符串

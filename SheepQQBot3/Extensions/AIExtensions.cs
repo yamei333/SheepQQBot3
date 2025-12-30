@@ -641,15 +641,16 @@ public static partial class AIExtensions
             {
                 // MEMO : 插入外置知识库
                 AddNote(AI_KNOWLEDGE_PATH);
-                AddNote(AI_KNOWLEDGE_NOTE_PATH);
-                AddNote(AI_INSPIRATION_NOTE_PATH);
+                AddNote(AI_KNOWLEDGE_NOTE_PATH, $"# 知识笔记{ENTER}{ENTER}");
+                AddNote(AI_INSPIRATION_NOTE_PATH, $"# 灵感笔记{ENTER}{ENTER}");
 
-                void AddNote(string filePath)
+                void AddNote(string filePath, string noteTitle = "")
                 {
                     if (!File.Exists(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath)))
                         return;
 
-                    contentParts.Add(ChatMessageContentPart.CreateTextPart(File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath), Encoding.UTF8)));
+                    contentParts.Add(ChatMessageContentPart.CreateTextPart(noteTitle
+                        + File.ReadAllText(Path.Combine(AppDomain.CurrentDomain.BaseDirectory, filePath), Encoding.UTF8)));
                 }
             }
         }

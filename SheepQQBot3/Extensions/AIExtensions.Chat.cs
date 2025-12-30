@@ -186,8 +186,6 @@ namespace SheepQQBot3.Extensions
 
             // MEMO : 构建回复消息
             var needAt = isAt;
-            // MEMO : 排除消息为空的内容
-            //chatMessages = chatMessages.Where(each => !each.Text.IsNullOrEmpty()).ToArray();
             chatMessages[^1].Delay = 0;
             // MEMO : 处理消息回复
             var aiContentParts = new List<ChatMessageContentPart>();

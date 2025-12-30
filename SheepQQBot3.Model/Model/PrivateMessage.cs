@@ -43,7 +43,7 @@ public class PrivateMessage
     {
         DateTime = clientData.DateTime;
         Message = clientData.Message;
-        MessageId = clientData.MessageId;
+        MessageId = clientData.MessageId.ToString();
         Sender = clientData.Sender;
     }
 

@@ -13,7 +13,7 @@ public class ClientData
     public string Message { get; set; }
 
     [JsonPropertyName("message_id")]
-    public string MessageId { get; set; }
+    public long MessageId { get; set; }
 
     [JsonPropertyName("message_seq")]
     public int MessageSeq { get; set; }

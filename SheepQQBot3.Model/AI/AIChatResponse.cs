@@ -18,10 +18,15 @@ public class AIChatResponse
     /// <summary>
     /// 回复信息内容
     /// </summary>
-    //[Description("response contents")]
     [Description(@"回复消息列表（气泡载荷）。
+【拟人化连发机制】：
+1. 模拟人类手速：人类很少一次性发一大段话，而是习惯连续发送多条短消息。
+2. 强制拆分：如果回复内容超过 30 字，或者包含转折/停顿，必须拆分成多个 AIChatResponseContent 对象发送。
+3. 示例：不要发一条 ""我去吃饭了，你要一起吗？""；请拆分成对象A[""我去吃饭了""] 和 对象B[""你要一起吗？""]。
+
+【独立性原则】：
 注意：数组中的每一个对象都是独立的！即使是同一轮回复，每一条消息也必须重新生成单独的 think、expression_code 和 sensory，严禁合并到根节点！
-群聊总结相关：严禁将所有话题合并在一条消息里！必须拆解为：话题1是一个对象，话题2是另一个对象。严禁在同一个 content 中包含两个【话题标题】。")]
+群聊总结相关：严禁将所有话题合并在一条消息里！必须拆解为：话题1是一个对象，话题2是另一个对象。")]
     [JsonPropertyName("contents")]
     [Required]
     public AIChatResponseContent[] Contents { get; set; }
@@ -45,7 +50,7 @@ public class AIChatResponse
     /// AI知识笔记
     /// </summary>
     //[Description("knowledge Note")]
-    [Description("记录新学到的知识点或重要事实（非闲聊内容）。")]
+    [Description("知识笔记：记录新学到的知识点或重要事实（非闲聊内容）。")]
     [JsonPropertyName("knowledgeNote")]
     public AIKnowledgeNote KnowledgeNote { get; set; }
 
@@ -53,7 +58,7 @@ public class AIChatResponse
     /// AI灵感笔记
     /// </summary>
     //[Description("inspiration Note")]
-    [Description("记录有趣的梗、笑话或聊天灵感。")]
+    [Description("灵感笔记：记录有趣的梗、笑话或聊天灵感。")]
     [JsonPropertyName("inspirationNote")]
     public AIInspirationNote InspirationNote { get; set; }
 
@@ -113,7 +118,19 @@ public class AIChatResponseContent
     /// <summary>
     /// 消息内容
     /// </summary>
-    [Description("气泡内的文字。请严格遵循 System Prompt 中的【Reply Settings】和【角色多维关系特质与动态交互判定系统】：根据当前心情和关系决定语气。注意：只有开心时才偶尔加'喵'，生气或严肃时不要加。")]
+    [Description(@"气泡内的纯文本内容。
+【格式硬性限制】：
+1. 严禁使用 Markdown (如 **加粗**、*斜体*)，模拟人类纯文本输入。
+
+【通用交互逻辑 - 拒绝“AI味”】：
+1. 严禁“服务员式反问”：不要在陈述观点或给出建议后，习惯性追加“你觉得呢？”“你想试哪个？”“需要我帮忙吗？”这类为了延续对话而强加的问题。
+2. 禁止“列表+选择”模式：如果一定要列举事物，列举完直接结束，或者发表你的评价。不要把做选择的任务显式地交给用户。
+3. 允许“把天聊死”：你不需要对对话的冷场负责。说完你想说的（观点、吐槽、情绪）就结束。
+4. 提问原则：只有当你（哈莉）真的对用户的事情感到好奇，或者缺少必要信息无法继续时，才允许提问。
+
+【语气示例】：
+错误：这里有方案A和方案B，方案A比较便宜。请问你想选哪一个？
+正确：方案A虽然便宜，但看起来质量很差，我才不要用。如果你非要选那个，别怪我没提醒你。")]
     [JsonPropertyName("text")]
     [NotNull]
     [Required]

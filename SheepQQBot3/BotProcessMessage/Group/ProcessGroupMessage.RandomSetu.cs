@@ -1012,14 +1012,14 @@ public static partial class ProcessGroupMessage
                         RunAction)
                     .ConfigureAwait(false);
 
-                async void RunAction(ClientReceiveData clientReceiveData)
+                void RunAction(ClientReceiveData clientReceiveData)
                 {
                     if (clientReceiveData?.IsSuccessed == true)
                         return;
 
                     // MEMO : 消息被风控, 发送文字消息
                     sendMessages[^1] = new GroupForwardMessage($"{setuInfo.SetuType}", BotId, "[该消息已被风控拦截!]");
-                    await GlobalBotClient.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
+                    GlobalBotClient.SendGroupForwardMessageAsync(groupId, sendMessages);
                 }
 
                 async Task<(SetuInfo, string)> GetSetu(
