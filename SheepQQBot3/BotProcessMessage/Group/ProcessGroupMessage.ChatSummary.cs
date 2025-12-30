@@ -60,7 +60,6 @@ public static partial class ProcessGroupMessage
         Dictionary<string, GroupMember> groupMembers,
         GroupMessage groupMessage)
     {
-        await using var botDb = DbExtensions.CreateBotDbContext();
         var groupId = groupMessage.GroupId;
         var senderId = groupMessage.Sender.UserId.ToString();
         var messageId = groupMessage.MessageId;
@@ -85,6 +84,7 @@ public static partial class ProcessGroupMessage
                     addBotGroupMessage.MessageText = "[转发消息]";
 
                 // MEMO : 将群聊录入数据库
+                await using var botDb = DbExtensions.CreateBotDbContext();
                 if (await botDb.BotGroupMessages.FindAsync(groupId, senderId, messageId, timeStamp).ConfigureAwait(false) == null)
                     await botDb.AddAsync(addBotGroupMessage).ConfigureAwait(false);
 
@@ -158,20 +158,17 @@ public static partial class ProcessGroupMessage
                 thisRequestParts.AddSystemHint($"[以下是最近{description}的群聊内容]");
                 var fromDateTimeStamp = fromDate.ToTimeStamp();
                 var toDateTimeStamp = (toDate ?? dateNow).ToTimeStamp();
+                await using var botDb = DbExtensions.CreateBotDbContext();
                 botDb.BotGroupMessages
                     .Where(each => each.GroupId == targetGroupId
                         && each.TimeStamp >= fromDateTimeStamp
                         && each.TimeStamp < toDateTimeStamp)
                     .AsEnumerable()
-                    .ForEach(async each =>
+                    .ForEach(each =>
                     {
                         var historyMessage = each.MessageText;
                         historyMessage = historyMessage.Trim();
                         if (historyMessage.IsNullOrEmpty())
-                            return;
-
-                        // MEMO : 不喜欢的内容直接屏蔽
-                        if (_regInjectHurry.IsMatch(historyMessage))
                             return;
 
                         thisRequestParts.AddQQChatMessage(groupMembers[each.TargetId].ToAIChatSender(AIUserInfos), historyMessage, groupMembers);

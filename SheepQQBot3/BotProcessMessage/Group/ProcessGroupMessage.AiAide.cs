@@ -10,7 +10,6 @@ using SheepQQBot3.Model.QQ;
 using System;
 using System.Collections.Generic;
 using System.Linq;
-using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
@@ -20,7 +19,6 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
-    private static readonly Regex _regInjectHurry = new("哈.{0,5}莉");
 
     /// <summary>
     /// AI助手
@@ -42,7 +40,7 @@ public static partial class ProcessGroupMessage
         var dateNow = DateTime.Now;
 
         var chatKey = $"g{groupId}";
-        var isPrivateChat = message.StartsWith(_commandAI, StringComparison.CurrentCultureIgnoreCase);
+        var isPrivateChat = message.Contains(_commandAI, StringComparison.CurrentCultureIgnoreCase);
         if (isPrivateChat && (dateNow - AILastRequestDates.GetOrAdd(chatKey, _ => DateTime.MinValue)).TotalSeconds < AI_REQUEST_INTERVAL_GROUP_PRIVATE)
         {
             await GlobalBotClient.SendMessageEmojiAsync(groupMessage.MessageId, Emoji.Coffee).ConfigureAwait(false);
@@ -58,20 +56,8 @@ public static partial class ProcessGroupMessage
             if (blackListUserConfig.BanedAICollect)
                 return;
 
-            if (NeedNotRecordMessage(msg =>
-            {
-                // MEMO : 注入攻击
-                if (!BotExtensions.IsAdmin(targetId) && _regInjectHurry.IsMatch(msg))
-                {
-                    YameiLogExtensions.WriteLog(LogType.Info, $"忽略群消息(注入): {msg}");
-                    return true;
-                }
-
-                return false;
-            }))
-            {
+            if (NeedNotRecordMessage())
                 return;
-            }
 
             // MEMO : 除CQ段以外, 字节数超过一定数量(1汉字=3字节), 认为是转发消息
             // MEMO : at消息则无此限制
