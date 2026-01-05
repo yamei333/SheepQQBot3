@@ -2,7 +2,6 @@
 using Masuit.Tools;
 using OpenAI.Chat;
 using OpenWeatherMap.Standard;
-using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
@@ -83,11 +82,6 @@ public static class PublicVar
     public static readonly string BotId = AppSettingExtensions.Get("selfId", string.Empty);
 
     /// <summary>
-    /// 色图斗士信息缓存
-    /// </summary>
-    public static readonly ConcurrentDictionary<string, SetuDoushiInfo> SetuDoushiInfoCache = [];
-
-    /// <summary>
     /// 半角逗号
     /// </summary>
     public const char COMMA = ',';
@@ -160,11 +154,6 @@ public static class PublicVar
     /// 已记录的群消息(用于防止撤回)
     /// </summary>
     public static ConcurrentDictionary<string, GroupMessage> SavedGroupMessages { get; set; } = [];
-
-    ///// <summary>
-    ///// Jieba数据库
-    ///// </summary>
-    //public static JiebaDbContext JiebaDb = new(new DbContextOptions<JiebaDbContext>());
 
     /// <summary>
     /// Bot配置

@@ -1,7 +1,6 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
 using Microsoft.EntityFrameworkCore;
-using SheepQQBot3.DbModel;
 using SheepQQBot3.Model;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
@@ -9,7 +8,6 @@ using SheepQQBot3.Model.Extension;
 using SheepQQBot3.Model.Model;
 using SheepQQBot3.Model.QQ;
 using SheepQQBot3.SDK.Client.Utils;
-using Yamei.Common;
 
 namespace SheepQQBot3.SDK.Client
 {
@@ -51,7 +49,6 @@ namespace SheepQQBot3.SDK.Client
                 }
             });
             ProcessYmMessage(ElementType.ym_bark, ProcessYmBark);
-            ProcessYmMessage(ElementType.ym_setu_rank, ProcessYmSetuRank);
 
             if (messageList?.Any() != true)
                 return;
@@ -98,110 +95,6 @@ namespace SheepQQBot3.SDK.Client
                 if (!elementData.Data.IsNullOrEmpty())
                 {
                     await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content).ConfigureAwait(false);
-                }
-            }
-
-            async void ProcessYmSetuRank(Element ymElement)
-            {
-                var groupMembers = await GetGroupMembersAsync(groupId).ConfigureAwait(false);
-                if (groupMembers == null)
-                    return;
-
-                var dateNow = DateTime.Now;
-                var dateNowStart = dateNow.ToString("yyyy-MM-dd 00:00:00").ToDateTime();
-                var dateNowStartTimestamp = dateNowStart.ToTimeStamp();
-                var dateNowEndTimestamp = dateNowStart.AddDays(1).ToTimeStamp();
-
-                await using var botDb = new BotDbContext(new DbContextOptions<BotDbContext>());
-                var setuSendHistories = botDb.SetuSendHistorys;
-                if (setuSendHistories == null || !setuSendHistories.Any())
-                    return;
-
-                var countInfos = botDb.SetuSendHistorys
-                    .Where(history => history.TimeStamp >= dateNowStartTimestamp && history.TimeStamp < dateNowEndTimestamp)
-                    .GroupBy(history => history.TargetId,
-                        (key, group) => new { TargetId = key.ToString(), Items = group.ToList() })
-                    .AsEnumerable()
-                    .Select(gp =>
-                    {
-                        var items = gp.Items;
-                        var itemCount = items.Count;
-                        var isRequestSuccessedCount = items.Count(each => each.IsRequestSuccessed.ToBool());
-                        var isRequestSuccessedPercent = isRequestSuccessedCount * 1.0 / itemCount;
-                        var isGetSuccessedCount = items.Count(each => each.IsGetSuccessed.ToBool());
-                        var isGetSuccessedPercent = isGetSuccessedCount * 1.0 / itemCount;
-
-                        return new
-                        {
-                            gp.TargetId,
-                            Count = itemCount,
-                            RequestSuccessedCount = isRequestSuccessedCount,
-                            RequestSuccessedPercent = isRequestSuccessedPercent,
-                            GetSuccessedCount = isGetSuccessedCount,
-                            GetSuccessedPercent = isGetSuccessedPercent,
-                            SearchTagCount = items.Count(each => each.IsSearchTag),
-                            FreeCount = items.Count(each => each.IsFree.ToBool()),
-                            R18BonusCount = items.Count(each => each.IsR18Bonus.ToBool()),
-                        };
-                    })
-                    .ToArray();
-
-                var sendMessage = "=====今日色图大哥=====";
-                if (countInfos.Length == 0)
-                {
-                    sendMessage += "\r\n今日竟无一人色图! 这个世界怎么了!";
-                }
-                else
-                {
-                    var kingSuccessed = Enumerable.MaxBy(
-                        countInfos.Where(each => each.GetSuccessedCount >= 3),
-                        each => each.GetSuccessedPercent);
-                    if (kingSuccessed != null)
-                        sendMessage += $"\r\n[色图王者]{GetSetuSenderName(kingSuccessed.TargetId)} 成功{kingSuccessed.GetSuccessedCount}次, 成功率 {kingSuccessed.GetSuccessedPercent:#0%}";
-                    else
-                        sendMessage += $"\r\n[色图王者]无人上榜! 堂堂大群竟无王者";
-
-                    var kingCount = countInfos
-                        .Where(each => each.Count >= 5)
-                        .OrderBy(each => each.GetSuccessedPercent, true)
-                        .FirstOrDefault();
-                    if (kingCount != null)
-                        sendMessage += $"\r\n[狂怒斗士]{GetSetuSenderName(kingCount.TargetId)} 请求{kingCount.Count}次, 成功率 {kingCount.GetSuccessedPercent:#0%}";
-                    else
-                        sendMessage += $"\r\n[狂怒斗士]无人上榜! 无人狂怒, 甚好";
-
-                    var kingLucky = countInfos
-                        .OrderByDescending(each => each.FreeCount)
-                        .First();
-                    if (kingLucky.FreeCount > 0)
-                        sendMessage += $"\r\n[白嫖斗士]{GetSetuSenderName(kingLucky.TargetId)} 白嫖{kingLucky.FreeCount}次";
-                    else
-                        sendMessage += $"\r\n[白嫖斗士]无人上榜! 都这么脸黑吗!";
-
-                    var kingGold = countInfos
-                        .OrderByDescending(each => each.R18BonusCount)
-                        .First();
-                    if (kingGold.R18BonusCount > 0)
-                        sendMessage += $"\r\n[金色斗士]{GetSetuSenderName(kingGold.TargetId)} 金色传说{kingGold.R18BonusCount}次";
-                    else
-                        sendMessage += $"\r\n[金色斗士]无人上榜! 并没有天选之人";
-                }
-
-                await SendGroupMessageAsync(groupId, sendMessage).ConfigureAwait(false);
-                return;
-
-                string GetSetuSenderName(string userId)
-                {
-                    if (groupMembers.TryGetValue(userId, out var groupMember))
-                    {
-                        return groupMember.Card.IsNullOrEmpty()
-                            ? $"{groupMember.NickName}({userId})"
-                            : $"{groupMember.Card}({userId})";
-                    }
-                    else
-                    {
-                        return $"无名色图斗士({userId})";
-                    }
                 }
             }
         }

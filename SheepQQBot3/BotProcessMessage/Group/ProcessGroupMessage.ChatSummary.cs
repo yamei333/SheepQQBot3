@@ -22,6 +22,11 @@ namespace SheepQQBot3.BotProcessMessage.Group;
 public static partial class ProcessGroupMessage
 {
     /// <summary>
+    /// 复读忽略设置
+    /// </summary>
+    private const int REPEAT_SKIP_LIMIT = 25;
+
+    /// <summary>
     /// 群聊消息总结最低消息数
     /// </summary>
     private const int SUMMARY_MESSAGE_COUNT_LIMIT = 25;
@@ -45,6 +50,8 @@ public static partial class ProcessGroupMessage
     /// 群聊总结最后一次执行时间
     /// </summary>
     private static readonly ConcurrentDictionary<string, DateTime> _chatSummaryRequestLastTimes = [];
+
+    private static readonly Queue<string> _repeatSkipQueueGroupSummary = [];
 
     /// <summary>
     /// 群聊总结
@@ -74,8 +81,17 @@ public static partial class ProcessGroupMessage
                 if (blackListUserConfig.BanedChatSummaryCollect)
                     return;
 
+                var deleteCQMessage = message.Replace(_regCQCode, string.Empty);
+                // MEMO : 复读消息不添加
+                if (_repeatSkipQueueGroupSummary.Contains(deleteCQMessage))
+                    return;
+
                 if (BotExtensions.NeedNotRecordMessage(message))
                     return;
+
+                _repeatSkipQueueGroupSummary.Enqueue(deleteCQMessage);
+                if (_repeatSkipQueueGroupSummary.Count > REPEAT_SKIP_LIMIT)
+                    _repeatSkipQueueGroupSummary.Dequeue();
 
                 var addBotGroupMessage = new BotGroupMessage(groupId, senderId, messageId, timeStamp, message);
                 var processedMessage = addBotGroupMessage.MessageText.Replace(_regCQCode, string.Empty);

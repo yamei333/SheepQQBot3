@@ -22,22 +22,6 @@ public partial class BotDbContext : DbContext
             entity.ToTable("BotGroupMessage");
         });
 
-        modelBuilder.Entity<SetuDoushiInfo>(entity =>
-        {
-            entity.HasKey(e => e.TargetId);
-
-            entity.HasIndex(e => e.TargetId, "KEY_TargetId").IsUnique();
-        });
-
-        modelBuilder.Entity<SetuSendHistory>(entity =>
-        {
-            entity.HasKey(e => new { e.TargetId, e.TimeStamp });
-
-            entity.Property(e => e.SearchKeyword)
-                .IsRequired()
-                .HasDefaultValueSql("搜索");
-        });
-
         OnModelCreatingPartial(modelBuilder);
     }
 

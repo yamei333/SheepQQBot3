@@ -72,11 +72,6 @@ public enum ElementType
     forward,
 
     /// <summary>
-    /// 雅美自定义_色图排行
-    /// </summary>
-    ym_setu_rank,
-
-    /// <summary>
     /// 雅美自定义_消息重定向
     /// </summary>
     ym_redirect,

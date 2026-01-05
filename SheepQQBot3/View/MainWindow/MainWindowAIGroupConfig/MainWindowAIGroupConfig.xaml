@@ -47,6 +47,25 @@
                                 IsChecked="{Binding SelectedSetConfig.AIGroupConfig.JoinGroupChat}" />
                         </GroupBox.Header>
                         <StackPanel IsEnabled="{Binding ElementName=chkAIJoinGroupChat, Mode=OneWay, Path=IsChecked}">
+                            <Grid>
+                                <Grid.RowDefinitions>
+                                    <RowDefinition Height="Auto" />
+                                </Grid.RowDefinitions>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="102" />
+                                    <ColumnDefinition Width="30" />
+                                </Grid.ColumnDefinitions>
+                                <TextBlock
+                                    Grid.Row="0"
+                                    Style="{StaticResource ResponseMessageLimitTextBlockKey}"
+                                    Text="AI响应群聊成功率" />
+                                <TextBox
+                                    Grid.Row="0"
+                                    PreviewTextInput="TxtContent_OnPreviewTextInput"
+                                    Style="{StaticResource ResponseMessageLimitTextBoxKey}"
+                                    Text="{Binding SelectedSetConfig.AIGroupConfig.GroupChatResponsePercent, UpdateSourceTrigger=PropertyChanged}"
+                                    TextChanged="TextBoxBase_OnTextChanged" />
+                            </Grid>
                             <CheckBox
                                 Click="CheckBox_OnClick"
                                 Content="(测试)消息发送至测试群"
@@ -66,7 +85,7 @@
                                     </Grid.RowDefinitions>
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="74" />
-                                        <ColumnDefinition Width="26" />
+                                        <ColumnDefinition Width="30" />
                                     </Grid.ColumnDefinitions>
                                     <TextBlock
                                         Grid.Row="0"

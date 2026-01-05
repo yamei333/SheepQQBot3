@@ -1,5 +1,4 @@
-﻿using System;
-using System.ComponentModel;
+﻿using System.ComponentModel;
 using System.ComponentModel.DataAnnotations;
 using System.Diagnostics.CodeAnalysis;
 using System.Text.Json.Serialization;
@@ -9,12 +8,6 @@ namespace SheepQQBot3.Model.AI;
 [Description("Structured response for the Roleplay.")]
 public class AIChatResponse
 {
-    /// <summary>
-    /// 消息回复时间
-    /// </summary>
-    [JsonPropertyName("date")]
-    public DateTime Date;
-
     /// <summary>
     /// 回复信息内容
     /// </summary>
@@ -41,7 +34,6 @@ public class AIChatResponse
     /// <summary>
     /// 拉黑用户信息
     /// </summary>
-    //[Description("block user info")]
     [Description("拉黑请求。仅在用户严重违规（如冒充雅美、严重性骚扰）时触发。")]
     [JsonPropertyName("blockUserInfos")]
     public AIBlockUserInfo[] BlockUserInfos { get; set; }
@@ -49,7 +41,6 @@ public class AIChatResponse
     /// <summary>
     /// AI知识笔记
     /// </summary>
-    //[Description("knowledge Note")]
     [Description("知识笔记：记录新学到的知识点或重要事实（非闲聊内容）。")]
     [JsonPropertyName("knowledgeNote")]
     public AIKnowledgeNote KnowledgeNote { get; set; }
@@ -57,7 +48,6 @@ public class AIChatResponse
     /// <summary>
     /// AI灵感笔记
     /// </summary>
-    //[Description("inspiration Note")]
     [Description("灵感笔记：记录有趣的梗、笑话或聊天灵感。")]
     [JsonPropertyName("inspirationNote")]
     public AIInspirationNote InspirationNote { get; set; }
@@ -65,7 +55,6 @@ public class AIChatResponse
     /// <summary>
     /// AI状态变化信息
     /// </summary>
-    //[Description("other status change info")]
     [Description("更新你的心情指数。")]
     [JsonPropertyName("statusChangeInfo")]
     public AIStatusChangeInfo StatusChangeInfo { get; set; }
@@ -120,7 +109,7 @@ public class AIChatResponseContent
     /// </summary>
     [Description(@"气泡内的纯文本内容。
 【长度与切分】：
-1. 单个气泡字数限制：严格控制在 **20-30字以内**。
+1. 单个气泡字数限制：严格控制在30字以内。
 2. 只要你觉得这句话还没说完，或者太长了，就立刻结束当前字符串。将剩下的内容放到 Contents 数组的 **下一个对象的 Text 字段** 中。
 3. 严禁 Markdown 和 长篇大论。
 

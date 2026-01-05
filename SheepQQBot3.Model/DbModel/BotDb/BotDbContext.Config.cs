@@ -11,10 +11,6 @@ public partial class BotDbContext
 {
     public virtual DbSet<BotGroupMessage> BotGroupMessages { get; set; }
 
-    public virtual DbSet<SetuDoushiInfo> SetuDoushiInfos { get; set; }
-
-    public virtual DbSet<SetuSendHistory> SetuSendHistorys { get; set; }
-
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
     {
         if (!optionsBuilder.IsConfigured)

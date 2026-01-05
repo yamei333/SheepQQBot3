@@ -22,7 +22,6 @@ public partial class App : Application
         PublicVar.IsDebug = args.Contains("-debug");
         // MEMO : 执行数据库连接
         var botDb = DbExtensions.CreateBotDbContext();
-        botDb.SetuDoushiInfos.Find("0");
         botDb.Database.ExecuteSqlRaw(@"
 PRAGMA journal_mode=WAL;
 PRAGMA synchronous=NORMAL;");
@@ -30,9 +29,8 @@ PRAGMA synchronous=NORMAL;");
 
     private void App_OnDispatcherUnhandledException(object sender, DispatcherUnhandledExceptionEventArgs e)
     {
-#if DEBUG
-        throw e.Exception;
-#endif
+        if (PublicVar.IsDebug)
+            throw e.Exception;
 
         YameiLogExtensions.WriteLog(LogType.Error, $"未处理的错误: {e.Exception?.StackTrace}-{e.Exception?.Message}");
         e.Handled = true;

@@ -1,6 +1,5 @@
 ﻿using CommonLibrary;
 using Masuit.Tools;
-using SheepQQBot3.DbModel;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
@@ -58,19 +57,6 @@ public static partial class BotExtensions
     {
         var processes = Process.GetProcessesByName(AppSettingExtensions.Get("barkexe").Replace(".exe", string.Empty));
         processes.ForEach(each => each.Kill());
-    }
-
-    /// <summary>
-    /// 取得色图成功率
-    /// </summary>
-    public static string GetSetuSuccessPercent(SetuDoushiInfo setuDoushiInfo, DateTime dateNow)
-    {
-        var setuDoushiLv = setuDoushiInfo?.CalcSetuDoushiLv(dateNow) ?? 0;
-        var failedSum = (int)(900 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(900 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(450 * Math.Pow(setuDoushiLv, 2.5))
-            + (int)(240 * Math.Pow(setuDoushiLv, 2.5));
-        return $"色图成功率 {(26426) / (26426.0 + failedSum):0.00%}";
     }
 
     /// <summary>

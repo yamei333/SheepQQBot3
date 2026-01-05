@@ -20,6 +20,8 @@ public static partial class ProcessGroupMessage
 {
     private static readonly string _commandAI = $"[CQ:at,qq={BotId}]";
 
+    private static readonly Queue<string> _repeatSkipQueueAIGroupChat = [];
+
     /// <summary>
     /// AI助手
     /// </summary>
@@ -59,6 +61,15 @@ public static partial class ProcessGroupMessage
             if (NeedNotRecordMessage())
                 return;
 
+            var deleteCQMessage = message.Replace(_regCQCode, string.Empty);
+            // MEMO : 复读消息不添加
+            if (_repeatSkipQueueAIGroupChat.Contains(deleteCQMessage))
+                return;
+
+            _repeatSkipQueueAIGroupChat.Enqueue(deleteCQMessage);
+            if (_repeatSkipQueueAIGroupChat.Count > REPEAT_SKIP_LIMIT)
+                _repeatSkipQueueAIGroupChat.Dequeue();
+
             // MEMO : 除CQ段以外, 字节数超过一定数量(1汉字=3字节), 认为是转发消息
             // MEMO : at消息则无此限制
             if (_regCQCode.Replace(message, string.Empty).GetByteCount() > CHAT_SUMMARY_LIMIT_BYTE)
@@ -71,7 +82,14 @@ public static partial class ProcessGroupMessage
             var messageCount = historyParts.Count(part => part.Kind == ChatMessageContentPartKind.Text);
             if (CanSendGroupChat(aiGroupConfig, messageCount))
             {
-                YameiLogExtensions.WriteLog(LogType.Info, $"AI群消息发送(触发消息数: {messageCount})");
+                if (!Rand.CheckPercent(aiGroupConfig.GroupChatResponsePercent))
+                {
+                    // MEMO : 发送消息判定失败, 清空消息
+                    AIHistoryParts.AddOrUpdate(groupId, _ => [], (_, __) => []);
+                    return;
+                }
+
+                //YameiLogExtensions.WriteLog(LogType.Info, $"AI群消息发送(触发消息数: {messageCount})");
                 // MEMO : 发送消息
                 await SendGroupAsync(historyParts, groupId, false, GlobalAIConfig.ModelChat, AIRequestType.Chat).ConfigureAwait(false);
             }

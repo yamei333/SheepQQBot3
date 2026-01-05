@@ -20,6 +20,12 @@ public partial class AIGroupConfig : NotifyPropertyChangedBase
     public bool JoinGroupChatSendToTestGroup { get; set; }
 
     /// <summary>
+    /// 参与群聊成功率
+    /// </summary>
+    [JsonPropertyName(nameof(GroupChatResponsePercent))]
+    public int GroupChatResponsePercent { get; set; }
+
+    /// <summary>
     /// 群聊响应限值(5%)
     /// </summary>
     [JsonPropertyName(nameof(GroupChatResponseLimit5))]
@@ -110,6 +116,7 @@ public partial class AIGroupConfig : NotifyPropertyChangedBase
     {
         JoinGroupChat = false;
         JoinGroupChatSendToTestGroup = true;
+        GroupChatResponsePercent = 50;
         GroupChatResponseLimit5 = 10;
         GroupChatResponseLimit10 = 15;
         GroupChatResponseLimit20 = 20;

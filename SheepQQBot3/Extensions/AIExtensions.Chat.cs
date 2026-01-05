@@ -16,7 +16,10 @@ namespace SheepQQBot3.Extensions
 {
     public static partial class AIExtensions
     {
-        private static readonly ChatTool _chatTool = GetTool_ChatResponse();
+        private static readonly ChatTool _chatTool = ChatTool.CreateFunctionTool(
+            "reply_user",
+            "Call this function to send a response to the user.",
+            BinaryData.FromString(JsonSchemaGenerator.Generate(typeof(AIChatResponse))));
 
         private static async Task<ChatCompletion> ChatRequestAsync(
             this List<ChatMessageContentPart> thisRequestParts,
@@ -213,27 +216,23 @@ namespace SheepQQBot3.Extensions
 
             #region 历史记录保存
 
-            thisRequestParts.DeleteExpireImage();
-            // MEMO : 添加本次请求内容
-            loadedHistories.Add(ChatMessage.CreateUserMessage(thisRequestParts));
-            // MEMO : 添加本次回复内容
-            loadedHistories.Add(ChatMessage.CreateAssistantMessage(aiContentParts));
-            // MEMO : 历史记录截取 (控制在上限范围内)
-            loadedHistories.LimitMessages(AppSettingExtensions.Get("maxAIHistoryCount", 100));
-            // MEMO : 保存历史记录
-            loadedHistories.SaveAIHistory(chatKey);
+            // MEMO : 0.16.5.0 取消群聊历史记录保存
+            if (!isGroupRequest)
+            {
+                thisRequestParts.DeleteExpireImage();
+                // MEMO : 添加本次请求内容
+                loadedHistories.Add(ChatMessage.CreateUserMessage(thisRequestParts));
+                // MEMO : 添加本次回复内容
+                loadedHistories.Add(ChatMessage.CreateAssistantMessage(aiContentParts));
+                // MEMO : 历史记录截取 (控制在上限范围内)
+                loadedHistories.LimitMessages(AppSettingExtensions.Get("maxAIHistoryCount", 100));
+                // MEMO : 保存历史记录
+                loadedHistories.SaveAIHistory(chatKey);
+            }
 
             #endregion 历史记录保存
 
             return chatCompletion;
-        }
-
-        private static ChatTool GetTool_ChatResponse()
-        {
-            return ChatTool.CreateFunctionTool(
-                "reply_user",
-                "Call this function to send a response to the user.",
-                BinaryData.FromString(JsonSchemaGenerator.Generate(typeof(AIChatResponse))));
         }
 
         private static AIChatResponse GetAIChatResponse(ChatCompletion chatCompletion)
@@ -248,7 +247,6 @@ namespace SheepQQBot3.Extensions
                 throw new AIException("[GeminiError-返回截断]", responseText);
 
             var aiChatResponse = responseText.FromJson<AIChatResponse>();
-            aiChatResponse.Date = DateTime.Now;
             return aiChatResponse;
         }
 
