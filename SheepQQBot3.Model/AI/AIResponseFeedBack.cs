@@ -8,7 +8,7 @@ public class AIResponseFeedBack
     /// <summary>
     /// 关系变化信息
     /// </summary>
-    [Description("关系变化信息。仅在用户行为明显影响你们关系时设置，无变化则留空。")]
+    [Description("更新关系变化信息，无变化则留空。")]
     [JsonPropertyName("relation_change_infos")]
     public AIRelationChangeInfo[] RelationChangeInfos { get; set; }
 

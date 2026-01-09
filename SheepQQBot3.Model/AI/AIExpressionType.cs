@@ -175,6 +175,10 @@ namespace SheepQQBot3.Model.AI
         [Description("天哪")]
         Zoink,
 
+        [Display(Name = "害羞")]
+        [Description("害羞")]
+        Shy,
+
         [Display(Name = "可爱")]
         [Description("可爱")]
         Kawaii,

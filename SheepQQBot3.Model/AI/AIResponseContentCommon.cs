@@ -39,6 +39,7 @@ public class AIResponseContentCommon
     /// </summary>
     [Description("当前的面部表情枚举值。")]
     [JsonPropertyName("expression_code")]
+    [JsonConverter(typeof(AIEnumSafeConverter<AIExpressionType>))]
     public AIExpressionType? Face { get; set; }
 
     /// <summary>
@@ -46,6 +47,7 @@ public class AIResponseContentCommon
     /// </summary>
     [Description("选择一个最能配合当前这条文字（Text）语气的表情 Key。如果这句话很平淡，可以留空。")]
     [JsonPropertyName("sticker_code")]
+    [JsonConverter(typeof(AIEnumSafeConverter<AIEmojiType>))]
     public AIEmojiType? Emoji { get; set; }
 
     /// <summary>

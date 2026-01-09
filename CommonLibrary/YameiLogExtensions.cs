@@ -19,7 +19,7 @@ public static class YameiLogExtensions
         => yameiLog.WriteLog(LogType.Error, $"{ex.Message}{ENTER}Type:{typeName}{ENTER}Object:{obj}");
 
     public static void WriteJsonDeserializeLog(Exception ex, string typeName, string jsonText)
-        => yameiLog.WriteLog(LogType.Error, $"{ex.Message}{ENTER}Type:{typeName}{ENTER}Json:{jsonText}");
+        => yameiLog.WriteLog(LogType.Error, $"[{ex.GetType()}]{ex.Message}{ENTER}Type:{typeName}{ENTER}Json:{jsonText}");
 
     /// <summary>
     /// 写入错误日志

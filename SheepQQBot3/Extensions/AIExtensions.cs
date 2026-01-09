@@ -15,7 +15,6 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Text;
-using System.Text.Json;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
@@ -48,6 +47,7 @@ public static partial class AIExtensions
 
     private static readonly Regex _regReplaceAt = new(@"\[CQ:at,qq=(?<qqId>\d+)\] ", RegexOptions.IgnoreCase);
     private static readonly Regex _regCQImageFileUrl = RegexGenerator.CQImageFileUrl();
+    private static readonly Regex _reg3LevelJson = new(@"\{([^{}]|\{([^{}]|\{[^{}]*\})*\})*\}");
     private static readonly Regex _regDeleteEmoji = new(@"\p{Cs}");
 
     public static async Task SendAsync(
@@ -167,6 +167,8 @@ public static partial class AIExtensions
 
         #endregion DEBUG响应, 正在发送哈基米请求
 
+        // MEMO : 保存最后出错的错误信息
+        var lastErrorMessage = string.Empty;
         while (retryTimes <= AI_MAX_RETRY_TIMES)
         {
             try
@@ -207,17 +209,19 @@ public static partial class AIExtensions
             catch (AIException ex)
             {
                 retryTimes++;
+                lastErrorMessage = ex.Message;
                 YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex.Message}{ENTER}返回内容: {ex.ResponseText}");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 #endif
             }
-            catch (JsonException ex)
+            catch (AIJsonException ex)
             {
                 #region Json转换失败处理
 
                 retryTimes++;
-                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), $"[GeminiError-{ex.GetType()}]");
+                lastErrorMessage = ex.Message;
+                YameiLogExtensions.WriteJsonDeserializeLog(ex, nameof(AIChatResponse), ex.JsonText);
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 #endif
@@ -228,13 +232,13 @@ public static partial class AIExtensions
             {
                 #region 请求返回报错处理
 
-                var errorMessage = ex.Message;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{errorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+                lastErrorMessage = ex.Message;
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{lastErrorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
 #if DEBUG
-                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(errorMessage)}");
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(lastErrorMessage)}");
 #endif
                 // MEMO : QQ图片有有效期, 过期了则部分/所有图片不解析
-                if (errorMessage.Contains("mime type is not supported by Gemini", StringComparison.CurrentCultureIgnoreCase))
+                if (lastErrorMessage.Contains("mime type is not supported by Gemini", StringComparison.CurrentCultureIgnoreCase))
                 {
                     // MEMO : 第1次重试只解析最后2张图片
                     if (retryTimes == 0)
@@ -253,10 +257,10 @@ public static partial class AIExtensions
                 #region 其他错误处理
 
                 retryTimes++;
-                var errorMessage = ex.Message;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{errorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+                lastErrorMessage = ex.Message;
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{lastErrorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
 #if DEBUG
-                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(errorMessage)}");
+                botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(lastErrorMessage)}");
 #endif
 
                 #endregion 其他错误处理
@@ -266,11 +270,11 @@ public static partial class AIExtensions
         if (isGroupRequest)
         {
             if (isGroupAt)
-                botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 重试次数超过限制!");
+                botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 重试次数超过限制!{ENTER}{lastErrorMessage}");
         }
         else
         {
-            botSendMessage(sendTargetId, $"哈基米请求失败! 重试次数超过限制!");
+            botSendMessage(sendTargetId, $"哈基米请求失败! 重试次数超过限制!{ENTER}{lastErrorMessage}");
         }
     }
 
@@ -461,7 +465,9 @@ public static partial class AIExtensions
             {
                 if (targetId == SuperAdminId)
                 {
-                    resultMessage += $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
+                    resultMessage += string.Empty
+                        + $"{(think.IsNullOrEmpty() ? string.Empty : $"[思考:{think}]{ENTER}")}"
+                        + $"{(sensory.IsNullOrEmpty() ? string.Empty : $"[感受:{sensory}]{ENTER}")}"
                         + $"{(mind.IsNullOrEmpty() ? string.Empty : $"[心想:{mind}]{ENTER}")}"
                         + $"{(body.IsNullOrEmpty() ? string.Empty : $"[动作:{body}]{ENTER}")}"
                         + GetExpressionText(true);
