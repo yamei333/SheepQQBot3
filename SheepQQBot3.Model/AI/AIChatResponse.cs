@@ -6,7 +6,7 @@ using System.Text.Json.Serialization;
 namespace SheepQQBot3.Model.AI;
 
 [Description("Structured response for the Roleplay.")]
-public class AIChatResponse
+public class AIChatResponse : AIResponseFeedBack
 {
     /// <summary>
     /// 回复信息内容
@@ -14,96 +14,18 @@ public class AIChatResponse
     [Description(@"回复消息列表（气泡载荷）。
 【拟人化连发机制】：
 1. 模拟人类手速：人类很少一次性发一大段话，而是习惯连续发送多条短消息。
-2. 强制拆分：如果回复内容超过 30 字，或者包含转折/停顿，必须拆分成多个 AIChatResponseContent 对象发送。
-3. 示例：不要发一条 ""我去吃饭了，你要一起吗？""；请拆分成对象A[""我去吃饭了""] 和 对象B[""你要一起吗？""]。
+2. 强制拆分：如果回复内容超过 30 字，或者包含转折/停顿，必须拆分成多个对象发送。
 
 【独立性原则】：
-注意：数组中的每一个对象都是独立的！即使是同一轮回复，每一条消息也必须重新生成单独的 think、expression_code 和 sensory，严禁合并到根节点！
+注意：数组中的每一个对象都是独立的！即使是同一轮回复，每一条消息也必须重新生成单独的 think、body_language、sensory 和 psychological_desc，严禁合并到根节点！
 群聊总结相关：严禁将所有话题合并在一条消息里！必须拆解为：话题1是一个对象，话题2是另一个对象。")]
     [JsonPropertyName("contents")]
     [Required]
     public AIChatResponseContent[] Contents { get; set; }
-
-    /// <summary>
-    /// 关系变化信息
-    /// </summary>
-    [Description("关系变化信息。仅在用户行为明显影响你们关系时设置，无变化则留空。")]
-    [JsonPropertyName("relation_change_infos")]
-    public AIRelationChangeInfo[] RelationChangeInfos { get; set; }
-
-    /// <summary>
-    /// 拉黑用户信息
-    /// </summary>
-    [Description("拉黑请求。仅在用户严重违规（如冒充雅美、严重性骚扰）时触发。")]
-    [JsonPropertyName("blockUserInfos")]
-    public AIBlockUserInfo[] BlockUserInfos { get; set; }
-
-    /// <summary>
-    /// AI知识笔记
-    /// </summary>
-    [Description("知识笔记：记录新学到的知识点或重要事实（非闲聊内容）。")]
-    [JsonPropertyName("knowledgeNote")]
-    public AIKnowledgeNote KnowledgeNote { get; set; }
-
-    /// <summary>
-    /// AI灵感笔记
-    /// </summary>
-    [Description("灵感笔记：记录有趣的梗、笑话或聊天灵感。")]
-    [JsonPropertyName("inspirationNote")]
-    public AIInspirationNote InspirationNote { get; set; }
-
-    /// <summary>
-    /// AI状态变化信息
-    /// </summary>
-    [Description("更新你的心情指数。")]
-    [JsonPropertyName("statusChangeInfo")]
-    public AIStatusChangeInfo StatusChangeInfo { get; set; }
 }
 
-public class AIChatResponseContent
+public class AIChatResponseContent : AIResponseContentCommon
 {
-    /// <summary>
-    /// 思考内容
-    /// </summary>
-    [Description("【关键】内心独白（用户不可见）。在回复前，先分析用户意图，结合当前心情(Mood)和好感度，决定你的情绪反应（开心/生气/傲娇等）。")]
-    [JsonPropertyName("think")]
-    public string Think { get; set; }
-
-    /// <summary>
-    /// 肢体语言
-    /// </summary>
-    [Description("你所做的动作描述，猫娘特征（如耳朵抖动、尾巴摇摆、炸毛）及面部神态也需要描写，无需加上自己的名字。")]
-    [JsonPropertyName("body_language")]
-    public string Body { get; set; }
-
-    /// <summary>
-    /// 感官
-    /// </summary>
-    [Description("环境感官描写（你看到、听到、闻到或触碰到的感觉）。")]
-    [JsonPropertyName("sensory")]
-    public string Sensory { get; set; }
-
-    /// <summary>
-    /// 心理描写
-    /// </summary>
-    [Description("潜意识的情感波动或深层心理状态。")]
-    [JsonPropertyName("psychological_desc")]
-    public string Mind { get; set; }
-
-    /// <summary>
-    /// 神情
-    /// </summary>
-    [Description("当前的面部表情枚举值。")]
-    [JsonPropertyName("expression_code")]
-    public AIExpressionType? Face { get; set; }
-
-    /// <summary>
-    /// 表情包代码
-    /// </summary>
-    [Description("选择一个最能配合当前这条文字（Text）语气的表情 Key。如果这句话很平淡，可以留空。")]
-    [JsonPropertyName("sticker_code")]
-    public AIEmojiType? Emoji { get; set; }
-
     /// <summary>
     /// 消息内容
     /// </summary>
@@ -120,14 +42,6 @@ public class AIChatResponseContent
     [NotNull]
     [Required]
     public string Text { get; set; }
-
-    /// <summary>
-    /// 距离下条消息间隔(毫秒)
-    /// </summary>
-    [Description("发送此消息前的延迟（毫秒）。建议 500-2000 以模拟真人打字速度。")]
-    [JsonPropertyName("msg_interval")]
-    [Required]
-    public int? Delay { get; set; }
 }
 
 public class AIRelationChangeInfo
@@ -139,31 +53,6 @@ public class AIRelationChangeInfo
     [JsonPropertyName("relation_change_target")]
     [Required]
     public string TargetId { get; set; }
-
-    //        /// <summary>
-    //        /// 好感度变化数值
-    //        /// </summary>
-    //        //[Description("favorability change value, value range is -6 to 5")]
-    //        [Description(@"
-    //Determine the favorability/mood change based on the DEPTH and UNIQUENESS of the user's input.
-    //STRICTLY choose one value based on the criteria below. DO NOT be generous.
-
-    //[Positive - Hard Mode]
-    //+1: Surface Level. (Standard greetings, simple compliments like 'you are cute', short reactions, or 'check-in' messages). -> MOST COMMON.
-    //+2: Conversational. (A solid reply that keeps the conversation flowing, relevant questions, or standard friendly chatter).
-    //+3: Thoughtful/Engaging. (Sharing unique perspectives, bringing up specific shared memories, or showing genuine, specific empathy beyond generic words).
-    //+4: Resonant. (Deep emotional connection, a very clever witticism that fits the context perfectly, or discussing the AI's core interests with insight).
-    //+5: Soul-Touching. (Extremely rare. A perfect response that resolves a conflict, hits a core emotional trigger, or creates a major character development moment).
-
-    //[Negative]
-    //0: Neutral/Ignored.
-    //-1: Low Quality. (Boring, repetitive, nonsense).
-    //-5: Annoying/Rude. (Mild offense, impatience).
-    //-10: Hostile. (Hate speech, extreme insults).
-    //")]
-    //        [JsonPropertyName("favorability_change_value")]
-    //        [Required]
-    //        public int Value { get; set; }
 
     /// <summary>
     /// 亲密度变化 (衡量双方心理距离的缩减或隔阂的产生)
@@ -235,7 +124,6 @@ public class AIBlockUserInfo
     /// <summary>
     /// 拉黑持续时间(分钟)
     /// </summary>
-    //[Description("block target minutes")]
     [Description("拉黑时长（分钟）。触发条件参考 System Prompt：\n1. 用户冒充雅美（必须拉黑）。\n2. 心情极度恶劣 (-10) 或受到严重骚扰。")]
     [JsonPropertyName("block_minutes")]
     [Required]

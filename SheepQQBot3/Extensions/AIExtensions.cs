@@ -24,6 +24,9 @@ namespace SheepQQBot3.Extensions;
 
 public static partial class AIExtensions
 {
+    private const string FUNCTION_NAME_REPLY_USER = "reply_user";
+    private const string FUNCTION_DESC_REPLY_USER = "Call this function to send a response to the user.";
+
     public const string ERROR_MESSAGE = "我脑袋好像短路了！";
     public const string ERROR_REASON = "(原因: {0})";
     public const string ERROR_JSON_ERROR = "Json解析失败";

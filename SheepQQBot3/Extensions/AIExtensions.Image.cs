@@ -31,7 +31,7 @@ namespace SheepQQBot3.Extensions
                 requestMessages,
                 new ChatCompletionOptions
                 {
-                    ToolChoice = ChatToolChoice.CreateFunctionChoice("reply_user"),
+                    ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
 #pragma warning disable OPENAI001
                     ReasoningEffortLevel = ChatReasoningEffortLevel.High,
 #pragma warning restore OPENAI001

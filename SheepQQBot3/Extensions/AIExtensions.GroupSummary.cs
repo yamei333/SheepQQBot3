@@ -15,8 +15,8 @@ namespace SheepQQBot3.Extensions
     public static partial class AIExtensions
     {
         private static readonly ChatTool _groupSummaryTool = ChatTool.CreateFunctionTool(
-            "reply_user",
-            "Call this function to send a response to the user.",
+            FUNCTION_NAME_REPLY_USER,
+            FUNCTION_DESC_REPLY_USER,
             BinaryData.FromString(JsonSchemaGenerator.Generate(typeof(AIGroupChatSummaryResponse))));
 
         private static async Task GroupSummaryRequestAsync(
@@ -31,7 +31,7 @@ namespace SheepQQBot3.Extensions
                 new ChatCompletionOptions
                 {
                     Tools = { _groupSummaryTool },
-                    ToolChoice = ChatToolChoice.CreateFunctionChoice("reply_user"),
+                    ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
 #pragma warning disable OPENAI001
                     ReasoningEffortLevel = ChatReasoningEffortLevel.High,
 #pragma warning restore OPENAI001
