@@ -210,7 +210,7 @@ public static partial class AIExtensions
             {
                 retryTimes++;
                 lastErrorMessage = ex.Message;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex.Message}{ENTER}返回内容: {ex.ResponseText}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex}{ENTER}返回内容: {ex.ResponseText}");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(ERROR_JSON_ERROR)}");
 #endif
@@ -233,7 +233,7 @@ public static partial class AIExtensions
                 #region 请求返回报错处理
 
                 lastErrorMessage = ex.Message;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{lastErrorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(lastErrorMessage)}");
 #endif
@@ -258,7 +258,7 @@ public static partial class AIExtensions
 
                 retryTimes++;
                 lastErrorMessage = ex.Message;
-                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{lastErrorMessage}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
+                YameiLogExtensions.WriteLog(LogType.Error, $"[GeminiError-{ex.GetType()}]{ex}{ENTER}请求内容: {thisRequestParts.ToJsonIgnoreNull()}");
 #if DEBUG
                 botSendMessage(isGroupRequest ? TestGroupId : sendTargetId, $"{ERROR_MESSAGE}{ERROR_REASON.CultureFormat(lastErrorMessage)}");
 #endif
@@ -483,7 +483,7 @@ public static partial class AIExtensions
 
         return resultMessage;
 
-        string GetExpressionText(bool useTitle) => face == AIExpressionType.None
+        string GetExpressionText(bool useTitle) => face is null or AIExpressionType.None
             ? string.Empty
             : $"[{(useTitle ? "表情:" : string.Empty)}{face.GetDisplay()}]{(useTitle ? ENTER : string.Empty)}";
     }

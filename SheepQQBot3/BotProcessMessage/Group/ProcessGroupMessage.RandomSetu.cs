@@ -66,6 +66,7 @@ public static partial class ProcessGroupMessage
         {SetuType.Jitsu, 2},
         {SetuType.JitsuSelf, 6},
         {SetuType.NekosiaCat, 15},
+        {SetuType.Mossia, 25},
     };
 
     #region 不用的变量集
@@ -255,6 +256,10 @@ public static partial class ProcessGroupMessage
             case "C":
                 message = message[..^1];
                 targetSetuApiType = SetuType.NekosiaCat;
+                break;
+            case "M":
+                message = message[..^1];
+                targetSetuApiType = SetuType.Mossia;
                 break;
         }
 
@@ -454,17 +459,20 @@ public static partial class ProcessGroupMessage
                 SetuType.Jitsu => GetRandomWeightSetuInfo(false, SetuType.Jitsu),
                 SetuType.JitsuSelf => GetRandomWeightSetuInfo(false, SetuType.JitsuSelf),
                 SetuType.NekosiaCat => GetRandomWeightSetuInfo(false, SetuType.NekosiaCat),
+                SetuType.Mossia => GetRandomWeightSetuInfo(false, SetuType.Mossia),
                 _ => GetRandomWeightSetuInfo(false, Enum.GetValues<SetuType>()),
             };
             Func<string, Task<SetuInfo>>[] randomSetuDefault =
             [
                 SetuExtensions.GetSetu_LoliconAsync,
-                    SetuExtensions.GetSetu_NyanCatdaAsync,
-                    SetuExtensions.GetSetu_YubanAsync,
-                    SetuExtensions.GetSetu_JitsuAsync,
-                    SetuExtensions.GetSetu_JitsuSelfAsync,
-                    SetuExtensions.GetSetu_NekosiaCat_Async,
-                ];
+                SetuExtensions.GetSetu_LolisukiAsync,
+                SetuExtensions.GetSetu_NyanCatdaAsync,
+                SetuExtensions.GetSetu_YubanAsync,
+                SetuExtensions.GetSetu_JitsuAsync,
+                SetuExtensions.GetSetu_JitsuSelfAsync,
+                SetuExtensions.GetSetu_NekosiaCat_Async,
+                SetuExtensions.GetSetu_MossiaAsync,
+            ];
             var (setuInfo, fileName) = await GetSetu(() => isSearchTag
                     ? randomSetuKeyword.TryGetRandomWeight(out var funcResult)
                         ? funcResult.Value(tag)
@@ -790,8 +798,11 @@ public static partial class ProcessGroupMessage
                     isR18 ? SetuExtensions.GetSetu_Jitsu_R18Async : SetuExtensions.GetSetu_JitsuAsync),
                 SetuType.JitsuSelf => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_JitsuSelf_R18Async : SetuExtensions.GetSetu_JitsuSelfAsync),
+                // MEMO : NekosiaCat没有R18接口, 用Lolicon的
                 SetuType.NekosiaCat => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Lolicon_R18Async : SetuExtensions.GetSetu_NekosiaCat_Async),
+                SetuType.Mossia => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
+                    isR18 ? SetuExtensions.GetSetu_Mossia_R18Async : SetuExtensions.GetSetu_MossiaAsync),
                 _ => throw new ArgumentOutOfRangeException(nameof(setuType), setuType, null),
             };
     }

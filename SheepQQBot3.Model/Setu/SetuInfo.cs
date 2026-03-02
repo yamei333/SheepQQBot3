@@ -101,6 +101,11 @@ public enum SetuType
     JitsuSelf,
 
     NekosiaCat,
+
+    /// <summary>
+    /// 鸭子API
+    /// </summary>
+    Mossia,
 }
 
 /// <summary>

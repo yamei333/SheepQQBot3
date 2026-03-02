@@ -246,54 +246,65 @@ namespace SheepQQBot3.Extensions
 
         private static AIChatResponse GetAIChatResponse(ChatCompletion chatCompletion)
         {
-            var jsonText = string.Empty;
-            var responseText = string.Empty;
-            if (chatCompletion.FinishReason != ChatFinishReason.ToolCalls)
+            if (chatCompletion == null)
+                throw new AIException("API 返回对象为空");
+
+            try
             {
-                // MEMO : 尝试拯救直接返回的内容
-                var contentText = chatCompletion.Content[0].Text;
-                if (contentText.Contains(FUNCTION_NAME_REPLY_USER))
-                    throw new AIException($"非预期Reason(包含{FUNCTION_NAME_REPLY_USER})", contentText);
-
-                var match = _reg3LevelJson.Match(jsonText);
-                if (!match.Success)
-                    throw new AIException($"非预期Reason(_reg3LevelJson Match失败)", contentText);
-
-                jsonText = match.Value;
-                SetResponseText();
-
-                try
+                var jsonText = string.Empty;
+                var responseText = string.Empty;
+                if (chatCompletion.FinishReason != ChatFinishReason.ToolCalls)
                 {
-                    var aiChatResponse = responseText.FromJson<AIChatResponse>();
-                    return aiChatResponse;
+                    // MEMO : 尝试拯救直接返回的内容
+                    var contentText = chatCompletion.Content[0].Text;
+                    if (contentText.Contains(FUNCTION_NAME_REPLY_USER))
+                        throw new AIException($"非预期Reason(包含{FUNCTION_NAME_REPLY_USER})", contentText);
+
+                    var match = _reg3LevelJson.Match(jsonText);
+                    if (!match.Success)
+                        throw new AIException($"非预期Reason(_reg3LevelJson Match失败)", contentText);
+
+                    jsonText = match.Value;
+                    SetResponseText();
+
+                    try
+                    {
+                        var aiChatResponse = responseText.FromJson<AIChatResponse>();
+                        return aiChatResponse;
+                    }
+                    catch (JsonException ex)
+                    {
+                        throw new AIJsonException(contentText, ex);
+                    }
                 }
-                catch (JsonException ex)
+                else
                 {
-                    throw new AIJsonException(contentText, ex);
+                    jsonText = chatCompletion.ToolCalls[0].FunctionArguments.ToString();
+                    SetResponseText();
+
+                    try
+                    {
+                        var aiChatResponse = responseText.FromJson<AIChatResponse>();
+                        return aiChatResponse;
+                    }
+                    catch (JsonException ex)
+                    {
+                        throw new AIJsonException(responseText, ex);
+                    }
+                }
+
+                void SetResponseText()
+                {
+                    // MEMO : 删除emoji
+                    responseText = _regDeleteEmoji.Replace(jsonText, string.Empty);
+                    if (responseText.IsNullOrEmpty())
+                        throw new AIException("返回截断", responseText);
                 }
             }
-            else
+            catch (Exception ex) when (ex is IndexOutOfRangeException or ArgumentOutOfRangeException)
             {
-                jsonText = chatCompletion.ToolCalls[0].FunctionArguments.ToString();
-                SetResponseText();
-
-                try
-                {
-                    var aiChatResponse = responseText.FromJson<AIChatResponse>();
-                    return aiChatResponse;
-                }
-                catch (JsonException ex)
-                {
-                    throw new AIJsonException(responseText, ex);
-                }
-            }
-
-            void SetResponseText()
-            {
-                // MEMO : 删除emoji
-                responseText = _regDeleteEmoji.Replace(jsonText, string.Empty);
-                if (responseText.IsNullOrEmpty())
-                    throw new AIException("返回截断", responseText);
+                // 这里的异常就是因为 Choices 列表为空导致的
+                throw new AIException("Choices 数组为空");
             }
         }
 
