@@ -33,14 +33,14 @@ public static partial class ProcessGroupMessage
     private static readonly ConcurrentDictionary<string, DateTime> SetuRequestHistories = [];
 
     //private const string[] SETUAPI_ICONS = "https://lolicon.app/favicon.ico";
-    private static readonly string[] _setuIcons = [
-        "https://i0.hdslb.com/bfs/garb/66a0850681611ac4dede74823a34e197913fb97f.png",
-        "https://i0.hdslb.com/bfs/garb/6f57a2e1d8cedd68f5b837a7118bba37275ba5c4.png",
-        "https://i0.hdslb.com/bfs/garb/20e2b689aebcd2fa8bbe1ffa440827c3062cc420.png",
-        "https://i0.hdslb.com/bfs/garb/ac9c50a5751f9b02af366c9096b703a8889d7ea4.png",
-        "https://i0.hdslb.com/bfs/garb/177b264dcdc99a107481ae8e7ead45dc7448dbd7.png",
-        "https://i0.hdslb.com/bfs/garb/8b6d3154bd4eb96df7603163cffc1db407d92bf2.png",
-    ];
+    //private static readonly string[] _setuIcons = [
+    //    "https://i0.hdslb.com/bfs/garb/66a0850681611ac4dede74823a34e197913fb97f.png",
+    //    "https://i0.hdslb.com/bfs/garb/6f57a2e1d8cedd68f5b837a7118bba37275ba5c4.png",
+    //    "https://i0.hdslb.com/bfs/garb/20e2b689aebcd2fa8bbe1ffa440827c3062cc420.png",
+    //    "https://i0.hdslb.com/bfs/garb/ac9c50a5751f9b02af366c9096b703a8889d7ea4.png",
+    //    "https://i0.hdslb.com/bfs/garb/177b264dcdc99a107481ae8e7ead45dc7448dbd7.png",
+    //    "https://i0.hdslb.com/bfs/garb/8b6d3154bd4eb96df7603163cffc1db407d92bf2.png",
+    //];
 
     private static readonly Regex _regCorrectSetuMessage = new(
         @"^(?!.*(\[CQ:|@)).*?色图[a-zA-Z]?$",
@@ -60,11 +60,8 @@ public static partial class ProcessGroupMessage
     private static readonly Dictionary<SetuType, int> _setuWeight = new()
     {
         {SetuType.Lolicon, 30},
-        {SetuType.Lolisuki, 20},
         {SetuType.Yuban, 4},
-        {SetuType.NyanCatda, 10},
-        {SetuType.Jitsu, 2},
-        {SetuType.JitsuSelf, 6},
+        {SetuType.NyanCatda, 5},
         {SetuType.NekosiaCat, 15},
         {SetuType.Mossia, 25},
     };
@@ -237,10 +234,6 @@ public static partial class ProcessGroupMessage
                 message = message[..^1];
                 targetSetuApiType = SetuType.Lolicon;
                 break;
-            case "S":
-                message = message[..^1];
-                targetSetuApiType = SetuType.Lolisuki;
-                break;
             case "N":
                 message = message[..^1];
                 targetSetuApiType = SetuType.NyanCatda;
@@ -248,10 +241,6 @@ public static partial class ProcessGroupMessage
             case "Y":
                 message = message[..^1];
                 targetSetuApiType = SetuType.Yuban;
-                break;
-            case "J":
-                message = message[..^1];
-                targetSetuApiType = SetuType.Jitsu;
                 break;
             case "C":
                 message = message[..^1];
@@ -439,25 +428,20 @@ public static partial class ProcessGroupMessage
             var randomSetuKeyword = targetSetuApiType switch
             {
                 SetuType.Lolicon => GetRandomWeightSetuInfo(false, SetuType.Lolicon),
-                SetuType.Lolisuki => GetRandomWeightSetuInfo(false, SetuType.Lolisuki),
                 SetuType.NyanCatda => GetRandomWeightSetuInfo(false, SetuType.NyanCatda),
                 SetuType.Yuban => GetRandomWeightSetuInfo(false, SetuType.Yuban),
-                SetuType.Jitsu => GetRandomWeightSetuInfo(false, SetuType.Jitsu),
                 _ => GetRandomWeightSetuInfo(false,
-                    SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu),
+                    SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban),
             };
 
             var randomSetuR18Keyword = GetRandomWeightSetuInfo(true,
-                SetuType.Lolicon, SetuType.Lolisuki, SetuType.NyanCatda, SetuType.Yuban, SetuType.Jitsu);
+                SetuType.Lolicon, SetuType.NyanCatda, SetuType.Yuban);
 
             var randomSetu = targetSetuApiType switch
             {
                 SetuType.Lolicon => GetRandomWeightSetuInfo(false, SetuType.Lolicon),
-                SetuType.Lolisuki => GetRandomWeightSetuInfo(false, SetuType.Lolisuki),
                 SetuType.NyanCatda => GetRandomWeightSetuInfo(false, SetuType.NyanCatda),
                 SetuType.Yuban => GetRandomWeightSetuInfo(false, SetuType.Yuban),
-                SetuType.Jitsu => GetRandomWeightSetuInfo(false, SetuType.Jitsu),
-                SetuType.JitsuSelf => GetRandomWeightSetuInfo(false, SetuType.JitsuSelf),
                 SetuType.NekosiaCat => GetRandomWeightSetuInfo(false, SetuType.NekosiaCat),
                 SetuType.Mossia => GetRandomWeightSetuInfo(false, SetuType.Mossia),
                 _ => GetRandomWeightSetuInfo(false, Enum.GetValues<SetuType>()),
@@ -465,11 +449,8 @@ public static partial class ProcessGroupMessage
             Func<string, Task<SetuInfo>>[] randomSetuDefault =
             [
                 SetuExtensions.GetSetu_LoliconAsync,
-                SetuExtensions.GetSetu_LolisukiAsync,
                 SetuExtensions.GetSetu_NyanCatdaAsync,
                 SetuExtensions.GetSetu_YubanAsync,
-                SetuExtensions.GetSetu_JitsuAsync,
-                SetuExtensions.GetSetu_JitsuSelfAsync,
                 SetuExtensions.GetSetu_NekosiaCat_Async,
                 SetuExtensions.GetSetu_MossiaAsync,
             ];
@@ -685,10 +666,10 @@ public static partial class ProcessGroupMessage
                             return (setuInfo, setuInfo.FullCacheFileName);
                         }
 
-                        var (getSuccessed, fileName) = await HttpExtensions.HttpDownloadAsync(
+                        var (getSuccessed, fName) = await HttpExtensions.HttpDownloadAsync(
                             setuInfo.ImageUrl, PATH_CACHE_IMAGE, checkImageOnly, customName: setuInfo.CacheFileName).ConfigureAwait(false);
                         if (getSuccessed)
-                            return (setuInfo, fileName);
+                            return (setuInfo, fName);
                     }
                     // MEMO : 0.14.8.8 任意错误都移出搜索队列
                     //else if (setuInfo.Result == SetuResult.NoSearchResult)
@@ -788,16 +769,10 @@ public static partial class ProcessGroupMessage
             {
                 SetuType.Lolicon => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Lolicon_R18Async : SetuExtensions.GetSetu_LoliconAsync),
-                SetuType.Lolisuki => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
-                    isR18 ? SetuExtensions.GetSetu_Lolisuki_R18Async : SetuExtensions.GetSetu_LolisukiAsync),
                 SetuType.Yuban => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Yuban_R18Async : SetuExtensions.GetSetu_YubanAsync),
                 SetuType.NyanCatda => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_NyanCatda_R18Async : SetuExtensions.GetSetu_NyanCatdaAsync),
-                SetuType.Jitsu => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
-                    isR18 ? SetuExtensions.GetSetu_Jitsu_R18Async : SetuExtensions.GetSetu_JitsuAsync),
-                SetuType.JitsuSelf => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
-                    isR18 ? SetuExtensions.GetSetu_JitsuSelf_R18Async : SetuExtensions.GetSetu_JitsuSelfAsync),
                 // MEMO : NekosiaCat没有R18接口, 用Lolicon的
                 SetuType.NekosiaCat => new RandomWeight<Func<string, Task<SetuInfo>>>(_setuWeight[setuType],
                     isR18 ? SetuExtensions.GetSetu_Lolicon_R18Async : SetuExtensions.GetSetu_NekosiaCat_Async),

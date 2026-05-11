@@ -90,15 +90,13 @@ public class SetuInfo
 public enum SetuType
 {
     Lolicon,
-    Lolisuki,
-    Yuban,
-    NyanCatda,
-    Jitsu,
 
-    /// <summary>
-    /// Jitsu个人版
-    /// </summary>
-    JitsuSelf,
+    // MEMO : 0.16.5.7 发现Lolisuki鸡了
+    //Lolisuki,
+
+    Yuban,
+
+    NyanCatda,
 
     NekosiaCat,
 

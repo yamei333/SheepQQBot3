@@ -132,6 +132,10 @@ namespace SheepQQBot3.Model.AI
         [Display(Name = "馋")]
         chan,
 
+        [Description("想你")]
+        [Display(Name = "想你")]
+        xiangni,
+
         #endregion 互动 / 亲密 / 撒娇
 
         #region 负面 / 生气 / 拒绝
@@ -156,9 +160,13 @@ namespace SheepQQBot3.Model.AI
         [Display(Name = "黑化")]
         heihua,
 
-        [Description("生气")]
-        [Display(Name = "生气")]
-        shengqi,
+        [Description("炸毛、破防、气急败坏")]
+        [Display(Name = "气急败坏")]
+        qijibaihuai,
+
+        [Description("赌气、闹别扭、生闷气")]
+        [Display(Name = "赌气")]
+        duqi,
 
         [Description("杂鱼、嘲笑")]
         [Display(Name = "杂鱼")]
@@ -416,6 +424,14 @@ namespace SheepQQBot3.Model.AI
         [Display(Name = "在做什么呢")]
         zaizuosm,
 
+        [Description("比耶(墨镜)")]
+        [Display(Name = "耶")]
+        ye,
+
+        [Description("喝牛奶")]
+        [Display(Name = "喝牛奶")]
+        heniunai,
+
         #endregion 状态 / 日常 / 动作
 
         [Description("0分")]
@@ -501,5 +517,65 @@ namespace SheepQQBot3.Model.AI
         [Description("跟你爆了")]
         [Display(Name = "跟你爆了")]
         gennibaole,
+
+        [Description("干嘛……")]
+        [Display(Name = "干嘛……")]
+        ganma,
+
+        [Description("干什么!!")]
+        [Display(Name = "干什么!!")]
+        ganshenme,
+
+        [Description("这家伙在说什么呢")]
+        [Display(Name = "在说什么")]
+        zaishuoshenme,
+
+        [Description("来财")]
+        [Display(Name = "来财")]
+        laicai,
+
+        [Description("变成宠物、当狗、被拿捏")]
+        [Display(Name = "变成宠物")]
+        bianchengchongwu,
+
+        [Description("放大镜")]
+        [Display(Name = "放大镜")]
+        fangdajing,
+
+        [Description("时间差不多咯")]
+        [Display(Name = "时间差不多咯")]
+        timeover,
+
+        [Description("打搅了")]
+        [Display(Name = "打搅了")]
+        dajiaole,
+
+        [Description("何意味")]
+        [Display(Name = "何意味")]
+        heyiwei,
+
+        [Description("可怜巴巴")]
+        [Display(Name = "可怜巴巴")]
+        kelianbaba,
+
+        [Description("看手机")]
+        [Display(Name = "看手机")]
+        kanshouji,
+
+        [Description("全都不会、全死光了就我没死")]
+        [Display(Name = "全都不会")]
+        quandoubuhui,
+
+        [Description("这么强?!")]
+        [Display(Name = "这么强?!")]
+        zhemeqiang,
+
+        [Description("摸摸群友")]
+        [Display(Name = "摸摸群友")]
+        momoqunyou,
+
+        [Description("震撼美味(贬义)")]
+        [Display(Name = "震撼美味")]
+        zhenghanmeiwei,
     }
 }
