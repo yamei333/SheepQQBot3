@@ -33,29 +33,40 @@ public static class FundExtensions
         // MEMO : doctorxiong 炸了
         //var url = $"https://api.doctorxiong.club/v1/fund?code={string.Join(",", fundIdArray)}"
         // MEMO : 0.14.7.7 cnuseful 炸了
-        //var url = $"https://www.cnuseful.com/api/index/fund?code={string.Join(",", fundIdArray)}";
-        //var httpResponse = await HttpExtensions.GetFromJsonAsync<FundData>(url).ConfigureAwait(false);
-        //return httpResponse.Result == HttpResponseResult.Successed
-        //    ? httpResponse.Data : null;
+        // var url = $"https://fundcomapi.tiantianfunds.com/mm/newCore/FundValuationLast?FCODES={fundIdArray.First()}&FIELDS=FCODE%2CSHORTNAME%2CGSZZL%2CGZTIME%2CGSZ%2CNAV%2CPDATE";
+        // var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
+        // // var fundJson = _regGetFundJson.Match(await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false)).Value;
+        // var fundJson = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        // var zap = fundJson.FromJson<FundDataResponse>();
+        // return httpResponse.Result == HttpResponseResult.Successed
+        //     ? httpResponse.Data : null;
 
-        var tasks = fundIdArray.Select(GetFundDataAsync);
-        return await Task.WhenAll(tasks).ConfigureAwait(false);
-
-        async Task<FundData> GetFundDataAsync(string fundId)
-        {
-            try
-            {
-                var url = $"https://fundgz.1234567.com.cn/js/{fundId}.js";
-                var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
-                var fundJson = _regGetFundJson.Match(await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false)).Value;
-                return fundJson.FromJson<FundData>();
-            }
-            catch (Exception e)
-            {
-                YameiLogExtensions.WriteLog(e);
-                return null;
-            }
-        }
+        var url = $"https://fundcomapi.tiantianfunds.com/mm/newCore/FundValuationLast?FCODES={string.Join("%2C", fundIdArray)}"
+            + $"&FIELDS=FCODE%2CSHORTNAME%2CGSZZL%2CGZTIME%2CGSZ%2CNAV%2CPDATE";
+        var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
+        // var fundJson = _regGetFundJson.Match(await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false)).Value;
+        var fundJson = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        return fundJson.FromJson<FundDataResponse>().FundDatas;
+        
+        // var tasks = fundIdArray.Select(GetFundDataAsync);
+        // return await Task.WhenAll(tasks).ConfigureAwait(false);
+        //
+        // async Task<FundData> GetFundDataAsync(string fundId)
+        // {
+        //     try
+        //     {
+        //         var url = $"https://fundcomapi.tiantianfunds.com/mm/newCore/FundValuationLast?FCODES={fundId}&FIELDS=FCODE%2CSHORTNAME%2CGSZZL%2CGZTIME%2CGSZ%2CNAV%2CPDATE";
+        //         var httpResponse = await HttpExtensions.HttpGetAsync(url).ConfigureAwait(false);
+        //         // var fundJson = _regGetFundJson.Match(await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false)).Value;
+        //         var fundJson = await httpResponse.Content.ReadAsStringAsync().ConfigureAwait(false);
+        //         return fundJson.FromJson<FundDataResponse>().FundDatas.First();
+        //     }
+        //     catch (Exception e)
+        //     {
+        //         YameiLogExtensions.WriteLog(e);
+        //         return null;
+        //     }
+        // }
 
         #region 测试用代码
 
@@ -102,35 +113,42 @@ public static class FundExtensions
         var sb = new StringBuilder($"========基金播报========\r\n");
         var isDateError = false;
         var fundAlarmConfigs = fundAlarmConfigsDic.Values;
+        var fundCount = 0;
 
         fundDatas.OrderBy(each => each.Code)
             .ForEach(fundData =>
             {
-                if (fundData.UpdateDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
-                {
-                    isDateError = true;
-                    return;
-                }
+                // MEMO : 0.16.5.8 不校验日期
+                // if (fundData.UpdateDate.ToString("yyyy-MM-dd") != DateTime.Now.ToString("yyyy-MM-dd"))
+                // {
+                //     isDateError = true;
+                //     return;
+                // }
 
                 var fundAlarmConfig = fundAlarmConfigs
                     .First(alarmFundConfig => alarmFundConfig.FundId == fundData.Code);
                 var fundRemark = fundAlarmConfig.FundRemark;
                 var growth = fundData.ExpectGrowth;
-                if (growth > maxGrowth)
-                    maxGrowth = growth;
+                if (growth != null)
+                {
+                    var growthValue = growth.GetValueOrDefault();
+                    fundCount++;
+                    if (growth > maxGrowth)
+                        maxGrowth = growthValue;
 
-                allGrowth += growth;
-                if (!isExistZero && Math.Abs(growth) <= 0.1)
-                    isExistZero = true;
+                    allGrowth += growthValue;
+                    if (!isExistZero && Math.Abs(growthValue) <= 0.1)
+                        isExistZero = true;
+                }
 
                 sb.AppendLine($"{fundData.Code}|{fundData.ExpectGrowthString} {(fundRemark.IsNullOrEmpty() ? fundData.Name : fundRemark)}");
             });
 
+        // MEMO : 0.16.5.8 不校验日期
         // MEMO : 日期错误, 今日不播报基金
-        if (isDateError)
-            return string.Empty;
+        // if (isDateError)
+        //     return string.Empty;
 
-        var fundCount = fundDatas.Length;
         var midGrowth = fundDatas.OrderBy(each => each.ExpectGrowth).Skip(fundCount / 2 - 1).First().ExpectGrowth;
         // MEMO : 中位平均值
         var avgGrowth = allGrowth / fundCount;

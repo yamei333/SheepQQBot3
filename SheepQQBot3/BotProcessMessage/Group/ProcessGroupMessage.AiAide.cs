@@ -150,7 +150,6 @@ public static partial class ProcessGroupMessage
                 chatKey, requestTargetId, groupId, isAt, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
                 (id, msg) => _ = GlobalBotClient.SendGroupMessageAsync(
                     aiGroupConfig.JoinGroupChatSendToTestGroup ? TestGroupId : id, msg),
-                aiModel,
                 requestType,
                 isAt ? null : AppSettingExtensions.Get("groupChatPrompt"));
         }

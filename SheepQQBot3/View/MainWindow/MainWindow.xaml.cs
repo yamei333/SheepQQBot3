@@ -1,4 +1,14 @@
-﻿using CommonLibrary;
+﻿using System;
+using System.ClientModel;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.IO;
+using System.Linq;
+using System.Text;
+using System.Windows;
+using System.Windows.Controls;
+using System.Windows.Input;
+using CommonLibrary;
 using Masuit.Tools;
 using OpenAI;
 using OpenAI.Chat;
@@ -9,16 +19,6 @@ using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using System;
-using System.ClientModel;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Windows;
-using System.Windows.Controls;
-using System.Windows.Input;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -74,9 +74,7 @@ public partial class MainWindow : Window
             var holidayInfoPath = $"{AppDomain.CurrentDomain.BaseDirectory}\\{nowYear}.txt";
             string holidayInfoJson;
             if (File.Exists(holidayInfoPath))
-            {
                 holidayInfoJson = await File.ReadAllTextAsync(holidayInfoPath, Encoding.UTF8).ConfigureAwait(false);
-            }
             else
             {
                 holidayInfoJson = await HttpExtensions.HttpClient
@@ -139,22 +137,15 @@ public partial class MainWindow : Window
 
     private void MainWindow_OnLoaded(object sender, RoutedEventArgs e)
     {
-        this.Left -= int.MaxValue;
-        this.Visibility = Visibility.Collapsed;
-        // MEMO : NapCat
-        PublicVar.GlobalNapCatWindow = new NapCatWindow
-        {
-            Visibility = Visibility.Collapsed,
-            WindowStyle = WindowStyle.None,
-        };
-        PublicVar.GlobalNapCatWindow.Show();
+        Left -= int.MaxValue;
+        Visibility = Visibility.Collapsed;
         // MEMO : Bark
-        PublicVar.GlobalBarkWindow = new BarkWindow
+        GlobalBarkWindow = new BarkWindow
         {
             Visibility = Visibility.Collapsed,
             WindowStyle = WindowStyle.None,
         };
-        PublicVar.GlobalBarkWindow.Show();
+        GlobalBarkWindow.Show();
         Vm.AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化完成"));
     }
 
@@ -170,9 +161,7 @@ public partial class MainWindow : Window
         vm.SelectionSetConfig = selectionSetConfig;
         vm.SelectedSetBotFunctions = selectionSetConfig.BotFunctions.Select(each => each.Value).ToArray();*/
         if (Vm.SelectedSetConfig == null)
-        {
             Vm.SelectedSetBotFunctions = new Dictionary<BotFunctionType, BotFunction>();
-        }
         else
         {
             Vm.SelectedSetBotFunctions = Vm.SelectedSetConfig.BotFunctions
@@ -319,26 +308,27 @@ public partial class MainWindow : Window
     private void GroupList_MouseDoubleClick(object sender, MouseButtonEventArgs e)
     {
         if (GroupList.SelectedItems.Count == 1)
-            GroupConfig_OnEdit(new MenuItem { Header = "修改" }, e);
+            GroupConfig_OnEdit(new MenuItem {Header = "修改"}, e);
     }
 
     private void OnNotifyIconDoubleClick(object sender, RoutedEventArgs e)
     {
-        if (this.Width <= 100)
+        if (Width <= 100)
         {
-            this.WindowStyle = WindowStyle.SingleBorderWindow;
+            WindowStyle = WindowStyle.SingleBorderWindow;
             Width = 1000;
             Height = 532;
             // 获取 DPI 缩放比例
             var matrix = PresentationSource.FromVisual(this)!.CompositionTarget!.TransformToDevice;
             var dpiFactor = 1 / matrix.M11;
             // 计算居中位置,设置窗口位置
-            this.Left = (SystemParameters.PrimaryScreenWidth - this.Width * dpiFactor) / 2;
-            this.Top = (SystemParameters.PrimaryScreenHeight - this.Height * dpiFactor) / 2;
+            Left = (SystemParameters.PrimaryScreenWidth - Width * dpiFactor) / 2;
+            Top = (SystemParameters.PrimaryScreenHeight - Height * dpiFactor) / 2;
         }
-        this.ShowInTaskbar = true;
-        this.Visibility = Visibility.Visible;
-        this.Show();
+
+        ShowInTaskbar = true;
+        Visibility = Visibility.Visible;
+        Show();
     }
 
     private void NotifyIcon_OnExit(object sender, RoutedEventArgs e)
@@ -352,24 +342,17 @@ public partial class MainWindow : Window
         Environment.Exit(0);
     }
 
-    private void NotifyIcon_OnShowMainWindow(object sender, RoutedEventArgs e)
-        => OnNotifyIconDoubleClick(sender, e);
-
-    private void NotifyIcon_OnShowNapCatWindow(object sender, RoutedEventArgs e)
-    {
-        PublicVar.GlobalNapCatWindow.Visibility = Visibility.Visible;
-        PublicVar.GlobalNapCatWindow.Activate();
-    }
+    private void NotifyIcon_OnShowMainWindow(object sender, RoutedEventArgs e) => OnNotifyIconDoubleClick(sender, e);
 
     private void NotifyIcon_OnShowBarkWindow(object sender, RoutedEventArgs e)
     {
-        PublicVar.GlobalBarkWindow.Visibility = Visibility.Visible;
-        PublicVar.GlobalBarkWindow.Activate();
+        GlobalBarkWindow.Visibility = Visibility.Visible;
+        GlobalBarkWindow.Activate();
     }
 
     private void MainWindow_OnClosing(object sender, CancelEventArgs e)
     {
-        this.Visibility = Visibility.Collapsed;
+        Visibility = Visibility.Collapsed;
         e.Cancel = true;
     }
 }

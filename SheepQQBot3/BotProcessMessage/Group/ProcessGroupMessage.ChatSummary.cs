@@ -204,8 +204,7 @@ public static partial class ProcessGroupMessage
                 await thisRequestParts.AddQQChatMessageAsync(sender,
                     $@"{CQCode.At(BotId)} {AppSettingExtensions.Get("chatSummaryPrompt")}", groupMembers, true).ConfigureAwait(false);
                 await thisRequestParts.SendAsync($"z{targetGroupId}", targetGroupId, targetGroupId, false, groupMembers.ToSenderDictionary(AIUserInfos), aiGroupConfig,
-                        (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false),
-                        GlobalAIConfig.ModelSummary, AIRequestType.ChatSummary)
+                        (id, msg) => GlobalBotClient.SendGroupMessageAsync(id, msg).ConfigureAwait(false), AIRequestType.ChatSummary)
                     .ConfigureAwait(false);
             }
         }

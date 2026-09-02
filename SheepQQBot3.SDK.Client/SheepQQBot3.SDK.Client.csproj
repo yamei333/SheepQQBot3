@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
+  </ItemGroup>
+
+  <ItemGroup>
     <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
   </ItemGroup>
 

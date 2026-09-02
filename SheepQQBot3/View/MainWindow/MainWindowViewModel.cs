@@ -67,8 +67,8 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
 
 #if (!debug)
         InitServer();
-        //InitWcfService();
-        WebApiProcess.InitWebApi();
+        // InitWcfService();
+        // WebApiProcess.InitWebApi();
 #endif
     }
 

@@ -16,12 +16,12 @@ namespace SheepQQBot3.SDK.Client
         private string Token { get; }
 
         /// <summary>
-        /// 默认端口
+        /// 榛樿绔彛
         /// </summary>
         private const int DEFAULT_PORT = 3000;
 
         /// <summary>
-        /// 默认IP地址
+        /// 榛樿IP鍦板潃
         /// </summary>
         private const string DEFAULT_IP_ADDRESS = "127.0.0.1";
 

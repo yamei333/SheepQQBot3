@@ -4,52 +4,64 @@ using System.Text.Json.Serialization;
 
 namespace SheepQQBot3.Model.Fund;
 
+public class FundDataResponse
+{
+    /// <summary>
+    /// 基金数据
+    /// </summary>
+    [JsonPropertyName("data")]
+    public FundData[] FundDatas { get; set; }
+    
+    /// <summary>
+    /// 错误代码
+    /// </summary>
+    [JsonPropertyName("ErrCode")]
+    public int ErrorCode { get; set; }
+}
+
 public class FundData
 {
     /// <summary>
     /// 基金编号
     /// </summary>
-    [JsonPropertyName("fundcode")]
+    [JsonPropertyName("FCODE")]
     public string Code { get; set; }
-
+    
+    /// <summary>
+    /// 更新时间
+    /// </summary>
+    [JsonPropertyName("GZTIME")]
+    public string UpdateDateSource { get; set; }
+    
     /// <summary>
     /// 基金名称
     /// </summary>
-    [JsonPropertyName("name")]
+    [JsonPropertyName("SHORTNAME")]
     public string Name { get; set; }
 
     /// <summary>
     /// 当前净值(昨日)
     /// </summary>
-    [JsonPropertyName("dwjz")]
-    public string NetWorthSource { get; set; }
+    [JsonPropertyName("NAV")]
+    public float YesterdayValue { get; set; }
 
     /// <summary>
     /// 净值估算(今日)
     /// </summary>
-    [JsonPropertyName("gsz")]
-    public string ExpectWorthSource { get; set; }
+    [JsonPropertyName("GSZ")]
+    public float? ExpectValue { get; set; }
 
     /// <summary>
     /// 净值估算(涨跌幅)
     /// </summary>
-    [JsonPropertyName("gszzl")]
-    public string ExpectGrowthSource { get; set; }
+    [JsonPropertyName("GSZZL")]
+    public float? ExpectGrowth { get; set; }
 
     /// <summary>
     /// 更新日期
     /// </summary>
-    [JsonPropertyName("gztime")]
-    public string UpdateDateSource { get; set; }
-
     [JsonIgnore]
-    public float NetWorth => FloatParse(NetWorthSource);
-
-    [JsonIgnore]
-    public float ExpectWorth => FloatParse(ExpectWorthSource);
-
-    [JsonIgnore]
-    public float ExpectGrowth => FloatParse(ExpectGrowthSource);
+    public DateTime UpdateDate => FormatDate(UpdateDateSource);
 
     /// <summary>
     /// 净值估算(涨跌幅)(格式化)
@@ -57,23 +69,19 @@ public class FundData
     [JsonIgnore]
     public string ExpectGrowthString => FormatGrowth(ExpectGrowth);
 
-    /// <summary>
-    /// 净值估算(涨跌幅)(彩色格式化)
-    /// </summary>
-    [JsonIgnore]
-    public string ExpectGrowthColorString => FormatGrowth(ExpectGrowth, "\ud83d\udd3a", "\ud83d\udfe2");
+    // /// <summary>
+    // /// 净值估算(涨跌幅)(彩色格式化)
+    // /// </summary>
+    // [JsonIgnore]
+    // public string ExpectGrowthColorString => FormatGrowth(ExpectGrowth, "\ud83d\udd3a", "\ud83d\udfe2");
 
-    /// <summary>
-    /// 更新时间(格式化)
-    /// </summary>
-    [JsonIgnore]
-    public DateTime UpdateDate => FormatDate(UpdateDateSource);
-
-    private static string FormatGrowth(float growthValue, string plusString = null, string minusString = null) =>
-        $"{(growthValue < 0 ? plusString ?? "－" : minusString ?? "＋")}{Math.Abs(growthValue):0.00}";
-
-    private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
-
+    private static string FormatGrowth(float? growthValue, string plusString = null, string minusString = null) 
+        => growthValue == null
+            ? "无数据"
+            : $"{(growthValue.GetValueOrDefault() < 0 ? plusString ?? "－" : minusString ?? "＋")}{Math.Abs(growthValue.GetValueOrDefault()):0.00}";
+    
+    // private static float FloatParse(string parseValue) => float.TryParse(parseValue, out var floatValue) ? floatValue : 0;
+    
     private static DateTime FormatDate(string dateString)
         => dateString.IsNullOrEmpty()
             ? DateTime.MinValue

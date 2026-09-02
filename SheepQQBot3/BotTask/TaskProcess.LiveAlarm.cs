@@ -120,7 +120,7 @@ public static partial class TaskProcess
 
     private static Task Monitor_OnLiveStartAsync(string title, string roomUrl, string userName, string userFace, string keyFrame, BotConfigTargetType targetType, string targetId)
     {
-        var sendMessage = CQCode.CustomMusic(roomUrl, roomUrl, $"{userName}正在直播!", userFace, title);
+        var sendMessage = CQCode.CustomMusic(roomUrl, roomUrl, $"[开播] {userName}", userFace, title);
         switch (targetType)
         {
             case BotConfigTargetType.Group:

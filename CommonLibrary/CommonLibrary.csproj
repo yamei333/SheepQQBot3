@@ -12,9 +12,9 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Masuit.Tools.Core" Version="2026.1.4" />
-    <PackageReference Include="NAudio" Version="2.3.0" />
-    <PackageReference Include="OpenAI" Version="2.10.0" />
+    <PackageReference Include="Masuit.Tools.Core" Version="2026.2.2" />
+    <PackageReference Include="NAudio" Version="3.0.1" />
+    <PackageReference Include="OpenAI" Version="2.13.0" />
   </ItemGroup>
 
 </Project>

@@ -43,16 +43,16 @@ public static class CQCode
     /// <param name="audio">音乐地址</param>
     /// <param name="title">标题</param>
     /// <param name="image">图片</param>
-    /// <param name="singer">演唱者</param>
-    /// <returns></returns>
-    public static string CustomMusic(string url, string audio, string title, string image, string singer)
-        => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image},singer={singer}]";
+    /// <param name="content">内容</param>
+    /// <returns>音乐卡片的CQ代码</returns>
+    public static string CustomMusic(string url, string audio, string title, string image, string content)
+        => $"[CQ:music,type=custom,url={url},audio={audio},title={title},image={image},content={content}]";
 
     /// <summary>
     /// 将接收到的CQImage段替换为可发送的CQImage段
     /// </summary>
     /// <param name="message"></param>
-    /// <returns></returns>
+    /// <returns>替换结果</returns>
     public static string ReplaceCQImage(string message)
     {
         message = _regCQImageFileUrl.Replace(message, match =>

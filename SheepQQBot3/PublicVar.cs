@@ -146,7 +146,6 @@ public static class PublicVar
     /// </summary>
     public static BotClient GlobalBotClient => Vm.BotClient;
 
-    public static NapCatWindow GlobalNapCatWindow;
     public static Process Bark;
     public static BarkWindow GlobalBarkWindow;
 

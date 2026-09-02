@@ -79,7 +79,6 @@ public static partial class ProcessPrivateMessage
 
         await thisRequestContentParts.SendAsync(chatKey, targetId, string.Empty, false, aiChatSenders, null,
             (id, msg) => _ = GlobalBotClient.SendPrivateMessageAsync(targetId, msg),
-            useModelImage ? GlobalAIConfig.ModelImage : GlobalAIConfig.ModelChat,
             useModelImage ? AIRequestType.Image : AIRequestType.Chat).ConfigureAwait(false);
     }
 }
