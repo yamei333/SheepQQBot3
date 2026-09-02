@@ -1,14 +1,13 @@
-﻿using CommonLibrary;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+using System.Text.RegularExpressions;
+using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.Model.Extension;
-using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
-using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.Extensions;
 
@@ -22,33 +21,12 @@ public static partial class BotExtensions
     /// 是否使用中的BotFunction
     /// </summary>
     /// <param name="botFunctions">botFunctions</param>
-    /// <param name="botFunctionType"><see cref="BotFunctionType"/></param>
+    /// <param name="botFunctionType">
+    ///     <see cref="BotFunctionType" />
+    /// </param>
     /// <returns></returns>
     public static bool IsUsed(this List<BotFunction> botFunctions, BotFunctionType botFunctionType)
         => botFunctions.FirstOrDefault(each => each.BotFunctionType == botFunctionType)?.IsUsed ?? false;
-
-    /// <summary>
-    /// 关闭NapCat进程
-    /// </summary>
-    public static void KillServerExe()
-    {
-        var napCatPath = AppSettingExtensions.Get("napcat");
-        var napCatKill = AppSettingExtensions.Get("napcatkill");
-        if (!napCatPath.IsNullOrEmpty() && !napCatKill.IsNullOrEmpty())
-        {
-            new Process
-            {
-                StartInfo =
-                {
-                    WorkingDirectory = napCatPath!,
-                    FileName = Path.Combine(napCatPath, napCatKill),
-                    UseShellExecute = false,
-                    RedirectStandardOutput = false,
-                    CreateNoWindow = true,
-                },
-            }.Start();
-        }
-    }
 
     /// <summary>
     /// 关闭Bark进程
@@ -87,7 +65,7 @@ public static partial class BotExtensions
             return true;
 
         // MEMO : 包含特定人员的at
-        if (message.Contains($"[CQ:at,qq=3889001246]"))
+        if (message.Contains("[CQ:at,qq=3889001246]"))
             return true;
 
         // MEMO : emoji数量超过一定数量

@@ -112,17 +112,6 @@ public class RunLog_SystemInfo : RunLog
 }
 
 /// <inheritdoc />
-public class RunLog_BotBackgroundInfo : RunLog
-{
-    /// <inheritdoc />
-    public RunLog_BotBackgroundInfo(string content)
-        : base(LogMessageType.BotBackground_Info, BotConfigTargetType.Common, content)
-    {
-        SenderId = "NapCat";
-    }
-}
-
-/// <inheritdoc />
 public class RunLog_SystemWarning : RunLog
 {
     /// <inheritdoc />

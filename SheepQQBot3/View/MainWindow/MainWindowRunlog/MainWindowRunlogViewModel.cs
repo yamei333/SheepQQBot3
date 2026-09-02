@@ -69,9 +69,6 @@ public partial class MainWindowRunlogViewModel : MainWindowViewModelBase
             case LogMessageType.System_Warning:
                 result.Add(new RunLogMessage($"来源: {runLog.SenderId}"));
                 break;
-            case LogMessageType.BotBackground_Info:
-                result.Add(new RunLogMessage($"来源: NapCat"));
-                break;
             case LogMessageType.MetaData:
                 result.Add(new RunLogMessage($"来源: {runLog.SenderId}"));
                 break;
