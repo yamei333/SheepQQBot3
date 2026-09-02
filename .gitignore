@@ -102,4 +102,4 @@ packages/
 /.idea/.idea.SheepQQBot3/.idea/indexLayout.xml
 /.idea/.idea.SheepQQBot3/.idea/vcs.xml
 *.lic
-/SheepQQBot3.UnitTest/*.*
+/SheepQQBot3.UnitTest/
