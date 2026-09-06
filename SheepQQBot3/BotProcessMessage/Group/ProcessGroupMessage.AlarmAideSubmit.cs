@@ -1,12 +1,4 @@
-﻿using CommonLibrary;
-using Masuit.Tools;
-using SheepQQBot3.Enums;
-using SheepQQBot3.Extensions;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Config;
-using SheepQQBot3.Model.Enums;
-using SheepQQBot3.Model.Extension;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -14,6 +6,14 @@ using System.Linq;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using CommonLibrary;
+using Masuit.Tools;
+using SheepQQBot3.Enums;
+using SheepQQBot3.Extensions;
+using SheepQQBot3.Model;
+using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Enums;
+using SheepQQBot3.Model.Extension;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.BotProcessMessage.Group;
@@ -38,7 +38,9 @@ public static partial class ProcessGroupMessage
     /// </summary>
     /// <param name="alarmAideConfigs">闹钟助手配置</param>
     /// <param name="alarmAideSubmitMembers">可投稿成员列表</param>
-    /// <param name="groupMessage"><see cref="GroupMessage"/></param>
+    /// <param name="groupMessage">
+    ///     <see cref="GroupMessage" />
+    /// </param>
     /// <returns></returns>
     public static async Task AlarmAideSubmitAsync(
         ConcurrentDictionary<Guid, AlarmAideConfig> alarmAideConfigs,
@@ -65,6 +67,11 @@ public static partial class ProcessGroupMessage
         }
 
         var alarmMessage = message[COMMAND_ALARMAIDE_SUBMIT_LIBRARY.Length..];
+        // MEMO : 删除开头结尾的空格和回车
+        alarmMessage = alarmMessage.Trim(' ', '\t', '\r', '\n');
+        if (string.IsNullOrEmpty(alarmMessage))
+            return;
+
         // MEMO : 0.14.4.4 已在接收消息层处理image消息, 此处不需要额外处理
         await _regCQImageFileUrl.Matches(alarmMessage).ForeachAsync(async match =>
         {
@@ -74,7 +81,7 @@ public static partial class ProcessGroupMessage
             var filePath = imageReceiveData.Data.File;
             string fileName;
             var isSuccessed = false;
-            if (imageReceiveData.IsSuccessed)
+            if (imageReceiveData.IsSuccessed && !filePath.StartsWith("http://"))
             {
                 fileName = $"{Guid.NewGuid()}{Path.GetExtension(file)}";
                 File.Copy(filePath, Path.Combine(TG_DIRECTORY_NAME, fileName));
@@ -114,7 +121,7 @@ public static partial class ProcessGroupMessage
                 // MEMO : 添加闹钟助手内容
                 var selectedSetConfig = Vm.SelectedSetConfig;
                 // MEMO : 当前选中的配置与目标一致时调用画面的追加方法
-                if (selectedSetConfig is { TargetType: BotConfigTargetType.Group } && selectedSetConfig.TargetId == groupId)
+                if (selectedSetConfig is {TargetType: BotConfigTargetType.Group} && selectedSetConfig.TargetId == groupId)
                     Vm.MainWindowAlarmAideViewModel.OnAddAlarmAideTest(alarmMessage);
                 else
                     alarmAideConfig.AlarmTexts = alarmTexts.CopyAdd(alarmTexts.GetSequence(), alarmMessage);

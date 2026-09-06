@@ -1,125 +1,125 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <Version>0.16.6.1</Version>
-    <OutputType>WinExe</OutputType>
-    <TargetFramework>net10.0-windows7.0</TargetFramework>
-    <Nullable>disable</Nullable>
-    <UseWPF>true</UseWPF>
-    <UseWindowsForms>False</UseWindowsForms>
-    <StartupObject>SheepQQBot3.App</StartupObject>
-    <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
-    <PlatformTarget>AnyCPU</PlatformTarget>
-    <PackageIcon>Kyouko04_104991561_0 128.png</PackageIcon>
-    <ApplicationIcon>Resource\hari003.ico</ApplicationIcon>
-    <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
-    <SelfContained>false</SelfContained>
-    <RuntimeIdentifier>win-x64</RuntimeIdentifier>
-  </PropertyGroup>
+    <PropertyGroup>
+        <Version>0.16.6.2</Version>
+        <OutputType>WinExe</OutputType>
+        <TargetFramework>net10.0-windows7.0</TargetFramework>
+        <Nullable>disable</Nullable>
+        <UseWPF>true</UseWPF>
+        <UseWindowsForms>False</UseWindowsForms>
+        <StartupObject>SheepQQBot3.App</StartupObject>
+        <RunPostBuildEvent>OnBuildSuccess</RunPostBuildEvent>
+        <PlatformTarget>AnyCPU</PlatformTarget>
+        <PackageIcon>Kyouko04_104991561_0 128.png</PackageIcon>
+        <ApplicationIcon>Resource\hari003.ico</ApplicationIcon>
+        <SatelliteResourceLanguages>zh-Hans</SatelliteResourceLanguages>
+        <SelfContained>false</SelfContained>
+        <RuntimeIdentifier>win-x64</RuntimeIdentifier>
+    </PropertyGroup>
 
-  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
-    <DebugType>none</DebugType>
-    <DebugSymbols>False</DebugSymbols>
-  </PropertyGroup>
+    <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|AnyCPU'">
+        <DebugType>none</DebugType>
+        <DebugSymbols>False</DebugSymbols>
+    </PropertyGroup>
 
-  <ItemGroup>
-    <Compile Remove="View\Dialog\AddAlarmAideDialog\**" />
-    <EmbeddedResource Remove="View\Dialog\AddAlarmAideDialog\**" />
-    <None Remove="View\Dialog\AddAlarmAideDialog\**" />
-    <Page Remove="View\Dialog\AddAlarmAideDialog\**" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="View\Dialog\AddAlarmAideDialog\**"/>
+        <EmbeddedResource Remove="View\Dialog\AddAlarmAideDialog\**"/>
+        <None Remove="View\Dialog\AddAlarmAideDialog\**"/>
+        <Page Remove="View\Dialog\AddAlarmAideDialog\**"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Remove="BotService\IQQBotService.cs" />
-    <Compile Remove="BotService\QQBotService.cs" />
-  </ItemGroup>
+    <ItemGroup>
+        <Compile Remove="BotService\IQQBotService.cs"/>
+        <Compile Remove="BotService\QQBotService.cs"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Remove="Resource\check-circle.png" />
-    <None Remove="Resource\check-circle_16.png" />
-    <None Remove="Resource\check.png" />
-    <None Remove="Resource\close-circle.png" />
-    <None Remove="Resource\close-circle_16.png" />
-    <None Remove="Resource\close.png" />
-    <None Remove="Resource\hari0.ico" />
-    <None Remove="Resource\hari0.jpg" />
-    <None Remove="Resource\Hari002.ico" />
-    <None Remove="Resource\Hari002_85591274_p1.png" />
-    <None Remove="Resource\hari003.ico" />
-  </ItemGroup>
+    <ItemGroup>
+        <None Remove="Resource\check-circle.png"/>
+        <None Remove="Resource\check-circle_16.png"/>
+        <None Remove="Resource\check.png"/>
+        <None Remove="Resource\close-circle.png"/>
+        <None Remove="Resource\close-circle_16.png"/>
+        <None Remove="Resource\close.png"/>
+        <None Remove="Resource\hari0.ico"/>
+        <None Remove="Resource\hari0.jpg"/>
+        <None Remove="Resource\Hari002.ico"/>
+        <None Remove="Resource\Hari002_85591274_p1.png"/>
+        <None Remove="Resource\hari003.ico"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Resource Include="Resource\check-circle.png" />
-    <Resource Include="Resource\check-circle_16.png" />
-    <Resource Include="Resource\check.png" />
-    <Resource Include="Resource\close-circle.png" />
-    <Resource Include="Resource\close-circle_16.png" />
-    <Resource Include="Resource\close.png" />
-    <Resource Include="Resource\hari0.ico" />
-    <Resource Include="Resource\hari0.jpg" />
-    <Resource Include="Resource\Hari002.ico" />
-    <Resource Include="Resource\Hari002_85591274_p1.png" />
-    <Resource Include="Resource\hari003.ico" />
-  </ItemGroup>
+    <ItemGroup>
+        <Resource Include="Resource\check-circle.png"/>
+        <Resource Include="Resource\check-circle_16.png"/>
+        <Resource Include="Resource\check.png"/>
+        <Resource Include="Resource\close-circle.png"/>
+        <Resource Include="Resource\close-circle_16.png"/>
+        <Resource Include="Resource\close.png"/>
+        <Resource Include="Resource\hari0.ico"/>
+        <Resource Include="Resource\hari0.jpg"/>
+        <Resource Include="Resource\Hari002.ico"/>
+        <Resource Include="Resource\Hari002_85591274_p1.png"/>
+        <Resource Include="Resource\hari003.ico"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1" />
-    <PackageReference Include="OpenWeatherMap.Standard" Version="3.0.91" />
-    <PackageReference Include="SixLabors.ImageSharp" Version="4.1.1" />
-    <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3" />
-  </ItemGroup>
+    <ItemGroup>
+        <PackageReference Include="Hardcodet.NotifyIcon.Wpf" Version="2.0.1"/>
+        <PackageReference Include="OpenWeatherMap.Standard" Version="3.0.91"/>
+        <PackageReference Include="SixLabors.ImageSharp" Version="4.1.1"/>
+        <PackageReference Include="SQLitePCLRaw.lib.e_sqlite3" Version="3.53.3"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj" />
-    <ProjectReference Include="..\SheepQQBot3.SDK.WebApi\SheepQQBot3.SDK.WebApi.csproj" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectReference Include="..\CommonLibrary\CommonLibrary.csproj"/>
+        <ProjectReference Include="..\SheepQQBot3.Model\SheepQQBot3.Model.csproj"/>
+        <ProjectReference Include="..\SheepQQBot3.SDK.Client\SheepQQBot3.SDK.Client.csproj"/>
+        <ProjectReference Include="..\SheepQQBot3.SDK.Server\SheepQQBot3.SDK.Server.csproj"/>
+        <ProjectReference Include="..\SheepQQBot3.SDK.WebApi\SheepQQBot3.SDK.WebApi.csproj"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Folder Include="View\BarkWindow\" />
-  </ItemGroup>
+    <ItemGroup>
+        <Folder Include="View\BarkWindow\"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <None Update="Properties\Settings.settings">
-      <Generator>SettingsSingleFileGenerator</Generator>
-      <LastGenOutput>Settings.Designer.cs</LastGenOutput>
-    </None>
-    <None Update="Resource\Kyouko04_104991561_0 128.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-    <None Update="Resource\Kyouko04_104991561_0.png">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
+    <ItemGroup>
+        <None Update="Properties\Settings.settings">
+            <Generator>SettingsSingleFileGenerator</Generator>
+            <LastGenOutput>Settings.Designer.cs</LastGenOutput>
+        </None>
+        <None Update="Resource\Kyouko04_104991561_0 128.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+        <None Update="Resource\Kyouko04_104991561_0.png">
+            <Pack>True</Pack>
+            <PackagePath>\</PackagePath>
+        </None>
+    </ItemGroup>
 
-  <ItemGroup>
-    <ProjectCapability Include="ConfigurableFileNesting" />
-    <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled" />
-  </ItemGroup>
+    <ItemGroup>
+        <ProjectCapability Include="ConfigurableFileNesting"/>
+        <ProjectCapability Include="ConfigurableFileNestingFeatureEnabled"/>
+    </ItemGroup>
 
-  <ItemGroup>
-    <Compile Update="Properties\Settings.Designer.cs">
-      <DesignTimeSharedInput>True</DesignTimeSharedInput>
-      <AutoGen>True</AutoGen>
-      <DependentUpon>Settings.settings</DependentUpon>
-    </Compile>
-  </ItemGroup>
-  
-  <ItemGroup>
-    <None Include="App.config" />
-    <None Include="App.Debug.config">
-      <DependentUpon>App.config</DependentUpon>
-    </None>
-    <None Include="App.Release.config">
-      <DependentUpon>App.config</DependentUpon>
-    </None>
-  </ItemGroup>
-  <Target Name="SetAppConfig" BeforeTargets="Compile">
-    <Copy SourceFiles="App.Debug.config" DestinationFiles="App.config" OverwriteReadOnlyFiles="true" Condition=" '$(Configuration)' == 'Debug' " />
-    <Copy SourceFiles="App.Release.config" DestinationFiles="App.config" OverwriteReadOnlyFiles="true" Condition=" '$(Configuration)' == 'Release' " />
-  </Target>
+    <ItemGroup>
+        <Compile Update="Properties\Settings.Designer.cs">
+            <DesignTimeSharedInput>True</DesignTimeSharedInput>
+            <AutoGen>True</AutoGen>
+            <DependentUpon>Settings.settings</DependentUpon>
+        </Compile>
+    </ItemGroup>
+
+    <ItemGroup>
+        <None Include="App.config"/>
+        <None Include="App.Debug.config">
+            <DependentUpon>App.config</DependentUpon>
+        </None>
+        <None Include="App.Release.config">
+            <DependentUpon>App.config</DependentUpon>
+        </None>
+    </ItemGroup>
+    <Target Name="SetAppConfig" BeforeTargets="Compile">
+        <Copy SourceFiles="App.Debug.config" DestinationFiles="App.config" OverwriteReadOnlyFiles="true" Condition=" '$(Configuration)' == 'Debug' "/>
+        <Copy SourceFiles="App.Release.config" DestinationFiles="App.config" OverwriteReadOnlyFiles="true" Condition=" '$(Configuration)' == 'Release' "/>
+    </Target>
 </Project>
