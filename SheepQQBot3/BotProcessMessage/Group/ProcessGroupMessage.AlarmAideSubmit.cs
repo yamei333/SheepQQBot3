@@ -70,7 +70,10 @@ public static partial class ProcessGroupMessage
         // MEMO : 删除开头结尾的空格和回车
         alarmMessage = alarmMessage.Trim(' ', '\t', '\r', '\n');
         if (string.IsNullOrEmpty(alarmMessage))
-            return;
+        {
+            // MEMO : 内容为空则不添加
+            await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 内容为空!").ConfigureAwait(false);
+        }
 
         // MEMO : 0.14.4.4 已在接收消息层处理image消息, 此处不需要额外处理
         await _regCQImageFileUrl.Matches(alarmMessage).ForeachAsync(async match =>
@@ -81,19 +84,34 @@ public static partial class ProcessGroupMessage
             var filePath = imageReceiveData.Data.File;
             string fileName;
             var isSuccessed = false;
-            if (imageReceiveData.IsSuccessed && !filePath.StartsWith("http://"))
+            if (imageReceiveData.IsSuccessed)
             {
-                fileName = $"{Guid.NewGuid()}{Path.GetExtension(file)}";
-                File.Copy(filePath, Path.Combine(TG_DIRECTORY_NAME, fileName));
-                isSuccessed = true;
+                if (!filePath.StartsWith("http"))
+                {
+                    fileName = $"{Guid.NewGuid()}{Path.GetExtension(file)}";
+                    File.Copy(filePath, Path.Combine(TG_DIRECTORY_NAME, fileName));
+                    isSuccessed = true;
+                }
+                else
+                {
+                    var picUrl = WebUtility.HtmlDecode(imageReceiveData.Data.Url);
+                    (isSuccessed, fileName) = await HttpExtensions
+                        .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
+                        .ConfigureAwait(false);
+                }
             }
             else
             {
                 var url = match.Groups["url"];
-                var picUrl = url.Success ? WebUtility.HtmlDecode(url.Value) : imageReceiveData.Data.Url;
-                (isSuccessed, fileName) = await HttpExtensions
-                    .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
-                    .ConfigureAwait(false);
+                if (url.Success)
+                {
+                    var picUrl = WebUtility.HtmlDecode(url.Value);
+                    (isSuccessed, fileName) = await HttpExtensions
+                        .HttpDownloadAsync(picUrl, TG_DIRECTORY_NAME)
+                        .ConfigureAwait(false);
+                }
+                else
+                    fileName = null;
             }
 
             if (isSuccessed)
@@ -102,13 +120,17 @@ public static partial class ProcessGroupMessage
                     replaceContent,
                     CQCode.Image(CommonExtensions.GetPath(TG_DIRECTORY_NAME, fileName, GetPathType.CQCodePath)));
             }
+            else
+                alarmMessage = null;
         }).ConfigureAwait(false);
 
         try
         {
-            // MEMO : 0.14.9.8 修复投稿内容开头有回车的问题
-            if (alarmMessage.StartsWith(ENTER))
-                alarmMessage = alarmMessage[1..];
+            if (string.IsNullOrEmpty(alarmMessage))
+            {
+                // MEMO : 图片读取失败
+                await GlobalBotClient.SendGroupMessageAsync(groupId, $"{CQCode.At(targetId)}投稿失败, 无法读取图片!").ConfigureAwait(false);
+            }
 
             var alarmTexts = alarmAideConfig.AlarmTexts;
             if (alarmTexts.Values.Any(each => each == alarmMessage))
