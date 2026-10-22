@@ -10,6 +10,7 @@ using System.Windows.Controls;
 using System.Windows.Input;
 using CommonLibrary;
 using Masuit.Tools;
+using Masuit.Tools.Extension.Object;
 using OpenAI;
 using OpenAI.Chat;
 using SheepQQBot3.Enums;

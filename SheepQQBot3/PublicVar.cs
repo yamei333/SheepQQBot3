@@ -1,4 +1,9 @@
-﻿using CommonLibrary;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.IO;
+using CommonLibrary;
 using Masuit.Tools;
 using OpenAI.Chat;
 using OpenWeatherMap.Standard;
@@ -8,11 +13,6 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
 
 namespace SheepQQBot3;
 
@@ -30,6 +30,46 @@ public static class PublicVar
     /// Bot昵称
     /// </summary>
     public const string BOT_NICK_NAME = "哈莉";
+
+    /// <summary>
+    /// 半角逗号
+    /// </summary>
+    public const char COMMA = ',';
+
+    /// <summary>
+    /// 全角逗号
+    /// </summary>
+    public const char COMMA_FULL = '，';
+
+    /// <summary>
+    /// 横线
+    /// </summary>
+    public const char LINE_CHAR = '-';
+
+    /// <summary>
+    /// 空格
+    /// </summary>
+    public const string SPACE = " ";
+
+    /// <summary>
+    /// 全角的空格
+    /// </summary>
+    public const string SPACE_FULL = "　";
+
+    /// <summary>
+    /// 回车换行
+    /// </summary>
+    public const string ENTER = "\r\n";
+
+    /// <summary>
+    /// AI最短请求间隔, 群内at(30秒)
+    /// </summary>
+    public const int AI_REQUEST_INTERVAL_GROUP_PRIVATE = 45;
+
+    /// <summary>
+    /// AI最短请求间隔, 个人(20秒)
+    /// </summary>
+    public const int AI_REQUEST_INTERVAL_PRIVATE = 20;
 
     /// <summary>
     /// 随机数产生器
@@ -81,73 +121,38 @@ public static class PublicVar
     /// </summary>
     public static readonly string BotId = AppSettingExtensions.Get("selfId", string.Empty);
 
-    /// <summary>
-    /// 半角逗号
-    /// </summary>
-    public const char COMMA = ',';
+    public static Process Bark;
+    public static BarkWindow GlobalBarkWindow;
 
     /// <summary>
-    /// 全角逗号
+    /// AI记录的群历史消息
     /// </summary>
-    public const char COMMA_FULL = '，';
+    public static readonly ConcurrentDictionary<string, List<ChatMessageContentPart>> AIHistoryParts = [];
 
     /// <summary>
-    /// 横线
+    /// AI知识库-用户信息
     /// </summary>
-    public const char LINE_CHAR = '-';
+    public static ConcurrentDictionary<string, AIChatSender> AIUserInfos;
 
     /// <summary>
-    /// 空格
-    /// </summary>
-    public const string SPACE = " ";
-
-    /// <summary>
-    /// 全角的空格
-    /// </summary>
-    public const string SPACE_FULL = "　";
-
-    /// <summary>
-    /// 回车换行
-    /// </summary>
-    public const string ENTER = "\r\n";
-
-    /// <summary>
-    /// 最大重试次数
-    /// </summary>
-    public const int AI_MAX_RETRY_TIMES = 2;
-
-    /// <summary>
-    /// AI最短请求间隔, 群内at(30秒)
-    /// </summary>
-    public const int AI_REQUEST_INTERVAL_GROUP_PRIVATE = 45;
-
-    /// <summary>
-    /// AI最短请求间隔, 个人(20秒)
-    /// </summary>
-    public const int AI_REQUEST_INTERVAL_PRIVATE = 20;
-
-    /// <summary>
-    /// <see cref="MainWindow"/>
+    ///     <see cref="MainWindow" />
     /// </summary>
     public static MainWindow GlobalMainWindow { get; set; }
 
     /// <summary>
-    /// <see cref="MainWindowViewModel"/>
+    ///     <see cref="MainWindowViewModel" />
     /// </summary>
     public static MainWindowViewModel Vm { get; set; }
 
     /// <summary>
-    /// <see cref="SDK.Server.BotServer"/>
+    ///     <see cref="SDK.Server.BotServer" />
     /// </summary>
     public static BotServer GlobalBotServer => Vm.BotServer;
 
     /// <summary>
-    /// <see cref="SDK.Client.BotClient"/>
+    ///     <see cref="SDK.Client.BotClient" />
     /// </summary>
     public static BotClient GlobalBotClient => Vm.BotClient;
-
-    public static Process Bark;
-    public static BarkWindow GlobalBarkWindow;
 
     /// <summary>
     /// 已记录的群消息(用于防止撤回)
@@ -213,16 +218,6 @@ public static class PublicVar
     /// OpenWeatherMap服务
     /// </summary>
     public static Current OpenWeatherMapService { get; set; }
-
-    /// <summary>
-    /// AI记录的群历史消息
-    /// </summary>
-    public static readonly ConcurrentDictionary<string, List<ChatMessageContentPart>> AIHistoryParts = [];
-
-    /// <summary>
-    /// AI知识库-用户信息
-    /// </summary>
-    public static ConcurrentDictionary<string, AIChatSender> AIUserInfos;
 
     /// <summary>
     /// 初始化全局变量

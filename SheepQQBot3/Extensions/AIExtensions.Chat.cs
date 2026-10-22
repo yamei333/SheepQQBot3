@@ -10,6 +10,7 @@ using System.Linq;
 using System.Text;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Masuit.Tools.Extension.Object;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 

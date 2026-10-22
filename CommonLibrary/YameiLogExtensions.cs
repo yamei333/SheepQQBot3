@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
+using Masuit.Tools.Extension.Object;
 
 namespace CommonLibrary;
 

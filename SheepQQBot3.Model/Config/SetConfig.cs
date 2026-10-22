@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text.Json.Serialization;
 using System.Windows.Media.Imaging;
+using Masuit.Tools.Extension.Object;
 
 namespace SheepQQBot3.Model.Config;
 

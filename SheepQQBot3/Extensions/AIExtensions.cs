@@ -10,6 +10,7 @@ using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using CommonLibrary;
 using Masuit.Tools;
+using Masuit.Tools.Extension.Object;
 using Masuit.Tools.Systems;
 using OpenAI.Chat;
 using SheepQQBot3.Enums;
@@ -168,7 +169,7 @@ public static partial class AIExtensions
 
         // MEMO : 保存最后出错的错误信息
         var lastErrorMessage = string.Empty;
-        while (retryTimes <= AI_MAX_RETRY_TIMES)
+        while (retryTimes <= GlobalAIConfig.MaxRetryTimes)
         {
             try
             {

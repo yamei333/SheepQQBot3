@@ -1,21 +1,18 @@
-﻿using CommonLibrary;
-using Masuit.Tools;
-using SheepQQBot3.Model;
-using SheepQQBot3.Model.Enums;
-using System;
+﻿using System;
 using System.Linq;
 using System.Net.WebSockets;
 using System.Text;
+using CommonLibrary;
+using Masuit.Tools;
+using Masuit.Tools.Extension.Object;
+using SheepQQBot3.Model;
+using SheepQQBot3.Model.Enums;
 using WatsonWebsocket;
 
 namespace SheepQQBot3.SDK.Server;
 
 public partial class BotServer : IDisposable
 {
-    private WatsonWsServer _server;
-
-    private Guid _clientGuid;
-
     /// <summary>
     /// 默认端口
     /// </summary>
@@ -25,6 +22,9 @@ public partial class BotServer : IDisposable
     /// 默认IP地址
     /// </summary>
     private const string DEFAULT_IP_ADDRESS = "127.0.0.1";
+
+    private Guid _clientGuid;
+    private WatsonWsServer _server;
 
     /// <summary>
     /// 是否连接中
@@ -161,6 +161,7 @@ public partial class BotServer : IDisposable
                     default:
                         throw new ArgumentOutOfRangeException(nameof(receiveData.SubType), receiveData.SubType, "值不在正确范围内");
                 }
+
                 break;
             case NoticeType.Group_Increase:
             // TODO : 群成员增加

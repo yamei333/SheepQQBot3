@@ -1,11 +1,4 @@
-﻿using CommonLibrary;
-using Masuit.Tools;
-using Microsoft.VisualBasic.FileIO;
-using OpenWeatherMap.Standard;
-using OpenWeatherMap.Standard.Enums;
-using SheepQQBot3.Model.AI;
-using SheepQQBot3.Model.Config;
-using System;
+﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.IO;
@@ -13,6 +6,14 @@ using System.Linq;
 using System.Text;
 using System.Windows;
 using System.Windows.Controls;
+using CommonLibrary;
+using Masuit.Tools;
+using Masuit.Tools.Extension.Object;
+using Microsoft.VisualBasic.FileIO;
+using OpenWeatherMap.Standard;
+using OpenWeatherMap.Standard.Enums;
+using SheepQQBot3.Model.AI;
+using SheepQQBot3.Model.Config;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.Extensions;
@@ -35,7 +36,7 @@ public static class ConfigExtensions
             var botConfig = new BotConfig();
             botConfig.InitBotFunctionIsEnabled();
 
-            PublicVar.GlobalBotConfig = botConfig;
+            GlobalBotConfig = botConfig;
             Vm.SetConfigs = botConfig.SetConfigs;
             Vm.IsLoadComplete = true;
             return;
@@ -48,19 +49,17 @@ public static class ConfigExtensions
             // 读取配置
             var configFilePath = $"{AppDomain.CurrentDomain.BaseDirectory}\\SheepQQBot3Config.txt";
             if (File.Exists(configFilePath) && MessageBox.Show(
-                    $"检测到 SheepQQBot3Config.txt{ENTER}真的要导入该文件作为新配置吗?{ENTER}!! 将会覆盖当前配置 !!",
-                    "警告",
-                    MessageBoxButton.YesNo,
-                    MessageBoxImage.Warning,
-                    MessageBoxResult.No) == MessageBoxResult.Yes)
+                $"检测到 SheepQQBot3Config.txt{ENTER}真的要导入该文件作为新配置吗?{ENTER}!! 将会覆盖当前配置 !!",
+                "警告",
+                MessageBoxButton.YesNo,
+                MessageBoxImage.Warning,
+                MessageBoxResult.No) == MessageBoxResult.Yes)
             {
                 isImportConfigFileExists = true;
                 jsonText = File.ReadAllText(configFilePath, Encoding.UTF8);
             }
             else
-            {
                 jsonText = File.ReadAllText(ConfigPath, Encoding.UTF8);
-            }
 
             var botConfig = jsonText.FromJson<BotConfig>();
             var defaultBotFunctions = SetConfig.DefaultBotFunctions;
@@ -108,13 +107,13 @@ public static class ConfigExtensions
     {
         if (!File.Exists(AIConfigPath))
         {
-            PublicVar.GlobalAIConfig = new AIConfig();
+            GlobalAIConfig = new AIConfig();
             return;
         }
 
         var jsonText = File.ReadAllText(AIConfigPath, Encoding.UTF8);
-        PublicVar.GlobalAIConfig = jsonText.FromJson<AIConfig>();
-        OpenWeatherMapService = new Current(PublicVar.GlobalAIConfig.OpenWeatherMapKey)
+        GlobalAIConfig = jsonText.FromJson<AIConfig>();
+        OpenWeatherMapService = new Current(GlobalAIConfig.OpenWeatherMapKey)
         {
             Languages = Languages.English,
             Units = WeatherUnits.Metric,

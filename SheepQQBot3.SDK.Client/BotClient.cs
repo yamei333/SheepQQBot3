@@ -2,6 +2,7 @@ using CommonLibrary;
 using Masuit.Tools;
 using System.Net.Http;
 using System.Text;
+using Masuit.Tools.Extension.Object;
 
 namespace SheepQQBot3.SDK.Client
 {

@@ -1,9 +1,9 @@
-﻿using Masuit.Tools;
-using System.IO;
+﻿using System.IO;
 using System.Text;
 using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Serialization;
+using Masuit.Tools.Extension.Object;
 
 namespace CommonLibrary;
 
@@ -32,7 +32,9 @@ public static class JsonExtensions
     /// <typeparam name="T">目标类型</typeparam>
     /// <param name="obj"></param>
     /// <param name="filePath">文件路径</param>
-    /// <param name="options"><see cref="JsonSerializerOptions"/></param>
+    /// <param name="options">
+    ///     <see cref="JsonSerializerOptions" />
+    /// </param>
     /// <returns>结果</returns>
     public static bool ToJsonFile<T>(this T obj, string filePath, JsonSerializerOptions options = null)
     {
@@ -45,7 +47,9 @@ public static class JsonExtensions
     /// </summary>
     /// <typeparam name="T">目标类型</typeparam>
     /// <param name="filePath">文件路径</param>
-    /// <param name="options"><see cref="JsonSerializerOptions"/></param>
+    /// <param name="options">
+    ///     <see cref="JsonSerializerOptions" />
+    /// </param>
     /// <returns>结果</returns>
     public static T FromJsonFile<T>(string filePath, JsonSerializerOptions options = null)
     {
@@ -58,6 +62,5 @@ public static class JsonExtensions
         return jsonText.FromJson<T>(options ?? GetJsonOptions());
     }
 
-    public static T FromJson<T>(this string jsonText)
-        => jsonText.FromJson<T>(GetJsonOptions());
+    public static T FromJson<T>(this string jsonText) => jsonText.FromJson<T>(GetJsonOptions());
 }

@@ -10,6 +10,7 @@ using System.Collections.Concurrent;
 using System.Collections.Generic;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Masuit.Tools.Extension.Object;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 

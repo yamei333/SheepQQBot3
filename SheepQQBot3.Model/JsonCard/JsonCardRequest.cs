@@ -1,5 +1,5 @@
-﻿using Masuit.Tools;
-using System.Text.Json.Serialization;
+﻿using System.Text.Json.Serialization;
+using Masuit.Tools.Extension.Object;
 
 namespace SheepQQBot3.Model.JsonCard;
 
