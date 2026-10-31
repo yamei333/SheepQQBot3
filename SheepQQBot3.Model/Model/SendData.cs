@@ -92,9 +92,6 @@ public class ParamData
     [JsonPropertyName("file_id")]
     public string FileId { get; set; }
 
-    [JsonPropertyName("desc")]
-    public string Desc { get; set; }
-
     [JsonPropertyName("summary")]
     public string Summary { get; set; }
 

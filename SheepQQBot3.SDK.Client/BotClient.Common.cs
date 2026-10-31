@@ -87,7 +87,8 @@ partial class BotClient
         async void ProcessYmBark(Element ymElement)
         {
             var elementData = ymElement.Data;
-            if (!elementData.Data.IsNullOrEmpty()) await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content).ConfigureAwait(false);
+            if (!elementData.Data.IsNullOrEmpty())
+                await PushExtensions.PushBarkMessageAsync(elementData.Title, elementData.Content).ConfigureAwait(false);
         }
     }
 
@@ -175,14 +176,14 @@ partial class BotClient
     /// </summary>
     /// <param name="groupId">群号</param>
     /// <param name="title">标题内容</param>
-    /// <param name="desc">详细内容</param>
+    /// <param name="content">详细内容</param>
     /// <param name="summary">聊天列表显示内容</param>
     /// <param name="previewUrl">预览图片URL</param>
     /// <param name="jumpUrl">跳转链接URL</param>
     public Task<bool> SendGroupTuwenAsync(
         string groupId,
         string title,
-        string desc,
+        string content,
         string summary,
         string previewUrl,
         string jumpUrl)
@@ -190,7 +191,7 @@ partial class BotClient
         {
             GroupId = groupId,
             Title = title,
-            Desc = desc,
+            Content = content,
             Summary = summary,
             PreviewUrl = previewUrl,
             JumpUrl = jumpUrl,
@@ -201,14 +202,14 @@ partial class BotClient
     /// </summary>
     /// <param name="userId">QQ号</param>
     /// <param name="title">标题内容</param>
-    /// <param name="desc">详细内容</param>
+    /// <param name="content">详细内容</param>
     /// <param name="summary">聊天列表显示内容</param>
     /// <param name="previewUrl">预览图片URL</param>
     /// <param name="jumpUrl">跳转链接URL</param>
     public Task<bool> SendPrivateTuwenAsync(
         string userId,
         string title,
-        string desc,
+        string content,
         string summary,
         string previewUrl,
         string jumpUrl)
@@ -216,7 +217,7 @@ partial class BotClient
         {
             UserId = userId,
             Title = title,
-            Desc = desc,
+            Content = content,
             Summary = summary,
             PreviewUrl = previewUrl,
             JumpUrl = jumpUrl,
