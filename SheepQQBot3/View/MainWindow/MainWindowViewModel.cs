@@ -1,4 +1,8 @@
-﻿using CommonLibrary;
+﻿using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Reflection;
+using CommonLibrary;
 using Masuit.Tools;
 using SheepQQBot3.BotService;
 using SheepQQBot3.Extensions;
@@ -7,10 +11,6 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reflection;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -20,73 +20,28 @@ namespace SheepQQBot3.View;
 /// </summary>
 public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposable
 {
+    private Dictionary<BotFunctionType, BotFunction> _selectedSetBotFunctions;
+
+    private SetConfig _selectedSetConfig;
+
+    private Dictionary<Guid, SetConfig> _setConfigs;
+
+    private string _title;
+
     /// <summary>
     /// 是否读取完成
     /// </summary>
     public bool IsLoadComplete { get; set; }
 
     /// <summary>
-    /// 监听消息用 <see cref="SDK.Server.BotServer"/>
+    /// 监听消息用 <see cref="SDK.Server.BotServer" />
     /// </summary>
     public BotServer BotServer { get; set; }
 
     /// <summary>
-    /// 监听消息用 <see cref="SDK.Client.BotClient"/>
+    /// 监听消息用 <see cref="SDK.Client.BotClient" />
     /// </summary>
     public BotClient BotClient { get; set; }
-
-    /// <summary>
-    /// 释放资源
-    /// </summary>
-    public void Dispose()
-    {
-        BotServer?.Dispose();
-    }
-
-    /// <summary>
-    /// 初始化
-    /// </summary>
-    public MainWindowViewModel()
-    {
-        InitPublicVar(this);
-        // 获取当前程序集的版本号
-        var version = Assembly.GetExecutingAssembly().GetName().Version;
-        Title = $"{BOT_NAME} - Ver {version}";
-        IsLoadComplete = false;
-        IsBarkUsed = !AppSettingExtensions.Get("bark").IsNullOrEmpty();
-
-        ConfigExtensions.LoadConfig();
-        ConfigExtensions.LoadAIConfig();
-        ConfigExtensions.LoadAIData();
-        ConfigExtensions.LoadAIAICharacter();
-        InitViewModel();
-        AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化..."));
-
-        //JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
-        //AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
-
-#if (!debug)
-        InitServer();
-        // InitWcfService();
-        // WebApiProcess.InitWebApi();
-#endif
-    }
-
-    /// <summary>
-    /// 各种子ViewModel初始化
-    /// </summary>
-    public void InitViewModel()
-    {
-        MainWindowRunlogViewModel = new MainWindowRunlogViewModel();
-        MainWindowAlarmAideViewModel = new MainWindowAlarmAideViewModel();
-        MainWindowAlarmAideSubmitViewModel = new MainWindowAlarmAideSubmitViewModel();
-        MainWindowFundHelperViewModel = new MainWindowFundHelperViewModel();
-        MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
-        MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
-        MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
-        MainWindowAIConfigModel = new MainWindowAIConfigModel();
-        MainWindowAIGroupConfigModel = new MainWindowAIGroupConfigModel();
-    }
 
     public MainWindowRunlogViewModel MainWindowRunlogViewModel { get; set; }
     public MainWindowAlarmAideViewModel MainWindowAlarmAideViewModel { get; set; }
@@ -100,7 +55,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
 
     public Dictionary<(BotConfigTargetType, long), BotFunction[]> SetBotFunctions { get; set; }
 
-    private SetConfig _selectedSetConfig;
     /// <summary>
     /// 当前选中的配置(群/个人)
     /// 后台->前台, 设定用
@@ -124,7 +78,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         }
     }
 
-    private Dictionary<Guid, SetConfig> _setConfigs;
     /// <summary>
     /// 群名的列表
     /// </summary>
@@ -139,8 +92,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         }
     }
 
-    private string _title;
-
     /// <summary>
     /// 窗体标题
     /// </summary>
@@ -154,7 +105,6 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
         }
     }
 
-    private Dictionary<BotFunctionType, BotFunction> _selectedSetBotFunctions;
     /// <summary>
     /// 选中群的功能配置
     /// </summary>
@@ -186,5 +136,57 @@ public partial class MainWindowViewModel : NotifyPropertyChangedBase, IDisposabl
                 .Where(each => tabFunctions.Contains(each.BotFunctionType))
                 .Any(each => each.IsUsed) == true;
         }
+    }
+
+    /// <summary>
+    /// 初始化
+    /// </summary>
+    public MainWindowViewModel()
+    {
+        InitPublicVar(this);
+        // 获取当前程序集的版本号
+        var version = Assembly.GetExecutingAssembly().GetName().Version;
+        Title = $"{BOT_NAME} - Ver {version}";
+        IsLoadComplete = false;
+        IsBarkUsed = !AppSettingExtensions.Get("bark").IsNullOrEmpty();
+
+        ConfigExtensions.LoadConfig();
+        ConfigExtensions.LoadAIConfig();
+        ConfigExtensions.LoadAIData();
+        ConfigExtensions.LoadAIAICharacter();
+        InitViewModel();
+        AddRunLog(new RunLog_SystemInfo($"{BOT_NAME} 初始化..."));
+
+        //JiebaDb.Dicts.Where(dict => dict.IsDefault == 0).ForEach(each => SegmenterExtensions.AddWord(each.Word));
+        //AddRunLog(new RunLog_SystemInfo("JiebaDb Dict 加载完成"));
+
+#if !debug
+        InitServer();
+        WebApiProcess.InitWebApi();
+#endif
+    }
+
+    /// <summary>
+    /// 释放资源
+    /// </summary>
+    public void Dispose()
+    {
+        BotServer?.Dispose();
+    }
+
+    /// <summary>
+    /// 各种子ViewModel初始化
+    /// </summary>
+    public void InitViewModel()
+    {
+        MainWindowRunlogViewModel = new MainWindowRunlogViewModel();
+        MainWindowAlarmAideViewModel = new MainWindowAlarmAideViewModel();
+        MainWindowAlarmAideSubmitViewModel = new MainWindowAlarmAideSubmitViewModel();
+        MainWindowFundHelperViewModel = new MainWindowFundHelperViewModel();
+        MainWindowRepeaterKillerViewModel = new MainWindowRepeaterKillerViewModel();
+        MainWindowBlackListViewModel = new MainWindowBlackListViewModel();
+        MainWindowLiveAlarmViewModel = new MainWindowLiveAlarmViewModel();
+        MainWindowAIConfigModel = new MainWindowAIConfigModel();
+        MainWindowAIGroupConfigModel = new MainWindowAIGroupConfigModel();
     }
 }

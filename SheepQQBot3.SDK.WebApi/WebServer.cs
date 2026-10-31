@@ -4,18 +4,18 @@ using WatsonWebserver.Core;
 namespace SheepQQBot3.SDK.WebApi;
 
 /// <summary>
-/// WebServerÓÃÀà
+/// WebServerç”¨ç±»
 /// </summary>
 public class WebServer
 {
     private readonly Webserver _webServer;
 
     /// <summary>
-    /// Ä¬ÈÏ¹¹Ôìº¯Êı
+    /// é»˜è®¤æ„é€ å‡½æ•°
     /// </summary>
     public WebServer()
     {
-        var webServerSetting = new WebserverSettings("yamei.moe", 9000)
+        var webServerSetting = new WebserverSettings("0.0.0.0", 9000)
         {
             AccessControl =
             {
@@ -24,16 +24,26 @@ public class WebServer
                 Mode = AccessControlMode.DefaultPermit,
             },
         };
-        _webServer = new Webserver(webServerSetting, context => context.Response.Send("ZipZap!"));
+        _webServer = new Webserver(webServerSetting, context =>
+        {
+            var response = context.Response;
+            if (context.Request.Useragent != "SheepQQBot3_token_webserver_yamei")
+            {
+                response.StatusCode = 403;
+                return response.Send();
+            }
+
+            return response.Send("ZipZap!");
+        });
     }
 
     /// <summary>
-    /// Æô¶¯WebServer
+    /// å¯åŠ¨WebServer
     /// </summary>
     public void Start() => _webServer.Start();
 
     /// <summary>
-    /// Ìí¼Ó¾²Ì¬Â·ÓÉÏìÓ¦
+    /// æ·»åŠ é™æ€è·¯ç”±å“åº”
     /// </summary>
     public void AddStaticRoute(
         HttpMethod httpMethod,

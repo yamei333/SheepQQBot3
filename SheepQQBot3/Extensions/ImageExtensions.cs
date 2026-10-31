@@ -1,5 +1,8 @@
 ﻿using System;
 using System.IO;
+using System.Text;
+using System.Threading.Tasks;
+using SheepQQBot3.Model.Extension;
 
 namespace SheepQQBot3.Extensions;
 
@@ -47,8 +50,8 @@ public static class ImageExtensions
         if (!File.Exists(filePath))
             throw new FileNotFoundException("图片文件未找到", filePath);
 
-        byte[] imageBytes = File.ReadAllBytes(filePath);
-        string base64 = Convert.ToBase64String(imageBytes);
+        var imageBytes = File.ReadAllBytes(filePath);
+        var base64 = Convert.ToBase64String(imageBytes);
         return $"base64://{base64}";
 
         //if (includeDataUri)
@@ -60,6 +63,42 @@ public static class ImageExtensions
         //}
 
         //return base64;
+    }
+
+    public static async Task<bool> IsGifUrlAsync(string imageUrl)
+    {
+        if (string.IsNullOrEmpty(imageUrl) || !imageUrl.StartsWith("http"))
+            return false;
+
+        try
+        {
+            var response = await HttpExtensions.HttpGetAsync(imageUrl);
+            if (!response.IsSuccessStatusCode)
+                return false;
+
+            // MEMO : mediaType快速检测
+            var mediaType = response.Content.Headers.ContentType?.MediaType;
+            if (string.Equals(mediaType, "image/gif", StringComparison.OrdinalIgnoreCase))
+                return true;
+
+            // MEMO : GIF 文件的开头 6 字节固定是 "GIF87a" 或 "GIF89a"
+            using var stream = await response.Content.ReadAsStreamAsync();
+            var header = new byte[6];
+            var bytesRead = await stream.ReadAsync(header, 0, 6);
+            if (bytesRead >= 6)
+            {
+                var magic = Encoding.ASCII.GetString(header);
+                return magic is "GIF89a" or "GIF87a";
+            }
+
+            return false;
+        }
+        catch (Exception ex)
+        {
+            // MEMO : 处理网络超时、DNS解析错误等异常
+            // Console.WriteLine($"检测出错: {ex.Message}");
+            return false;
+        }
     }
 
     /// <summary>

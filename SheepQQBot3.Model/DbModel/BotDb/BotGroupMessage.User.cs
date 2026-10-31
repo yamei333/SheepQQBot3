@@ -1,6 +1,6 @@
-﻿using Masuit.Tools;
+﻿using System.Text.RegularExpressions;
+using Masuit.Tools;
 using SheepQQBot3.Model.Extension;
-using System.Text.RegularExpressions;
 
 namespace SheepQQBot3.DbModel;
 
@@ -9,8 +9,7 @@ public partial class BotGroupMessage
     private static readonly Regex _regCQCode = RegexGenerator.CQCode();
 
     public BotGroupMessage()
-    {
-    }
+    { }
 
     public BotGroupMessage(
         string groupId,

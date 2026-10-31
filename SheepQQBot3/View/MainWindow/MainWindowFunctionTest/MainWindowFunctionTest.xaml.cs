@@ -1,7 +1,7 @@
-﻿using SheepQQBot3.Model.Extension;
-using SheepQQBot3.Model.JsonCard;
-using System.Windows;
+﻿using System.Windows;
 using System.Windows.Controls;
+using SheepQQBot3.Model.Extension;
+using SheepQQBot3.Model.JsonCard;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;

@@ -276,7 +276,9 @@ public static partial class AIExtensions
                 botSendMessage(sendTargetId, $"{CQCode.At(requestTargetId)} 哈基米请求失败! 重试次数超过限制!{ENTER}{lastErrorMessage}");
         }
         else
+        {
             botSendMessage(sendTargetId, $"哈基米请求失败! 重试次数超过限制!{ENTER}{lastErrorMessage}");
+        }
     }
 
     // 删除过期图片信息
@@ -311,7 +313,10 @@ public static partial class AIExtensions
                 }
             }
             // 2. 如果是图片：直接替换，使用手里拿着的最新（其实是后面）的名字
-            else if (part.Kind == ChatMessageContentPartKind.Image) parts[i] = CreateTextPart(currentNickName, IMAGE_EXPIRED);
+            else if (part.Kind == ChatMessageContentPartKind.Image)
+            {
+                parts[i] = CreateTextPart(currentNickName, IMAGE_EXPIRED);
+            }
         }
     }
 
@@ -594,25 +599,48 @@ public static partial class AIExtensions
                 var filePath = imageReceiveData.Data.File;
                 if (imageReceiveData.IsSuccessed)
                 {
-                    if (ImageExtensions.IsGifFile(filePath))
-                        thisContentParts.AddQQChatTextContent(sender, "[GIF动图]");
+                    if (!filePath.StartsWith("http"))
+                    {
+                        if (ImageExtensions.IsGifFile(filePath))
+                        {
+                            thisContentParts.AddQQChatTextContent(sender, "[无效GIF动图]");
+                        }
+                        else
+                        {
+                            var imageContentPart = await CreateFromFileAsync(filePath).ConfigureAwait(false);
+                            if (imageContentPart == null)
+                            {
+                                thisContentParts.AddQQChatTextContent(sender, "[无效图片]");
+                            }
+                            else if (imageContentPart.Kind == ChatMessageContentPartKind.Text)
+                            {
+                                thisContentParts.AddQQChatTextContent(sender, imageContentPart.Text);
+                            }
+                            else
+                            {
+                                isAddImage = true;
+                                thisContentParts.Add(imageContentPart);
+                            }
+                        }
+                    }
                     else
                     {
-                        // thisContentParts.Add(ChatMessageContentPart.CreateImagePart(new Uri(imageReceiveData.Data.Url)));
-                        var imageContentPart = await CreateFromFileAsync(filePath).ConfigureAwait(false);
-                        if (imageContentPart == null)
-                            thisContentParts.AddQQChatTextContent(sender, "[无效图片]");
-                        else if (imageContentPart.Kind == ChatMessageContentPartKind.Text)
-                            thisContentParts.AddQQChatTextContent(sender, imageContentPart.Text);
+                        // MEMO : 本地取图片失败
+                        if (await ImageExtensions.IsGifUrlAsync(filePath).ConfigureAwait(false))
+                        {
+                            thisContentParts.AddQQChatTextContent(sender, "[无效GIF动图]");
+                        }
                         else
                         {
                             isAddImage = true;
-                            thisContentParts.Add(imageContentPart);
+                            thisContentParts.Add(ChatMessageContentPart.CreateImagePart(new Uri(filePath)));
                         }
                     }
                 }
                 else
+                {
                     thisContentParts.AddQQChatTextContent(sender, "[加载失败图片]");
+                }
 
                 processedMessage = processedMessage.Replace(match.Value, string.Empty);
             }).ConfigureAwait(false);

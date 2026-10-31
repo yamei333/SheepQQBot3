@@ -1,6 +1,6 @@
-﻿using CommonLibrary;
+﻿using System;
+using CommonLibrary;
 using SheepQQBot3.Model.Model.WebApi;
-using System;
 using WatsonWebserver.Core;
 
 namespace SheepQQBot3.BotService;
@@ -15,7 +15,7 @@ public static partial class WebApiProcess
     private static void AddRoute_UpdateSteamMarketStatus()
     {
         // MEMO : Steam市场状态上报时使用的POST
-        _webServer.AddStaticRoute(HttpMethod.POST, "/UpdateSteamMarketStatus/", async context =>
+        _webServer.AddStaticRoute(HttpMethod.POST, "/UpdateSteamMarketStatus", async context =>
         {
             var jsonText = context.Request.DataAsString;
             try

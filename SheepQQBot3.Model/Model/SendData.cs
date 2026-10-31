@@ -27,9 +27,9 @@ public class SendData
     /// </summary>
     public SendData(string action, ParamData paramData, string echo)
     {
-        this.Action = action;
-        this.ParamData = paramData;
-        this.Echo = echo;
+        Action = action;
+        ParamData = paramData;
+        Echo = echo;
     }
 }
 
@@ -89,12 +89,15 @@ public class ParamData
     [JsonPropertyName("jumpUrl")]
     public string JumpUrl { get; set; }
 
-    [JsonPropertyName("iconUrl")]
-    public string IconUrl { get; set; }
-
-    [JsonPropertyName("webUrl")]
-    public string WebUrl { get; set; }
-
     [JsonPropertyName("file_id")]
     public string FileId { get; set; }
+
+    [JsonPropertyName("desc")]
+    public string Desc { get; set; }
+
+    [JsonPropertyName("summary")]
+    public string Summary { get; set; }
+
+    [JsonPropertyName("preview_url")]
+    public string PreviewUrl { get; set; }
 }

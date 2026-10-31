@@ -10,7 +10,7 @@ public static partial class WebApiProcess
     private static void AddRoute_SendMessage()
     {
         // MEMO : 外部调用API发送消息
-        _webServer.AddStaticRoute(HttpMethod.POST, "/SendMessage/", async context =>
+        _webServer.AddStaticRoute(HttpMethod.POST, "/SendMessage", async context =>
         {
             var jsonText = context.Request.DataAsString;
             try

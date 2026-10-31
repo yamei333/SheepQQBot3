@@ -29,7 +29,7 @@ public class BilibiliLive_RoomInfo
     public string Title { get; set; }
 
     /// <summary>
-    /// 直播间标题
+    /// 直播间ID
     /// </summary>
     [JsonPropertyName("room_id")]
     public int RoomId { get; set; }
