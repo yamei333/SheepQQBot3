@@ -86,7 +86,7 @@ public class ParamData
     [JsonPropertyName("picUrl")]
     public string PicUrl { get; set; }
 
-    [JsonPropertyName("jumpUrl")]
+    [JsonPropertyName("jump_url")]
     public string JumpUrl { get; set; }
 
     [JsonPropertyName("file_id")]
