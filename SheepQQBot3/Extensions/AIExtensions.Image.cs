@@ -1,5 +1,7 @@
 ﻿using System;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Text.RegularExpressions;
@@ -27,11 +29,12 @@ public static partial class AIExtensions
         string chatKey,
         bool isAt)
     {
-        var imageCompletion = (await AIClientImage.CompleteChatAsync(
+        var result = await AIClientImage.CompleteChatAsync(
                 requestMessages,
                 new ChatCompletionOptions
                 {
-                    ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
+                    // Tools = {_chatTool},
+                    // ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
 #pragma warning disable OPENAI001
                     ReasoningEffortLevel = ChatReasoningEffortLevel.High,
 #pragma warning restore OPENAI001
@@ -39,8 +42,8 @@ public static partial class AIExtensions
                     TopP = GlobalAIConfig.TopP,
                     MaxOutputTokenCount = GlobalAIConfig.MaxToken,
                 })
-            .ConfigureAwait(false)).Value;
-
+            .ConfigureAwait(false);
+        var imageCompletion = result.Value;
         if (imageCompletion.FinishReason != ChatFinishReason.Stop)
         {
             YameiLogExtensions.WriteJsonDeserializeLog(
@@ -55,6 +58,7 @@ public static partial class AIExtensions
         }
 
         var sendMessage = string.Empty;
+        TrySaveGeneratedImage(result.GetRawResponse());
         var imageUrls = ExtractImageUrls(imageCompletion.Content[0].Text);
         await imageUrls.ForeachAsync(async imageUrl =>
         {
@@ -103,5 +107,52 @@ public static partial class AIExtensions
         return matches
             .Select(m => m.Groups["url"].Value)
             .ToList();
+    }
+
+    /// <summary>
+    /// 从 PipelineResponse 中直接提取 choices[0].message.images[0].image_url.url 并保存为图片
+    /// </summary>
+    public static bool TrySaveGeneratedImage(PipelineResponse rawResponse, string outputFileName = "today_topic.jpg")
+    {
+        try
+        {
+            // 在只读内存切片上流式解析
+            using var doc = JsonDocument.Parse(rawResponse.Content.ToMemory());
+            var root = doc.RootElement;
+
+            // choices[0] -> message -> images[0] -> image_url -> url
+            if (!root.TryGetProperty("choices", out var choices) || choices.GetArrayLength() == 0)
+                return false;
+
+            var message = choices[0].GetProperty("message");
+            if (!message.TryGetProperty("images", out var images) || images.GetArrayLength() == 0)
+                return false;
+
+            var imageItem = images[0];
+            if (!imageItem.TryGetProperty("image_url", out var imageUrlObj))
+                return false;
+
+            if (!imageUrlObj.TryGetProperty("url", out var urlProp))
+                return false;
+
+            var dataUri = urlProp.GetString();
+            if (string.IsNullOrEmpty(dataUri))
+                return false;
+
+            // 拿Base64
+            var commaIndex = dataUri.IndexOf(',');
+            var base64Data = commaIndex >= 0 ? dataUri.Substring(commaIndex + 1) : dataUri;
+
+            // 写入
+            var imageBytes = Convert.FromBase64String(base64Data);
+            File.WriteAllBytes(outputFileName, imageBytes);
+
+            return true;
+        }
+        catch (Exception ex)
+        {
+            Console.WriteLine($"提取图片失败: {ex.Message}");
+            return false;
+        }
     }
 }

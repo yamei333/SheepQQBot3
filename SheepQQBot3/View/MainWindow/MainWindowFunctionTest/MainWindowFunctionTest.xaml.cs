@@ -1,7 +1,6 @@
 ﻿using System.Windows;
 using System.Windows.Controls;
 using SheepQQBot3.Model.Extension;
-using SheepQQBot3.Model.JsonCard;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -38,11 +37,13 @@ public partial class MainWindowFunctionTest : UserControl
             = "{\"app\":\"com.tencent.tianxuan.share\",\"config\":{\"ctime\":1721896417,\"token\":\"e1e951801b4dabc3c419e628e6bc223f\"},\"meta\":{\"news\":{\"desc\":\"徐州鸡3\",\"jumpUrl\":\"https://www.baidu.com/\",\"preview\":\"https://tianxuan.gtimg.cn/45176_272fa035/assets/200x200.jpg\",\"tag\":\"徐州鸡4\",\"tagIcon\":\"https://tianxuan.gtimg.cn/42065_b555f19c/assets/qq.png\",\"title\":\"徐州鸡2\"}},\"prompt\":\"徐州鸡1\",\"ver\":\"0.0.0.1\",\"view\":\"news\"}\n";
         var message = $"[CQ:json,data={signedJsonText}]";
         if (long.TryParse(TxtTestSendGroupMessage_GroupId.Text, out var groupId))
+        {
             // await GlobalBotClient.SendGroupMessageAsync(groupId.ToString(), message, Vm.SetConfigs).ConfigureAwait(false);
             await GlobalBotClient.SendGroupTuwenAsync(groupId.ToString(),
                 "测试标题", "测试内容", "[测试]",
                 "https://tianxuan.gtimg.cn/45176_272fa035/assets/200x200.jpg",
                 "https://live.bilibili.com/21678788").ConfigureAwait(false);
+        }
     }
 
     private void TestSendPrivateMessage(object sender, RoutedEventArgs e)
@@ -52,60 +53,16 @@ public partial class MainWindowFunctionTest : UserControl
     }
 
     /// <summary>
-    /// 测试发送Json消息
+    /// 测试发送卡片消息
     /// </summary>
-    private async void TestSendJsonMessage1(object sender, RoutedEventArgs e)
+    private async void TestSendTuwen(object sender, RoutedEventArgs e)
     {
-        //var miniAppJson = await Vm.BotServer.GetMiniAppJsonAsync(MiniAppType.WeiBo,
-        //    "测试标题", "测试内容", "https://thirdqq.qlogo.cn/g?b=oidb&k=09ElpZZZUTHFhoIlvs0lFg&kti=ZyBvjxHhVOI&s=640",
-        //    "https://www.bilibili.com/video/BV1GJ411x7h7/?share_source=copy_web&vd_source=f952e0bb6dedea89c4fea625fbb2aab1")
-        //    .ConfigureAwait(false);
-
-        if (long.TryParse(TxtTestSendJsonMessage1_GroupId.Text, out var groupId))
+        if (long.TryParse(TxtTestSendTuwen_GroupId.Text, out var groupId))
         {
-            //var sendMessages = new List<GroupForwardMessage>
-            //{
-            //    new("测试1", 10000, "test1"),
-            //    new("测试2", 10000, "test2"),
-            //};
-            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages).ConfigureAwait(false);
-
-            //// MEMO : markdown发送测试
-            //var sendMessages = new List<GroupForwardMessage>
-            //{
-            //    new("测试2", 252961222, CQCode.MarkDown("### 测试徐州鸡\\n- 鸡群1\\n- 鸡群2\\n- 鸡群3")),
-            //};
-
-            //await Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages,
-            //    "title", ["content"], "summary", "prompt", 15, data =>
-            //{
-            //    if (data is { IsSuccessed: false, RetCode: 1200 })
-            //    {
-            //        var reg = new Regex("(?<=发送转发消息（res_id：).+(?= 失败)", RegexOptions.Multiline);
-            //        var match = reg.Match(data.Wording);
-            //        if (match.Success)
-            //        {
-            //            var sendMessages2 = new List<GroupForwardMessage>
-            //            {
-            //                new("测试1", 252961222, "测试md"),
-            //                new("测试2", 252961222, CQCode.Forward(match.Value)),
-            //            };
-            //            Vm.BotServer.SendGroupForwardMessageAsync(groupId, sendMessages2).ConfigureAwait(false);
-            //        }
-            //    }
-            //}).ConfigureAwait(false);
-
-            var miniAppJson = await GlobalBotClient.GetMiniAppJsonAsync(MiniAppType.Bilibili, "title", "content",
-                "https://ragnarokonline.gungho.jp/gameguide/system/expand-item/images/glacier/map01_armor.png",
-                "https://www.bilibili.com/video/BV1GJ411x7h7/").ConfigureAwait(false);
-            await GlobalBotClient.SendGroupMessageAsync(groupId.ToString(), CQCode.Json(miniAppJson))
+            await GlobalBotClient.SendGroupTuwenAsync(groupId.ToString(),
+                    TxtTestSendTuwen_Title.Text, TxtTestSendTuwen_Content.Text, TxtTestSendTuwen_Summary.Text,
+                    TxtTestSendTuwen_Preview.Text, TxtTestSendTuwen_Url.Text)
                 .ConfigureAwait(false);
-            //await Vm.BotServer.SendGroupMessageAsync(groupId, await CQExtensions.JsonCard_TianxuanShareAsync(
-            //    TxtTestSendJsonMessage1_Title.Text,
-            //    TxtTestSendJsonMessage1_Content.Text,
-            //    TxtTestSendJsonMessage1_Url.Text,
-            //    string.Empty).ConfigureAwait(false),
-            //    Vm.SetConfigs).ConfigureAwait(false);
         }
     }
 

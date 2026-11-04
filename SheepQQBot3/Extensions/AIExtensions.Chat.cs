@@ -11,6 +11,7 @@ using Masuit.Tools.Extension.Object;
 using OpenAI.Chat;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
+using Tavily;
 using Yamei.Common;
 using static SheepQQBot3.PublicVar;
 
@@ -18,12 +19,7 @@ namespace SheepQQBot3.Extensions;
 
 public static partial class AIExtensions
 {
-    private static readonly ChatTool _chatTool = ChatTool.CreateFunctionTool(
-        FUNCTION_NAME_REPLY_USER,
-        FUNCTION_DESC_REPLY_USER,
-        BinaryData.FromString(JsonSchemaGenerator.Generate(typeof(AIChatResponse))));
-
-    private static async Task<ChatCompletion> ChatRequestAsync(
+    private static async Task<(ChatCompletion, ChatCompletion)> ChatRequestAsync(
         this List<ChatMessageContentPart> thisRequestParts,
         List<ChatMessage> requestMessages,
         List<ChatMessage> loadedHistories,
@@ -40,7 +36,7 @@ public static partial class AIExtensions
                 requestMessages,
                 new ChatCompletionOptions
                 {
-                    Tools = {_chatTool},
+                    Tools = {_chatTool, _webSearchTool},
                     ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
 #pragma warning disable OPENAI001
                     ReasoningEffortLevel = ChatReasoningEffortLevel.High,
@@ -51,7 +47,8 @@ public static partial class AIExtensions
                 })
             .ConfigureAwait(false)).Value;
 
-        var aiChatResponse = GetAIChatResponse(chatCompletion);
+        // MEMO : 触发搜索时, 二次请求返回 chatCompletion2
+        var (aiChatResponse, chatCompletion2) = await GetAIResponseAsync<AIChatResponse>(chatCompletion, requestMessages).ConfigureAwait(false);
         var chatMessages = aiChatResponse.Contents;
         var needSaveAIData = false;
         var dateNow = DateTime.Now;
@@ -64,6 +61,7 @@ public static partial class AIExtensions
             var valueChangeMessage = string.Empty;
             var relationChangeInfos = aiChatResponse.RelationChangeInfos;
             if (relationChangeInfos?.Any() == true)
+            {
                 relationChangeInfos
                     .Where(relationChangeInfo => !relationChangeInfo.TargetId.IsNullOrEmpty()
                         && (relationChangeInfo.IntimacyChange != 0
@@ -101,6 +99,7 @@ public static partial class AIExtensions
                             + $"/认可{(respectChange > 0 ? "+" : string.Empty)}{respectChange}"
                             + $"/好感{(affectionChange > 0 ? "+" : string.Empty)}{affectionChange}]{ENTER}";
                     });
+            }
 
 #endregion 处理关系变化
 
@@ -109,6 +108,7 @@ public static partial class AIExtensions
             // MEMO : 计算用户屏蔽时长
             var blockUserInfos = aiChatResponse.BlockUserInfos;
             if (blockUserInfos?.Any() == true)
+            {
                 blockUserInfos
                     .Where(blockUserInfo => !blockUserInfo.TargetId.IsNullOrEmpty() && blockUserInfo.Value != 0)
                     .ForEach(blockUserInfo =>
@@ -133,6 +133,7 @@ public static partial class AIExtensions
 
                         valueChangeMessage += $"[({blockUserInfo.TargetId})封禁: {changeValue} 分钟]{ENTER}";
                     });
+            }
 
 #endregion 处理用户屏蔽
 
@@ -170,8 +171,10 @@ public static partial class AIExtensions
                 // MEMO : 写入知识笔记内容
                 WriteAINote(knowledgeNote);
                 if (IsDebug)
+                {
                     botSendMessage(isGroupRequest ? TestGroupId : sendTargetId,
                         $"===!新知识笔记!==={ENTER}标题: {knowledgeNote.Title}{ENTER}内容: {knowledgeNote.Content}");
+                }
             }
 
             // MEMO : 保存灵感笔记内容
@@ -181,8 +184,10 @@ public static partial class AIExtensions
                 // MEMO : 写入灵感笔记内容
                 WriteAINote(inspirationNote);
                 if (IsDebug)
+                {
                     botSendMessage(isGroupRequest ? TestGroupId : sendTargetId,
                         $"===!新灵感笔记!==={ENTER}标题: {inspirationNote.Title}{ENTER}内容: {inspirationNote.Content}");
+                }
             }
 
 #endregion 处理知识和灵感笔记
@@ -240,11 +245,14 @@ public static partial class AIExtensions
 
 #endregion 历史记录保存
 
-        return chatCompletion;
+        return (chatCompletion, chatCompletion2);
     }
 
-    private static AIChatResponse GetAIChatResponse(ChatCompletion chatCompletion)
+    private static async Task<(T, ChatCompletion)> GetAIResponseAsync<T>(ChatCompletion chatCompletion, List<ChatMessage> requestMessages = null)
     {
+        // MEMO : 二次请求的返回值
+        ChatCompletion chatCompletion2 = null;
+    StartGetAIResponseAsync:
         if (chatCompletion == null)
             throw new AIException("API 返回对象为空");
 
@@ -268,8 +276,8 @@ public static partial class AIExtensions
 
                 try
                 {
-                    var aiChatResponse = responseText.FromJson<AIChatResponse>();
-                    return aiChatResponse;
+                    var aiChatResponse = responseText.FromJson<T>();
+                    return (aiChatResponse, null);
                 }
                 catch (JsonException ex)
                 {
@@ -277,13 +285,57 @@ public static partial class AIExtensions
                 }
             }
 
-            jsonText = chatCompletion.ToolCalls[0].FunctionArguments.ToString();
+            var toolCall = chatCompletion.ToolCalls[0];
+            switch (toolCall.FunctionName)
+            {
+                case FUNCTION_NAME_REPLY_USER:
+                case FUNCTION_NAME_REPLY_GROUPCHAT_SUMMARY:
+                    break;
+                case FUNCTION_NAME_WEB_SEARCH:
+                    // MEMO : 写入一次请求日志
+                    LogExtensions.AddRunLog(new RunLog_AIRequest(AISystemId, false, chatCompletion.Usage));
+                    YameiLogExtensions.WriteLog(chatCompletion, null, string.Empty);
+
+                    var webSearchArgs = toolCall.FunctionArguments.ToObjectFromJson<AIWebSearchArgs>();
+                    var webSearchResponse = await WebSearchClient.CreateSearchAsync(
+                        webSearchArgs.Query,
+                        topic: webSearchArgs.Topic,
+                        timeRange: webSearchArgs.TimeRange,
+                        maxResults: 5,
+                        excludeDomains: ["csdn.net", "zhihu.com", "baidu.com"],
+                        searchDepth: CreateSearchRequestSearchDepth.Advanced
+                    ).ConfigureAwait(false);
+                    var webSearchContext = webSearchResponse.Results.Count > 0
+                        ? string.Join("\n\n", webSearchResponse.Results.Select(r => $"【{r.Title}】\n{r.Content}"))
+                        : "未检索到相关内容。";
+                    LogExtensions.AddRunLog(new RunLog_WebSearch(webSearchArgs.Query));
+                    YameiLogExtensions.WriteLog(webSearchResponse);
+
+                    requestMessages.Add(new ToolChatMessage(toolCall.Id, webSearchContext));
+                    chatCompletion2 = (await AIClientChat.CompleteChatAsync(
+                            requestMessages,
+                            new ChatCompletionOptions
+                            {
+                                Tools = {_chatTool},
+                                ToolChoice = ChatToolChoice.CreateFunctionChoice(FUNCTION_NAME_REPLY_USER),
+#pragma warning disable OPENAI001
+                                ReasoningEffortLevel = ChatReasoningEffortLevel.High,
+#pragma warning restore OPENAI001
+                                Temperature = GlobalAIConfig.Temperature,
+                                TopP = GlobalAIConfig.TopP,
+                                MaxOutputTokenCount = GlobalAIConfig.MaxToken,
+                            })
+                        .ConfigureAwait(false)).Value;
+                    goto StartGetAIResponseAsync;
+            }
+
+            jsonText = (chatCompletion2 ?? chatCompletion).ToolCalls[0].FunctionArguments.ToString();
             SetResponseText();
 
             try
             {
-                var aiChatResponse = responseText.FromJson<AIChatResponse>();
-                return aiChatResponse;
+                var aiResponse = responseText.FromJson<T>();
+                return (aiResponse, chatCompletion2 ?? chatCompletion);
             }
             catch (JsonException ex)
             {
@@ -329,12 +381,14 @@ public static partial class AIExtensions
     {
         // 只有在增加好感，且当前是负分时触发回归逻辑
         if (currentValue < -100 && rawChange > 0)
+        {
             return rawChange switch
             {
                 >= 3 => (int)(rawChange * 2.5), // 高诚意行为加速回归
                 >= 2 => (int)(rawChange * 1.5),
                 _ => rawChange, // 敷衍行为不加速
             };
+        }
 
         // 正常慢热逻辑 (正分区间)
         return rawChange;

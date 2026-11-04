@@ -14,6 +14,8 @@ using OpenWeatherMap.Standard;
 using OpenWeatherMap.Standard.Enums;
 using SheepQQBot3.Model.AI;
 using SheepQQBot3.Model.Config;
+using SheepQQBot3.Model.Extension;
+using Tavily;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.Extensions;
@@ -118,6 +120,7 @@ public static class ConfigExtensions
             Languages = Languages.English,
             Units = WeatherUnits.Metric,
         };
+        WebSearchClient = new TavilyClient(AppSettingExtensions.Get("tavilyKey"), HttpExtensions.HttpClient);
     }
 
     /// <summary>

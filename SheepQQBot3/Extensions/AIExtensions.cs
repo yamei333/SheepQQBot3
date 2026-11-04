@@ -26,9 +26,6 @@ namespace SheepQQBot3.Extensions;
 
 public static partial class AIExtensions
 {
-    private const string FUNCTION_NAME_REPLY_USER = "reply_user";
-    private const string FUNCTION_DESC_REPLY_USER = "Call this function to send a response to the user.";
-
     public const string ERROR_MESSAGE = "我脑袋好像短路了！";
     public const string ERROR_REASON = "(原因: {0})";
     public const string ERROR_JSON_ERROR = "Json解析失败";
@@ -139,6 +136,7 @@ public static partial class AIExtensions
         // MEMO : 本次请求的用户信息
         if (requestUserInfos.Any())
             systemMessageContents.Add(ChatMessageContentPart.CreateTextPart(requestUserInfos.Values.ToJsonIgnoreNull()));
+
         var systemMessage = ChatMessage.CreateSystemMessage(systemMessageContents);
 
 #endregion 构建系统信息
@@ -186,12 +184,13 @@ public static partial class AIExtensions
                 switch (aiRequestType)
                 {
                     case AIRequestType.Chat:
-                        var chatCompletion = await thisRequestParts.ChatRequestAsync(
+                        var (chatCompletion, chatCompletion2) = await thisRequestParts.ChatRequestAsync(
                                 thisRequestMessages, loadedHistories, botSendMessage,
                                 aiGroupConfig, isGroupRequest, requestTargetId, sendTargetId, chatKey, isAt)
                             .ConfigureAwait(false);
-                        LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, chatCompletion.Usage));
-                        YameiLogExtensions.WriteLog(chatCompletion, thisRequestParts, aiStatus.ToJsonIgnoreNull());
+                        var logChatCompletion = chatCompletion2 ?? chatCompletion;
+                        LogExtensions.AddRunLog(new RunLog_AIRequest(sendTargetId, isGroupRequest, logChatCompletion.Usage));
+                        YameiLogExtensions.WriteLog(logChatCompletion, thisRequestParts, aiStatus.ToJsonIgnoreNull());
                         return;
                     case AIRequestType.Image:
                         await thisRequestParts.ImageRequestAsync(
@@ -246,6 +245,7 @@ public static partial class AIExtensions
                     // MEMO : 第1次重试只解析最后2张图片
                     if (retryTimes == 0)
                         thisRequestParts.ProcessImageContentParts(2);
+
                     // MEMO : 第2次重试不解析所有图片
                     else if (retryTimes == 1)
                         thisRequestParts.DeleteExpireImage();
@@ -406,12 +406,13 @@ public static partial class AIExtensions
         }
     }
 
-    private static string CreateSendMessage(
+    private static string CreateSendMessage<T>(
         AIGroupConfig aiGroupConfig,
-        AIChatResponseContent content,
+        T content,
         bool needAt,
         string targetId,
         bool isGroupRequest)
+        where T : AIResponseContentCommon, IAIChatResponseContent
     {
         var think = content.Think;
         var body = content.Body;
@@ -485,7 +486,7 @@ public static partial class AIExtensions
                 : $"[{(useTitle ? "表情:" : string.Empty)}{face.GetDisplay()}]{(useTitle ? ENTER : string.Empty)}";
     }
 
-    private static string GetEmojiCode(AIChatResponseContent content, bool showEmojiImage)
+    private static string GetEmojiCode(AIResponseContentCommon content, bool showEmojiImage)
     {
         if (!showEmojiImage)
         {
@@ -583,7 +584,7 @@ public static partial class AIExtensions
             var isAddImage = false;
             var cqImageMatches = _regCQImageFileUrl.Matches(messageText);
             // MEMO : QQ群at+图片时, 图片数量>{imageNumLimit}会丢失at指令
-            if (imageToText || (imageNumLimit > 0 && cqImageMatches.Count > imageNumLimit))
+            if (imageNumLimit > 0 && cqImageMatches.Count > imageNumLimit)
             {
                 var noImageContents = new List<ChatMessageContentPart>();
                 noImageContents.AddQQChatTextContent(sender, IMAGE_EXPIRED);
@@ -810,7 +811,8 @@ public static partial class AIExtensions
     /// <param name="needAt">是否文字开头加at</param>
     /// <param name="targetId">at对象QQ号</param>
     /// <returns>替换结果</returns>
-    public static string DeleteCode(this AIChatResponseContent aiChatResponseContent, bool showEmojiImage, bool needAt, string targetId = "")
+    public static string DeleteCode<T>(this T aiChatResponseContent, bool showEmojiImage, bool needAt, string targetId = "")
+        where T : AIResponseContentCommon, IAIChatResponseContent
     {
         var result = aiChatResponseContent.Text ?? string.Empty;
         return GetEmojiCode(aiChatResponseContent, showEmojiImage) + (needAt ? $"{CQCode.At(targetId)} " : string.Empty) + result;

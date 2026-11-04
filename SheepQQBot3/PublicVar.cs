@@ -13,6 +13,7 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
 using SheepQQBot3.View;
+using Tavily;
 
 namespace SheepQQBot3;
 
@@ -220,9 +221,14 @@ public static class PublicVar
     public static Current OpenWeatherMapService { get; set; }
 
     /// <summary>
+    /// Tavily的Web搜索服务
+    /// </summary>
+    public static TavilyClient WebSearchClient { get; set; }
+
+    /// <summary>
     /// 初始化全局变量
     /// </summary>
-    /// <param name="vm"><see cref="MainWindowViewModel"/></param>
+    /// <param name="vm"><see cref="MainWindowViewModel" /></param>
     public static void InitPublicVar(MainWindowViewModel vm)
     {
         Vm = vm;

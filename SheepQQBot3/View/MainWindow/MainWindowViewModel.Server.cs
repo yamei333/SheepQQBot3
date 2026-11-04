@@ -1,4 +1,10 @@
-﻿using SheepQQBot3.BotProcessMessage;
+﻿using System;
+using System.Collections.Concurrent;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading;
+using System.Threading.Tasks;
+using SheepQQBot3.BotProcessMessage;
 using SheepQQBot3.BotProcessMessage.Group;
 using SheepQQBot3.BotProcessMessage.Private;
 using SheepQQBot3.Extensions;
@@ -7,12 +13,6 @@ using SheepQQBot3.Model.Config;
 using SheepQQBot3.Model.Enums;
 using SheepQQBot3.SDK.Client;
 using SheepQQBot3.SDK.Server;
-using System;
-using System.Collections.Concurrent;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading;
-using System.Threading.Tasks;
 using static SheepQQBot3.PublicVar;
 
 namespace SheepQQBot3.View;
@@ -55,7 +55,7 @@ partial class MainWindowViewModel
                 //botServer.SendGroupForwardMessageAsync(15873217, message).ConfigureAwait(false);
             }
 
-            #region 处理历史记录
+#region 处理历史记录
 
             //SetConfigs.Values.ForEach(RunAction);
 
@@ -80,7 +80,7 @@ partial class MainWindowViewModel
             //        });
             //}
 
-            #endregion 处理历史记录
+#endregion 处理历史记录
         };
         botServer.ClientDisconnected += (_, _) =>
         {
@@ -159,7 +159,8 @@ partial class MainWindowViewModel
         if (systemConfig == null)
             return;
 
-        var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId)) ?? new BlackListUserConfig(senderId);
+        var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId))
+            ?? new BlackListUserConfig(senderId);
         // 获取或创建一个属于该用户的锁
         var userLock = _userLocks.GetOrAdd(senderId, _ => new SemaphoreSlim(1, 1));
         await userLock.WaitAsync().ConfigureAwait(false);
@@ -224,7 +225,8 @@ partial class MainWindowViewModel
             return;
 
         var systemConfig = SetConfigs.Values.FirstOrDefault(x => x.TargetType == BotConfigTargetType.Common && x.TargetId == AISystemId);
-        var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId)) ?? new BlackListUserConfig(senderId);
+        var blackListUserConfig = systemConfig?.BlackListUserConfigs.GetValueOrDefault(senderId, new BlackListUserConfig(senderId))
+            ?? new BlackListUserConfig(senderId);
 
         AddRunLog(blackListUserConfig.BanedChatSummaryCollect
             ? new RunLog_GroupMessageBlackList(groupMessage)
@@ -238,12 +240,16 @@ partial class MainWindowViewModel
         var actions = new (BotFunctionType Type, Func<Task> Action)[]
         {
             (BotFunctionType.Common_CustomAlarm, () => ProcessMessage.CustomGroupAlarmAsync(groupMessage)),
-            (BotFunctionType.Common_AlarmAideSubmit, () => ProcessGroupMessage.AlarmAideSubmitAsync(groupConfig.AlarmAideConfigs, groupConfig.AlarmAideSubmitMemberIds, groupMessage)),
+            (BotFunctionType.Common_AlarmAideSubmit,
+                () => ProcessGroupMessage.AlarmAideSubmitAsync(groupConfig.AlarmAideConfigs, groupConfig.AlarmAideSubmitMemberIds, groupMessage)),
             //(BotFunctionType.Group_FundHelper, () => ProcessGroupMessage.FundHelperAsync(groupMessage)),
             (BotFunctionType.Group_RandomSetu, () => ProcessGroupMessage.RandomSetuAsync(blackListUserConfig, groupMessage)),
             (BotFunctionType.Group_SearchImageSource, () => ProcessGroupMessage.SearchImageSourceAsync(groupMessage)),
             (BotFunctionType.Group_Roll, () => ProcessGroupMessage.RollAsync(groupMessage)),
-            (BotFunctionType.Group_ChatSummary, () => ProcessGroupMessage.ChatSummaryAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
+            (BotFunctionType.Group_ChatSummary,
+                () => ProcessGroupMessage.ChatSummaryAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
+            // (BotFunctionType.Group_ChatSummary,
+            //     () => ProcessGroupMessage.ChatSummaryMangaAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
             (BotFunctionType.Group_RepeatRevokeMessage, () => ProcessGroupMessage.RepeatRevokeMessageAsync(groupMessage)),
             (BotFunctionType.Group_AIAide, () => ProcessGroupMessage.AIAideAsync(groupConfig.AIGroupConfig, blackListUserConfig, groupMembers, groupMessage)),
         };
@@ -271,10 +277,10 @@ partial class MainWindowViewModel
     /// <summary>
     /// 增加日志
     /// </summary>
-    /// <param name="runLog"><see cref="RunLog"/></param>
+    /// <param name="runLog"><see cref="RunLog" /></param>
     public void AddRunLog(RunLog runLog)
     {
-        var runLogs = new List<RunLog> { runLog };
+        var runLogs = new List<RunLog> {runLog};
         var mainWindowRunlogViewModel = MainWindowRunlogViewModel;
         runLogs.AddRange(mainWindowRunlogViewModel.RunLogs);
         // MEMO : 超过上限时移除最后一条记录

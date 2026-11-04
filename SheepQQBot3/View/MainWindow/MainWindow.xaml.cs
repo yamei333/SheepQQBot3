@@ -1,5 +1,6 @@
 ﻿using System;
 using System.ClientModel;
+using System.ClientModel.Primitives;
 using System.Collections.Generic;
 using System.ComponentModel;
 using System.IO;
@@ -108,15 +109,20 @@ public partial class MainWindow : Window
             GlobalAIControl = new AIControl(GlobalAIConfig, GlobalAICharacter);
             AIClientChat = CreateChatClient(GlobalAIConfig.ModelChat);
             AIClientSummary = CreateChatClient(GlobalAIConfig.ModelSummary);
-            AIClientImage = CreateChatClient(GlobalAIConfig.ModelImage);
+            AIClientImage = CreateChatClient(GlobalAIConfig.ModelImage, OutputModality.ImageOnly);
             return;
 
-            static ChatClient CreateChatClient(AIModel model)
-                => new(model.Model, new ApiKeyCredential(model.Key), new OpenAIClientOptions
+            static ChatClient CreateChatClient(AIModel model, OutputModality outputModality = OutputModality.TextOnly)
+            {
+                var aiClientOptions = new OpenAIClientOptions
                 {
-                    NetworkTimeout = TimeSpan.FromSeconds(90),
+                    NetworkTimeout = TimeSpan.FromSeconds(300),
                     Endpoint = new Uri(model.Url),
-                });
+                };
+                // MEMO : 将 modalities 注入策略注册到请求管道中
+                aiClientOptions.AddPolicy(new InjectModalitiesPolicy(outputModality), PipelinePosition.PerCall);
+                return new ChatClient(model.Model, new ApiKeyCredential(model.Key), aiClientOptions);
+            }
 
             //static ImageClient CreateImageClient(AIModel model)
             //    => new(model.Model, new ApiKeyCredential(model.Key), new OpenAIClientOptions { Endpoint = new Uri(model.Url) });
